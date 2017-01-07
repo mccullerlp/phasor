@@ -118,6 +118,8 @@ class SystemSolver(object):
                 if not isinstance(subview, DeepBunch):
                     subview.subview_insert(name_tup[-1:], view_obj)
                 else:
+                    print(subview)
+                    print(name_tup)
                     subview[name_tup[-1]] = view_obj
         return
 

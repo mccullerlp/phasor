@@ -141,12 +141,16 @@ class SystemElementBase(ElementBase):
             self,
             parent,
             name,
+            vparent = None,
             _sled_root = False,
             **kwargs
     ):
-        self.parent   = parent
-        self.ooa_params       = parent.ooa_params[name]
-        self.system           = parent.system
+        self.parent     = parent
+        self.name       = name
+        if vparent is None:
+            vparent = parent
+        self.ooa_params = vparent.ooa_params[name]
+        self.system     = vparent.system
         #annotation for automatic defect studies
         OOA_ASSIGN(self).type = self.__class__
         super(SystemElementBase, self).__init__(**kwargs)
@@ -155,12 +159,18 @@ class SystemElementBase(ElementBase):
         self,
         parent,
         name,
+        vparent = None,
         **kwargs
     ):
         """can call during init to ensure that methods are available for OOA_ASSIGN to operate. Idempotent"""
+        if name == 'PD_P':
+            assert(parent is not None)
         self.parent = parent
-        self.ooa_params     = parent.ooa_params[name]
-        self.system         = parent.system
+        if vparent is None:
+            vparent = parent
+        self.ooa_params = vparent.ooa_params[name]
+        self.system     = vparent.system
+        self.name           = name
 
     def linked_elements(self):
         return ()
@@ -176,10 +186,9 @@ class SystemElementBase(ElementBase):
             ptup = ()
         else:
             ptup = self.parent.fully_resolved_name_tuple
-        if self.name is None:
-            return ptup
-        else:
-            return ptup + (self.name,)
+        if self.name is not None:
+            ptup = ptup + (self.name,)
+        return ptup
 
     @mproperty
     def fully_resolved_name(self):

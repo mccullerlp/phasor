@@ -106,8 +106,9 @@ class LinearSystem(object):
         }
 
         self.sled = SystemElementSled(
-            parent     = self,
-            name       = 'sled',
+            parent     = None,
+            name       = None,
+            vparent    = self,
             _sled_root = True,
         )
         self.sled.environment = SystemElementSled()
@@ -345,6 +346,9 @@ class LinearSystem(object):
             parent = element,
             name   = name,
         )
+        if name == 'PD_P':
+            print("BOO!", constructed_item, element)
+            print(constructed_item.fully_resolved_name_tuple)
         self.include(constructed_item)
         return constructed_item
 

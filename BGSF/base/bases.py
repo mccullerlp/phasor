@@ -9,14 +9,9 @@ class ElementBase(object):
 
     def __init__(
             self,
-            name = None,
-            parent = None,
     ):
         self.owned_ports = dict()
         self.owned_port_keys = dict()
-        if name is not None:
-            self.name = name
-        self.parent = parent
 
     def linked_elements(self):
         return ()

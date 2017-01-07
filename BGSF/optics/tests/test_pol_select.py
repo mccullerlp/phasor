@@ -358,7 +358,6 @@ class TestPolarizations(TestCase):
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
 
-
     def test_waveplate_retro_quarter(self):
         db = DeepBunch()
         db.test.waveplate_type = 'quarter'
