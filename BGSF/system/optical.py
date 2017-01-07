@@ -3,27 +3,19 @@
 """
 from __future__ import division
 from __future__ import print_function
-from YALL.utilities.print import print
 
 from ..base import (
     PortHolderBase,
 )
 
 from ..optics import (
-    OpticalPortHolderIn,
-    OpticalPortHolderInOut,
     ClassicalFreqKey,
     OpticalFrequency,
-    Mirror,
-    PD,
-    MagicPD,
-    Laser,
-    Space,
     OpticalFreqKey,
-    VacuumTerminator,
 )
 
 from .base import LinearSystem
+
 
 class OpticalSystem(LinearSystem):
     def __init__(self, **kwargs):

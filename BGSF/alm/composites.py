@@ -6,11 +6,17 @@ from declarative import (
     mproperty,
     dproperty,
     group_dproperty,
+    Bunch,
 )
 
+from ..base.multi_unit_args import (
+    generate_refval_attribute,
+)
 
-from declarative.bunch import Bunch
-from .utils import str_m, TargetIdx
+from .utils import (
+    str_m,
+    TargetIdx,
+)
 
 from .beam import (
     CLensInterface,
@@ -25,8 +31,6 @@ from .substrates import (
     substrate_fused_silica,
     substrate_environment,
 )
-
-from ..substrate.multi_unit_args import generate_refval_attribute
 
 
 class PLCX(CSystemStack):

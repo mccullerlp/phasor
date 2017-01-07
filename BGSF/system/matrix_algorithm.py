@@ -1,35 +1,27 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
-from YALL.utilities.print import print
-
-from declarative.bunch import (
-    Bunch,
-)
+from __future__ import (division, print_function)
+from collections import defaultdict
+import copy
 
 from declarative import (
     NOARG,
+    Bunch,
     #mproperty,
     #dproperty, OverridableObject,
 )
 
-import copy
-
-from ..key_matrix import (
+from ..math.key_matrix import (
     KVSpace,
     KeyMatrix,
 )
 
-from collections import defaultdict
-
-from graph_algorithm import (
+from .graph_algorithm import (
     check_seq_req_balance,
     purge_reqless_inplace,
     purge_seqless_inplace,
 )
-
 
 from .matrix_injections import (
     ConstantEdgeCoupling,

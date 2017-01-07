@@ -3,7 +3,7 @@ from __future__ import division
 from __future__ import print_function
 #from YALL.utilities.print import print
 
-from ..key_matrix import DictKey
+from ..math.key_matrix import DictKey
 
 from ..base.ports import(
     ElementKey,

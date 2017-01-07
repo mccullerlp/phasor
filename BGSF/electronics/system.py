@@ -4,19 +4,19 @@
 import numpy as np
 import warnings
 
-from YALL.utilities.key_matrix.keymatrix import (
+from ..math.key_matrix.keymatrix import (
     KVSpace,
     KeyVector,
     KeyMatrix,
     key_matrix_eye,
 )
 
-from YALL.natsci.optics.dictionary_keys import (
+from ..math.key_matrix.dictionary_keys import (
     DictKey,
     FrequencyKey,
 )
 
-from YALL.natsci.optics.keyed_linear_algebra import (
+from ..math.key_matrix.keyed_linear_algebra import (
     ForewardDictMatrix,
 )
 

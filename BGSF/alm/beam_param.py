@@ -2,10 +2,8 @@
 from __future__ import division
 
 import numpy as np
-from BGSF.numerics.complex import Complex
-import BGSF.numerics.dispatched as dmath
-import sympy
-
+from BGSF.math.complex import Complex
+import BGSF.math.dispatched as dmath
 from utils import str_m
 
 class ComplexBeamParam(object):
@@ -178,20 +176,13 @@ class ComplexBeamParam(object):
         )
 
 
-class SymComplexBeamParam(ComplexBeamParam):
-    pi = sympy.pi
-    I  = sympy.I
-    complex = staticmethod(lambda x: Complex(dmath.re(x), dmath.im(x)))
-    nominal_wavelen = sympy.var('lambda', positive = True)
-
-
 def beam_shape_1D(x, x_cbp, trans, tilt):
     """
     .. todo:: check the that the tilt and shift sign conventions make sense
     """
     cbp = complex(x_cbp)
     k = 2*np.pi / x_cbp.wavelen
-    return (2/np.pi)**.25 * (1/x_cbp.W)**.5 * np.exp(-self.I * k * (x + trans) ** 2 / (2*cbp) + 2*np.pi * self.I * x/x_cbp.wavelen * np.sin(tilt))
+    return (2/np.pi)**.25 * (1/x_cbp.W)**.5 * np.exp(-1j * k * (x + trans) ** 2 / (2*cbp) + 2*np.pi * 1j * x/x_cbp.wavelen * np.sin(tilt))
 
 
 def beam_transverse(x, y, x_cbp, y_cbp = None, x_trans = 0, y_trans = 0, x_tilt = 0, y_tilt = 0):

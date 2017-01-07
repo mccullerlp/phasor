@@ -3,7 +3,7 @@
 """
 from __future__ import division, print_function
 import numpy as np
-from BGSF.numerics.complex import Complex
+from BGSF.math.complex import Complex
 
 
 class TargetIdx(tuple):

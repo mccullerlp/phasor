@@ -1,6 +1,6 @@
-from __future__ import division
-from __future__ import print_function
-from YALL.utilities.print import print
+"""
+"""
+from __future__ import (division, print_function)
 
 import numpy as np
 

@@ -1,17 +1,9 @@
 from __future__ import division
-import numpy as np
 
-#import BGSF.numerics.dispatched as dmath
-#import sympy
+#from declarative import (
+#    dproperty,
+#)
 
-from declarative import (
-    OverridableObject,
-    mproperty,
-    dproperty,
-    NOARG,
-)
-
-from declarative.bunch import Bunch
 
 from .beam_param import ComplexBeamParam
 
@@ -31,6 +23,8 @@ from .utils import (
 from .measurements import (
     substrate_environment,
 )
+
+from .beam import CNoP
 
 
 

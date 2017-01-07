@@ -17,7 +17,7 @@ from declarative.bunch import (
     HookBunch,
 )
 
-from ..bases import (
+from declarative.substrate import (
     RootElement,
     invalidate_auto,
 )

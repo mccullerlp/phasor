@@ -7,7 +7,7 @@ from declarative import (
     OverridableObject,
     dproperty,
     mproperty,
-    Bunch,
+    FrozenBunch,
     NOARG,
 )
 
@@ -130,7 +130,7 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
         while current is not root:
             names.append(current.name_child)
             current = current.parent
-        return names[::-1]
+        return tuple(names[::-1])
 
     @mproperty
     def fitter_data(self):
@@ -156,7 +156,7 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
                 val = ooa.get('val', None)
             return val
 
-        return [Bunch(
+        return [FrozenBunch(
             parameter_key = self.fitter_parameter,
             units         = self.units,
             name          = self.name_system,

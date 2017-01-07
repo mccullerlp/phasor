@@ -153,12 +153,6 @@ class CMeasurements(Element):
             targets_by_tidx = targets_by_tidx,
         )
 
-    def targets_by_tidx():
-        pass
-
-    def targets_by_type():
-        pass
-
     def q_target_z(self, z_m, beam_source = None):
         if beam_source is None:
             if self.layout.env_principle_target is None:

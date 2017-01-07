@@ -5,7 +5,7 @@ from __future__ import print_function
 
 from .elements import SystemElementBase
 
-from ..key_matrix import DictKey
+from ..math.key_matrix import DictKey
 
 
 ElementKey = u'▲'

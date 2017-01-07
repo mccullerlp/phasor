@@ -1,39 +1,25 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
-from YALL.utilities.print import print
-
+from __future__ import (division, print_function)
 import numpy as np
-#import warnings
-
 import copy
-
 from collections import defaultdict
 
 from declarative import (
     mproperty,
-)
-from declarative.bunch import (
     Bunch,
     DeepBunch,
 )
 
-from ..key_matrix import (
+from ..math.key_matrix import (
     KVSpace,
     KeyVector,
     KeyMatrix,
-    key_matrix_eye,
     DictKey,
 )
 
-from .linalg import (
-    linalg_solve_bcast,
-)
-
 from .graph_algorithm import (
-    #coherent_sparsity_graph,
     push_solve_inplace,
     inverse_solve_inplace,
 )

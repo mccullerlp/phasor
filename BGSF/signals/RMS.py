@@ -10,7 +10,7 @@ from __future__ import print_function
 #from numbers import Number
 #import warnings
 
-from ..key_matrix import (
+from ..math.key_matrix import (
     DictKey,
     FrequencyKey,
 )

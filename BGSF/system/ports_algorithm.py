@@ -1,22 +1,15 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
-from YALL.utilities.print import print
+from __future__ import (division, print_function)
+from collections import defaultdict
 
 from declarative import (
     NOARG,
 )
 
-from collections import defaultdict
-
-from ..key_matrix import (
+from ..math.key_matrix import (
     DictKey,
-)
-
-from ..base import (
-    ElementKey,
 )
 
 

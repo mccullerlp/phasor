@@ -1,9 +1,10 @@
 import numpy as np
-from keymatrix import (
+from BGSF.key_matrix.keymatrix import (
     KVSpaceGroup,
     KeyVector,
     KeyMatrix
 )
+
 
 group = KVSpaceGroup()
 

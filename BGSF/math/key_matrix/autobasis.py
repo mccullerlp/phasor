@@ -1,6 +1,9 @@
+"""
+"""
 
 from __future__ import division
-import YALL.utilities.numerics.dispatched as dmath
+from ..math import dispatched as dmath
+dmath #  silence lint
 
 RAISE = DictKey(Op = 'raising')
 LOWER = DictKey(Op = 'lowering')

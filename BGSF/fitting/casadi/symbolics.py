@@ -5,13 +5,11 @@ from . import visitors as VISIT
 import casadi
 
 from declarative import (
-    #dproperty,
     mproperty,
-    #NOARG,
     group_dproperty,
 )
 
-from ..multi_unit_args import (
+from ...base.multi_unit_args import (
     generate_refval_attribute,
 )
 

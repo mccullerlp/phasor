@@ -13,7 +13,7 @@ from ..base.utilities import (
     type_test
 )
 
-from ..key_matrix.dictionary_keys import (
+from ..math.key_matrix.dictionary_keys import (
     DictKey,
     FrequencyKey,
 )

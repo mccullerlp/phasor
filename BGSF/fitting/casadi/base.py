@@ -4,12 +4,11 @@ from __future__ import division, print_function
 from . import visitors as VISIT
 import casadi
 
-from ..bases import (
+from declarative.substrate import (
     Element,
 )
 
-import YALL.utilities.numerics.dispatch_casadi
-YALL.utilities.numerics.dispatch_casadi  # to silence pyflakes
+from ...math.dispatch_casadi import *
 
 
 def casadi_sparsity_ravel(sym_vec):

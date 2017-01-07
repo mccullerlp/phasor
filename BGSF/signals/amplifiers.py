@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
-#from YALL.utilities.print import print
+from __future__ import (division, print_function)
+from collections import defaultdict
+
+
+from declarative import (
+    Bunch,
+)
 
 from ..base import (
     CouplerBase,
-)
-
-from declarative.bunch import (
-    Bunch,
 )
 
 from .bases import (
@@ -22,8 +22,6 @@ from .ports import (
     SignalPortHolderIn,
     SignalPortHolderOut,
 )
-
-from collections import defaultdict
 
 class DistributionAmplifier(CouplerBase, SystemElementBase):
     def __init__(

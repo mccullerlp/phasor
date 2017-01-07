@@ -12,11 +12,12 @@ from declarative import (
     dproperty,
     NOARG,
     Bunch,
-)
-
-from declarative.properties import (
     group_dproperty,
     #group_mproperty,
+)
+
+from ..base.multi_unit_args import (
+    generate_refval_attribute,
 )
 
 from .beam_param import (
@@ -43,10 +44,6 @@ from .substrates import (
 from declarative.substrate import (
     Element,
     invalidate_auto
-)
-
-from ..substrate.multi_unit_args import (
-    generate_refval_attribute,
 )
 
 

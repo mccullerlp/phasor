@@ -65,7 +65,7 @@ class QFit(OverridableObject):
         return (self.wavelen_nm * 1e-9 / (np.pi * z_R) * ((z + z_0)**2 + z_R**2))**.5
 
     def waist_func_fit(self, z):
-        return self.waist_func(z, *self.Z_ZR_fit)
+        return self.waist_func(z, *self.Z0_ZR_fit)
 
     @mproperty
     def Z0_ZR_fit(self):

@@ -6,7 +6,7 @@ from __future__ import print_function
 #from YALL.utilities.print import print
 #import numpy as np
 
-from ..key_matrix import (
+from ..math.key_matrix import (
     DictKey,
 )
 

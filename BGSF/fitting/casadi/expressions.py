@@ -1,6 +1,6 @@
 """
 """
-from __future__ import division, print_function
+from __future__ import (division, print_function)
 import numpy as np
 import operator
 
@@ -17,7 +17,7 @@ from declarative.bunch import (
     DeepBunch
 )
 
-from ..multi_unit_args import (
+from ...base.multi_unit_args import (
     SimpleUnitfulGroup,
 )
 

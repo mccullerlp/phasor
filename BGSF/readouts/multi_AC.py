@@ -16,7 +16,7 @@ from declarative.bunch import (
     Bunch,
 )
 
-from ..key_matrix import (
+from ..math.key_matrix import (
     DictKey,
     FrequencyKey,
     KeyMatrix,

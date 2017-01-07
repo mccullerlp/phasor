@@ -1,30 +1,27 @@
 """
 """
 from __future__ import print_function, division
-import pytest
 
 from YALL.utilities.mpl.autoniceplot import (
     #AutoPlotSaver,
     #mplfigB,
     asavefig,
 )
-import matplotlib as mpl
 
 import os.path as path
 
-import BGSF.alm.fitter as FIT
+import BGSF.fitting.casadi as FIT
 #from YALL.alm.beam import *
 from BGSF.alm.measurements import CRootSystem
 import BGSF.alm.beam as CB
 #from BGSF.alm.beam_param import ComplexBeamParam
 #import BGSF.alm.system as CS
 from BGSF.alm.mplot import MPlotter
+
 mplot = MPlotter()
 asavefig.org_subfolder = path.join(path.dirname(__file__), 'tests')
 
 #mpl.rc('font', family='DejaVu Sans')
-
-from IPython.lib.pretty import pprint as print
 
 
 def buildsys():
