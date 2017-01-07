@@ -10,10 +10,8 @@ import sys
 from declarative.bunch import Bunch
 
 from declarative import (
-    OverridableObject,
     mproperty,
     dproperty,
-    NOARG,
 )
 
 from .utils import (
@@ -27,7 +25,7 @@ from .beam import (
     MatrixAtsBase
 )
 
-from .bases import (
+from declarative.substrate import (
     RootElement,
     Element,
     invalidate_auto,

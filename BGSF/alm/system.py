@@ -10,9 +10,14 @@ from declarative import (
     mproperty,
     group_dproperty,
     NOARG,
+    Bunch,
+    PropertyTransforming,
 )
 
-from declarative.bunch import Bunch
+from declarative.substrate import (
+    invalidate_auto,
+    Element,
+)
 
 from .utils import (
     TargetLeft,
@@ -21,22 +26,13 @@ from .utils import (
     matrix_space,
 )
 
-from .bases import (
-    Element,
-)
-
 from .beam import (
     CSpace,
     MatrixAtsCompositeBase,
     MatrixAtsBase,
 )
 
-from .bases import (
-    invalidate_auto,
-)
-
-from declarative.properties import PropertyTransforming
-from multi_unit_args import generate_refval_attribute
+from ..substrate.multi_unit_args import generate_refval_attribute
 
 
 class CSystem(

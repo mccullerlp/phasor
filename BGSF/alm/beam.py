@@ -40,12 +40,12 @@ from .substrates import (
     substrate_environment,
 )
 
-from .bases import (
+from declarative.substrate import (
     Element,
     invalidate_auto
 )
 
-from .multi_unit_args import (
+from ..substrate.multi_unit_args import (
     generate_refval_attribute,
 )
 
@@ -92,7 +92,7 @@ class MatrixAtsBase(Element):
     def env_reversed(self):
         #TODO put this into the environment_query
         #print("PREV: ", self.parent.env_reversed, " ME: ", self.reversed)
-        p_env_reversed = self.environment_query((MatrixAtsBase, "reversed"))
+        p_env_reversed = self.parent.environment_query((MatrixAtsBase, "reversed"))
         arg = bool(p_env_reversed) ^ bool(self.reversed)
         #arg = self.ooa_params.setdefault("env_reversed", arg)
         self.ooa_params.env_reversed = arg

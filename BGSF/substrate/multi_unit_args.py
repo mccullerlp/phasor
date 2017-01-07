@@ -11,12 +11,8 @@ from declarative import (
     NOARG,
 )
 
-from declarative.properties import (
-    group_dproperty,
-    #group_mproperty,
-)
+from declarative.substrate import Element
 
-from .bases import Element
 from .units import (
     units_lookup,
     units_lookup_dim,

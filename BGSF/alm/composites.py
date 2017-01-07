@@ -26,9 +26,7 @@ from .substrates import (
     substrate_environment,
 )
 
-from .multi_unit_args import (
-    generate_refval_attribute,
-)
+from ..substrate.multi_unit_args import generate_refval_attribute
 
 
 class PLCX(CSystemStack):
