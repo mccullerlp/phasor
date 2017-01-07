@@ -1,0 +1,121 @@
+
+import math
+import cmath
+import numpy as np
+import scipy.special
+from . import dispatch_defaults
+
+npmath = [np, scipy.special]
+
+module_by_type = {
+    int           : [math, cmath, scipy.special],
+    float         : [math, cmath, scipy.special],
+    float         : [math, cmath, scipy.special],
+    np.float      : npmath,
+    np.int        : npmath,
+    np.float32    : npmath,
+    np.float64    : npmath,
+    np.int8       : npmath,
+    np.int16      : npmath,
+    np.int32      : npmath,
+    np.int64      : npmath,
+    np.complex    : npmath,
+    np.complex64  : npmath,
+    np.complex128 : npmath,
+    complex       : [cmath, scipy.special, np],
+    np.ndarray    : [np, scipy.special],
+}
+
+module_by_typemodule = {
+}
+
+
+def generate_dispatched(func_name):
+    def func(arg, **kwargs):
+        atype = type(arg)
+        mod_list = module_by_type.get(atype, None)
+        if mod_list is None:
+            amods = tuple(atype.__module__.split('.'))
+            while amods:
+                mod_list = module_by_typemodule.get(amods, None)
+                if mod_list is not None:
+                    module_by_type[amods] = atype
+                    break
+                amods = amods[:-1]
+        if mod_list is None:
+            mod_list = []
+        for mod in mod_list + [dispatch_defaults]:
+            try:
+                act_func = getattr(mod, func_name)
+                break
+            except AttributeError:
+                pass
+        else:
+            raise RuntimeError("Could not find function {0} for argument of type {1}".format(func_name, type(arg)))
+        return act_func(arg, **kwargs)
+    func.__name__ = func_name
+    return func
+
+
+def re(obj):
+    return obj.real
+
+def im(obj):
+    return obj.imag
+
+def conjugate(obj):
+    try:
+        return obj.conjugate()
+    except AttributeError:
+        pass
+
+    try:
+        r = re(obj)
+        i = im(obj)
+        return obj.__class__(r, i)
+    except AttributeError:
+        pass
+
+    return obj
+
+
+_abs = abs
+abs = _abs
+
+
+def abs_sq(obj):
+    from .complex import Complex
+    cobj = Complex(obj)
+    return cobj.abs_sq()
+
+np.abs_sq = abs_sq
+
+
+
+mod_locals = locals()
+
+def inject_dispatched(func_name):
+    mod_locals[func_name] = generate_dispatched(func_name)
+
+
+for name in dir(cmath):
+    if name[0] != '_':
+        inject_dispatched(name)
+
+for name in dir(dispatch_defaults):
+    if name[0] != '_':
+        inject_dispatched(name)
+
+for name in dir(math):
+    if name[0] != '_':
+        inject_dispatched(name)
+
+for name in dir(scipy.special):
+    if name[0] != '_':
+        inject_dispatched(name)
+
+inject_dispatched('angle')
+
+
+
+
