@@ -148,8 +148,8 @@ class Mirror(
             self._LFrB: self.FrB,
             self._LBkB: self.BkB,
         }
-        rmapL = dict((k.i, [v.o]) for k, v in rmap.iteritems())
-        rmapL.update((k.o, [v.i]) for k, v in rmap.iteritems())
+        rmapL = dict((k.i, [v.o]) for k, v in rmap.items())
+        rmapL.update((k.o, [v.i]) for k, v in rmap.items())
 
         #direct couplings
         #TODO some of these may be excessive, need more test cases

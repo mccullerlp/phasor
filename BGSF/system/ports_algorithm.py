@@ -29,16 +29,16 @@ class PortUpdatesAlgorithm(object):
         self.readout_pk_sets    = defaultdict(set)
 
         self.link_pairsR = defaultdict(set)
-        for k, v_set in self.system.link_pairs.iteritems():
+        for k, v_set in self.system.link_pairs.items():
             for v in v_set:
                 self.link_pairsR[v].add(k)
 
-        for port, owner in system.port_owners.iteritems():
+        for port, owner in system.port_owners.items():
             self.port_cplgs[port]         = set()
             self.port_cplgs_update[owner, port]  = set()
             self.port_cplgs_updateX[port] = set()
 
-        for port, owners in system.port_owners_virtual.iteritems():
+        for port, owners in system.port_owners_virtual.items():
             for owner in owners:
                 #print((owner, port))
                 self.port_cplgs_update.setdefault((owner, port), set())
@@ -163,7 +163,7 @@ class PortUpdatesAlgorithm(object):
 
     def port_set_print(self, select_port = None):
         if select_port is None:
-            for port, kset in self.port_cplgs.iteritems():
+            for port, kset in self.port_cplgs.items():
                 print("Portset: ", port)
                 print(kset)
         else:

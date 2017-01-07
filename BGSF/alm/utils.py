@@ -87,7 +87,7 @@ def targets_map_fill(
         subidx,
         name = None,
 ):
-    for target, t_idx_lst_lst in subcomp.targets_map.iteritems():
+    for target, t_idx_lst_lst in subcomp.targets_map.items():
         tname_list = [target]
         if name is not None:
             tname_list.append("{0}.{1}".format(name, target))

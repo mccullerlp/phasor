@@ -79,7 +79,7 @@ class MultiACReadout(SystemElementBase):
 
     def system_setup_ports_initial(self, system):
         portsets = [self.port_set, 'AC_sensitivitys', 'readouts']
-        for pname, port in self.port_map.iteritems():
+        for pname, port in self.port_map.items():
             system.readout_port_needed(port, self.keyP, portsets)
             system.readout_port_needed(port, self.keyN, portsets)
         system.readout_port_needed(self.portD, self.keyP, portsets)
@@ -162,7 +162,7 @@ class MultiACReadoutView(ReadoutViewBase):
             vspace_from = self.vspace,
             vspace_to   = self.vspace,
         )
-        for (portA, portB), cplg in self.noise.CSD.iteritems():
+        for (portA, portB), cplg in self.noise.CSD.items():
             km[portA, portB] = cplg
         return km
 
@@ -172,7 +172,7 @@ class MultiACReadoutView(ReadoutViewBase):
             vspace_from = self.vspace,
             vspace_to   = self.vspace,
         )
-        for (portA, portB), cplg in self.noise.CSD.iteritems():
+        for (portA, portB), cplg in self.noise.CSD.items():
             km[portA, portB] = np.real(cplg)
         return km
 
@@ -294,7 +294,7 @@ class MultiNoiseReadout(SystemElementBase):
 
     def system_setup_ports_initial(self, system):
         portsets = [self.port_set, 'noise']
-        for port_name, port in self.port_map.iteritems():
+        for port_name, port in self.port_map.items():
             system.readout_port_needed(port, self.keyP, portsets)
             system.readout_port_needed(port, self.keyN, portsets)
         return

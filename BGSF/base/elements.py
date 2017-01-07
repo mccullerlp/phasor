@@ -48,7 +48,7 @@ class SledConstructorInternal(object):
             _sled_root     = None,
             **kwargs
     ):
-        for aname, aval in kwargs.iteritems():
+        for aname, aval in kwargs.items():
             prev = self.kwargs.setdefault(aname, aval)
             if prev != aval:
                 raise RuntimeError("Assigning Constructor item {0}, to {1}, but previously assigned {2}".format(aname, aval, prev))
@@ -61,7 +61,7 @@ class SledConstructorInternal(object):
             _sled_root     = None,
             **kwargs
     ):
-        for aname, aval in kwargs.iteritems():
+        for aname, aval in kwargs.items():
             self.kwargs.setdefault(aname, aval)
 
     #the "None" parameters are to prevent accidental override of these from the kwargs
@@ -72,7 +72,7 @@ class SledConstructorInternal(object):
             _sled_root     = None,
             **kwargs
     ):
-        for aname, aval in kwargs.iteritems():
+        for aname, aval in kwargs.items():
             self.kwargs[aname] = aval
 
     def construct(

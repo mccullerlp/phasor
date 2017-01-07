@@ -3,8 +3,8 @@
 from __future__ import division
 from __future__ import print_function
 
-import pytest
-pytest.skip("TODO")
+#import pytest
+#pytest.skip("TODO")
 
 import numpy as np
 
@@ -13,21 +13,15 @@ from declarative.bunch import (
 )
 
 from BGSF.optics import (
-    OpticalFrequency,
     Mirror,
     PD,
     MagicPD,
     Space,
     Laser,
-    VacuumTerminator,
     EZSqz,
 )
 
-from BGSF.base import (
-    ElementSled,
-)
-
-from BGSF.optical_system import (
+from BGSF.system.optical import (
     OpticalSystem
 )
 

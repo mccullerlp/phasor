@@ -166,7 +166,7 @@ class KeyVectorBase(KeyLinearBase):
         return self._data_map.get(key, default)
 
     def iteritems(self):
-        return self._data_map.iteritems()
+        return self._data_map.items()
 
     def __len__(self):
         return len(self._data_map)
@@ -196,7 +196,7 @@ class KeyVectorBase(KeyLinearBase):
         return iter(self._data_map.items())
 
     def iterkeys(self):
-        return self._data_map.iterkeys()
+        return self._data_map.keys()
 
 
 class KeyMatrixBase(KeyLinearBase):
@@ -252,10 +252,10 @@ class KeyMatrixBase(KeyLinearBase):
             yield key_from, key_to, value
 
     def iterkeys(self):
-        return self._data_map.iterkeys()
+        return self._data_map.keys()
 
     def iteritems(self):
-        return self._data_map.iteritems()
+        return self._data_map.items()
 
     def set_nullable(self, key_to, key_from, value):
         self._memoize_count += 1

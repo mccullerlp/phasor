@@ -59,7 +59,7 @@ class SignalGenerator(CouplerBase, SystemElementBase):
         self.Out = SignalPortHolderOut(self, x = 'Out')
 
         self.harmonic_gains = harmonic_gains
-        for Hidx, gain in self.harmonic_gains.iteritems():
+        for Hidx, gain in self.harmonic_gains.items():
             #just to check that it is a number
             Hidx + 1
             port = SignalPortHolderOut(self, x = 'OutH{0}'.format(Hidx))
@@ -82,7 +82,7 @@ class SignalGenerator(CouplerBase, SystemElementBase):
             self.Out.o,
             DictKey({ClassicalFreqKey: -self.f_key}),
         )
-        for Hidx, gain in self.harmonic_gains.iteritems():
+        for Hidx, gain in self.harmonic_gains.items():
             port = getattr(self, 'OutH{0}'.format(Hidx))
             system.coherent_sources_needed(
                 port.o,
@@ -108,7 +108,7 @@ class SignalGenerator(CouplerBase, SystemElementBase):
             DictKey({ClassicalFreqKey: -self.f_key}),
             self.amplitudeC,
         )
-        for Hidx, gain in self.harmonic_gains.iteritems():
+        for Hidx, gain in self.harmonic_gains.items():
             port = getattr(self, 'OutH{0}'.format(Hidx))
             system.coherent_sources_insert(
                 port.o,

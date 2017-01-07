@@ -158,7 +158,7 @@ class HomodyneACReadoutView(ReadoutViewBase):
     @mproperty
     def AC_PSD_by_source(self):
         eachCSD = dict()
-        for nobj, subCSD in self.noise.CSD_by_source.iteritems():
+        for nobj, subCSD in self.noise.CSD_by_source.items():
             II = subCSD['I', 'I']
             IQ = subCSD['I', 'Q']
             QI = subCSD['Q', 'I']

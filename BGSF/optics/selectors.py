@@ -92,7 +92,7 @@ class GenericSelector(OpticalCouplerBase, SystemElementBase):
         self.port_map   = {}
         self.Fr         = OpticalPortHolderInOut(self, x = 'Fr')
 
-        for name, key in self.select_map.iteritems():
+        for name, key in self.select_map.items():
             pname = 'Bk_{0}'.format(name)
             port = OpticalPortHolderInOut(self, x = pname)
             setattr(self, pname, port)
@@ -102,26 +102,26 @@ class GenericSelector(OpticalCouplerBase, SystemElementBase):
     def system_setup_ports(self, ports_algorithm):
         for kfrom in ports_algorithm.port_update_get(self.Fr.i):
             N_selections = 0
-            for pname, (port, key) in self.port_map.iteritems():
+            for pname, (port, key) in self.port_map.items():
                 if key & kfrom:
                     N_selections += 1
                     ports_algorithm.port_coupling_needed(port.o, kfrom)
                     if not self.check:
                         break
             assert(N_selections == 1)
-        for pname, (port, key) in self.port_map.iteritems():
+        for pname, (port, key) in self.port_map.items():
             for kfrom in ports_algorithm.port_update_get(port.i):
                 ports_algorithm.port_coupling_needed(self.Fr.o, kfrom)
 
         for kto in ports_algorithm.port_update_get(self.Fr.o):
             N_selections = 0
-            for pname, (port, key) in self.port_map.iteritems():
+            for pname, (port, key) in self.port_map.items():
                 if key & kto:
                     N_selections += 1
                     ports_algorithm.port_coupling_needed(port.i, kto)
                     if not self.check:
                         break
-        for pname, (port, key) in self.port_map.iteritems():
+        for pname, (port, key) in self.port_map.items():
             for kto in ports_algorithm.port_update_get(port.o):
                 ports_algorithm.port_coupling_needed(self.Fr.i, kto)
         return
@@ -129,14 +129,14 @@ class GenericSelector(OpticalCouplerBase, SystemElementBase):
     def system_setup_coupling(self, matrix_algorithm):
         for kfrom in matrix_algorithm.port_set_get(self.Fr.i):
             N_selections = 0
-            for pname, (port, key) in self.port_map.iteritems():
+            for pname, (port, key) in self.port_map.items():
                 if key & kfrom:
                     N_selections += 1
                     matrix_algorithm.port_coupling_insert(self.Fr.i, kfrom, port.o, kfrom, 1)
                     if not self.check:
                         break
             assert(N_selections == 1)
-        for pname, (port, key) in self.port_map.iteritems():
+        for pname, (port, key) in self.port_map.items():
             for kfrom in matrix_algorithm.port_set_get(port.i):
                 matrix_algorithm.port_coupling_insert(port.i, kfrom, self.Fr.o, kfrom, 1)
         return
@@ -156,12 +156,12 @@ class OpticalSelectionStack(OpticalCouplerBase, SystemElementBase):
         else:
             optical_ports = None
 
-        for ename, element in sub_element_map.iteritems():
+        for ename, element in sub_element_map.items():
             setattr(self, ename, element)
             #separate these as the setattr "constructs" the element through the sled mechanism
             celement = getattr(self, ename)
             if optical_ports is not None:
-                for pname, port in celement.owned_port_keys.iteritems():
+                for pname, port in celement.owned_port_keys.items():
                     if isinstance(port, (
                             OpticalPortHolderInOut,
                             OpticalPortHolderIn,
@@ -171,13 +171,13 @@ class OpticalSelectionStack(OpticalCouplerBase, SystemElementBase):
 
         if optical_ports is not None:
             pnum_cmn = None
-            for pname, pnum in optical_ports.iteritems():
+            for pname, pnum in optical_ports.items():
                 if pnum != pnum_cmn:
                     if pnum_cmn is None:
                         pnum_cmn == pnum
                     else:
                         assert(False)
-            port_set = set(optical_ports.iterkeys())
+            port_set = set(optical_ports.keys())
 
         self.split_ports = {}
         for pname in port_set:
@@ -189,7 +189,7 @@ class OpticalSelectionStack(OpticalCouplerBase, SystemElementBase):
             self.split_ports[pname] = psel
             setattr(self, pname, psel.Fr)
 
-            for ename, element in sub_element_map.iteritems():
+            for ename, element in sub_element_map.items():
                 celement = getattr(self, ename)
                 port = getattr(celement, pname)
                 self.system.link(psel.port_map[ename][0], port)

@@ -1,5 +1,5 @@
 import numpy as np
-from BGSF.key_matrix.keymatrix import (
+from BGSF.math.key_matrix.keymatrix import (
     KVSpaceGroup,
     KeyVector,
     KeyMatrix

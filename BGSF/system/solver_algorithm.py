@@ -156,7 +156,7 @@ class SystemSolver(object):
         field_space          = self.matrix_algorithm.field_space
         coupling_matrix      = KeyMatrix(field_space, field_space)
         #generate only the edges needed
-        for pkfrom, seq_set in seq.iteritems():
+        for pkfrom, seq_set in seq.items():
             for pkto in seq_set:
                 try:
                     factor_func_list = malgo.coupling_matrix_inj_funclist[pkfrom, pkto]
@@ -227,14 +227,14 @@ class SystemSolver(object):
             outputs_set   = outputs_set.union(self.matrix_algorithm.AC_out_all),
             inputs_map    = source_vector,
             inputs_AC_set = self.matrix_algorithm.AC_in_all,
-            edge_map      = dict(coupling_matrix.iteritems()),
+            edge_map      = dict(coupling_matrix.items()),
             purge_in      = True,
             purge_out     = True,
         )
         solution_dict = solution_bunch.outputs_map
         solution_vector_kv = KeyVector(field_space)
         #TODO make be able to avoid this copy
-        for node, val in solution_dict.iteritems():
+        for node, val in solution_dict.items():
             solution_vector_kv[node] = val
 
         solution_bunch = Bunch(
@@ -263,7 +263,7 @@ class SystemSolver(object):
             solution_vector
     ):
         delta_v_rel_max = 0
-        for k, v in solution_vector.iteritems():
+        for k, v in solution_vector.items():
             v_prev = solution_vector_prev.get(k, 0)
             v = np.asarray(v)
             v_prev = np.asarray(v_prev)
@@ -338,7 +338,7 @@ class SystemSolver(object):
             req           = req,
             outputs_set   = outputs_set,
             inputs_map    = source_vector,
-            edge_map      = dict(coupling_matrix.iteritems()),
+            edge_map      = dict(coupling_matrix.items()),
             purge_in      = True,
             purge_out     = True,
         )
@@ -405,7 +405,7 @@ class SystemSolver(object):
             req           = req,
             inputs_set    = inputs_set,
             outputs_set   = outputs_set,
-            edge_map      = dict(coupling_matrix.iteritems()),
+            edge_map      = dict(coupling_matrix.items()),
             purge_in      = True,
             purge_out     = True,
         )
@@ -488,7 +488,7 @@ class SystemSolver(object):
             N           = N,
         )
         vals = []
-        for (key_from, key_to), value in solution_bunch.coupling_matrix.iteritems():
+        for (key_from, key_to), value in solution_bunch.coupling_matrix.items():
             dk_from = key_from[0] | key_from[1]
             dk_to = key_to[0] | key_to[1]
             if dk_from.contains(select_from) and dk_to.contains(select_to):
@@ -512,7 +512,7 @@ class SystemSolver(object):
         )
         rt_inv = solution_bunch.coupling_matrix_inv
         vals = []
-        for (key_from, key_to), value in rt_inv.iteritems():
+        for (key_from, key_to), value in rt_inv.items():
             dk_from = key_from[0] | key_from[1]
             dk_to = key_to[0] | key_to[1]
             if dk_from.contains(select_from) and dk_to.contains(select_to):
@@ -534,7 +534,7 @@ class SystemSolver(object):
 #        self.coupling_matrix             = KeyMatrix(field_space, field_space)
 #
 #        #TODO only fill out the coherent perturbation subgraph
-#        for pkto, factor_list_list in self.source_vector_factors.iteritems():
+#        for pkto, factor_list_list in self.source_vector_factors.items():
 #            val = 0
 #            for vcplg, factor_pk_list in factor_list_list:
 #                for pkprev in factor_pk_list:
@@ -543,13 +543,13 @@ class SystemSolver(object):
 #                val += vcplg
 #            self.source_vector[pkto] = val
 #
-#        for (pkfrom, pkto), (vcplg, factor_pk_list) in self.coupling_matrix_factors.iteritems():
+#        for (pkfrom, pkto), (vcplg, factor_pk_list) in self.coupling_matrix_factors.items():
 #            for pprev, kprev in factor_pk_list:
 #                svec = self.solution_vectors[-1].get(pkprev, 0)
 #                vcplg *= svec
 #            self.coupling_matrix[pkfrom, pkto] = vcplg
 #
-#        for pfrom, pto_set in self.link_pairs.iteritems():
+#        for pfrom, pto_set in self.link_pairs.items():
 #            for pto in pto_set:
 #                for pkey in self.port_set_get(pfrom):
 #                    assert(pkey in self.port_set_get(pto))

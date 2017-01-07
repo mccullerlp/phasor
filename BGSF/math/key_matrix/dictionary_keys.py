@@ -59,7 +59,7 @@ class DictKey(MappingABC):
         return self.__class__(cp)
 
     def iteritems(self):
-        return self._dict.iteritems()
+        return self._dict.items()
 
     def kv_contains(self, k, v):
         v2 = self._dict.get(k, NOARG)
@@ -73,13 +73,13 @@ class DictKey(MappingABC):
             larger = other
             smaller = self
         newdict = dict()
-        for k, v in smaller.iteritems():
+        for k, v in smaller.items():
             if larger.kv_contains(k, v):
                 newdict[k] = v
         return self.__class__(**newdict)
 
     def contains(self, other):
-        for k, v in other.iteritems():
+        for k, v in other.items():
             if not self.kv_contains(k, v):
                 return False
         return True
@@ -92,17 +92,17 @@ class DictKey(MappingABC):
 
     def replace_keys(self, key_dict, *more_key_dicts):
         cp = dict(self._dict)
-        for key, val in key_dict.iteritems():
+        for key, val in key_dict.items():
             cp[key] = val
         if more_key_dicts:
             for key_dict in more_key_dicts:
-                for key, val in key_dict.iteritems():
+                for key, val in key_dict.items():
                     cp[key] = val
         return self.__class__(**cp)
 
     def subkey_has(self, other):
         try:
-            for k, v in other.iteritems():
+            for k, v in other.items():
                 v2 = self._dict[k]
                 if v != v2:
                     return False
@@ -112,7 +112,7 @@ class DictKey(MappingABC):
 
     def __sub__(self, other):
         cp = dict(self._dict)
-        for k, v in other._dict.iteritems():
+        for k, v in other._dict.items():
             assert(cp[k] == v)
             del cp[k]
         return self.__class__(cp)
@@ -166,7 +166,7 @@ class FrequencyKey(object):
         return F_sum
 
     def __repr__(self):
-        l = tuple(sorted(((F.name, n) for F, n in self.F_dict.iteritems())))
+        l = tuple(sorted(((F.name, n) for F, n in self.F_dict.items())))
         flist = []
         for Fname, n in l:
             if n == 1:

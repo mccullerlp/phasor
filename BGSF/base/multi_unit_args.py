@@ -249,7 +249,7 @@ def generate_refval_attribute(
         units,
     ):
         #could get value with
-        #k, v = storage.iteritems().next()
+        #k, v = storage.items().next()
         units = units
         return ElementRefValue(
             ooa_params = self.ooa_params[pname],

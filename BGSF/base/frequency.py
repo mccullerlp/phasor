@@ -42,11 +42,11 @@ class Frequency(FrequencyBase, SystemElementBase):
 
         OOA_ASSIGN(self).order = order
 
-        for group, b_incl in groups.iteritems():
+        for group, b_incl in groups.items():
             self.ooa_params.groups[group] = b_incl
 
         groups = set()
-        for group, b_incl in self.ooa_params.groups.iteritems():
+        for group, b_incl in self.ooa_params.groups.items():
             if b_incl:
                 groups.add(group)
         self.groups = groups

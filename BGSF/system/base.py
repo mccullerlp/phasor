@@ -60,6 +60,7 @@ class LinearSystem(object):
 
         #TODO, add argument to fill this
         self.ooa_params = DeepBunchSingleAssign()
+        self.system     = self
         if override_params is not None:
             self.ooa_params.update_recursive(override_params)
 
@@ -105,11 +106,9 @@ class LinearSystem(object):
         }
 
         self.sled = SystemElementSled(
-            system         = self,
-            parent_element = None,
-            name           = None,
-            ooa_params     = self.ooa_params,
-            _sled_root     = True,
+            parent     = self,
+            name       = 'sled',
+            _sled_root = True,
         )
         self.sled.environment = SystemElementSled()
         self.environment = self.sled.environment
@@ -144,7 +143,7 @@ class LinearSystem(object):
     def reject_classical_frequency_order(self, fkey):
         #TODO put this logic in a subobject
         group_N = defaultdict(lambda: 0)
-        for F, N in fkey.F_dict.iteritems():
+        for F, N in fkey.F_dict.items():
             N_limit = F.order
             if N_limit is None:
                 N_limit = self.freq_order_max_default
@@ -154,7 +153,7 @@ class LinearSystem(object):
             for group in F.groups:
                 group_N[group] += Na
 
-        for group, N in group_N.iteritems():
+        for group, N in group_N.items():
             Nmax = self.groups_max_N.get(group, None)
             if Nmax is not None and N > Nmax:
                 return True
@@ -212,7 +211,7 @@ class LinearSystem(object):
         except AttributeError:
             pass
         else:
-            for port, pobj in op.iteritems():
+            for port, pobj in op.items():
                 self.port_owners[port] = element
                 self.owners_ports.setdefault(element, []).append(port)
                 self.owners_ports_virtual.setdefault(element, [])
@@ -236,11 +235,11 @@ class LinearSystem(object):
 
     def _autoterminate(self):
         terminated_ports = set()
-        for k, v in self.link_pairs.iteritems():
+        for k, v in self.link_pairs.items():
             if v:
                 terminated_ports.add(k)
                 terminated_ports.update(v)
-        registered_ports = set(self.port_owners.iterkeys())
+        registered_ports = set(self.port_owners.keys())
         unterminated_ports = registered_ports - terminated_ports
         if unterminated_ports:
             self.sled.autoterminate = SystemElementSled()

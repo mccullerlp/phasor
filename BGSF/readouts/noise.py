@@ -129,8 +129,8 @@ class NoiseMatrixView(object):
     def CSD_builds(self):
         if self.external_collect is not None:
             nsums    = dict()
-            for nobj, sumdict in self.external_collect.iteritems():
-                for dkey, nsum in sumdict.iteritems():
+            for nobj, sumdict in self.external_collect.items():
+                for dkey, nsum in sumdict.items():
                     if dkey not in nsums:
                         nsums[dkey] = np.copy(nsum)
                     else:
@@ -150,30 +150,30 @@ class NoiseMatrixView(object):
 
         pkviewsP = dict()
         pkviewsN = dict()
-        for pname, port in self.port_map.iteritems():
+        for pname, port in self.port_map.items():
             pkviewsP[pname] = (port, self.keyP)
             pkviewsN[pname] = (port, self.keyN)
 
         kvecsP = defaultdict(dict)
         kvecsN = defaultdict(dict)
-        for (pkfrom, pkto), cplg in coupling_matrix_inv.iteritems():
-            for pname, pkview in pkviewsP.iteritems():
+        for (pkfrom, pkto), cplg in coupling_matrix_inv.items():
+            for pname, pkview in pkviewsP.items():
                 if pkto == pkview:
                     kvecsP[pname][pkfrom] = cplg
-            for pname, pkview in pkviewsN.iteritems():
+            for pname, pkview in pkviewsN.items():
                 if pkto == pkview:
                     kvecsN[pname][pkfrom] = cplg
 
         ncollect = defaultdict(lambda: defaultdict(lambda: 0))
         nsums    = dict()
-        for pnameP, kvecP in kvecsP.iteritems():
-            for pnameN, kvecN in kvecsN.iteritems():
+        for pnameP, kvecP in kvecsP.items():
+            for pnameN, kvecN in kvecsN.items():
                 nsum = 0
-                for pk1, cplg1 in kvecP.iteritems():
+                for pk1, cplg1 in kvecP.items():
                     nmap_inner = nmap.get(pk1, None)
                     if nmap_inner is None:
                         continue
-                    for pk2, cplg2 in kvecN.iteritems():
+                    for pk2, cplg2 in kvecN.items():
                         vals = nmap_inner.get(pk2, None)
                         if vals is None:
                             continue
@@ -197,7 +197,7 @@ class NoiseMatrixView(object):
 
     def select_sources(self, nobj_filter_func):
         external_collect = dict()
-        for nobj, sumdict in self.CSD_by_source.iteritems():
+        for nobj, sumdict in self.CSD_by_source.items():
             if nobj_filter_func(nobj):
                 external_collect[nobj] = sumdict
         return self.__class__(

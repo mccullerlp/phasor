@@ -42,7 +42,7 @@ class FitterBase(Element):
 
     def targets_recurse(self, typename):
         dmap = []
-        for cname, cobj in self._registry_children.iteritems():
+        for cname, cobj in self._registry_children.items():
             if isinstance(cobj, FitterBase):
                 dmap.extend(cobj.targets_recurse(typename))
         target_ret = self.targets_list(typename)
