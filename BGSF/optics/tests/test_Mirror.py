@@ -3,34 +3,17 @@
 
 from __future__ import division
 from __future__ import print_function
+import pytest
 
-import numpy as np
-#import warnings
+from declarative import Bunch
 
-from declarative.bunch import (
-    Bunch,
-)
-
-from BGSF.optics import (
-    OpticalFreqKey,
-    ClassicalFreqKey,
-    LOWER, RAISE,
-    OpticalFrequency,
-    Mirror,
-    PD,
-    MagicPD,
-    Space,
-    Laser,
-)
+import BGSF.optics as optics
+import BGSF.readouts as readouts
 
 from BGSF.system.optical import (
     OpticalSystem
 )
 
-from BGSF.readouts import (
-    DCReadout,
-    ACReadout,
-)
 
 #from BGSF.utilities.np import logspaced
 
@@ -38,22 +21,22 @@ def gensys():
     sys = OpticalSystem(
     )
     sled = sys.sled
-    sled.laser = Laser(
+    sled.laser = optics.Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
-        name = "Laser",
+        name = "optics.Laser",
     )
 
-    sled.etm = Mirror(
+    sled.etm = optics.Mirror(
         T_hr=.001,
         name = 'ETM',
         facing_cardinal = 'W',
     )
-    sled.etmPD = MagicPD(
+    sled.etmPD = optics.MagicPD(
         name = 'ETMPD',
         facing_cardinal = 'E',
     )
-    sled.s1 = Space(
+    sled.s1 = optics.Space(
         100,
         L_detune_m = 0,
         name = 's1'
@@ -66,8 +49,8 @@ def gensys():
         sled.etm
     )
 
-    sled.etm_DC = DCReadout(port = sled.etmPD.Wpd.o)
-    sled.etm_drive = ACReadout(
+    sled.etm_DC = readouts.DCReadout(port = sled.etmPD.Wpd.o)
+    sled.etm_drive = readouts.ACReadout(
         portN = sled.etmPD.Wpd.o,
         portD = sled.etm.posZ.i,
     )
@@ -75,6 +58,7 @@ def gensys():
     return Bunch(locals())
 
 
+@pytest.mark.optics_fast
 def test_mirror():
     b = gensys()
     sys = b.sys
@@ -127,12 +111,12 @@ def test_mirror():
     #)
 
     #rt_inv = sys.invert_system()
-    #usb_keyL = DictKey({OpticalFreqKey: FrequencyKey(b.sled.laser.optical_fdict), ClassicalFreqKey: FrequencyKey({sys.F_AC : 1})}) | b.sled.laser.polarization | LOWER
-    #usb_keyR = DictKey({OpticalFreqKey: FrequencyKey(b.sled.laser.optical_fdict), ClassicalFreqKey: FrequencyKey({sys.F_AC : 1})}) | b.sled.laser.polarization | RAISE
-    #lsb_keyL = DictKey({OpticalFreqKey: FrequencyKey(b.sled.laser.optical_fdict), ClassicalFreqKey: FrequencyKey({sys.F_AC : -1})}) | b.sled.laser.polarization | LOWER
-    #lsb_keyR = DictKey({OpticalFreqKey: FrequencyKey(b.sled.laser.optical_fdict), ClassicalFreqKey: FrequencyKey({sys.F_AC : -1})}) | b.sled.laser.polarization | RAISE
-    #ucl_key = DictKey({ClassicalFreqKey: FrequencyKey({sys.F_AC : 1})})
-    #lcl_key = DictKey({ClassicalFreqKey: FrequencyKey({sys.F_AC : -1})})
+    #usb_keyL = DictKey({optics.OpticalFreqKey: FrequencyKey(b.sled.laser.optical_fdict), optics.ClassicalFreqKey: FrequencyKey({sys.F_AC : 1})}) | b.sled.laser.polarization | optics.LOWER
+    #usb_keyR = DictKey({optics.OpticalFreqKey: FrequencyKey(b.sled.laser.optical_fdict), optics.ClassicalFreqKey: FrequencyKey({sys.F_AC : 1})}) | b.sled.laser.polarization | optics.RAISE
+    #lsb_keyL = DictKey({optics.OpticalFreqKey: FrequencyKey(b.sled.laser.optical_fdict), optics.ClassicalFreqKey: FrequencyKey({sys.F_AC : -1})}) | b.sled.laser.polarization | optics.LOWER
+    #lsb_keyR = DictKey({optics.OpticalFreqKey: FrequencyKey(b.sled.laser.optical_fdict), optics.ClassicalFreqKey: FrequencyKey({sys.F_AC : -1})}) | b.sled.laser.polarization | optics.RAISE
+    #ucl_key = DictKey({optics.ClassicalFreqKey: FrequencyKey({sys.F_AC : 1})})
+    #lcl_key = DictKey({optics.ClassicalFreqKey: FrequencyKey({sys.F_AC : -1})})
     #print("USBLU: ", rt_inv.get((b.sled.etm.Fr.o, usb_keyL), (b.sled.etm.posZ.i, ucl_key), 0))
     #print("USBRU: ", rt_inv.get((b.sled.etm.Fr.o, usb_keyR), (b.sled.etm.posZ.i, ucl_key), 0))
     #print("USBLL: ", rt_inv.get((b.sled.etm.Fr.o, usb_keyL), (b.sled.etm.posZ.i, lcl_key), 0))

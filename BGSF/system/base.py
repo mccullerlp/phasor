@@ -7,8 +7,7 @@ have measurement objects inject objects into the solver, so that the solver stat
 
 have coherent measurement systems able to run the solver independently to generate system-altering measurements
 """
-from __future__ import division
-from __future__ import print_function
+from __future__ import (division, print_function)
 from builtins import object
 from BGSF.utilities.print import print
 from collections import defaultdict
@@ -16,8 +15,8 @@ from collections import defaultdict
 import numpy as np
 import warnings
 
-from declarative.bunch import (
-    DeepBunchSingleAssign,
+from declarative import (
+    DeepBunch,
 )
 
 from ..base import (
@@ -60,7 +59,7 @@ class LinearSystem(object):
             self.freq_order_max_default = freq_order_max_default
 
         #TODO, add argument to fill this
-        self.ooa_params = DeepBunchSingleAssign()
+        self.ooa_params = DeepBunch()
         self.system     = self
         if override_params is not None:
             self.ooa_params.update_recursive(override_params)

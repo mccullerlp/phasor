@@ -1,66 +1,40 @@
 # -*- coding: utf-8 -*-
 """
 """
+from __future__ import (division, print_function)
 
-from __future__ import division
-from __future__ import print_function
-
-import numpy as np
-
-from declarative.bunch import (
-    Bunch,
-)
-
-from ..optics import (
+from ...optics import (
     Mirror,
     PD,
     MagicPD,
     Space,
     Laser,
+    HiddenVariableHomodynePD,
+    VacuumTerminator,
+    PM
 )
 
-from ..system.optical import (
-    OpticalSystem,
-)
-
-from ..signals import (
+from ...signals import (
     SignalGenerator,
-    Mixer,
     DistributionAmplifier,
     SummingAmplifier,
     #TransferFunctionSISO,
     TransferFunctionSISOMechSingleResonance,
 )
 
-from ..readouts import (
+from ...readouts import (
     DCReadout,
     ACReadout,
     ACReadoutCLG,
-)
-
-from ..readouts.homodyne_AC import (
     HomodyneACReadout,
 )
 
-from ..base import (
+from ...base import (
     SystemElementSled,
     OOA_ASSIGN,
     Frequency,
 )
 
-from ..optics.modulators import (
-    PM
-)
-
-from ..optics.hidden_variable_homodyne import (
-    HiddenVariableHomodynePD,
-)
-
-from ..optics.vacuum import (
-    VacuumTerminator,
-)
-
-#from BGSF.utilities.np import logspaced
 
 class QuadMirrorBasic(SystemElementSled):
     def __init__(
@@ -479,7 +453,6 @@ class LIGOOutputHomodyne(SystemElementSled):
             portNQ = self.ASPDHD_lossless.rtWpdQ.o,
             portD = LIGO_obj.actuate_DARM_m.I.i,
         )
-
 
         self.ASPD_DC = DCReadout(
             port = self.ASPD.Wpd.o,

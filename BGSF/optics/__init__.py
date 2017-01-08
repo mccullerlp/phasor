@@ -58,3 +58,12 @@ from .polarization import (
     UnmountedQuarterWavePlate,
     UnmountedHalfWavePlate,
 )
+
+from .modulators import (
+    AM,
+    PM,
+)
+
+from .hidden_variable_homodyne import (
+    HiddenVariableHomodynePD,
+)
