@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import object
+from past.utils import old_div
 
 import numpy as np
 from numpy import pi
@@ -73,7 +76,7 @@ class PD1811Model(object):
     @property
     def AmpS11(self):
         if self._AmpS11 is None:
-            self._AmpS11 = ((self._x3 - 50)/(self._x3 + 50))
+            self._AmpS11 = (old_div((self._x3 - 50),(self._x3 + 50)))
         return self._AmpS11
     
     @AmpS11.setter
@@ -86,7 +89,7 @@ class PD1811Model(object):
     @property
     def Z_DC(self):
         if self._Z_DC is None:
-            self._Z_DC = (self.R_3_1Ohms + 1/(self._x1 + 1/(self.R_3_1Ohms + 1/(self._x1 + 1/self.R_5Ohms))))
+            self._Z_DC = (self.R_3_1Ohms + old_div(1,(self._x1 + old_div(1,(self.R_3_1Ohms + old_div(1,(self._x1 + old_div(1,self.R_5Ohms))))))))
         return self._Z_DC
     
     @Z_DC.setter
@@ -405,7 +408,7 @@ class PD1811Model(object):
     @property
     def _x15(self):
         if self.__x15 is None:
-            self.__x15 = (1/(1j*self.AmpS11 + 1j*self._x6*self._x7 - 1j + 2*pi*self.F*(-self.C_PD*self._x12 + self._x10 - self._x13 + self._x9) - self.Z_DC*self._x14 - self.Z_LM340*self._x14))
+            self.__x15 = (old_div(1,(1j*self.AmpS11 + 1j*self._x6*self._x7 - 1j + 2*pi*self.F*(-self.C_PD*self._x12 + self._x10 - self._x13 + self._x9) - self.Z_DC*self._x14 - self.Z_LM340*self._x14)))
         return self.__x15
     
     @_x15.setter

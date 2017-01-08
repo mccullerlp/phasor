@@ -1,3 +1,4 @@
+*.py.bak
 venv/
 *.egg-info/
 build/

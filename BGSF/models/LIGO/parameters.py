@@ -1,3 +1,5 @@
+from __future__ import division
+from past.utils import old_div
 # IFOMODEL returns a structure describing an IFO for use in
 # benchmark programs and noise simulator. Part of the gwinc
 # package, which provides science-grounded figures of merit for
@@ -268,7 +270,7 @@ ifo.Optics.ETM.CoatingThicknessCap = 0.5;
 
 #ifo.Optics.SRM.Tunephase = 0.23;           # SRM tuning, 795 Hz narrowband
 ifo.Optics.SRM.Tunephase = 0.0;             # SRM tuning
-ifo.Optics.Quadrature.dc = pi/2;            # demod/detection/homodyne phase
+ifo.Optics.Quadrature.dc = old_div(pi,2);            # demod/detection/homodyne phase
 
 ##Squeezer Parameters------------------------------------------------------
 

@@ -1,5 +1,6 @@
 """
 """
+from builtins import zip, object
 import sympy
 from sympy.utilities.lambdify import lambdastr
 from YALL.utilities.strings import canonicalize_TQStrings
@@ -169,7 +170,7 @@ class SympyExpressionGenerator(object):
         self.variable_default_values[var.name] = default_value
 
     def generate(self):
-        expr_name_list, expr_list = list(zip(*iter(self.expressions_to_variables.items())))
+        expr_name_list, expr_list = list(zip(*iter(list(self.expressions_to_variables.items()))))
 
         expr_vars = set()
         expr_funcs = set()
@@ -214,13 +215,13 @@ class SympyExpressionGenerator(object):
 
         def hypersubs(expr):
             expr = expr.subs(sympy.I, sympy.var('1j'))
-            for func, name in func_vars_to_selfname.items():
+            for func, name in list(func_vars_to_selfname.items()):
                 expr = expr.replace(func, sympy.var(name))
-            for var, name in expr_vars_to_selfname.items():
+            for var, name in list(expr_vars_to_selfname.items()):
                 expr = expr.subs(var, sympy.var(name))
-            for var, name in cse_vars_to_selfname.items():
+            for var, name in list(cse_vars_to_selfname.items()):
                 expr = expr.subs(var, sympy.var(name))
-            for func, name in func_vars_to_selfname.items():
+            for func, name in list(func_vars_to_selfname.items()):
                 expr = expr.subs(func, sympy.Function(name))
             return expr
 
@@ -268,7 +269,7 @@ class SympyExpressionGenerator(object):
         value_views = []
 
         done = set()
-        for var, default in sorted(iter(expr_vars_default.items()), key = lambda p: expr_vars_to_classname[p[0]]):
+        for var, default in sorted(iter(list(expr_vars_default.items())), key = lambda p: expr_vars_to_classname[p[0]]):
             classname = expr_vars_to_classname[var]
             if classname in done:
                 continue

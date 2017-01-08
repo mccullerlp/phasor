@@ -1,4 +1,8 @@
-from system import ElectricalSystem
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
+from past.utils import old_div
+from .system import ElectricalSystem
 import sympy
 import numpy as np
 
@@ -34,7 +38,7 @@ def prefactor_cplx_split(expr):
             cplx_parity += 1
         else:
             idx += 1
-    cplx_sign = (-1) ** ((cplx_parity / 2) % 2)
+    cplx_sign = (-1) ** ((old_div(cplx_parity, 2)) % 2)
     cplx_parity = cplx_parity % 2
     prefactor = cplx_sign * sympy.Mul(*outer_factors)
     return cplx_parity, prefactor, sympy.Mul(*factors)

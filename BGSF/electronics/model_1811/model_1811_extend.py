@@ -1,3 +1,5 @@
+from __future__ import division
+from past.utils import old_div
 from model_1811 import PD1811Model
 from YALL.utilities.numerics.dispatched import abs_sq, sqrt
 import copy
@@ -22,7 +24,7 @@ class PD1811ModelExt(PD1811Model):
 
     def copy(self, **kwargs):
         new = copy.deepcopy(self)
-        for n, val in kwargs.items():
+        for n, val in list(kwargs.items()):
             getattr(new, n) #just check if the thing exists
             setattr(new, n, val)
         return new
@@ -41,7 +43,7 @@ class PD1811ModelExt(PD1811Model):
     @property
     def NIpd_sq_from_SN(self):
         if self._NIpd_sq_from_SN is None:
-            self._NIpd_sq_from_SN = (2 * (self.VDC / 10) / 6.24e18)
+            self._NIpd_sq_from_SN = (2 * (old_div(self.VDC, 10)) / 6.24e18)
         return self._NIpd_sq_from_SN
 
     _NIpd_from_SN = None
@@ -117,7 +119,7 @@ class PD1811ModelExt(PD1811Model):
     @property
     def NVamp_sq_from_R_trans(self):
         if self._NVamp_sq_from_R_trans is None:
-            self._NVamp_sq_from_R_trans = (4.07e-9)**2 * (self.R_trans / 1e3) * abs_sq(self.ampV_from_VR_trans)
+            self._NVamp_sq_from_R_trans = (4.07e-9)**2 * (old_div(self.R_trans, 1e3)) * abs_sq(self.ampV_from_VR_trans)
         return self._NVamp_sq_from_R_trans
 
     _NVamp_from_R_trans = None

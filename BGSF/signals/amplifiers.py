@@ -51,7 +51,7 @@ class DistributionAmplifier(CouplerBase, SystemElementBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         for kfrom in matrix_algorithm.port_set_get(self.I.i):
-            for pname, pgain in self.port_gains.items():
+            for pname, pgain in list(self.port_gains.items()):
                 port = getattr(self, pname)
                 matrix_algorithm.port_coupling_insert(self.I.i,  kfrom, port.o, kfrom, pgain)
         return
@@ -84,7 +84,7 @@ class SummingAmplifier(CouplerBase, SystemElementBase):
         return
 
     def system_setup_coupling(self, matrix_algorithm):
-        for pname, pgain in self.port_gains.items():
+        for pname, pgain in list(self.port_gains.items()):
             port = getattr(self, pname)
             for kfrom in matrix_algorithm.port_set_get(port.i):
                 matrix_algorithm.port_coupling_insert(port.i,  kfrom, self.O.o, kfrom, pgain)
@@ -104,11 +104,11 @@ class MatrixAmplifier(CouplerBase, SystemElementBase):
         self.O  = Bunch()
 
         dd = defaultdict(dict)
-        for (iname, oname), xfer in self.port_pair_xfers.items():
+        for (iname, oname), xfer in list(self.port_pair_xfers.items()):
             dd[iname][oname] = xfer
         self._dd = dd
 
-        for (iname, oname), xfer in self.port_pair_gains.items():
+        for (iname, oname), xfer in list(self.port_pair_gains.items()):
             if iname not in self.I:
                 self.I[iname] = SignalPortHolderIn(self,  x = iname)
             if oname not in self.O:
@@ -116,7 +116,7 @@ class MatrixAmplifier(CouplerBase, SystemElementBase):
         return
 
     def system_setup_ports(self, ports_algorithm):
-        for (iname, oname), xfer in self.port_pair_gains.items():
+        for (iname, oname), xfer in list(self.port_pair_gains.items()):
             for kfrom in ports_algorithm.port_update_get(self.I[iname].i):
                 ports_algorithm.port_coupling_needed(self.O[oname].o, kfrom)
             for kto in ports_algorithm.port_update_get(self.O[oname].o):
@@ -124,9 +124,9 @@ class MatrixAmplifier(CouplerBase, SystemElementBase):
         return
 
     def system_setup_coupling(self, matrix_algorithm):
-        for iname, oxD in self._dd.items():
+        for iname, oxD in list(self._dd.items()):
             for kfrom in matrix_algorithm.port_set_get(self.I[iname].i):
-                for oname, xfer in oxD.items():
+                for oname, xfer in list(oxD.items()):
                     matrix_algorithm.port_coupling_insert(
                         self.I[iname].i,
                         kfrom,

@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import absolute_import
 from declarative import (
     Bunch,
 )
@@ -8,7 +9,8 @@ from .dictionary_keys import (
 import operator
 from collections import defaultdict
 
-from keymatrix_reduce_tarjan import topological_sort
+from .keymatrix_reduce_tarjan import topological_sort
+from functools import reduce
 
 
 def sparsity_graph(km):

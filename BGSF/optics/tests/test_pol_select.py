@@ -1,6 +1,5 @@
 """
 """
-
 from __future__ import (division, print_function)
 from unittest import TestCase, main
 

@@ -1,5 +1,8 @@
 """
 """
+from __future__ import division
+from past.utils import old_div
+from builtins import object
 
 #import numpy as np
 #import warnings
@@ -97,7 +100,7 @@ def type_test(obj, types):
             types = (types, )
         example_names = []
         for t in types:
-            for oname, obj in globals().items():
+            for oname, obj in list(globals().items()):
                 try:
                     if isinstance(obj, t) or issubclass(obj, t):
                         if obj is not t:
@@ -252,19 +255,19 @@ class VoltageSourceBalanced(SMatrix2PortBase):
             matrix[
                 df_key | self.V,
                 df_key | self.A.o
-            ] = 1/_2
+            ] = old_div(1,_2)
             matrix[
                 df_key | self.V,
                 df_key | self.B.o
-            ] = -1/_2
+            ] = old_div(-1,_2)
             matrix[
                 df_key | self.I,
                 df_key | self.A.o
-            ] = system.Z_termination/_2
+            ] = old_div(system.Z_termination,_2)
             matrix[
                 df_key | self.I,
                 df_key | self.B.o
-            ] = system.Z_termination/_2
+            ] = old_div(system.Z_termination,_2)
 
         matrix.insert(
             into = system.coupling_matrix,
@@ -345,9 +348,9 @@ class Connection(ElectricalElementBase):
         for portA in self.port_list:
             for portB in self.port_list:
                 if portA is portB:
-                    couplings[portA.o, portB.i] = (_2 - N_wires) / N_wires
+                    couplings[portA.o, portB.i] = old_div((_2 - N_wires), N_wires)
                 else:
-                    couplings[portA.o, portB.i] = _2 / N_wires
+                    couplings[portA.o, portB.i] = old_div(_2, N_wires)
 
         delay_matrix = ForewardDictMatrix()
         for f_key in system.F_key_basis:
@@ -419,7 +422,7 @@ class CapacitorBase(object):
         self.capacitance_Farads = capacitance_Farads
 
     def impedance_by_freq(self, F, system):
-        return 1/(2 * system.i * system.pi * F * self.capacitance_Farads)
+        return old_div(1,(2 * system.i * system.pi * F * self.capacitance_Farads))
 
 
 class InductorBase(object):
@@ -437,7 +440,7 @@ class TerminatorImpedance(SMatrix1PortBase):
 
     def S11_by_freq(self, F, system):
         Z = self.impedance_by_freq(F, system)
-        return (Z - system.Z_termination) / (Z + system.Z_termination)
+        return old_div((Z - system.Z_termination), (Z + system.Z_termination))
 
 
 class TerminatorResistor(ResistorBase, TerminatorImpedance):
@@ -465,19 +468,19 @@ class SeriesImpedance(SMatrix2PortBase):
 
     def S11_by_freq(self, F, system):
         Z = self.impedance_by_freq(F, system)
-        return Z / (Z + system.Z_termination * 2)
+        return old_div(Z, (Z + system.Z_termination * 2))
 
     def S12_by_freq(self, F, system):
         Z = self.impedance_by_freq(F, system)
-        return (2 * system.Z_termination) / (Z + system.Z_termination * 2)
+        return old_div((2 * system.Z_termination), (Z + system.Z_termination * 2))
 
     def S21_by_freq(self, F, system):
         Z = self.impedance_by_freq(F, system)
-        return (2 * system.Z_termination) / (Z + system.Z_termination * 2)
+        return old_div((2 * system.Z_termination), (Z + system.Z_termination * 2))
 
     def S22_by_freq(self, F, system):
         Z = self.impedance_by_freq(F, system)
-        return Z / (Z + system.Z_termination * 2)
+        return old_div(Z, (Z + system.Z_termination * 2))
 
 
 class SeriesResistor(ResistorBase, SeriesImpedance):
@@ -575,11 +578,11 @@ class VAmp(ElectricalElementBase):
             matrix[
                 df_key | self.in_n.i,
                 df_key | self.in_n.o
-            ] = (1 - self.Y_input * system.Z_termination) / (1 + self.Y_input * system.Z_termination)
+            ] = old_div((1 - self.Y_input * system.Z_termination), (1 + self.Y_input * system.Z_termination))
             matrix[
                 df_key | self.out.i,
                 df_key | self.out.o
-            ] = (self.Z_output - system.Z_termination) / (self.Z_output + system.Z_termination)
+            ] = old_div((self.Z_output - system.Z_termination), (self.Z_output + system.Z_termination))
             gbf = self.gain_by_freq(
                 F = f_key.frequency(),
                 system = system

@@ -2,6 +2,7 @@
 """
 """
 from __future__ import (division, print_function)
+from builtins import object
 from collections import defaultdict
 import copy
 
@@ -51,7 +52,7 @@ class MatrixBuildAlgorithm(object):
         self.coupling_matrix_sparsity    = KeyMatrix(field_space, field_space)
 
         #TODO, stopgap for generating an exhaustive field space
-        for p, k_set in self.port_cplgs.items():
+        for p, k_set in list(self.port_cplgs.items()):
             for k in k_set:
                 self.field_space.keys_add((p, k))
 
@@ -67,10 +68,10 @@ class MatrixBuildAlgorithm(object):
         self._noise_map()
 
         #freeze the lists
-        self.source_vector_injlist            = dict(self.source_vector_injlist.items())
-        self.source_vector_inj_funclist   = dict(self.source_vector_inj_funclist.items())
-        self.coupling_matrix_injlist          = dict(self.coupling_matrix_injlist.items())
-        self.coupling_matrix_inj_funclist = dict(self.coupling_matrix_inj_funclist.items())
+        self.source_vector_injlist            = dict(list(self.source_vector_injlist.items()))
+        self.source_vector_inj_funclist   = dict(list(self.source_vector_inj_funclist.items()))
+        self.coupling_matrix_injlist          = dict(list(self.coupling_matrix_injlist.items()))
+        self.coupling_matrix_inj_funclist = dict(list(self.coupling_matrix_inj_funclist.items()))
 
     def _setup_system(self):
         for el in self.system.elements:
@@ -81,7 +82,7 @@ class MatrixBuildAlgorithm(object):
             else:
                 ssc(self)
 
-        for pfrom, pto_set in self.system.link_pairs.items():
+        for pfrom, pto_set in list(self.system.link_pairs.items()):
             for pto in pto_set:
                 for pkey in self.port_set_get(pfrom):
                     assert(pkey in self.port_set_get(pto))
@@ -175,7 +176,7 @@ class MatrixBuildAlgorithm(object):
 
     def injection_insert(self, inj_obj):
         self.all_injections.append(inj_obj)
-        for (pkf, pkt), func in inj_obj.edges_pkpk_dict.items():
+        for (pkf, pkt), func in list(inj_obj.edges_pkpk_dict.items()):
             pto, kto = pkt
             ptofull = self.port_cplgs.get(pto, NOARG)
             if ptofull is NOARG:
@@ -193,7 +194,7 @@ class MatrixBuildAlgorithm(object):
             self.field_space.keys_add(pkf)
             self.field_space.keys_add(pkt)
             self.coupling_matrix_sparsity[pkf, pkt] = 1
-        for pks, func in inj_obj.sources_pk_dict.items():
+        for pks, func in list(inj_obj.sources_pk_dict.items()):
             psrc , ksrc = pks
             ptofull = self.port_cplgs.get(psrc, NOARG)
             if ptofull is NOARG:
@@ -240,7 +241,7 @@ class MatrixBuildAlgorithm(object):
         seq = defaultdict(set)
         req = defaultdict(set)
 
-        for pfrom, pto_set in self.system.link_pairs.items():
+        for pfrom, pto_set in list(self.system.link_pairs.items()):
             for pto in pto_set:
                 for kkey in self.port_set_get(pfrom):
                     pkfrom = (pfrom, kkey)
@@ -250,7 +251,7 @@ class MatrixBuildAlgorithm(object):
                     req[pkto].add(pkfrom)
 
         source_invlist = defaultdict(list)
-        for pkto, injlist in self.source_vector_injlist.items():
+        for pkto, injlist in list(self.source_vector_injlist.items()):
             order_list = []
             any_order0 = False
             for inj in injlist:
@@ -271,7 +272,7 @@ class MatrixBuildAlgorithm(object):
                 inputs_set.add(pkto)
 
         edge_invlist = defaultdict(list)
-        for (pkfrom, pkto), injlist in self.coupling_matrix_injlist.items():
+        for (pkfrom, pkto), injlist in list(self.coupling_matrix_injlist.items()):
             any_order0 = False
             order_list = []
             for inj in injlist:

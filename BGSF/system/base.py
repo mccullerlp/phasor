@@ -9,6 +9,7 @@ have coherent measurement systems able to run the solver independently to genera
 """
 from __future__ import division
 from __future__ import print_function
+from builtins import object
 from YALL.utilities.print import print
 from collections import defaultdict
 
@@ -144,7 +145,7 @@ class LinearSystem(object):
     def reject_classical_frequency_order(self, fkey):
         #TODO put this logic in a subobject
         group_N = defaultdict(lambda: 0)
-        for F, N in fkey.F_dict.items():
+        for F, N in list(fkey.F_dict.items()):
             N_limit = F.order
             if N_limit is None:
                 N_limit = self.freq_order_max_default
@@ -154,7 +155,7 @@ class LinearSystem(object):
             for group in F.groups:
                 group_N[group] += Na
 
-        for group, N in group_N.items():
+        for group, N in list(group_N.items()):
             Nmax = self.groups_max_N.get(group, None)
             if Nmax is not None and N > Nmax:
                 return True
@@ -163,7 +164,7 @@ class LinearSystem(object):
     def classical_frequency_extract(self, key):
         #TODO put this logic in a subobject
         freq_Hz = 0
-        for F, n in key[ClassicalFreqKey].F_dict.items():
+        for F, n in list(key[ClassicalFreqKey].F_dict.items()):
             freq_Hz += n * F.F_Hz
         return freq_Hz
 
@@ -172,7 +173,7 @@ class LinearSystem(object):
             return False
         #TODO put this logic in a subobject
         freq_Hz = 0
-        for F, n in key[ClassicalFreqKey].F_dict.items():
+        for F, n in list(key[ClassicalFreqKey].F_dict.items()):
             freq_Hz += n * F.F_Hz
         if np.any(freq_Hz < max_freq):
             return False
@@ -212,7 +213,7 @@ class LinearSystem(object):
         except AttributeError:
             pass
         else:
-            for port, pobj in op.items():
+            for port, pobj in list(op.items()):
                 self.port_owners[port] = element
                 self.owners_ports.setdefault(element, []).append(port)
                 self.owners_ports_virtual.setdefault(element, [])
@@ -227,7 +228,7 @@ class LinearSystem(object):
             self.elements_named[element.fully_resolved_name] = None
         else:
             self.elements_named[element.fully_resolved_name] = element
-        for t, s in self.elements_by_type.items():
+        for t, s in list(self.elements_by_type.items()):
             if isinstance(element, t):
                 s.add(element)
         #TODO not sure linked_elements is relevant anymore with the sled system
@@ -236,7 +237,7 @@ class LinearSystem(object):
 
     def _autoterminate(self):
         terminated_ports = set()
-        for k, v in self.link_pairs.items():
+        for k, v in list(self.link_pairs.items()):
             if v:
                 terminated_ports.add(k)
                 terminated_ports.update(v)

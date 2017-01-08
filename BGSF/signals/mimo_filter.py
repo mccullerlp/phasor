@@ -45,7 +45,7 @@ class TransferFunctionMIMO(CouplerBase, SystemElementBase):
         OOA_ASSIGN(self).max_freq = max_freq
         OOA_ASSIGN(self).port_pair_xfers = port_pair_xfers
 
-        for (iname, oname), xfer in self.port_pair_xfers.items():
+        for (iname, oname), xfer in list(self.port_pair_xfers.items()):
             if iname not in self.I:
                 self.I[iname] = SignalPortHolderIn(self,  x = iname)
             if oname not in self.O:
@@ -53,7 +53,7 @@ class TransferFunctionMIMO(CouplerBase, SystemElementBase):
         return
 
     def system_setup_ports(self, ports_algorithm):
-        for (iname, oname), xfer in self.port_pair_xfers.items():
+        for (iname, oname), xfer in list(self.port_pair_xfers.items()):
             for kfrom in ports_algorithm.port_update_get(self.I[iname].i):
                 if self.system.classical_frequency_test_max(kfrom, self.max_freq):
                     continue
@@ -66,15 +66,15 @@ class TransferFunctionMIMO(CouplerBase, SystemElementBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         dd = defaultdict(dict)
-        for (iname, oname), xfer in self.port_pair_xfers.items():
+        for (iname, oname), xfer in list(self.port_pair_xfers.items()):
             dd[iname][oname] = xfer
 
-        for iname, oxD in dd.items():
+        for iname, oxD in list(dd.items()):
             for kfrom in matrix_algorithm.port_set_get(self.I[iname].i):
                 if self.system.classical_frequency_test_max(kfrom, self.max_freq):
                     continue
                 freq = self.system.classical_frequency_extract(kfrom)
-                for oname, xfer in oxD.items():
+                for oname, xfer in list(oxD.items()):
                     pgain = xfer(freq)
                     matrix_algorithm.port_coupling_insert(
                         self.I[iname].i,

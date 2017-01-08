@@ -1,4 +1,8 @@
-from __future__ import division
+"""
+"""
+
+from __future__ import (division, print_function)
+from builtins import zip, range, object
 from .optical_system import OpticalSystem
 import sympy
 import numpy as np
@@ -67,7 +71,7 @@ class SympyViewReduction(object):
         return
 
     def sympy_reduce_solutions(self, expr):
-        for sub_expr, subst in self._view_simplifications.items():
+        for sub_expr, subst in list(self._view_simplifications.items()):
             expr = expr.subs(sub_expr, subst)
         for func in self.view_simplification_funcs:
             expr = func(expr)

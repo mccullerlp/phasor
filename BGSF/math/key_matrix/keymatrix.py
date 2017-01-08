@@ -1,6 +1,8 @@
 """
 """
 from __future__ import division
+from builtins import range
+from builtins import object
 
 import warnings
 import numpy as np
@@ -128,7 +130,7 @@ class KeyLinearBase(object):
         if self.dtype == object:
             return tuple(maxshape)
         if self._must_test_shape:
-            for key_pair, value in self._data_map.items():
+            for key_pair, value in list(self._data_map.items()):
                 shape = np.array(np.asanyarray(value).shape)
                 if len(shape) > len(maxshape):
                     maxshape, shape = shape, maxshape
@@ -166,7 +168,7 @@ class KeyVectorBase(KeyLinearBase):
         return self._data_map.get(key, default)
 
     def items(self):
-        return self._data_map.items()
+        return list(self._data_map.items())
 
     def __len__(self):
         return len(self._data_map)
@@ -193,10 +195,10 @@ class KeyVectorBase(KeyLinearBase):
         del self._data_map[key]
 
     def __iter__(self):
-        return iter(self._data_map.items())
+        return iter(list(self._data_map.items()))
 
     def iterkeys(self):
-        return self._data_map.keys()
+        return list(self._data_map.keys())
 
 
 class KeyMatrixBase(KeyLinearBase):
@@ -247,15 +249,15 @@ class KeyMatrixBase(KeyLinearBase):
             self._must_test_shape = True
 
     def __iter__(self):
-        for key_pair, value in self._data_map.items():
+        for key_pair, value in list(self._data_map.items()):
             key_from, key_to = key_pair
             yield key_from, key_to, value
 
     def keys(self):
-        return self._data_map.keys()
+        return list(self._data_map.keys())
 
     def items(self):
-        return self._data_map.items()
+        return list(self._data_map.items())
 
     def set_nullable(self, key_to, key_from, value):
         self._memoize_count += 1
@@ -271,14 +273,14 @@ class KeyMatrixBase(KeyLinearBase):
         del self._data_map[key_pair]
 
     def fill_from_pair_map(self, key_pair_map):
-        for key_pair, value in key_pair_map.items():
+        for key_pair, value in list(key_pair_map.items()):
             self[key_pair] = value
 
     def fill_from_nested_map(self, from_to_nested_map):
         self._memoize_count += 1
-        for key_from, to_nested_map in from_to_nested_map.items():
+        for key_from, to_nested_map in list(from_to_nested_map.items()):
             self.vspace_from.keys_add(key_from)
-            for key_to, value in to_nested_map.items():
+            for key_to, value in list(to_nested_map.items()):
                 self.vspace_to.keys_add(key_to)
                 self._data_map[key_from, key_to] = value
 
@@ -298,7 +300,7 @@ class KeyVector(KeyVectorBase):
         if self._memoize_array_count != self._memoize_count:
             maxshape = self._maxshape()
             arr = np.zeros(tuple(maxshape) + (len(self.vspace),), dtype = self.dtype)
-            for key, value in self._data_map.items():
+            for key, value in list(self._data_map.items()):
                 arr[..., self.vspace.key_map(key)] = value
             self._memoize_array = arr
             self._memoize_array_count = self._memoize_count
@@ -350,7 +352,7 @@ class KeyMatrix(KeyMatrixBase):
         if self._memoize_array_count != self._memoize_count:
             maxshape = self._maxshape()
             arr = np.zeros(tuple(maxshape) + (len(self.vspace_to), len(self.vspace_from)), dtype = self.dtype)
-            for key_pair, value in self._data_map.items():
+            for key_pair, value in list(self._data_map.items()):
                 key_from, key_to = key_pair
                 arr[
                     ...,
@@ -439,7 +441,7 @@ class KeyMatrix(KeyMatrixBase):
 
         #make a copy
         premap = dict(self._data_map)
-        for key_pair, value in other._data_map.items():
+        for key_pair, value in list(other._data_map.items()):
             try:
                 v = premap[key_pair]
                 premap[key_pair] = v + value
@@ -455,7 +457,7 @@ class KeyMatrix(KeyMatrixBase):
 
         #make a copy
         premap = dict(self._data_map)
-        for key_pair, value in other._data_map.items():
+        for key_pair, value in list(other._data_map.items()):
             try:
                 v = premap[key_pair]
                 premap[key_pair] = v - value

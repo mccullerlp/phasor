@@ -10,7 +10,7 @@ LOWER = DictKey(Op = 'lowering')
 
 def keyvect_cplx_to_real(kv):
     donekeys = set()
-    for key in kv.keys():
+    for key in list(kv.keys()):
         if key in donekeys:
             continue
         xkey = key.has_any_remove(RAISE, LOWER)

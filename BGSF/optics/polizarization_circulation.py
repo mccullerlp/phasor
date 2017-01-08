@@ -1,7 +1,10 @@
+from __future__ import division
+from __future__ import print_function
+from past.utils import old_div
 import numpy as np
 
 def normalize(v):
-    return v / np.dot(v, v)**.5
+    return old_div(v, np.dot(v, v)**.5)
 
 def project_away(v, N):
     #project away N from v, assumes N normalized
@@ -69,6 +72,6 @@ if __name__ == '__main__':
         (0, 1, -up_down),
     ]
     jones = polarization_circulation(p_s)
-    print 'Jones Matrix: '
-    print jones
-    print 'Polarization Defect: ', 1 - jones[0,0]**2
+    print('Jones Matrix: ')
+    print(jones)
+    print('Polarization Defect: ', 1 - jones[0,0]**2)

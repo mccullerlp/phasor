@@ -1,6 +1,8 @@
 """
 """
 from __future__ import division, print_function
+from builtins import str
+from builtins import range
 import numpy as np
 
 #import BGSF.numerics.dispatched as dmath
@@ -283,7 +285,7 @@ class BeamTarget(CNoP):
             z = z,
             q = beam_q,
             type = 'target',
-            str = u'{name} {q}'.format(name = self.name, q = unicode(beam_q)),
+            str = u'{name} {q}'.format(name = self.name, q = str(beam_q)),
         )
 
     def system_data_targets(self, typename):

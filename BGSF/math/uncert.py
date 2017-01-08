@@ -1,5 +1,7 @@
 """
 """
+from __future__ import division
+from past.utils import old_div
 
 import uncertainties
 import uncertainties.umath
@@ -41,8 +43,8 @@ def fix_op(opname, lambda_syntax):
 
 fix_op('__mul__'  , lambda s, o: s * o)
 fix_op('__rmul__' , lambda s, o: o * s)
-fix_op('__div__'  , lambda s, o: s / o)
-fix_op('__rdiv__' , lambda s, o: o / s)
+fix_op('__div__'  , lambda s, o: old_div(s, o))
+fix_op('__rdiv__' , lambda s, o: old_div(o, s))
 fix_op('__add__'  , lambda s, o: s + o)
 fix_op('__radd__' , lambda s, o: o + s)
 fix_op('__sub__'  , lambda s, o: s - o)

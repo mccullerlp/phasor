@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
+from builtins import str
+from builtins import object
 from collections import Mapping as MappingABC
 
 import copy
@@ -44,10 +46,10 @@ class DictKey(MappingABC):
 
     def __repr__(self):
         def recode(v):
-            if isinstance(v, (str, unicode)):
-                return unicode(v)
+            if isinstance(v, str):
+                return str(v)
             else:
-                return unicode(repr(v), 'utf-8')
+                return str(repr(v), 'utf-8')
         l = tuple(sorted(self._dict.items()))
         #print(unicode(repr(l), 'utf-8'))
         l2 = [u'{0}:{1}'.format(recode(i), recode(j)) for i, j in l]
@@ -59,7 +61,7 @@ class DictKey(MappingABC):
         return self.__class__(cp)
 
     def iteritems(self):
-        return self._dict.items()
+        return list(self._dict.items())
 
     def kv_contains(self, k, v):
         v2 = self._dict.get(k, NOARG)
@@ -73,13 +75,13 @@ class DictKey(MappingABC):
             larger = other
             smaller = self
         newdict = dict()
-        for k, v in smaller.items():
+        for k, v in list(smaller.items()):
             if larger.kv_contains(k, v):
                 newdict[k] = v
         return self.__class__(**newdict)
 
     def contains(self, other):
-        for k, v in other.items():
+        for k, v in list(other.items()):
             if not self.kv_contains(k, v):
                 return False
         return True
@@ -92,17 +94,17 @@ class DictKey(MappingABC):
 
     def replace_keys(self, key_dict, *more_key_dicts):
         cp = dict(self._dict)
-        for key, val in key_dict.items():
+        for key, val in list(key_dict.items()):
             cp[key] = val
         if more_key_dicts:
             for key_dict in more_key_dicts:
-                for key, val in key_dict.items():
+                for key, val in list(key_dict.items()):
                     cp[key] = val
         return self.__class__(**cp)
 
     def subkey_has(self, other):
         try:
-            for k, v in other.items():
+            for k, v in list(other.items()):
                 v2 = self._dict[k]
                 if v != v2:
                     return False
@@ -112,7 +114,7 @@ class DictKey(MappingABC):
 
     def __sub__(self, other):
         cp = dict(self._dict)
-        for k, v in other._dict.items():
+        for k, v in list(other._dict.items()):
             assert(cp[k] == v)
             del cp[k]
         return self.__class__(cp)
@@ -147,7 +149,7 @@ class FrequencyKey(object):
             return self.prev_tup
         except AttributeError:
             pass
-        self.prev_tup = tuple(sorted((f, n) for f, n in self.F_dict.items() if n != 0))
+        self.prev_tup = tuple(sorted((f, n) for f, n in list(self.F_dict.items()) if n != 0))
         return self.prev_tup
 
     def __eq__(self, other):
@@ -160,13 +162,13 @@ class FrequencyKey(object):
 
     def frequency(self):
         F_sum = 0
-        for F, n in self.F_dict.items():
+        for F, n in list(self.F_dict.items()):
             if n != 0:
                 F_sum += F.F_Hz * n
         return F_sum
 
     def __repr__(self):
-        l = tuple(sorted(((F.name, n) for F, n in self.F_dict.items())))
+        l = tuple(sorted(((F.name, n) for F, n in list(self.F_dict.items()))))
         flist = []
         for Fname, n in l:
             if n == 1:
@@ -174,16 +176,16 @@ class FrequencyKey(object):
             elif n == -1:
                 flist.append(u'-' + Fname)
             elif n > 1:
-                flist.append(u'+' + unicode(n) + Fname)
+                flist.append(u'+' + str(n) + Fname)
             elif n < -1:
-                flist.append(unicode(n) + Fname)
+                flist.append(str(n) + Fname)
         if not flist:
             flist.append('0')
         return ''.join(flist).encode('utf-8')
 
     def __add__(self, other):
         F_dict = dict(self.F_dict)
-        for F, n in other.F_dict.items():
+        for F, n in list(other.F_dict.items()):
             current_idx = self.F_dict.get(F, 0)
             new_idx = current_idx + n
             if new_idx == 0 and F in F_dict:
@@ -194,7 +196,7 @@ class FrequencyKey(object):
 
     def __sub__(self, other):
         F_dict = dict(self.F_dict)
-        for F, n in other.F_dict.items():
+        for F, n in list(other.F_dict.items()):
             current_idx = self.F_dict.get(F, 0)
             new_idx = current_idx - n
             if new_idx == 0 and F in F_dict:
@@ -205,13 +207,13 @@ class FrequencyKey(object):
 
     def __rmul__(self, other):
         F_dict = dict()
-        for F, n in self.F_dict.items():
+        for F, n in list(self.F_dict.items()):
             F_dict[F] = other * n
         return self.__class__(F_dict)
 
     def __neg__(self):
         F_dict = dict()
-        for F, n in self.F_dict.items():
+        for F, n in list(self.F_dict.items()):
             current_idx = self.F_dict[F]
             F_dict[F] = -current_idx
         return self.__class__(F_dict)

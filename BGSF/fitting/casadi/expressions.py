@@ -1,6 +1,7 @@
 """
 """
 from __future__ import (division, print_function)
+from builtins import zip
 import numpy as np
 import operator
 
@@ -28,6 +29,7 @@ from .base import (
     casadi_sparsity_ravel,
     casadi_sparsity_unravel,
 )
+from functools import reduce
 
 
 class FitterExpression(FitterBase):
@@ -217,7 +219,7 @@ class FitterExpression(FitterBase):
             sol_map[datum] = sol_val
 
         ooa_meta = Bunch()
-        for obj in self.root.object_roots_inv.keys():
+        for obj in list(self.root.object_roots_inv.keys()):
             ooa_meta[obj] = DeepBunch()
 
         injectors = self.targets_recurse('ooa_reinject')
@@ -226,7 +228,7 @@ class FitterExpression(FitterBase):
 
         systems = Bunch()
         systems_map = dict()
-        for obj, name in self.root.object_roots_inv.items():
+        for obj, name in list(self.root.object_roots_inv.items()):
             new_obj = obj.regenerate(
                 ooa_params = ooa_meta[obj],
             )

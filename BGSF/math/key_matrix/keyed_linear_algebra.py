@@ -1,6 +1,8 @@
 """
 """
 from __future__ import division
+from __future__ import print_function
+from builtins import object
 import numbers
 
 from .dictionary_keys import (
@@ -16,7 +18,7 @@ class ForewardDictMatrix(object):
             self.from_to_map = {}
 
         if vdict is not None:
-            for key_pair, value in vdict.items():
+            for key_pair, value in list(vdict.items()):
                 from_key, to_key = key_pair
                 self[from_key, to_key] = value
 
@@ -42,24 +44,24 @@ class ForewardDictMatrix(object):
         return
 
     def __iter__(self):
-        for from_key, to_map in self.from_to_map.items():
-            for to_key, value in to_map.items():
+        for from_key, to_map in list(self.from_to_map.items()):
+            for to_key, value in list(to_map.items()):
                 yield from_key, to_key, value
         return
 
     def __mul__(self, other):
         if isinstance(other, self.__class__):
             from_to_map_new = {}
-            for from_key, to_map in self.from_to_map.items():
+            for from_key, to_map in list(self.from_to_map.items()):
                 to_map_new = {}
                 from_to_map_new[from_key] = to_map_new
-                for to_key, value in to_map.items():
+                for to_key, value in list(to_map.items()):
                     try:
                         other_to_map = other.from_to_map[to_key]
                     except KeyError:
                         pass
                     else: #runs only if other_to_map was defined
-                        for other_to_key, other_value in other_to_map.items():
+                        for other_to_key, other_value in list(other_to_map.items()):
                             try:
                                 to_map_new[other_to_key] += value * other_value
                             except KeyError:
@@ -67,10 +69,10 @@ class ForewardDictMatrix(object):
             return self.__class__(_premap = from_to_map_new)
         elif isinstance(other, numbers.Number):
             from_to_map_new = {}
-            for from_key, to_map in self.from_to_map.items():
+            for from_key, to_map in list(self.from_to_map.items()):
                 to_map_new = {}
                 from_to_map_new[from_key] = to_map_new
-                for to_key, value in to_map.items():
+                for to_key, value in list(to_map.items()):
                     to_map_new[to_key] =  value * other
             return self.__class__(_premap = from_to_map_new)
         return NotImplemented
@@ -79,17 +81,17 @@ class ForewardDictMatrix(object):
         return NotImplemented
         if isinstance(other, numbers.Number):
             from_to_map_new = {}
-            for from_key, to_map in self.from_to_map.items():
+            for from_key, to_map in list(self.from_to_map.items()):
                 to_map_new = {}
                 from_to_map_new[from_key] = to_map_new
-                for to_key, value in to_map.items():
+                for to_key, value in list(to_map.items()):
                     to_map_new[to_key] =  other * value
             return self.__class__(_premap = from_to_map_new)
         return NotImplemented
 
     def data_print(self):
-        for from_key, to_map in self.from_to_map.items():
-            for to_key, value in to_map.items():
+        for from_key, to_map in list(self.from_to_map.items()):
+            for to_key, value in list(to_map.items()):
                 print("{0: <20}:{1: <20}={2}".format(from_key, to_key, value))
 
     def tensor_product(

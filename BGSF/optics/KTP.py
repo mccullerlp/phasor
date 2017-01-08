@@ -112,8 +112,8 @@ class PPKTP(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
             self._LFrB: self.FrB,
             self._LBkB: self.BkB,
         }
-        rmapL = dict((k.i, [v.o]) for k, v in rmap.items())
-        rmapL.update((k.o, [v.i]) for k, v in rmap.items())
+        rmapL = dict((k.i, [v.o]) for k, v in list(rmap.items()))
+        rmapL.update((k.o, [v.i]) for k, v in list(rmap.items()))
 
         #direct couplings
         for port in self.ports_optical:

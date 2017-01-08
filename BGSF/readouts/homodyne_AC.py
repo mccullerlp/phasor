@@ -3,6 +3,7 @@
 """
 from __future__ import division
 from __future__ import print_function
+from builtins import range
 #from YALL.utilities.print import print
 
 import numpy as np
@@ -158,7 +159,7 @@ class HomodyneACReadoutView(ReadoutViewBase):
     @mproperty
     def AC_PSD_by_source(self):
         eachCSD = dict()
-        for nobj, subCSD in self.noise.CSD_by_source.items():
+        for nobj, subCSD in list(self.noise.CSD_by_source.items()):
             II = subCSD['I', 'I']
             IQ = subCSD['I', 'Q']
             QI = subCSD['Q', 'I']

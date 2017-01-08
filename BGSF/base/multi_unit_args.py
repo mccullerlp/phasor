@@ -197,14 +197,14 @@ def generate_refval_attribute(
             sources.clear()
         else:
             if len(sources) > 1:
-                raise RuntimeError("Must Provide only one in: {0}".format(group.keys()))
+                raise RuntimeError("Must Provide only one in: {0}".format(list(group.keys())))
             elif len(sources) == 0:
                 if default_attr is None:
                     default = None
                 else:
                     default = getattr(self, default_attr)
                 if default is None:
-                    raise RuntimeError("Must Provide one in: {0}".format(group.keys()))
+                    raise RuntimeError("Must Provide one in: {0}".format(list(group.keys())))
                 else:
                     k, v = default
             else:

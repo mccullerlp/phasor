@@ -60,7 +60,7 @@ class MountBase(MatrixAtsBase, OverridableObject):
         dmap = {}
         if typename == 'mount_description':
             dmap[TargetIdx()] = self.mount_desc_dfunct
-        for tidx, dfunc in self.subsystem.system_data_targets(typename).items():
+        for tidx, dfunc in list(self.subsystem.system_data_targets(typename).items()):
             dmap[TargetIdx(tidx + (1,))] = dfunc
         return dmap
 

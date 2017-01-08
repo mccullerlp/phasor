@@ -1,3 +1,6 @@
+from __future__ import division
+from __future__ import print_function
+from past.utils import old_div
 from . import dispatched
 import functools
 import numpy as np
@@ -34,7 +37,7 @@ def fix_custom_complex(otype, opname, lambda_syntax):
             try:
                 return op_orig(self, other)
             except TypeError:
-                print("Other Type: ", type(other))
+                print(("Other Type: ", type(other)))
                 #print other
                 raise
     functools.update_wrapper(op_wrap, op_orig)
@@ -48,8 +51,8 @@ def fix_many(otype):
         return self
     fix_custom_complex(otype, '__mul__'  , lambda s, o: s * o)
     fix_custom_complex(otype, '__rmul__' , lambda s, o: o * s)
-    fix_custom_complex(otype, '__div__'  , lambda s, o: s / o)
-    fix_custom_complex(otype, '__rdiv__' , lambda s, o: o / s)
+    fix_custom_complex(otype, '__div__'  , lambda s, o: old_div(s, o))
+    fix_custom_complex(otype, '__rdiv__' , lambda s, o: old_div(o, s))
     fix_custom_complex(otype, '__truediv__'  , operator.truediv)
     fix_custom_complex(otype, '__rtruediv__' , lambda s, o: operator.truediv(o, s))
     fix_custom_complex(otype, '__add__'  , lambda s, o: s + o)

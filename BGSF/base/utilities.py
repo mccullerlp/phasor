@@ -12,7 +12,7 @@ def type_test(obj, types):
             types = (types, )
         example_names = []
         for t in types:
-            for oname, obj in globals().items():
+            for oname, obj in list(globals().items()):
                 try:
                     if isinstance(obj, t) or issubclass(obj, t):
                         if obj is not t:

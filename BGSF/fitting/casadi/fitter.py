@@ -1,6 +1,7 @@
 """
 """
 from __future__ import division, print_function
+from builtins import zip
 import numpy as np
 
 from . import visitors as VISIT
@@ -40,7 +41,7 @@ class FitterRoot(RootElement, FitterBase):
     def systems(self):
         prefill = dict()
         if self.inst_preincarnation is not None:
-            for name, sys in self.inst_preincarnation.systems.items():
+            for name, sys in list(self.inst_preincarnation.systems.items()):
                 newsys = self._system_map[sys]
                 prefill[name] = self._system_map[sys]
                 self._root_register(name, newsys)
@@ -73,7 +74,7 @@ class FitterRoot(RootElement, FitterBase):
         pkey = fitter_datum.parameter_key
         if system not in self.object_roots_inv:
             raise RuntimeError("Must register system")
-        for okey, odatum in self._registry_parameters.items():
+        for okey, odatum in list(self._registry_parameters.items()):
             okeyshort = okey[:len(pkey)]
             pkeyshort = pkey[:len(okey)]
             if okeyshort == pkeyshort and odatum is not fitter_datum:
@@ -86,7 +87,7 @@ class FitterRoot(RootElement, FitterBase):
     @invalidate_auto
     def fit_systems(self):
         ooa_meta = Bunch()
-        for sysname in self.systems.keys():
+        for sysname in list(self.systems.keys()):
             ooa_meta[sysname] = DeepBunch(vpath=True)
 
         injectors = self.targets_recurse('ooa_inject')
@@ -94,7 +95,7 @@ class FitterRoot(RootElement, FitterBase):
             injector(ooa_meta)
 
         systems = Bunch()
-        for system, name in self.object_roots_inv.items():
+        for system, name in list(self.object_roots_inv.items()):
             new_obj = system.regenerate(
                 ooa_params = ooa_meta[name],
             )
@@ -105,7 +106,7 @@ class FitterRoot(RootElement, FitterBase):
     @invalidate_auto
     def constraints(self):
         constraints = []
-        for name, obj in self.fit_systems.items():
+        for name, obj in list(self.fit_systems.items()):
             try:
                 clist = obj.constraints
             except AttributeError:

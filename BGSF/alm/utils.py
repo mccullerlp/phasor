@@ -2,6 +2,7 @@
 """
 """
 from __future__ import division, print_function
+from builtins import range
 import numpy as np
 from BGSF.math.complex import Complex
 
@@ -87,7 +88,7 @@ def targets_map_fill(
         subidx,
         name = None,
 ):
-    for target, t_idx_lst_lst in subcomp.targets_map.items():
+    for target, t_idx_lst_lst in list(subcomp.targets_map.items()):
         tname_list = [target]
         if name is not None:
             tname_list.append("{0}.{1}".format(name, target))

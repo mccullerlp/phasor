@@ -144,7 +144,7 @@ class ACReadoutView(ReadoutViewBase):
     @mproperty
     def AC_PSD_by_source(self):
         eachCSD = dict()
-        for nobj, subCSD in self.noise.CSD_by_source.items():
+        for nobj, subCSD in list(self.noise.CSD_by_source.items()):
             nsum = subCSD['R', 'R']
             eachCSD[nobj] = nsum
         return eachCSD
@@ -255,7 +255,7 @@ class ACReadoutCLGView(ReadoutViewBase):
     @mproperty
     def AC_PSD_by_source(self):
         eachCSD = dict()
-        for nobj, subCSD in self.noise.CSD_by_source.items():
+        for nobj, subCSD in list(self.noise.CSD_by_source.items()):
             nsum = subCSD['R', 'R']
             eachCSD[nobj] = nsum
         return eachCSD

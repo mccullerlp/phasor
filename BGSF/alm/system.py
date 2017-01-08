@@ -87,7 +87,7 @@ class CSystem(
                         )
         self.root._complete()
         loc_ch_list = []
-        for name, ch in self._registry_children.items():
+        for name, ch in list(self._registry_children.items()):
             if isinstance(ch, MatrixAtsBase):
                 if ch.loc_m.ref is not None:
                     loc_ch_list.append((ch.loc_m.ref, ch))
@@ -347,7 +347,7 @@ class CSystem(
     def system_data_targets(self, typename):
         dmap = {}
         for subidx, comp in enumerate(self.filled_list):
-            for tidx, dfunc in comp.system_data_targets(typename).items():
+            for tidx, dfunc in list(comp.system_data_targets(typename).items()):
                 dmap[TargetIdx(tidx + (subidx,))] = dfunc
         return dmap
 

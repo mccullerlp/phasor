@@ -1,6 +1,7 @@
 """
 """
 from __future__ import (division, print_function)
+from builtins import zip, range
 
 import numpy as np
 
@@ -11,7 +12,7 @@ def stackrange(rangetup):
         try:
             iter(v)
         except TypeError:
-            rangestack.append(range(v))
+            rangestack.append(list(range(v)))
         else:
             rangestack.append(v)
 
@@ -22,7 +23,7 @@ def stackrange(rangetup):
             if not iterstack:
                 break
             try:
-                nval = iterstack[-1].next()
+                nval = next(iterstack[-1])
                 tupstack.append(tupstack[-1] + (nval,))
                 iterstack.append(iter(rangestack[len(iterstack)]))
             except StopIteration:

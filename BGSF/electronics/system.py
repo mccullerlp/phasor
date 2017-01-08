@@ -1,5 +1,7 @@
 """
 """
+from __future__ import print_function
+from builtins import range, object
 
 import numpy as np
 import warnings
@@ -115,8 +117,8 @@ class ElectricalSystem(object):
         else:
             F = self.freq_key({F:1})
         F = DictKey(F = F)
-        for kto, val_to in vdict_to.items():
-            for kfrom, val_from in vdict_from.items():
+        for kto, val_to in list(vdict_to.items()):
+            for kfrom, val_from in list(vdict_from.items()):
                 key_to = kto | F
                 key_from = kfrom | F
                 try:

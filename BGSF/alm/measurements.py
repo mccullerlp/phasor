@@ -134,7 +134,7 @@ class CMeasurements(Element):
     def target_classifications(self):
         targets_by_type = {}
         targets_by_tidx = {}
-        for tname, tidx_lst in self.layout.targets_map.items():
+        for tname, tidx_lst in list(self.layout.targets_map.items()):
             for tidx in tidx_lst:
                 ttype = tidx[0]
                 tmap = targets_by_type.get(ttype, None)
@@ -245,7 +245,7 @@ class CMeasurements(Element):
             tidx_beam = beam_source
 
         tidx1 = None
-        if isinstance(tname1, (str, unicode)):
+        if isinstance(tname1, str):
             tidx1 = self.target_idx(tname1)
             matbs = self.layout.matrix_between(tidx_beam, tidx1)
         elif tname1 in (TargetLeft, TargetRight) or isinstance(tname1, TargetIdx):
@@ -271,7 +271,7 @@ class CMeasurements(Element):
         tidx_beam = self.target_idx(beam_source)
 
         tidx1 = None
-        if isinstance(tname1, (str, unicode)):
+        if isinstance(tname1, str):
             tidx1 = self.target_idx(tname1)
             matbs = self.layout.matrix_between(tidx_beam, tidx1)
         else:
@@ -284,7 +284,7 @@ class CMeasurements(Element):
         #reset phasor to propagate it further
         q_1.gouy_phasor = 1
 
-        if isinstance(tname2, (str, unicode)):
+        if isinstance(tname2, str):
             tidx2 = self.target_idx(tname2)
             if tidx1 is not None:
                 mat = self.layout.matrix_between(tidx1, tidx2)
@@ -318,11 +318,11 @@ class CMeasurements(Element):
     def beam_targets(self):
         namemap = self.layout.system_data_targets('q_target')
         funcmap_inv = {}
-        for tidx, name in namemap.items():
+        for tidx, name in list(namemap.items()):
             funcmap_inv[name] = tidx
         print("TARGETS: ", funcmap_inv)
 
-        z_targets = [(self.target_z(tidx), tname) for tname, tidx in funcmap_inv.items()]
+        z_targets = [(self.target_z(tidx), tname) for tname, tidx in list(funcmap_inv.items())]
         z_targets.sort()
         return [tname for t_z, tname in z_targets]
 
@@ -338,7 +338,7 @@ class CMeasurements(Element):
         else:
             tidx_beam = beam_source
 
-        for tidx, dfunc in descmap.items():
+        for tidx, dfunc in list(descmap.items()):
             #TODO make this more "robust"
             if tidx_beam[::-1] <= tidx[::-1]:
                 tlr = TargetLeft
@@ -418,7 +418,7 @@ class CMeasurements(Element):
 
         namemap = self.layout.system_data_targets('q_target')
         funcmap_inv = {}
-        for tidx, name in namemap.items():
+        for tidx, name in list(namemap.items()):
             funcmap_inv[name] = tidx
         #TODO, deal with non-uniques
         return funcmap_inv[tname]

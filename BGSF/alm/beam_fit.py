@@ -2,6 +2,7 @@
 """
 """
 from __future__ import division
+from __future__ import print_function
 import numpy as np
 import scipy.optimize
 
@@ -89,7 +90,7 @@ class QFit(OverridableObject):
         )
 
     def rep(self, place_in = 0):
-        print self.Z0_ZR_fit
+        print(self.Z0_ZR_fit)
         try:
             print ("ComplexBeamParam.from_Z_ZR({0}, {1}, wavelen = {2})".format(
                 self.Z0_ZR_fit[0] + place_in * .0254,
@@ -97,7 +98,7 @@ class QFit(OverridableObject):
                 self.wavelen_nm * 1e-9,
             ))
         except Exception as e:
-            print e
+            print(e)
 
     def plot(self, init = False):
         F = mplfigB()

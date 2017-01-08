@@ -39,7 +39,7 @@ class MirrorSelectionStack(
             port_set = set(['FrA', 'FrB', 'BkA', 'BkB'])
 
         #TODO make better error messages
-        for mname, mconstr in sub_element_map.items():
+        for mname, mconstr in list(sub_element_map.items()):
             assert(isinstance(mconstr, SledConstructorInternal))
             mconstr.adjust_safe(
                 AOI_deg         = AOI_deg,

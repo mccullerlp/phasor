@@ -9,6 +9,7 @@ These are medium-duty implementations, they still use a hash-table for lookup, r
 
 .. autofunction:: topological_sort
 """
+from builtins import str
 
 
 class SCCError(RuntimeError):
@@ -131,6 +132,6 @@ def topological_sort_dict(graph):
     """
     Helper generator for topological sorting a dict-stored graph, throws SCCError if there are cycles
     """
-    for component in topological_sort(iter(graph.keys()), lambda k:graph.get(k, ()), single = True):
+    for component in topological_sort(iter(list(graph.keys())), lambda k:graph.get(k, ()), single = True):
         yield component
     return

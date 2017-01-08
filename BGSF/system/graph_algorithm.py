@@ -19,7 +19,7 @@ from ..math.key_matrix import (
 
 def print_seq(seq, edge_map):
     print("Sequential Edges")
-    for node, seq_set in seq.items():
+    for node, seq_set in list(seq.items()):
         plist = []
         print(node)
         for snode in seq_set:
@@ -31,7 +31,7 @@ def print_seq(seq, edge_map):
 
 def print_req(req, edge_map):
     print("Requisite Edges")
-    for node, seq_set in req.items():
+    for node, seq_set in list(req.items()):
         plist = []
         print(node)
         for rnode in seq_set:
@@ -43,14 +43,14 @@ def print_req(req, edge_map):
 
 
 def check_seq_req_balance(seq, req, edge_map = None):
-    for node, seq_set in seq.items():
+    for node, seq_set in list(seq.items()):
         for snode in seq_set:
             assert(node in req[snode])
             if edge_map and (node, snode) not in edge_map:
                 warnings.warn(repr((node, snode), 'not in edge map'))
                 edge_map[node, snode] = 0
 
-    for node, req_set in req.items():
+    for node, req_set in list(req.items()):
         for rnode in req_set:
             assert(node in seq[rnode])
 
@@ -86,7 +86,7 @@ def mgraph_simplify_inplace(
         return s_n * r_n_full + r_n * s_n_full
     pqueue = HeapPriorityQueue()
 
-    for node in seq.keys():
+    for node in list(seq.keys()):
         if not seq[node] or not req[node]:
             #then this is an edge node and exempt
             continue
@@ -328,7 +328,7 @@ def push_solve_inplace(
     #source node
     #the inputs are from the special state (with implicit vector value of '1')
     VACUUM_STATE = DictKey(special = 'vacuum')
-    for inode, val in inputs_map.items():
+    for inode, val in list(inputs_map.items()):
         seq[VACUUM_STATE].add(inode)
         req[inode].add(VACUUM_STATE)
         edge_map[VACUUM_STATE, inode] = val

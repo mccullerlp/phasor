@@ -1,3 +1,7 @@
+from __future__ import division
+from builtins import str
+from builtins import range
+from past.utils import old_div
 
 from collections import namedtuple
 from .dispatched import sin, cos, atan
@@ -128,8 +132,8 @@ class Complex(ReprMixin):
             o_imag = 0
         den = o_real * o_real + o_imag * o_imag
         return self.__class__(
-            (self.real * o_real + self.imag * o_imag) / den,
-            (self.imag * o_real - self.real * o_imag) / den,
+            old_div((self.real * o_real + self.imag * o_imag), den),
+            old_div((self.imag * o_real - self.real * o_imag), den),
         )
 
     def __rdiv__(self, other):
@@ -141,8 +145,8 @@ class Complex(ReprMixin):
             o_imag = 0
         den = self.real * self.real + self.imag * self.imag
         return self.__class__(
-            (o_real * self.real + o_imag * self.imag) / den,
-            (o_imag * self.real - o_real * self.imag) / den,
+            old_div((o_real * self.real + o_imag * self.imag), den),
+            old_div((o_imag * self.real - o_real * self.imag), den),
         )
 
     def __truediv__(self, other):
@@ -154,8 +158,8 @@ class Complex(ReprMixin):
             o_imag = 0
         den = o_real * o_real + o_imag * o_imag
         return self.__class__(
-            (self.real * o_real + self.imag * o_imag) / den,
-            (self.imag * o_real - self.real * o_imag) / den,
+            old_div((self.real * o_real + self.imag * o_imag), den),
+            old_div((self.imag * o_real - self.real * o_imag), den),
         )
 
     def __rtruediv__(self, other):
@@ -167,8 +171,8 @@ class Complex(ReprMixin):
             o_imag = 0
         den = self.real * self.real + self.imag * self.imag
         return self.__class__(
-            (o_real * self.real + o_imag * self.imag) / den,
-            (o_imag * self.real - o_real * self.imag) / den,
+            old_div((o_real * self.real + o_imag * self.imag), den),
+            old_div((o_imag * self.real - o_real * self.imag), den),
         )
 
     def __eq__(self, other):
@@ -208,15 +212,15 @@ class Complex(ReprMixin):
             if isinstance(o_real, int) or (isinstance(o_real, float) and (int(o_real) == o_real)):
                 o_real = int(o_real)
                 while o_real % 2 == 0:
-                    o_real = o_real / 2
+                    o_real = old_div(o_real, 2)
                     val = val * val
                 for _ in range(o_real - 1):
                     val = val * self
                 return val
             if isinstance(o_real, float) and o_real == .5:
                 aval = abs(self)
-                rval_sq = (aval + self.real)/2
-                ival_sq = (aval - self.real)/2
+                rval_sq = old_div((aval + self.real),2)
+                ival_sq = old_div((aval - self.real),2)
                 #this is weird, but needed to work with uncertainties
                 if rval_sq == 0:
                     rval_sq = 0
@@ -230,11 +234,11 @@ class Complex(ReprMixin):
         aval = abs(self)
         if self.real == 0:
             if self.imag >= 0:
-                phase = pi/2
+                phase = old_div(pi,2)
             else:
-                phase = -pi/2
+                phase = old_div(-pi,2)
         else:
-            phase = atan(self.imag/self.real)
+            phase = atan(old_div(self.imag,self.real))
         if self.real < 0:
             if self.imag >= 0:
                 phase += pi
@@ -297,11 +301,11 @@ def exp(arg):
 def angle(arg, deg = False):
     if arg.real == 0:
         if arg.imag >= 0:
-            phase = pi/2
+            phase = old_div(pi,2)
         else:
-            phase = -pi/2
+            phase = old_div(-pi,2)
     else:
-        phase = atan(arg.imag/arg.real)
+        phase = atan(old_div(arg.imag,arg.real))
     if arg.real < 0:
         if arg.imag >= 0:
             phase += pi

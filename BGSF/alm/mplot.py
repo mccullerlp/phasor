@@ -2,6 +2,7 @@
 """
 """
 from __future__ import division, print_function
+from builtins import str
 import numpy as np
 
 #from pprint import pprint
@@ -249,7 +250,7 @@ class MPlotter(OverridableObject):
                 return desc
         for idx, (z, width, desc, lkw, akw) in enumerate(reversed(left_list)):
             if isinstance(desc, str):
-                desc = unicode(desc, 'utf-8')
+                desc = str(desc, 'utf-8')
             desc = desc_format(z, desc)
             #top elements
             arrowkw = dict(self.arrow_args)
@@ -285,7 +286,7 @@ class MPlotter(OverridableObject):
 
         for idx, (z, width, desc, lkw, akw) in enumerate(right_list):
             if isinstance(desc, str):
-                desc = unicode(desc, 'utf-8')
+                desc = str(desc, 'utf-8')
             desc = desc_format(z, desc)
             #bottom elements
             arrowkw = dict(self.arrow_args)

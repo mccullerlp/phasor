@@ -33,9 +33,9 @@ class OpticalSystem(LinearSystem):
     def optical_frequency_extract(self, key):
         iwavelen_m = 0
         freq_Hz = 0
-        for F, n in key[ClassicalFreqKey].F_dict.items():
+        for F, n in list(key[ClassicalFreqKey].F_dict.items()):
             freq_Hz += n * F.F_Hz
-        for F, n in key[OpticalFreqKey].F_dict.items():
+        for F, n in list(key[OpticalFreqKey].F_dict.items()):
             iwavelen_m += n * F.iwavelen_m
         return iwavelen_m, freq_Hz
 

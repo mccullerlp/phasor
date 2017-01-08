@@ -3,6 +3,7 @@
 """
 from __future__ import division
 from __future__ import print_function
+from builtins import range
 #from YALL.utilities.print import print
 
 import numpy as np
@@ -79,7 +80,7 @@ class MultiACReadout(SystemElementBase):
 
     def system_setup_ports_initial(self, system):
         portsets = [self.port_set, 'AC_sensitivitys', 'readouts']
-        for pname, port in self.port_map.items():
+        for pname, port in list(self.port_map.items()):
             system.readout_port_needed(port, self.keyP, portsets)
             system.readout_port_needed(port, self.keyN, portsets)
         system.readout_port_needed(self.portD, self.keyP, portsets)
@@ -152,7 +153,7 @@ class MultiACReadoutView(ReadoutViewBase):
     @mproperty
     def vspace(self):
         kv = KVSpace(dtype = np.complex128)
-        kv.keys_add(self.port_map.keys())
+        kv.keys_add(list(self.port_map.keys()))
         kv.freeze()
         return kv
 
@@ -162,7 +163,7 @@ class MultiACReadoutView(ReadoutViewBase):
             vspace_from = self.vspace,
             vspace_to   = self.vspace,
         )
-        for (portA, portB), cplg in self.noise.CSD.items():
+        for (portA, portB), cplg in list(self.noise.CSD.items()):
             km[portA, portB] = cplg
         return km
 
@@ -172,7 +173,7 @@ class MultiACReadoutView(ReadoutViewBase):
             vspace_from = self.vspace,
             vspace_to   = self.vspace,
         )
-        for (portA, portB), cplg in self.noise.CSD.items():
+        for (portA, portB), cplg in list(self.noise.CSD.items()):
             km[portA, portB] = np.real(cplg)
         return km
 
@@ -294,7 +295,7 @@ class MultiNoiseReadout(SystemElementBase):
 
     def system_setup_ports_initial(self, system):
         portsets = [self.port_set, 'noise']
-        for port_name, port in self.port_map.items():
+        for port_name, port in list(self.port_map.items()):
             system.readout_port_needed(port, self.keyP, portsets)
             system.readout_port_needed(port, self.keyN, portsets)
         return
