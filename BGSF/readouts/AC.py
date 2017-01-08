@@ -30,7 +30,6 @@ class ACReadout(SystemElementBase):
 
     def __init__(
         self,
-        system,
         portN,
         portD,
         portDrv = None,
@@ -38,7 +37,7 @@ class ACReadout(SystemElementBase):
         include_noise = True,
         **kwargs
     ):
-        super(ACReadout, self).__init__(system = system, **kwargs)
+        super(ACReadout, self).__init__(**kwargs)
         if portDrv is None:
             portDrv = portD
 
@@ -49,7 +48,7 @@ class ACReadout(SystemElementBase):
         OOA_ASSIGN(self).port_set = 'AC'
 
         #TODO: make this adjustable
-        self.F_sep = system.F_AC
+        self.F_sep = self.system.F_AC
 
         self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : 1})})
         self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : -1})})

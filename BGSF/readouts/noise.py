@@ -34,14 +34,12 @@ from .base import ReadoutViewBase
 class NoiseReadout(SystemElementBase):
     def __init__(
             self,
-            system,
             portN,
             port_set = None,
             AC_sidebands_use = True,
             **kwargs
     ):
         super(NoiseReadout, self).__init__(
-            system = system,
             **kwargs
         )
 
@@ -56,8 +54,8 @@ class NoiseReadout(SystemElementBase):
             self.port_set = port_set
 
         if AC_sidebands_use:
-            self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({system.F_AC : 1})})
-            self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({system.F_AC : -1})})
+            self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({self.system.F_AC : 1})})
+            self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({self.system.F_AC : -1})})
         else:
             self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({})})
             self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({})})

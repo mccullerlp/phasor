@@ -35,7 +35,7 @@ from BGSF.readouts import (
     NoiseReadout,
 )
 
-from BGSF.LIGO.ligo_sled import (
+from BGSF.models.LIGO.ligo_sled import (
     LIGOBasicOperation
 )
 

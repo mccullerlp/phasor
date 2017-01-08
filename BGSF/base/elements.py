@@ -100,7 +100,7 @@ class SledConstructorInternal(object):
                 **kwargs
             )
         except TypeError:
-            print(inst)
+            print(inst, args, kwargs)
             raise
         return inst
 
