@@ -149,7 +149,10 @@ class SystemElementBase(ElementBase):
         self.name       = name
         if vparent is None:
             vparent = parent
-        self.ooa_params = vparent.ooa_params[name]
+        if name is not None:
+            self.ooa_params = vparent.ooa_params[name]
+        else:
+            self.ooa_params = vparent.ooa_params
         self.system     = vparent.system
         #annotation for automatic defect studies
         OOA_ASSIGN(self).type = self.__class__

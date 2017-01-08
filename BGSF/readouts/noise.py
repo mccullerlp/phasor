@@ -1,21 +1,15 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
-#from YALL.utilities.print import print
+from __future__ import (division, print_function)
 
 import numpy as np
 from collections import defaultdict
 
 from declarative import (
     mproperty,
-)
-
-from declarative.bunch import (
     Bunch
 )
-
 
 from ..math.key_matrix import (
     DictKey,
@@ -27,8 +21,6 @@ from ..base import (
     OOA_ASSIGN,
     ClassicalFreqKey,
 )
-
-from .base import ReadoutViewBase
 
 
 class NoiseReadout(SystemElementBase):

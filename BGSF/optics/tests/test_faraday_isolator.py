@@ -1,31 +1,20 @@
 """
 """
-
-from __future__ import division
-from __future__ import print_function
+from __future__ import (division, print_function)
 
 from unittest import TestCase, main
 
 #import numpy as np
 
-from declarative.bunch import (
-    DeepBunch,
-)
-
 from BGSF.optics import (
-    Mirror,
     PD,
     Laser,
-    HalfWavePlate,
-    QuarterWavePlate,
     OpticalCirculator,
-    FaradayRotator,
 )
 
 from BGSF.optics.bases import (
     OpticalCouplerBase,
     SystemElementBase,
-    OOA_ASSIGN,
 )
 
 from BGSF.system.optical import (
@@ -40,9 +29,9 @@ from BGSF.optics.faraday_isolator import (
     FaradayIsolator,
 )
 
-from pprint import pprint
-#from YALL.utilities.np import logspaced
-
+import pytest
+pytestmark = pytest.mark.skip('Faraday still WIP')
+pytest.skip("Want to skip!")
 
 class FaradayTestSled(
     OpticalCouplerBase, SystemElementBase
@@ -113,9 +102,6 @@ class TestFaradayIsolator(TestCase):
         self.assertAlmostEqual(sol.views.test.DC_Fr_Prej.DC_readout, 0)
         self.assertAlmostEqual(sol.views.test.DC_Bk_Prej.DC_readout, 0)
         self.assertAlmostEqual(sol.views.test.DC_Fr_ins.DC_readout, 0)
-
-
-
 
 
 if __name__ == '__main__':

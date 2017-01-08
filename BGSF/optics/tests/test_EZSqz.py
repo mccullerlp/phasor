@@ -1,16 +1,6 @@
 """
 """
-from __future__ import division
-from __future__ import print_function
-
-#import pytest
-#pytest.skip("TODO")
-
-import numpy as np
-
-from declarative.bunch import (
-    Bunch,
-)
+from __future__ import (division, print_function)
 
 from BGSF.optics import (
     Mirror,
@@ -24,6 +14,10 @@ from BGSF.optics import (
 from BGSF.system.optical import (
     OpticalSystem
 )
+
+import pytest
+pytestmark = pytest.mark.skip('EZSqz still WIP')
+pytest.skip("Want to skip!")
 
 #from YALL.utilities.np import logspaced
 

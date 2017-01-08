@@ -387,11 +387,10 @@ class WavePlate(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBas
 
 
 class UnmountedQuarterWavePlate(WavePlate):
-    def __init__(self, system, **kwargs):
+    def __init__(self, **kwargs):
         super(UnmountedQuarterWavePlate, self).__init__(
             cplgS  = 1,
-            cplgP  = system.i,
-            system = system,
+            cplgP  = 1j,  # #TODO, use global/system I
             **kwargs
         )
 

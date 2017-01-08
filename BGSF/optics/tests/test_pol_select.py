@@ -1,10 +1,13 @@
 """
 """
 
-from __future__ import division
-from __future__ import print_function
-
+from __future__ import (division, print_function)
 from unittest import TestCase, main
+
+try:
+    from IPython.lib.pretty import pprint
+except ImportError:
+    from pprint import pprint
 
 #import numpy as np
 
@@ -40,7 +43,6 @@ from BGSF.optics.selective_mirrors import (
     PolarizingMirror,
 )
 
-from pprint import pprint
 #from YALL.utilities.np import logspaced
 
 class PolTester(
@@ -215,10 +217,11 @@ class TestPolarizations(TestCase):
     def test_split(self):
         sys = OpticalSystem()
         sys.sled.test = PolTester()
+        print("A")
+        pprint(sys.ooa_params.test.PSL)
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
-        pprint(sys.ooa_params.test.PSL)
 
         db = DeepBunch()
         db.test.PSL.polarization = 'P'
@@ -227,8 +230,14 @@ class TestPolarizations(TestCase):
         )
         sys.sled.test = PolTester()
         sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 0)
+        print("B")
+        pprint(db)
+        pprint(sys.ooa_params.test.PSL)
+
+        print("DC_S:", sol.views.test.DC_S.DC_readout)
+        print("DC_P:", sol.views.test.DC_P.DC_readout)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 1)
+        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 0)
 
     def test_waveplate(self):
         sys = OpticalSystem()
