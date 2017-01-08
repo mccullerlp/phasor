@@ -23,13 +23,13 @@ from .utils import (
     #np_check_sorted,
 )
 
-#from YALL.utilities.mpl.autoniceplot import (
+#from BGSF.utilities.mpl.autoniceplot import (
 #    AutoPlotSaver,
 #    mplfigB,
 #    asavefig,
 #)
 
-from YALL.utilities.mpl.stacked_plots import (
+from BGSF.utilities.mpl.stacked_plots import (
     generate_stacked_plot_ax,
 )
 

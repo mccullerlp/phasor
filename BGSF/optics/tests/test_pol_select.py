@@ -42,7 +42,7 @@ from BGSF.optics.selective_mirrors import (
     PolarizingMirror,
 )
 
-#from YALL.utilities.np import logspaced
+#from BGSF.utilities.np import logspaced
 
 class PolTester(
     OpticalCouplerBase, SystemElementBase

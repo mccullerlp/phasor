@@ -70,7 +70,7 @@ from ..signals import (
     DistributionAmplifier,
     SummingAmplifier,
 )
-#from YALL.utilities.np import logspaced
+#from BGSF.utilities.np import logspaced
 
 class BalancedHomodyneDetector(SystemElementSled):
     def __init__(

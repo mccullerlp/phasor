@@ -18,7 +18,7 @@ from .beam_param import (
     ComplexBeamParam
 )
 
-from YALL.utilities.mpl.autoniceplot import (
+from BGSF.utilities.mpl.autoniceplot import (
     #AutoPlotSaver,
     mplfigB,
     #asavefig,

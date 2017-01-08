@@ -3,7 +3,7 @@
 from builtins import zip, object
 import sympy
 from sympy.utilities.lambdify import lambdastr
-from YALL.utilities.strings import canonicalize_TQStrings
+from BGSF.utilities.strings import canonicalize_TQStrings
 
 
 def iter_group(iter_expr, n, func = lambda x: x):

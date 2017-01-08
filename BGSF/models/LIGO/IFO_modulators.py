@@ -64,7 +64,7 @@ from ..optics.vacuum import (
     VacuumTerminator,
 )
 
-#from YALL.utilities.np import logspaced
+#from BGSF.utilities.np import logspaced
 
 class MichelsonModulator(SystemElementSled):
     def __init__(self, **kwargs):

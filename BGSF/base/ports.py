@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import division, print_function
 from builtins import object
-#from YALL.utilities.print import print
+#from BGSF.utilities.print import print
 
 from .elements import SystemElementBase
 

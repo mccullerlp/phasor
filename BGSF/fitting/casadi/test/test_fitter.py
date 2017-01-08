@@ -2,7 +2,7 @@
 """
 from __future__ import print_function, division
 
-from YALL.utilities.mpl.autoniceplot import (
+from BGSF.utilities.mpl.autoniceplot import (
     #AutoPlotSaver,
     #mplfigB,
     asavefig,

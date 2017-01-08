@@ -3,7 +3,7 @@
 from __future__ import print_function, division
 import pytest
 
-from YALL.utilities.mpl.autoniceplot import (
+from BGSF.utilities.mpl.autoniceplot import (
     #AutoPlotSaver,
     #mplfigB,
     asavefig,

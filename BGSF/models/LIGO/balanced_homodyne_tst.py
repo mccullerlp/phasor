@@ -72,7 +72,7 @@ from .direct_homodyne import (
     BalancedHomodyneDetector
 )
 
-#from YALL.utilities.np import logspaced
+#from BGSF.utilities.np import logspaced
 
 class BHDTestSled(SystemElementSled):
     def __init__(self, **kwargs):

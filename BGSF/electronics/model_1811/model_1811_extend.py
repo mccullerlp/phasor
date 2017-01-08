@@ -1,7 +1,7 @@
 from __future__ import division
 from past.utils import old_div
 from model_1811 import PD1811Model
-from YALL.utilities.numerics.dispatched import abs_sq, sqrt
+from BGSF.utilities.numerics.dispatched import abs_sq, sqrt
 import copy
 
 

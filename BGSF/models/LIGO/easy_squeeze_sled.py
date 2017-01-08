@@ -68,7 +68,7 @@ from .IFO_modulators import (
     MZModulator,
 )
 
-#from YALL.utilities.np import logspaced
+#from BGSF.utilities.np import logspaced
 
 class EasySqueezeSetup(SystemElementSled):
     def __init__(self, **kwargs):

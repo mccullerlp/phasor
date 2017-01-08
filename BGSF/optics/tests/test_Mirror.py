@@ -32,7 +32,7 @@ from BGSF.readouts import (
     ACReadout,
 )
 
-#from YALL.utilities.np import logspaced
+#from BGSF.utilities.np import logspaced
 
 def gensys():
     sys = OpticalSystem(
@@ -143,7 +143,7 @@ def test_mirror():
     #print("LSBRL: ", rt_inv.get((b.sled.etm.Fr.o, lsb_keyR), (b.sled.etm.posZ.i, lcl_key), 0))
     #print("AC:", sys.AC_sensitivity('ETM_Drive'))
 
-    #from YALL.utilities.mpl.autoniceplot import (mplfigB)
+    #from BGSF.utilities.mpl.autoniceplot import (mplfigB)
     #F = mplfigB(Nrows = 2)
     #F.ax0.loglog(sys.F_AC_Hz, abs(sys.AC_sensitivity('ETM_Drive')))
     #F.ax1.semilogx(sys.F_AC_Hz, np.angle(sys.AC_sensitivity('ETM_Drive')))

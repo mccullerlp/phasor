@@ -8,8 +8,8 @@ import sympy
 import numpy as np
 
 from declarative.bunch import Bunch
-import YALL.utilities.numerics.dispatched as dmath
-import YALL.utilities.numerics.dispatch_sympy
+import BGSF.utilities.numerics.dispatched as dmath
+import BGSF.utilities.numerics.dispatch_sympy
 
 from .optical_elements import (
     BeamSplitter,

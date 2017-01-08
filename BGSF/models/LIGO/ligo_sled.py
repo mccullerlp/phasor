@@ -60,7 +60,7 @@ from ..optics.vacuum import (
     VacuumTerminator,
 )
 
-#from YALL.utilities.np import logspaced
+#from BGSF.utilities.np import logspaced
 
 class QuadMirrorBasic(SystemElementSled):
     def __init__(

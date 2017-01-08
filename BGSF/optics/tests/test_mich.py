@@ -29,7 +29,7 @@ from BGSF.readouts import (
     ACReadout,
 )
 
-#from YALL.utilities.np import logspaced
+#from BGSF.utilities.np import logspaced
 
 
 def gensys(
@@ -140,7 +140,7 @@ class TestMichelson(TestCase):
         #sys.port_set_print(b.vterm.Fr.o)
         #sys.coupling_matrix_inv_print(select_to = b.asymPD.Wpd.o)
 
-        #from YALL.utilities.mpl.autoniceplot import (mplfigB)
+        #from BGSF.utilities.mpl.autoniceplot import (mplfigB)
         #F = mplfigB(Nrows = 2)
         #F.ax0.loglog(sys.F_AC_Hz, abs(AC))
         #F.ax1.semilogx(sys.F_AC_Hz, np.angle(AC, deg = True))
@@ -184,7 +184,7 @@ class TestMichelson(TestCase):
         #sys.port_set_print(b.vterm.Fr.o)
         #sys.coupling_matrix_inv_print(select_to = b.asymPD.Wpd.o)
 
-        #from YALL.utilities.mpl.autoniceplot import (mplfigB)
+        #from BGSF.utilities.mpl.autoniceplot import (mplfigB)
         #F = mplfigB(Nrows = 2)
         #F.ax0.loglog(sys.F_AC_Hz, abs(AC))
         #F.ax1.semilogx(sys.F_AC_Hz, np.angle(AC, deg = True))

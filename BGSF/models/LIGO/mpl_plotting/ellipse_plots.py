@@ -19,7 +19,7 @@ from declarative import (
     mproperty,
 )
 
-from YALL.utilities.np import logspaced
+from BGSF.utilities.np import logspaced
 
 def first_non_none(*args):
     for arg in args:

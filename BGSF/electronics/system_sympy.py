@@ -6,9 +6,9 @@ from .system import ElectricalSystem
 import sympy
 import numpy as np
 
-from YALL.utilities.bunch import Bunch
-import YALL.utilities.numerics.dispatched as dmath
-import YALL.utilities.numerics.dispatch_sympy
+from BGSF.utilities.bunch import Bunch
+import BGSF.utilities.numerics.dispatched as dmath
+import BGSF.utilities.numerics.dispatch_sympy
 
 var = sympy.var
 

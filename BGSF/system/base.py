@@ -10,7 +10,7 @@ have coherent measurement systems able to run the solver independently to genera
 from __future__ import division
 from __future__ import print_function
 from builtins import object
-from YALL.utilities.print import print
+from BGSF.utilities.print import print
 from collections import defaultdict
 
 import numpy as np

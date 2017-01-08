@@ -39,7 +39,7 @@ from BGSF.readouts import (
 )
 
 
-#from YALL.utilities.np import logspaced
+#from BGSF.utilities.np import logspaced
 
 
 #http://journals.aps.org/pra/pdf/10.1103/PhysRevA.43.5022

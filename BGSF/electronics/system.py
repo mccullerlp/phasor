@@ -22,7 +22,7 @@ from ..math.key_matrix.keyed_linear_algebra import (
     ForewardDictMatrix,
 )
 
-from YALL.utilities.progressbar import ProgressBar
+from BGSF.utilities.progressbar import ProgressBar
 
 
 class ElectricalSystem(object):

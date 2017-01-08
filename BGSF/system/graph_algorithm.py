@@ -7,7 +7,7 @@ from numbers import Number
 import numpy as np
 from collections import defaultdict
 
-from YALL.utilities.priority_queue import HeapPriorityQueue
+from BGSF.utilities.priority_queue import HeapPriorityQueue
 
 from declarative.bunch import (
     Bunch,

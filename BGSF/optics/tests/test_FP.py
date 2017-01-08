@@ -28,7 +28,7 @@ from BGSF.readouts import (
 )
 
 from unittest import TestCase, main
-#from YALL.utilities.np import logspaced
+#from BGSF.utilities.np import logspaced
 
 def gensys(
     L_detune_m = -1e-10,
@@ -182,7 +182,7 @@ class TestFabryPerot(TestCase):
         AC = sol.views.ETM_Drive.AC_sensitivity
         print("AC:", AC)
 
-        #from YALL.utilities.mpl.autoniceplot import (mplfigB)
+        #from BGSF.utilities.mpl.autoniceplot import (mplfigB)
         #F = mplfigB(Nrows = 2)
         #F.ax0.loglog(sys.F_AC_Hz, abs(AC))
         #F.ax1.semilogx(sys.F_AC_Hz, np.angle(AC))
