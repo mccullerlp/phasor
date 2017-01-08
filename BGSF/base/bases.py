@@ -2,10 +2,11 @@
 """
 """
 from __future__ import division
-from builtins import object
+
+from declarative.utilities import SuperBase
 
 
-class ElementBase(object):
+class ElementBase(SuperBase):
     name = None
 
     def __init__(

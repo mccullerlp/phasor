@@ -31,7 +31,7 @@ from BGSF.optics.faraday_isolator import (
 
 import pytest
 pytestmark = pytest.mark.skip('Faraday still WIP')
-pytest.skip("Want to skip!")
+#pytest.skip("Want to skip!")
 
 class FaradayTestSled(
     OpticalCouplerBase, SystemElementBase

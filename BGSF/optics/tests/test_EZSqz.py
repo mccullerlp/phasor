@@ -17,7 +17,7 @@ from BGSF.system.optical import (
 
 import pytest
 pytestmark = pytest.mark.skip('EZSqz still WIP')
-pytest.skip("Want to skip!")
+#pytest.skip("Want to skip!")
 
 #from BGSF.utilities.np import logspaced
 
