@@ -1,38 +1,21 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
-#from BGSF.utilities.print import print
-
+from __future__ import (division, print_function)
 import declarative as decl
 
-from .bases import (
-    OpticalCouplerBase,
-    SystemElementBase,
-    OOA_ASSIGN,
-)
-
+from .. import readouts
 from . import ports
-
-from .nonlinear_utilities import (
-    #symmetric_update,
-    ports_fill_2optical_2classical,
-    modulations_fill_2optical_2classical,
-)
-
-from ..readouts import (
-    DCReadout,
-    #ACReadout,
-    NoiseReadout,
-)
-
-from .vacuum import (
-    OpticalVacuumFluctuation,
-)
+from . import bases
+from . import vacuum
+from . import nonlinear_utilities
 
 
-class PD(ports.OpticalNonOriented1PortMixin, OpticalCouplerBase, SystemElementBase):
+class PD(
+        ports.OpticalNonOriented1PortMixin,
+        bases.OpticalCouplerBase,
+        bases.SystemElementBase
+):
 
     @decl.mproperty
     def magic(self, val = False):
@@ -40,7 +23,7 @@ class PD(ports.OpticalNonOriented1PortMixin, OpticalCouplerBase, SystemElementBa
 
     @decl.dproperty
     def _fluct(self):
-        return OpticalVacuumFluctuation(port = self.Fr)
+        return vacuum.OpticalVacuumFluctuation(port = self.Fr)
 
     @decl.dproperty
     def include_readouts(self, val = False):
@@ -50,12 +33,12 @@ class PD(ports.OpticalNonOriented1PortMixin, OpticalCouplerBase, SystemElementBa
     @decl.dproperty
     def DC(self):
         if self.include_readouts:
-            return DCReadout(port = self.Wpd.o)
+            return readouts.DCReadout(port = self.Wpd.o)
 
     @decl.dproperty
     def noise(self):
         if self.include_readouts:
-            return NoiseReadout(portN = self.Wpd.o)
+            return readouts.NoiseReadout(portN = self.Wpd.o)
 
     @decl.dproperty
     def Fr(self):
@@ -82,7 +65,7 @@ class PD(ports.OpticalNonOriented1PortMixin, OpticalCouplerBase, SystemElementBa
             self.Fr.i : []
         }
 
-        ports_fill_2optical_2classical(
+        nonlinear_utilities.ports_fill_2optical_2classical(
             self.system,
             ports_algorithm,
             [self.Fr],
@@ -98,7 +81,7 @@ class PD(ports.OpticalNonOriented1PortMixin, OpticalCouplerBase, SystemElementBa
             std_cplg  = 1
             std_cplgC = std_cplg
 
-            modulations_fill_2optical_2classical(
+            nonlinear_utilities.modulations_fill_2optical_2classical(
                 self.system,
                 matrix_algorithm,
                 self.Fr, kfrom,
@@ -115,7 +98,11 @@ class PD(ports.OpticalNonOriented1PortMixin, OpticalCouplerBase, SystemElementBa
         return
 
 
-class MagicPD(ports.OpticalOriented2PortMixin, OpticalCouplerBase, SystemElementBase):
+class MagicPD(
+        ports.OpticalOriented2PortMixin,
+        bases.OpticalCouplerBase,
+        bases.SystemElementBase
+):
 
     @decl.dproperty
     def Fr(self):
@@ -137,12 +124,12 @@ class MagicPD(ports.OpticalOriented2PortMixin, OpticalCouplerBase, SystemElement
     @decl.dproperty
     def DC(self):
         if self.include_readouts:
-            return DCReadout(port = self.Wpd.o)
+            return readouts.DCReadout(port = self.Wpd.o)
 
     @decl.dproperty
     def noise(self):
         if self.include_readouts:
-            return NoiseReadout(portN = self.Wpd.o)
+            return readouts.NoiseReadout(portN = self.Wpd.o)
 
     def system_setup_ports(self, ports_algorithm):
         pmap = {
@@ -152,7 +139,7 @@ class MagicPD(ports.OpticalOriented2PortMixin, OpticalCouplerBase, SystemElement
             self.Bk.o : [self.Fr.i],
         }
 
-        ports_fill_2optical_2classical(
+        nonlinear_utilities.ports_fill_2optical_2classical(
             self.system,
             ports_algorithm,
             [self.Fr],
@@ -173,7 +160,7 @@ class MagicPD(ports.OpticalOriented2PortMixin, OpticalCouplerBase, SystemElement
             std_cplg  = 1
             std_cplgC = std_cplg
 
-            modulations_fill_2optical_2classical(
+            nonlinear_utilities.modulations_fill_2optical_2classical(
                 self.system,
                 matrix_algorithm,
                 self.Fr, kfrom,

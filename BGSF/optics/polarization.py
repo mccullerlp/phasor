@@ -21,7 +21,6 @@ from .ports import (
     RAISE, LOWER,
     PolS, PolP,
     OpticalSymmetric2PortMixin,
-    #OpticalOriented4PortMixin,
 )
 
 from .selective_mirrors import PolarizingMirror
