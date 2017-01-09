@@ -119,70 +119,67 @@ class SystemElementBase(ElementBase):
     They have special object creation semantics such that the class does not fully
     create the object, it's creation is completed only on the sled
     """
-    def __new__(
-        cls, *args, **kwargs
-    ):
-        #TODO, not sure if I am happy with the _sled_root semantics
-        sled_root = kwargs.get('_sled_root', False)
-        if not sled_root:
-            #TODO make this a class returned that gives sane error messages
-            #for users not realizing the dispatch must happen
-            constr = SledConstructorInternal(cls, args, kwargs)
-            return constr
-        else:
-            inst = super(SystemElementBase, cls).__new__(
-                cls,
-                *args,
-                **kwargs
-            )
-            #the __init__ function must not be explicitely called because python does this for us
-            return inst
+    #def __new__(
+    #    cls, *args, **kwargs
+    #):
+    #    #TODO, not sure if I am happy with the _sled_root semantics
+    #    sled_root = kwargs.get('_sled_root', False)
+    #    if not sled_root:
+    #        #TODO make this a class returned that gives sane error messages
+    #        #for users not realizing the dispatch must happen
+    #        constr = SledConstructorInternal(cls, args, kwargs)
+    #        return constr
+    #    else:
+    #        inst = super(SystemElementBase, cls).__new__(
+    #            cls,
+    #            *args,
+    #            **kwargs
+    #        )
+    #        #the __init__ function must not be explicitely called because python does this for us
+    #        return inst
 
-    def __init__(
-            self,
-            parent,
-            name,
-            vparent = None,
-            _sled_root = False,
-            **kwargs
-    ):
-        self.parent     = parent
-        self.name       = name
-        if vparent is None:
-            vparent = parent
-        if name is not None:
-            self.ooa_params = vparent.ooa_params[name]
-        else:
-            self.ooa_params = vparent.ooa_params
-        self.system     = vparent.system
-        #annotation for automatic defect studies
-        OOA_ASSIGN(self).type = self.__class__
-        super(SystemElementBase, self).__init__(**kwargs)
+    #def __init__(
+    #        self,
+    #        parent,
+    #        name,
+    #        vparent = None,
+    #        _sled_root = False,
+    #        **kwargs
+    #):
+    #    self.parent     = parent
+    #    self.name       = name
+    #    if vparent is None:
+    #        vparent = parent
+    #    if name is not None:
+    #        self.ooa_params = vparent.ooa_params[name]
+    #    else:
+    #        self.ooa_params = vparent.ooa_params
+    #    self.system     = vparent.system
+    #    #annotation for automatic defect studies
+    #    OOA_ASSIGN(self).type = self.__class__
+    #    super(SystemElementBase, self).__init__(**kwargs)
 
-    def __init_ooa__(
-        self,
-        parent,
-        name,
-        vparent = None,
-        **kwargs
-    ):
-        """can call during init to ensure that methods are available for OOA_ASSIGN to operate. Idempotent"""
-        if name == 'PD_P':
-            assert(parent is not None)
-        self.parent = parent
-        if vparent is None:
-            vparent = parent
-        self.ooa_params = vparent.ooa_params[name]
-        self.system     = vparent.system
-        self.name           = name
+    #def __init_ooa__(
+    #    self,
+    #    parent,
+    #    name,
+    #    vparent = None,
+    #    **kwargs
+    #):
+    #    """can call during init to ensure that methods are available for OOA_ASSIGN to operate. Idempotent"""
+    #    if name == 'PD_P':
+    #        assert(parent is not None)
+    #    self.parent = parent
+    #    if vparent is None:
+    #        vparent = parent
+    #    self.ooa_params = vparent.ooa_params[name]
+    #    self.system     = vparent.system
+    #    self.name           = name
 
-    def linked_elements(self):
-        return ()
-
-    def __repr__(self):
-        if self.name is not None:
-            return self.name
-        return self.__class__.__name__ + '(<unknown>)'
+    #def __repr__(self):
+    #    if self.name is not None:
+    #        return self.name
+    #    return self.__class__.__name__ + '(<unknown>)'
 
     @mproperty
     def fully_resolved_name_tuple(self):
@@ -196,12 +193,12 @@ class SystemElementBase(ElementBase):
 
     @mproperty
     def fully_resolved_name(self):
-        return ".".join(self.fully_resolved_name_tuple)
+        ret = ".".join(self.fully_resolved_name_tuple)
+        return ret
 
     def __setattr__(self, name, item):
-        if isinstance(item, SledConstructorInternal):
-            constructed_item = self.system._subsled_construct(self, name, item)
-            super(SystemElementBase, self).__setattr__(name, constructed_item)
+        if isinstance(item, PropertyTransforming):
+            setattr(self.my, name, item)
         else:
             super(SystemElementBase, self).__setattr__(name, item)
         return

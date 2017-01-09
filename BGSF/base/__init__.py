@@ -10,6 +10,8 @@ from .bases import (
     NoiseBase,
     CouplerBase,
     FrequencyBase,
+    Element,
+    RootElement,
 )
 
 from .elements import (

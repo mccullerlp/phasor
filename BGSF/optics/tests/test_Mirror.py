@@ -24,7 +24,7 @@ def gensys():
     sled.laser = optics.Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
-        name = "optics.Laser",
+        name = "laser",
     )
 
     sled.etm = optics.Mirror(

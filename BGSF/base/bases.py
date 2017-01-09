@@ -3,17 +3,37 @@
 """
 from __future__ import division
 
+from declarative import (
+    dproperty,
+)
 from declarative.utilities import SuperBase
+import declarative.substrate as dsubstrate
 
 
-class ElementBase(SuperBase):
+class Element(dsubstrate.Element):
+    def __post_init__(self):
+        super(Element, self).__post_init__()
+        with self.building:
+            self.__build__()
+
+    def __build__(self):
+        return
+
+
+class RootElement(Element, dsubstrate.RootElement):
+    pass
+
+
+class ElementBase(Element, SuperBase):
     name = None
 
     def __init__(
-            self,
+        self,
+        **kwargs
     ):
         self.owned_ports = dict()
         self.owned_port_keys = dict()
+        super(ElementBase, self).__init__(**kwargs)
 
     def linked_elements(self):
         return ()
@@ -22,6 +42,10 @@ class ElementBase(SuperBase):
         if self.name is not None:
             return self.name
         return self.__class__.__name__ + '(<unknown>)'
+
+    @dproperty
+    def system(self):
+        return self.parent.system
 
 
 class CouplerBase(ElementBase):

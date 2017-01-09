@@ -44,7 +44,8 @@ class MatrixBuildAlgorithm(object):
         #TODO maybe copy?
         self.port_cplgs = ports_algorithm.port_cplgs
 
-        if system.field_space_proto is None:
+        #TODO, be smarter about this field space default
+        if system.field_space is None:
             field_space = KVSpace('field_ports', dtype = object)
         else:
             field_space = system.field_space_proto.copy()

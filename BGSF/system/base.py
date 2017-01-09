@@ -8,7 +8,6 @@ have measurement objects inject objects into the solver, so that the solver stat
 have coherent measurement systems able to run the solver independently to generate system-altering measurements
 """
 from __future__ import (division, print_function)
-from builtins import object
 from BGSF.utilities.print import print
 from collections import defaultdict
 
@@ -16,13 +15,12 @@ import numpy as np
 import warnings
 
 from declarative import (
-    DeepBunch,
+    mproperty,
 )
 
 from ..base import (
     Frequency,
     SystemElementSled,
-    SystemElementBase,
     ClassicalFreqKey,
     OOA_ASSIGN,
 )
@@ -39,31 +37,12 @@ from .solver_algorithm import (
     SystemSolver
 )
 
+from ..base import Element, RootElement
 
-class LinearSystem(object):
 
-    field_space_proto      = None
-    freq_order_max_default = 2
-    _frozen = False
+class Constants(Element):
 
-    def __init__(
-        self,
-        world_builder          = None,
-        field_space            = None,
-        freq_order_max_default = None,
-        override_params        = None,
-    ):
-        if field_space is not None:
-            self.field_space_proto = field_space
-        if freq_order_max_default is not None:
-            self.freq_order_max_default = freq_order_max_default
-
-        #TODO, add argument to fill this
-        self.ooa_params = DeepBunch()
-        self.system     = self
-        if override_params is not None:
-            self.ooa_params.update_recursive(override_params)
-
+    def __build__(self):
         OOA_ASSIGN(self).c_m_s    = 299792458
         OOA_ASSIGN(self).kB_J_K   = 1.380658e-23
         OOA_ASSIGN(self).h_Js     = 6.6260700408e-34
@@ -73,6 +52,31 @@ class LinearSystem(object):
         OOA_ASSIGN(self).i2pi     = np.pi * 2j
         OOA_ASSIGN(self).math     = np
         OOA_ASSIGN(self).temp_K   = 299
+        super(Constants, self).__build__()
+
+
+class LinearSystem(RootElement, Constants):
+
+    _frozen = False
+
+    @mproperty
+    def field_space(self, FS = None):
+        return FS
+
+    @mproperty
+    def freq_order_max_default(self, val = 2):
+        return val
+
+    def __init__(
+        self,
+        **kwargs
+    ):
+        super(LinearSystem, self).__init__(**kwargs)
+
+    def __build__(self):
+        #TODO, remove this once all elements use substrate
+        #use environment_query instead
+        self.system     = self
 
         #debugging assignments
         OOA_ASSIGN(self).unique_selections_check = True
@@ -82,6 +86,8 @@ class LinearSystem(object):
             OOA_ASSIGN(self).adjust_PSD = 1
         elif self.sided_spectra == 1:
             OOA_ASSIGN(self).adjust_PSD = 2
+
+        #TODO, remove to use self.building
         #this is a tag for the method calls whether to record the elements.
         #any methods or state applied to the system outside of the world_builder
         #can be replayed during N'th constructions. The world builder is a more
@@ -100,16 +106,13 @@ class LinearSystem(object):
         self.link_pairs = defaultdict(set)
         self.port_owners_virtual = defaultdict(set)
 
-        self.frequencies         = set()
+        self.frequencies      = set()
         self.elements_by_type = {
             Frequency : self.frequencies,
         }
 
-        self.sled = SystemElementSled(
-            parent     = None,
-            name       = None,
-            vparent    = self,
-            _sled_root = True,
+        self.my.sled = SystemElementSled(
+            ooa_params = self.ooa_params,
         )
         self.sled.environment = SystemElementSled()
         self.environment = self.sled.environment
@@ -121,18 +124,11 @@ class LinearSystem(object):
         )
         self.F_AC = self.sled.environment.F_AC
 
-        #now run the world builder from the mostly constructed system
-        if world_builder is None:
-            pass
-        elif issubclass(world_builder, SystemElementBase):
-            self.sled.world = world_builder()
-        else:
-            world_builder(self.ooa_params, self.sled)
-
         #now that the system is done constructing, switch to recording mode so that any further
         #construction can be replayed
         self._record_build = True
         self._record_build_sequence = []
+        super(LinearSystem, self).__build__()
         return
 
     def number(self, num):
@@ -140,6 +136,10 @@ class LinearSystem(object):
 
     def variant(self, params = None):
         raise NotImplementedError("TODO")
+
+    @mproperty
+    def fully_resolved_name_tuple(self):
+        return ()
 
     def reject_classical_frequency_order(self, fkey):
         #TODO put this logic in a subobject
@@ -346,9 +346,6 @@ class LinearSystem(object):
             parent = element,
             name   = name,
         )
-        if name == 'PD_P':
-            print("BOO!", constructed_item, element)
-            print(constructed_item.fully_resolved_name_tuple)
         self.include(constructed_item)
         return constructed_item
 
