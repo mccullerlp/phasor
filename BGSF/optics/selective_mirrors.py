@@ -18,8 +18,6 @@ from .ports import (
 
 from .selectors import OpticalSelectionStack
 
-from ..base.elements import (SledConstructorInternal)
-
 
 class MirrorSelectionStack(
     OpticalDegenerate4PortMixin,
@@ -40,7 +38,6 @@ class MirrorSelectionStack(
 
         #TODO make better error messages
         for mname, mconstr in list(sub_element_map.items()):
-            assert(isinstance(mconstr, SledConstructorInternal))
             mconstr.adjust_safe(
                 AOI_deg         = AOI_deg,
                 facing_cardinal = facing_cardinal,

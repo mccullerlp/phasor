@@ -1,12 +1,15 @@
 """
 """
-
-from __future__ import division
-from __future__ import print_function
-
+from __future__ import (division, print_function)
 import numpy as np
+import pytest
 
-from declarative.bunch import (
+try:
+    from IPython.lib.pretty import pprint
+except ImportError:
+    from pprint import pprint
+
+from declarative import (
     Bunch,
 )
 
@@ -50,36 +53,36 @@ def gensys(
         name = "Laser",
     )
 
-    sled.itm = Mirror(
+    sled.my.itm = Mirror(
         T_hr=.001,
         name = 'ITM',
         facing_cardinal = 'E',
     )
-    sled.etm = Mirror(
+    sled.my.etm = Mirror(
         T_hr=.001,
         name = 'ETM',
         facing_cardinal = 'W',
     )
 
-    sled.s1 = Space(
+    sled.my.s1 = Space(
         L_m,
         L_detune_m = L_detune_m,
         name = 's1',
     )
 
-    sled.reflPD = MagicPD(
+    sled.my.reflPD = MagicPD(
         name = 'reflPD',
         facing_cardinal = 'E',
     )
-    sled.itmPD = MagicPD(
+    sled.my.itmPD = MagicPD(
         name = 'ITMPD',
         facing_cardinal = 'W',
     )
-    sled.etmPD = MagicPD(
+    sled.my.etmPD = MagicPD(
         name = 'ETMPD',
         facing_cardinal = 'E',
     )
-    sled.transPD = PD(
+    sled.my.transPD = PD(
         name = 'transmon',
     )
 
@@ -114,6 +117,7 @@ def gensys(
 
 
 class TestFabryPerot(TestCase):
+    @pytest.mark.optics_fast
     def test_FP_base(self):
         print('test_FP_base')
         b = gensys(
@@ -127,6 +131,7 @@ class TestFabryPerot(TestCase):
         #sys.coupling_matrix_print()
         #sys.source_vector_print()
         #sys.solution_vector_print()
+        pprint(sol.views)
         print("refl_DC",      sol.views.refl_DC.DC_readout     )
         print("transmon_DC",  sol.views.transmon_DC.DC_readout )
         print("itm_DC",       sol.views.itm_DC.DC_readout      )

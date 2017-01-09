@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
-#from BGSF.utilities.print import print
+from __future__ import (division, print_function)
+import declarative as decl
 
 from ..base.utilities import (
     type_test
@@ -14,73 +13,65 @@ from ..math.key_matrix.dictionary_keys import (
     FrequencyKey,
 )
 
-from .bases import (
-    OpticalCouplerBase,
-    SystemElementBase,
-    OOA_ASSIGN,
-)
-
-from .ports import (
-    OpticalPortHolderOut,
-    RAISE, LOWER,
-    PolS, PolP,
-    OpticalFreqKey,
-    ClassicalFreqKey,
-    OpticalNonOriented1PortMixin,
-)
-
-from .frequency import (
-    OpticalFrequency,
-)
-
-from .vacuum import (
-    OpticalVacuumFluctuation,
-)
+from . import bases
+from . import ports
+from . import frequency
+from . import vacuum
 
 
-class Laser(OpticalNonOriented1PortMixin, OpticalCouplerBase, SystemElementBase):
-    def __init__(
-        self,
-        F,
-        power_W,
-        multiple = 1,
-        polarization = 'S',
-        classical_fdict = None,
-        phased = False,
-        **kwargs
-    ):
-        super(Laser, self).__init__(**kwargs)
-        type_test(F, OpticalFrequency)
-        self.F = F
+class Laser(ports.OpticalNonOriented1PortMixin, bases.OpticalCouplerBase, bases.SystemElementBase):
 
-        OOA_ASSIGN(self).polarization = polarization
-        OOA_ASSIGN(self).power_W = power_W
+    @decl.dproperty
+    def Fr(self):
+        return ports.OpticalPortHolderOut(self, x = 'Fr')
 
+    @decl.dproperty
+    def polarization(self, val = 'S'):
+        val = self.ooa_params.setdefault('polarization', val)
+        return val
+
+    @decl.dproperty
+    def polk(self):
         if self.polarization == 'S':
-            self.polk  = PolS
+            ret  = ports.PolS
         elif self.polarization == 'P':
-            self.polk  = PolP
+            ret  = ports.PolP
+        return ret
 
-        self.multiple = multiple
-        self.polarization = polarization
-        self.Fr = OpticalPortHolderOut(self, x = 'Fr')
-        self.optical_fdict = {self.F : self.multiple}
-        if classical_fdict is None:
-            self.classical_fdict = {}
-        else:
-            self.classical_fdict = classical_fdict
-        self.fkey = DictKey({
-            OpticalFreqKey: FrequencyKey(self.optical_fdict),
-            ClassicalFreqKey: FrequencyKey(self.classical_fdict),
+    @decl.dproperty
+    def _fluct(self):
+        print("HMM")
+        return vacuum.OpticalVacuumFluctuation(port = self.Fr)
+
+    phased = False
+    multiple = 1
+
+    @decl.dproperty
+    def classical_fdict(self, val = None):
+        if val is None:
+            val = {}
+        return val
+
+    @decl.mproperty
+    def optical_fdict(self):
+        return {self.F : self.multiple}
+
+    @decl.mproperty
+    def fkey(self):
+        return DictKey({
+            ports.OpticalFreqKey: FrequencyKey(self.optical_fdict),
+            ports.ClassicalFreqKey: FrequencyKey(self.classical_fdict),
         })
-        self.phased = phased
-        #TODO, not sure I like these semantics
-        self._fluct = self.system._subsled_construct(
-            element     = self,
-            name        = '_fluct',
-            constructor = OpticalVacuumFluctuation(port = self.Fr),
-        )
-        return
+
+    @decl.dproperty
+    def power_W(self, val):
+        val = self.ooa_params.setdefault('power_W', val)
+        return val
+
+    @decl.dproperty
+    def F(self, val):
+        type_test(val, frequency.OpticalFrequency)
+        return val
 
     def linked_elements(self):
         return (
@@ -89,8 +80,8 @@ class Laser(OpticalNonOriented1PortMixin, OpticalCouplerBase, SystemElementBase)
         )
 
     def system_setup_ports_initial(self, ports_algorithm):
-        ports_algorithm.coherent_sources_needed(self.Fr.o, self.fkey | self.polk | LOWER)
-        ports_algorithm.coherent_sources_needed(self.Fr.o, self.fkey | self.polk | RAISE)
+        ports_algorithm.coherent_sources_needed(self.Fr.o, self.fkey | self.polk | ports.LOWER)
+        ports_algorithm.coherent_sources_needed(self.Fr.o, self.fkey | self.polk | ports.RAISE)
         return
 
     def system_setup_ports(self, ports_algorithm):
@@ -99,10 +90,10 @@ class Laser(OpticalNonOriented1PortMixin, OpticalCouplerBase, SystemElementBase)
     def system_setup_coupling(self, matrix_algorithm):
         field_rtW = self.system.math.sqrt(self.power_W)
         if self.phased:
-            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | LOWER, field_rtW * self.system.i)
-            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | RAISE, -field_rtW * self.system.i)
+            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.LOWER, field_rtW * self.system.i)
+            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.RAISE, -field_rtW * self.system.i)
         else:
-            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | LOWER, field_rtW)
-            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | RAISE, field_rtW)
+            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.LOWER, field_rtW)
+            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.RAISE, field_rtW)
         return
 

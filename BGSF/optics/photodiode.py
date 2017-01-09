@@ -5,21 +5,15 @@ from __future__ import division
 from __future__ import print_function
 #from BGSF.utilities.print import print
 
+import declarative as decl
+
 from .bases import (
     OpticalCouplerBase,
     SystemElementBase,
     OOA_ASSIGN,
 )
 
-from .ports import (
-    OpticalPortHolderIn,
-    #OpticalPortHolderOut,
-    OpticalPortHolderInOut,
-    SignalPortHolderIn,
-    SignalPortHolderOut,
-    OpticalOriented2PortMixin,
-    OpticalNonOriented1PortMixin,
-)
+from . import ports
 
 from .nonlinear_utilities import (
     #symmetric_update,
@@ -38,32 +32,50 @@ from .vacuum import (
 )
 
 
-class PD(OpticalNonOriented1PortMixin, OpticalCouplerBase, SystemElementBase):
-    def __init__(
-            self,
-            include_readouts = False,
-            **kwargs
-    ):
-        #TODO make magic optional
-        magic = False
-        super(PD, self).__init__(**kwargs)
-        self.magic = magic
-        self.Fr    = OpticalPortHolderInOut(self, x = 'Fr')
-        self.Wpd   = SignalPortHolderOut(self, x    = 'Wpd')
+class PD(ports.OpticalNonOriented1PortMixin, OpticalCouplerBase, SystemElementBase):
 
+    @decl.mproperty
+    def magic(self, val = False):
+        return val
+
+    @decl.dproperty
+    def _fluct(self):
+        return OpticalVacuumFluctuation(port = self.Fr)
+
+    @decl.dproperty
+    def include_readouts(self, val = False):
+        val = self.ooa_params.setdefault('include_readouts', val)
+        return val
+
+    @decl.dproperty
+    def DC(self):
+        if self.include_readouts:
+            return DCReadout(port = self.Wpd.o)
+
+    @decl.dproperty
+    def noise(self):
+        if self.include_readouts:
+            return NoiseReadout(portN = self.Wpd.o)
+
+    @decl.dproperty
+    def Fr(self):
+        return ports.OpticalPortHolderInOut(self, x = 'Fr')
+
+    @decl.dproperty
+    def Wpd(self):
+        return ports.SignalPortHolderOut(self, x    = 'Wpd')
+
+    @decl.dproperty
+    def BA(self):
         if self.magic:
             self.BA = None
-            self.Bk = OpticalPortHolderInOut(self, x = 'Bk')
         else:
-            self.BA  = SignalPortHolderIn(self,  x = 'BA')
+            self.BA  = ports.SignalPortHolderIn(self,  x = 'BA')
 
-        self._fluct = OpticalVacuumFluctuation(port = self.Fr)
-
-        OOA_ASSIGN(self).include_readouts = include_readouts
-        if self.include_readouts:
-            self.DC    = DCReadout(port = self.Wpd.o)
-            self.noise = NoiseReadout(portN = self.Wpd.o)
-        return
+    @decl.dproperty
+    def Bk(self):
+        if self.magic:
+            return ports.OpticalPortHolderInOut(self, x = 'Bk')
 
     def system_setup_ports(self, ports_algorithm):
         pmap = {
@@ -103,16 +115,16 @@ class PD(OpticalNonOriented1PortMixin, OpticalCouplerBase, SystemElementBase):
         return
 
 
-class MagicPD(OpticalOriented2PortMixin, OpticalCouplerBase, SystemElementBase):
+class MagicPD(ports.OpticalOriented2PortMixin, OpticalCouplerBase, SystemElementBase):
     def __init__(
             self,
             include_readouts = False,
             **kwargs
     ):
         super(MagicPD, self).__init__(**kwargs)
-        self.Fr   = OpticalPortHolderInOut(self, x = 'Fr')
-        self.Bk   = OpticalPortHolderInOut(self, x = 'Bk')
-        self.Wpd  = SignalPortHolderOut(self, x = 'Wpd')
+        self.Fr   = ports.OpticalPortHolderInOut(self, x = 'Fr')
+        self.Bk   = ports.OpticalPortHolderInOut(self, x = 'Bk')
+        self.Wpd  = ports.SignalPortHolderOut(self, x = 'Wpd')
 
         OOA_ASSIGN(self).include_readouts = include_readouts
         if self.include_readouts:

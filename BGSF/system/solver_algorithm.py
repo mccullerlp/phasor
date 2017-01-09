@@ -91,7 +91,7 @@ class SystemSolver(object):
 
     @mproperty
     def views(self):
-        return DeepBunch()
+        return DeepBunch(vpath = False)
 
     def _setup_views(self):
         views_insert = []
@@ -107,6 +107,7 @@ class SystemSolver(object):
                 )
         #sort this so that shorter name_tups are first
         views_insert.sort()
+        print("INSERT: ", views_insert)
         for name_tup, view_obj in views_insert:
             subview = self.views
             for idx, name in enumerate(name_tup[:-1]):

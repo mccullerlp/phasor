@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
+from __future__ import division, print_function
 #from BGSF.utilities.print import print
+
+import declarative as decl
 
 from ..base import (
     FrequencyBase,
@@ -13,11 +14,11 @@ from ..base import (
 
 
 class OpticalFrequency(SystemElementBase, FrequencyBase):
-    iwavelen_m = None
-    def __init__(
-            self,
-            wavelen_m,
-            **kwargs
-    ):
-        super(OpticalFrequency, self).__init__(**kwargs)
-        self.iwavelen_m = 1/wavelen_m
+
+    @decl.dproperty
+    def wavelen_m(self, val):
+        return val
+
+    @decl.mproperty
+    def iwavelen_m(self, val):
+        return 1/self.wavelen_m

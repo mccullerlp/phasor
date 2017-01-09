@@ -5,9 +5,7 @@ from __future__ import division
 from __future__ import print_function
 #from BGSF.utilities.print import print
 
-from declarative import (
-    mproperty,
-)
+import declarative as decl
 
 from .bases import (
     OpticalCouplerBase,
@@ -15,10 +13,10 @@ from .bases import (
     #OOA_ASSIGN,
 )
 
+from . import ports
 from .ports import (
     OpticalPortHolderInOut,
     SignalPortHolderIn,
-    SignalPortHolderOut,
     QuantumKey, RAISE, LOWER,
     PolKEY, PolS, PolP,
     OpticalSymmetric2PortMixin,
@@ -37,15 +35,23 @@ from .nonlinear_utilities import (
 
 
 class Optical2PortModulator(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
-    def __init__(self, **kwargs):
-        super(Optical2PortModulator, self).__init__(**kwargs)
-        self.Fr   = OpticalPortHolderInOut(self, x = 'Fr')
-        self.Bk   = OpticalPortHolderInOut(self, x = 'Bk')
-        self.Drv  = SignalPortHolderIn(self, x = 'Drv')
-        self.BA   = SignalPortHolderOut(self, x = 'BA')
-        return
+    @decl.dproperty
+    def Fr(self):
+        return OpticalPortHolderInOut(self, x = 'Fr')
 
-    @mproperty
+    @decl.dproperty
+    def Bk(self):
+        return OpticalPortHolderInOut(self, x = 'Bk')
+
+    @decl.dproperty
+    def Drv(self):
+        return SignalPortHolderIn(self, x = 'Drv')
+
+    @decl.dproperty
+    def BA(self):
+        return ports.SignalPortHolderOut(self, x = 'BA')
+
+    @decl.mproperty
     def ports_optical(self):
         return set([
             self.Fr,

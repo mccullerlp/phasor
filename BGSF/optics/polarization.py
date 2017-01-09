@@ -15,12 +15,12 @@ from .bases import (
     OOA_ASSIGN,
 )
 
+from . import ports
 from .ports import (
     OpticalPortHolderInOut,
     RAISE, LOWER,
     PolS, PolP,
     OpticalSymmetric2PortMixin,
-    OpticalOriented2PortMixin,
     #OpticalOriented4PortMixin,
 )
 
@@ -161,7 +161,7 @@ class BaseRotator(OpticalCouplerBase, SystemElementBase):
         return
 
 
-class PolarizationRotator(OpticalOriented2PortMixin, BaseRotator):
+class PolarizationRotator(ports.OpticalOriented2PortMixin, BaseRotator):
     def system_setup_coupling(self, matrix_algorithm):
         if self.rotate_deg in (0, 180, -180):
             if self.rotate_deg == 0:
@@ -403,7 +403,7 @@ class UnmountedHalfWavePlate(WavePlate):
             **kwargs
         )
 
-class WavePlateMount(OpticalOriented2PortMixin, OpticalCouplerBase, SystemElementBase):
+class WavePlateMount(ports.OpticalOriented2PortMixin, OpticalCouplerBase, SystemElementBase):
     def __init__(
         self,
         plate,

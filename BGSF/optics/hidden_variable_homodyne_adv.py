@@ -29,14 +29,12 @@ from .bases import (
     OOA_ASSIGN,
 )
 
+from . import ports
 from .ports import (
     OpticalPortHolderIn,
-    #OpticalPortHolderOut,
+    #ports.OpticalPortHolderOut,
     OpticalPortHolderInOut,
     SignalPortHolderIn,
-    SignalPortHolderOut,
-    OpticalOriented2PortMixin,
-    OpticalNonOriented1PortMixin,
 )
 
 from ..readouts import (
@@ -112,7 +110,7 @@ class HomodyneCoupling(FactorCouplingBase):
 
 
 class HiddenVariableHomodynePD(
-        OpticalNonOriented1PortMixin,
+        ports.OpticalNonOriented1PortMixin,
         OpticalCouplerBase,
         SystemElementBase,
 ):
@@ -125,7 +123,7 @@ class HiddenVariableHomodynePD(
         include_readouts       = False,
         **kwargs
     ):
-        #TODO make optional, requires adjusting the OpticalNonOriented1PortMixin base to be adjustable
+        #TODO make optional, requires adjusting the ports.OpticalNonOriented1PortMixin base to be adjustable
         magic = False
         super(HiddenVariableHomodynePD, self).__init__(**kwargs)
 
@@ -140,8 +138,8 @@ class HiddenVariableHomodynePD(
         if magic:
             self.Bk = OpticalPortHolderInOut(self, x = 'Bk')
 
-        self.rtWpdI = SignalPortHolderOut(self, x = 'rtWpdI')
-        self.rtWpdQ = SignalPortHolderOut(self, x = 'rtWpdQ')
+        self.rtWpdI = ports.SignalPortHolderOut(self, x = 'rtWpdI')
+        self.rtWpdQ = ports.SignalPortHolderOut(self, x = 'rtWpdQ')
 
         self.source_port            = source_port
         self.phase_reference_port   = phase_reference_port
@@ -346,7 +344,7 @@ class HiddenVariableHomodynePD(
 
 
 class TotalDCPowerPD(
-        OpticalNonOriented1PortMixin,
+        ports.OpticalNonOriented1PortMixin,
         OpticalCouplerBase,
         SystemElementBase
 ):
@@ -359,7 +357,7 @@ class TotalDCPowerPD(
         super(TotalDCPowerPD, self).__init__(**kwargs)
         self.port  = port
         self.system.own_port_virtual(self, self.port)
-        self.WpdDC = SignalPortHolderOut(self, x = 'WpdDC')
+        self.WpdDC = ports.SignalPortHolderOut(self, x = 'WpdDC')
         return
 
     def system_setup_ports(self, ports_algorithm):

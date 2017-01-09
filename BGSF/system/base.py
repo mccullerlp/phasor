@@ -206,6 +206,7 @@ class LinearSystem(RootElement, Constants):
             raise RuntimeError("Cannot include elements or link after solution requested")
         if element in self.elements:
             return
+        print("INCLUDE: ", element, element.fully_resolved_name)
         self.elements.add(element)
         try:
             op = element.owned_ports

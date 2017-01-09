@@ -15,10 +15,10 @@ from .bases import (
     OOA_ASSIGN,
 )
 
+from . import ports
 from .ports import (
     OpticalPortHolderInOut,
     OpticalPortHolderIn,
-    OpticalPortHolderOut,
     #QuantumKey,
     RAISE, LOWER,
     PolKEY, PolS, PolP,
@@ -165,7 +165,7 @@ class OpticalSelectionStack(OpticalCouplerBase, SystemElementBase):
                     if isinstance(port, (
                             OpticalPortHolderInOut,
                             OpticalPortHolderIn,
-                            OpticalPortHolderOut
+                            ports.OpticalPortHolderOut
                     )):
                         optical_ports[pname] += 1
 

@@ -1,18 +1,14 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
+from __future__ import (division, print_function)
 #from BGSF.utilities.print import print
 
-from declarative import (
-    mproperty,
-)
+import declarative as decl
 
 from .bases import (
     OpticalCouplerBase,
     SystemElementBase,
-    OOA_ASSIGN,
 )
 
 from .ports import (
@@ -37,6 +33,22 @@ class Mirror(
     OpticalCouplerBase,
     SystemElementBase
 ):
+
+    @decl.dproperty
+    def T_hr(self, val = 0):
+        self.ooa_params.setdefault('T_hr', val)
+        return val
+
+    @decl.dproperty
+    def L_hr(self, val = 0):
+        self.ooa_params.setdefault('L_hr', val)
+        return val
+
+    @decl.dproperty
+    def L_t(self, val = 0):
+        self.ooa_params.setdefault('L_t', val)
+        return val
+
     def __init__(
         self,
         T_hr    = 0,
@@ -44,10 +56,10 @@ class Mirror(
         L_t     = 0,
         **kwargs
     ):
-        super(Mirror, self).__init__(**kwargs)
-        OOA_ASSIGN(self).T_hr    = T_hr
-        OOA_ASSIGN(self).L_hr    = L_hr
-        OOA_ASSIGN(self).L_t     = L_t
+        super(Mirror, self).__init__(
+            _include = None,
+            **kwargs
+        )
 
         #optic mechanical ports
         self.posZ     = MechanicalPortHolderIn(self, x = 'pZ')
@@ -103,9 +115,10 @@ class Mirror(
             self.system.link(self._LFrB, self._LFrB_vac.Fr)
             self.system.link(self._LBkA, self._LBkA_vac.Fr)
             self.system.link(self._LBkB, self._LBkB_vac.Fr)
+        self.system.include(self)
         return
 
-    @mproperty
+    @decl.mproperty
     def ports_optical(self):
         return set([
             self.FrA,
@@ -114,7 +127,7 @@ class Mirror(
             self.BkB,
         ])
 
-    @mproperty
+    @decl.mproperty
     def ports_optical_loss(self):
         return set([
             self._LFrA,

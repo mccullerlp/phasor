@@ -5,6 +5,7 @@ from __future__ import division
 
 from declarative import (
     dproperty,
+    NOARG,
 )
 from declarative.utilities import SuperBase
 import declarative.substrate as dsubstrate
@@ -45,7 +46,13 @@ class ElementBase(Element, SuperBase):
 
     @dproperty
     def system(self):
-        return self.parent.system
+        sys = self.parent.system
+        return sys
+
+    @dproperty
+    def _include(self, val = NOARG):
+        if val is NOARG :
+            self.system.include(self)
 
 
 class CouplerBase(ElementBase):

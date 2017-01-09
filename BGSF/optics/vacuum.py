@@ -5,53 +5,42 @@ from __future__ import division
 from __future__ import print_function
 #from BGSF.utilities.print import print
 
-from .bases import (
-    OpticalCouplerBase,
-    OpticalNoiseBase,
-    SystemElementBase,
-)
+import declarative as decl
 
-from .ports import (
-    OpticalPortHolderOut,
-    QuantumKey,
-    RAISE, LOWER,
-    OpticalNonOriented1PortMixin,
-)
+from . import bases
+from . import ports
 
-
-#TODO - SystemElementBase,
+#TODO - bases.SystemElementBase,
 # need system sled
-class VacuumTerminator(OpticalNonOriented1PortMixin, OpticalCouplerBase, SystemElementBase):
-    def __init__(
-        self,
-        **kwargs
-    ):
-        super(VacuumTerminator, self).__init__(**kwargs)
-        self.Fr = OpticalPortHolderOut(self, x = 'Fr')
-        #TODO, not sure I like these semantics
-        self._fluct = OpticalVacuumFluctuation(port = self.Fr)
-        return
+class VacuumTerminator(ports.OpticalNonOriented1PortMixin, bases.OpticalCouplerBase, bases.SystemElementBase):
+
+    @decl.dproperty
+    def Fr(self):
+        return ports.OpticalPortHolderOut(self, x = 'Fr')
+
+    @decl.dproperty
+    def _fluct(self):
+        return OpticalVacuumFluctuation(port = self.Fr)
 
     def linked_elements(self):
-        return (
-            self._fluct,
-        )
+        return (self._fluct,)
 
     def system_setup_ports(self, system):
         return
 
-class OpticalVacuumFluctuation(OpticalNoiseBase, SystemElementBase):
-    def __init__(self, port, **kwargs):
-        super(OpticalVacuumFluctuation, self).__init__(**kwargs)
-        self.port = port
+
+class OpticalVacuumFluctuation(bases.OpticalNoiseBase, bases.SystemElementBase):
+    @decl.dproperty
+    def port(self, val):
+        return val
 
     def system_setup_noise(self, matrix_algorithm):
         #print ("SETUP NOISE: ", self)
         for k1 in matrix_algorithm.port_set_get(self.port.o):
-            if k1.subkey_has(LOWER):
-                k2 = k1.without_keys(QuantumKey) | RAISE
+            if k1.subkey_has(ports.LOWER):
+                k2 = k1.without_keys(ports.QuantumKey) | ports.RAISE
             else:
-                k2 = k1.without_keys(QuantumKey) | LOWER
+                k2 = k1.without_keys(ports.QuantumKey) | ports.LOWER
 
             #matrix_algorithm.noise_pair_insert(
             #    self.port.o, k1, self.port.o, k1, self.optical_vacuum_noise_generate

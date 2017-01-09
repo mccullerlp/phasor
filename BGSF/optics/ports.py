@@ -2,7 +2,8 @@
 from __future__ import division
 from __future__ import print_function
 from builtins import object
-#from BGSF.utilities.print import print
+
+import declarative as decl
 
 from ..math.key_matrix import DictKey
 
@@ -65,14 +66,11 @@ class OpticalNonOriented1PortMixin(object):
         return (self.Fr,)
 
 class OpticalOriented2PortMixin(object):
-    def __init__(
-        self,
-        facing_cardinal = None,
-        **kwargs
-    ):
-        super(OpticalOriented2PortMixin, self).__init__(**kwargs)
-        assert(facing_cardinal in ['N', 'S', 'E', 'W', None])
-        self.facing_cardinal = facing_cardinal
+    @decl.dproperty
+    def facing_cardinal(self, val = None):
+        val = self.ooa_params.setdefault('facing_cardinal', val)
+        assert(val in ['N', 'S', 'E', 'W', None])
+        return val
 
     def orient_optical_portsEW(self):
         if self.facing_cardinal == 'E':
@@ -103,14 +101,12 @@ class OpticalSymmetric2PortMixin(object):
 
 
 class OpticalOriented4PortMixin(object):
-    def __init__(
-        self,
-        facing_cardinal = None,
-        **kwargs
-    ):
-        super(OpticalOriented2PortMixin, self).__init__(**kwargs)
-        OOA_ASSIGN(self).facing_cardinal = facing_cardinal
-        assert(self.facing_cardinal in ['NE', 'NW', 'SE', 'SW', None])
+
+    @decl.dproperty
+    def facing_cardinal(self, val = None):
+        val = self.ooa_params.setdefault('facing_cardinal', val)
+        assert(val in ['NE', 'NW', 'SE', 'SW', None])
+        return val
 
     def orient_optical_portsEW(self):
         if self.facing_cardinal == 'NW':
@@ -137,25 +133,31 @@ class OpticalOriented4PortMixin(object):
             raise RuntimeError(u"No Facing Cardinal direction defined")
 
 class OpticalDegenerate4PortMixin(object):
-    def __init__(
-        self,
-        facing_cardinal = None,
-        AOI_deg         = 0,
-        **kwargs
-    ):
-        super(OpticalDegenerate4PortMixin, self).__init__(**kwargs)
-        OOA_ASSIGN(self).AOI_deg = AOI_deg
-        OOA_ASSIGN(self).facing_cardinal = facing_cardinal
 
+    @decl.dproperty
+    def AOI_deg(self, val = 0):
+        val = self.ooa_params.setdefault('AOI_deg', val)
+        return val
+
+    @decl.dproperty
+    def facing_cardinal(self, val = None):
+        val = self.ooa_params.setdefault('facing_cardinal', val)
         if self.AOI_deg == 0:
-            assert(self.facing_cardinal in ['N', 'S', 'E', 'W', None])
-            self.is_4_port = False
+            assert(val in ['N', 'S', 'E', 'W', None])
         else:
             if self.AOI_deg == 45:
-                assert(self.facing_cardinal in ['N', 'S', 'E', 'W', 'NE', 'NW', 'SE', 'SW', None])
+                assert(val in ['N', 'S', 'E', 'W', 'NE', 'NW', 'SE', 'SW', None])
             else:
-                assert(self.facing_cardinal in ['N', 'S', 'E', 'W', None])
-            self.is_4_port = True
+                assert(val in ['N', 'S', 'E', 'W', None])
+        return val
+
+    @decl.mproperty
+    def is_4_port(self):
+        if self.AOI_deg == 0:
+            val = False
+        else:
+            val = True
+        return val
 
     def orient_optical_portsEW(self):
         if self.facing_cardinal == 'E':

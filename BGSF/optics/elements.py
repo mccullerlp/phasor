@@ -29,12 +29,12 @@ from .bases import (
 
 from .ports import (
     OpticalPortHolderIn,
-    OpticalPortHolderOut,
+    ports.OpticalPortHolderOut,
     OpticalPortHolderInOut,
     MechanicalPortHolderIn,
     MechanicalPortHolderOut,
     SignalPortHolderIn,
-    SignalPortHolderOut,
+    ports.SignalPortHolderOut,
     QuantumKey,
     RAISE, LOWER,
     PolKEY,
@@ -42,8 +42,8 @@ from .ports import (
     OpticalFreqKey,
     ClassicalFreqKey,
     OpticalSymmetric2PortMixin,
-    OpticalOriented2PortMixin,
-    OpticalNonOriented1PortMixin,
+    ports.OpticalOriented2PortMixin,
+    ports.OpticalNonOriented1PortMixin,
 )
 
 from .nonlinear_utilities import (

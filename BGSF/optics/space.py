@@ -5,9 +5,7 @@ from __future__ import division
 from __future__ import print_function
 #from BGSF.utilities.print import print
 
-from declarative import (
-    mproperty,
-)
+import declarative as decl
 
 from .bases import (
     OpticalCouplerBase,
@@ -24,19 +22,23 @@ from .ports import (
 
 
 class Space(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
-    def __init__(
-        self,
-        L_m,
-        L_detune_m = 0,
-        **kwargs
-    ):
-        super(Space, self).__init__(**kwargs)
+    @decl.dproperty
+    def Fr(self):
+        return OpticalPortHolderInOut(self, x = 'Fr')
 
-        OOA_ASSIGN(self).L_m          = L_m
-        OOA_ASSIGN(self).L_detune_m   = L_detune_m
-        self.Fr = OpticalPortHolderInOut(self, x = 'Fr')
-        self.Bk = OpticalPortHolderInOut(self, x = 'Bk')
-        return
+    @decl.dproperty
+    def Bk(self):
+        return OpticalPortHolderInOut(self, x = 'Bk')
+
+    @decl.dproperty
+    def L_m(self, val):
+        val = self.ooa_params.setdefault('L_m', val)
+        return val
+
+    @decl.dproperty
+    def L_detune_m(self, val = 0):
+        val = self.ooa_params.setdefault('L_detune_m', val)
+        return val
 
     def phase_lower(self, iwavelen_m, F):
         system = self.system
@@ -46,14 +48,14 @@ class Space(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
         system = self.system
         return system.math.exp(system.i2pi * (F * self.L_m / system.c_m_s + self.L_detune_m * iwavelen_m))
 
-    @mproperty
+    @decl.mproperty
     def ports_optical(self):
         return [
             self.Fr,
             self.Bk,
         ]
 
-    @mproperty
+    @decl.mproperty
     def pmap(self):
         return {
             self.Fr : self.Bk,

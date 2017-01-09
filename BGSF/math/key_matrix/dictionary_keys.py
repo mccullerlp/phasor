@@ -4,10 +4,9 @@ from builtins import str
 from builtins import object
 from collections import Mapping as MappingABC
 
-import copy
-
 
 NOARG = (lambda : ())
+
 
 class DictKey(MappingABC):
     __slots__ = ('_dict', 'prev_hash')
@@ -49,11 +48,11 @@ class DictKey(MappingABC):
             if isinstance(v, str):
                 return str(v)
             else:
-                return str(repr(v), 'utf-8')
+                return repr(v)
         l = tuple(sorted(self._dict.items()))
         #print(unicode(repr(l), 'utf-8'))
         l2 = [u'{0}:{1}'.format(recode(i), recode(j)) for i, j in l]
-        return u"DK{{{0}}}".format(u'|'.join(l2)).encode('utf-8')
+        return u"DK{{{0}}}".format(u'|'.join(l2))
 
     def __or__(self, other):
         cp = dict(self._dict)
@@ -181,7 +180,7 @@ class FrequencyKey(object):
                 flist.append(str(n) + Fname)
         if not flist:
             flist.append('0')
-        return ''.join(flist).encode('utf-8')
+        return ''.join(flist)
 
     def __add__(self, other):
         F_dict = dict(self.F_dict)

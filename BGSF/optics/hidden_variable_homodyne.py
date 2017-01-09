@@ -25,14 +25,12 @@ from .bases import (
     OOA_ASSIGN,
 )
 
+from . import ports
 from .ports import (
     OpticalPortHolderIn,
-    #OpticalPortHolderOut,
+    #ports.OpticalPortHolderOut,
     OpticalPortHolderInOut,
     SignalPortHolderIn,
-    SignalPortHolderOut,
-    OpticalOriented2PortMixin,
-    OpticalNonOriented1PortMixin,
 )
 
 from ..readouts import (
@@ -86,8 +84,8 @@ class HomodyneCoupling(FactorCouplingBase):
 
 
 class HiddenVariableHomodynePD(
-        #OpticalNonOriented1PortMixin,
-        OpticalOriented2PortMixin,
+        #ports.OpticalNonOriented1PortMixin,
+        ports.OpticalOriented2PortMixin,
         OpticalCouplerBase,
         SystemElementBase,
 ):
@@ -98,7 +96,7 @@ class HiddenVariableHomodynePD(
         include_readouts = False,
         **kwargs
     ):
-        #TODO make optional, requires adjusting the OpticalNonOriented1PortMixin base to be adjustable
+        #TODO make optional, requires adjusting the ports.OpticalNonOriented1PortMixin base to be adjustable
         super(HiddenVariableHomodynePD, self).__init__(**kwargs)
 
         self.Fr    = OpticalPortHolderInOut(self, x = 'Fr')
@@ -108,9 +106,9 @@ class HiddenVariableHomodynePD(
         ##Only required if Bk isn't used (not a MagicPD)
         #self._fluct = OpticalVacuumFluctuation(port = self.Fr)
 
-        self.rtWpdI = SignalPortHolderOut(self, x = 'rtWpdI')
-        self.rtWpdQ = SignalPortHolderOut(self, x = 'rtWpdQ')
-        self.rtWpdCmn = SignalPortHolderOut(self, x = 'rtWpdCmn')
+        self.rtWpdI = ports.SignalPortHolderOut(self, x = 'rtWpdI')
+        self.rtWpdQ = ports.SignalPortHolderOut(self, x = 'rtWpdQ')
+        self.rtWpdCmn = ports.SignalPortHolderOut(self, x = 'rtWpdCmn')
 
         if source_port is None:
             self.source_port = self.Fr.i
@@ -354,7 +352,7 @@ class HiddenVariableHomodynePD(
 
 
 class TotalDCPowerPD(
-        OpticalNonOriented1PortMixin,
+        ports.OpticalNonOriented1PortMixin,
         OpticalCouplerBase,
         SystemElementBase
 ):
@@ -367,7 +365,7 @@ class TotalDCPowerPD(
         super(TotalDCPowerPD, self).__init__(**kwargs)
         self.port  = port
         self.system.own_port_virtual(self, self.port)
-        self.WpdDC = SignalPortHolderOut(self, x = 'WpdDC')
+        self.WpdDC = ports.SignalPortHolderOut(self, x = 'WpdDC')
         self.fdkey  = DictKey({ClassicalFreqKey: FrequencyKey({})})
         self.pk_WpdDC = (self.WpdDC.o, self.fdkey)
         return

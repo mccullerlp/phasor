@@ -1,8 +1,7 @@
 """
 """
 
-from __future__ import division
-from __future__ import print_function
+from __future__ import (division, print_function)
 import pytest
 
 from declarative import Bunch
@@ -37,7 +36,7 @@ def gensys():
         facing_cardinal = 'E',
     )
     sled.s1 = optics.Space(
-        100,
+        L_m = 100,
         L_detune_m = 0,
         name = 's1'
     )

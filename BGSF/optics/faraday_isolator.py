@@ -18,12 +18,12 @@ from .bases import (
 from .ports import (
     OpticalPortHolderInOut,
     OpticalPortHolderIn,
-    OpticalPortHolderOut,
+    ports.OpticalPortHolderOut,
     #QuantumKey,
     RAISE, LOWER,
     PolKEY, PolS, PolP,
     OpticalSymmetric2PortMixin,
-    OpticalOriented2PortMixin,
+    ports.OpticalOriented2PortMixin,
 )
 
 from .polarization import (
@@ -36,7 +36,7 @@ from .polarization import (
 )
 
 class FaradayIsolator(
-        OpticalOriented2PortMixin,
+        ports.OpticalOriented2PortMixin,
         OpticalCouplerBase,
         SystemElementBase
 ):
