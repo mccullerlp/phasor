@@ -14,9 +14,7 @@ from collections import defaultdict
 import numpy as np
 import warnings
 
-from declarative import (
-    mproperty,
-)
+import declarative as decl
 
 from ..base import (
     Frequency,
@@ -59,11 +57,11 @@ class LinearSystem(RootElement, Constants):
 
     _frozen = False
 
-    @mproperty
+    @decl.mproperty
     def field_space(self, FS = None):
         return FS
 
-    @mproperty
+    @decl.mproperty
     def freq_order_max_default(self, val = 2):
         return val
 
@@ -137,7 +135,7 @@ class LinearSystem(RootElement, Constants):
     def variant(self, params = None):
         raise NotImplementedError("TODO")
 
-    @mproperty
+    @decl.mproperty
     def fully_resolved_name_tuple(self):
         return ()
 
@@ -179,7 +177,10 @@ class LinearSystem(RootElement, Constants):
         return True
 
     def _setup_sequence(self):
-        self._autoterminate()
+        while self._include_lst:
+            self.do_includes()
+            print(self._include_lst)
+            self._autoterminate()
         self._frozen = True
 
         self.port_algo = PortUpdatesAlgorithm(
@@ -201,7 +202,19 @@ class LinearSystem(RootElement, Constants):
         self.solver.solve()
         return self.solver
 
+    @decl.mproperty
+    def _include_lst(self):
+        return []
+
     def include(self, element):
+        self._include_lst.append(element)
+
+    def do_includes(self):
+        while self._include_lst:
+            el = self._include_lst.pop()
+            self._include(el)
+
+    def _include(self, element):
         if self._frozen:
             raise RuntimeError("Cannot include elements or link after solution requested")
         if element in self.elements:
@@ -243,8 +256,8 @@ class LinearSystem(RootElement, Constants):
                 terminated_ports.update(v)
         registered_ports = set(self.port_owners.keys())
         unterminated_ports = registered_ports - terminated_ports
-        if unterminated_ports:
-            self.sled.autoterminate = SystemElementSled()
+        if unterminated_ports and not hasattr(self.sled, 'autoterminate'):
+            self.sled.my.autoterminate = SystemElementSled()
         for port in unterminated_ports:
             aterm = self.port_autoterminate.get(port, None)
             if aterm is None:

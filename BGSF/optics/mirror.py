@@ -49,71 +49,130 @@ class Mirror(
         val = self.ooa_params.setdefault('L_t', val)
         return val
 
-    def __init__(
-        self,
-        **kwargs
-    ):
-        super(Mirror, self).__init__(
-            _include = None,
-            **kwargs
-        )
+    #self.angleZ  = MechanicalPortHolder(self, x = 'aZ')
+    #self.torqueZ = MechanicalPortHolder(self, x = 'tZ')
+    #self.posX    = MechanicalPortHolder(self, x = 'pX')
+    #self.forceX  = MechanicalPortHolder(self, x = 'fX')
+    #self.angleX  = MechanicalPortHolder(self, x = 'aX')
+    #self.torqueX = MechanicalPortHolder(self, x = 'tX')
+    #self.posY    = MechanicalPortHolder(self, x = 'pY')
+    #self.forceY  = MechanicalPortHolder(self, x = 'fY')
+    #self.angleY  = MechanicalPortHolder(self, x = 'aY')
+    #self.torqueY = MechanicalPortHolder(self, x = 'tY')
 
-        #optic mechanical ports
-        self.posZ     = MechanicalPortHolderIn(self, x = 'pZ')
-        self.forceZ   = MechanicalPortHolderOut(self, x = 'fZ')
-        #self.angleZ  = MechanicalPortHolder(self, x = 'aZ')
-        #self.torqueZ = MechanicalPortHolder(self, x = 'tZ')
-        #self.posX    = MechanicalPortHolder(self, x = 'pX')
-        #self.forceX  = MechanicalPortHolder(self, x = 'fX')
-        #self.angleX  = MechanicalPortHolder(self, x = 'aX')
-        #self.torqueX = MechanicalPortHolder(self, x = 'tX')
-        #self.posY    = MechanicalPortHolder(self, x = 'pY')
-        #self.forceY  = MechanicalPortHolder(self, x = 'fY')
-        #self.angleY  = MechanicalPortHolder(self, x = 'aY')
-        #self.torqueY = MechanicalPortHolder(self, x = 'tY')
+    @decl.dproperty
+    def posZ(self):
+        return MechanicalPortHolderIn(self, x = 'pZ')
 
-        #behave like a mirror if AOI_deg is 0 and only have a front and back port
+    @decl.dproperty
+    def forceZ(self):
+        return MechanicalPortHolderOut(self, x = 'fZ')
+
+    @decl.dproperty
+    def Fr(self):
         if not self.is_4_port:
-            self.Fr   = OpticalPortHolderInOut(self, x = 'Fr' )
-            self.Bk   = OpticalPortHolderInOut(self, x = 'Bk' )
-            self._LFr = OpticalPortHolderInOut(self, x = 'LFr')
-            self._LBk = OpticalPortHolderInOut(self, x = 'LBk')
-
-            self._LFr_vac = VacuumTerminator()
-            self._LBk_vac = VacuumTerminator()
-            #TODO, not clear if linking from constructor here is OK
-            self.system.link(self._LFr, self._LFr_vac.Fr)
-            self.system.link(self._LBk, self._LBk_vac.Fr)
-            #emulate BS ports, will raise an error if they are ever accidentally multiply assigned
-            self.FrA = self.Fr
-            self.FrB = self.Fr
-            self.BkA = self.Bk
-            self.BkB = self.Bk
-            self._LFrA = self._LFr
-            self._LFrB = self._LFr
-            self._LBkA = self._LBk
-            self._LBkB = self._LBk
+            return OpticalPortHolderInOut(self, x = 'Fr' )
         else:
-            self.FrA   = OpticalPortHolderInOut(self, x = 'FrA' )
-            self.FrB   = OpticalPortHolderInOut(self, x = 'FrB' )
-            self.BkA   = OpticalPortHolderInOut(self, x = 'BkA' )
-            self.BkB   = OpticalPortHolderInOut(self, x = 'BkB' )
-            self._LFrA = OpticalPortHolderInOut(self, x = 'LFrA')
-            self._LFrB = OpticalPortHolderInOut(self, x = 'LFrB')
-            self._LBkA = OpticalPortHolderInOut(self, x = 'LBkA')
-            self._LBkB = OpticalPortHolderInOut(self, x = 'LBkB')
+            return None
 
-            self._LFrA_vac = VacuumTerminator()
-            self._LFrB_vac = VacuumTerminator()
-            self._LBkA_vac = VacuumTerminator()
-            self._LBkB_vac = VacuumTerminator()
-            #TODO, not clear if linking from constructor here is OK
-            self.system.link(self._LFrA, self._LFrA_vac.Fr)
+    @decl.dproperty
+    def Bk(self):
+        if not self.is_4_port:
+            return OpticalPortHolderInOut(self, x = 'Bk' )
+        else:
+            return None
+
+    @decl.dproperty
+    def _LFr(self):
+        if not self.is_4_port:
+            return OpticalPortHolderInOut(self, x = 'LFr')
+
+    @decl.dproperty
+    def _LBk(self):
+        if not self.is_4_port:
+            return OpticalPortHolderInOut(self, x = 'LBk')
+
+    @decl.dproperty
+    def _LFrA_vac(self):
+        return VacuumTerminator()
+
+    @decl.dproperty
+    def _LBkA_vac(self):
+        return VacuumTerminator()
+
+    @decl.dproperty
+    def _LFrB_vac(self):
+        if self.is_4_port:
+            return VacuumTerminator()
+
+    @decl.dproperty
+    def _LBkB_vac(self):
+        if self.is_4_port:
+            return VacuumTerminator()
+
+    @decl.dproperty
+    def FrA(self):
+        if self.is_4_port:
+            return OpticalPortHolderInOut(self, x = 'FrA' )
+        else:
+            return self.Fr
+
+    @decl.dproperty
+    def FrB(self):
+        if self.is_4_port:
+            return OpticalPortHolderInOut(self, x = 'FrB' )
+        else:
+            return self.Fr
+
+    @decl.dproperty
+    def BkA(self):
+        if self.is_4_port:
+            return OpticalPortHolderInOut(self, x = 'BkA' )
+        else:
+            return self.Bk
+
+    @decl.dproperty
+    def BkB(self):
+        if self.is_4_port:
+            return OpticalPortHolderInOut(self, x = 'BkB' )
+        else:
+            return self.Bk
+
+    @decl.dproperty
+    def _LFrA(self):
+        if self.is_4_port:
+            return OpticalPortHolderInOut(self, x = 'LFrA' )
+        else:
+            return self._LFr
+
+    @decl.dproperty
+    def _LFrB(self):
+        if self.is_4_port:
+            return OpticalPortHolderInOut(self, x = 'LFrB' )
+        else:
+            return self._LFr
+
+    @decl.dproperty
+    def _LBkA(self):
+        if self.is_4_port:
+            return OpticalPortHolderInOut(self, x = 'LBkA' )
+        else:
+            return self._LBk
+
+    @decl.dproperty
+    def _LBkB(self):
+        if self.is_4_port:
+            return OpticalPortHolderInOut(self, x = 'LBkB' )
+        else:
+            return self._LBk
+
+    @decl.dproperty
+    def _link(self):
+        self.system.link(self._LFrA, self._LFrA_vac.Fr)
+        self.system.link(self._LBkA, self._LBkA_vac.Fr)
+        if self.is_4_port:
             self.system.link(self._LFrB, self._LFrB_vac.Fr)
-            self.system.link(self._LBkA, self._LBkA_vac.Fr)
             self.system.link(self._LBkB, self._LBkB_vac.Fr)
-        self.system.include(self)
-        return
 
     @decl.mproperty
     def ports_optical(self):
