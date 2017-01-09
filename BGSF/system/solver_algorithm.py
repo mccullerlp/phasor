@@ -499,7 +499,11 @@ class SystemSolver(object):
             dk_from = key_from[0] | key_from[1]
             dk_to = key_to[0] | key_to[1]
             if dk_from.contains(select_from) and dk_to.contains(select_to):
-                vals.append(("[{0: <50},{1: <60}]={2}".format(key_from, key_to, value)))
+                vals.append(("[{0: <50},{1: <60}]={2}".format(
+                    str(key_from),
+                    str(key_to),
+                    str(value),
+                )))
         vals.sort()
         for val in vals:
             print(val)
@@ -523,7 +527,11 @@ class SystemSolver(object):
             dk_from = key_from[0] | key_from[1]
             dk_to = key_to[0] | key_to[1]
             if dk_from.contains(select_from) and dk_to.contains(select_to):
-                vals.append(("[{0: <50},{1: <60}]={2}".format(key_from, key_to, value)))
+                vals.append(("[{0: <50},{1: <60}]={2}".format(
+                    str(key_from),
+                    str(key_to),
+                    str(value),
+                )))
         vals.sort()
         for val in vals:
             print(val)

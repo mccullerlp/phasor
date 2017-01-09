@@ -20,5 +20,5 @@ class OpticalFrequency(SystemElementBase, FrequencyBase):
         return val
 
     @decl.mproperty
-    def iwavelen_m(self, val):
+    def iwavelen_m(self):
         return 1/self.wavelen_m

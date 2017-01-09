@@ -50,40 +50,32 @@ def gensys(
     sled.laser = Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
-        name = "Laser",
     )
 
     sled.my.itm = Mirror(
         T_hr=.001,
-        name = 'ITM',
         facing_cardinal = 'E',
     )
     sled.my.etm = Mirror(
         T_hr=.001,
-        name = 'ETM',
         facing_cardinal = 'W',
     )
 
     sled.my.s1 = Space(
-        L_m,
+        L_m = L_m,
         L_detune_m = L_detune_m,
-        name = 's1',
     )
 
     sled.my.reflPD = MagicPD(
-        name = 'reflPD',
         facing_cardinal = 'E',
     )
     sled.my.itmPD = MagicPD(
-        name = 'ITMPD',
         facing_cardinal = 'W',
     )
     sled.my.etmPD = MagicPD(
-        name = 'ETMPD',
         facing_cardinal = 'E',
     )
     sled.my.transPD = PD(
-        name = 'transmon',
     )
 
     sys.optical_link_sequence_WtoE(
@@ -132,6 +124,7 @@ class TestFabryPerot(TestCase):
         #sys.source_vector_print()
         #sys.solution_vector_print()
         pprint(sol.views)
+        print("Detune [m]: ", b.sys.sled.s1.L_detune_m)
         print("refl_DC",      sol.views.refl_DC.DC_readout     )
         print("transmon_DC",  sol.views.transmon_DC.DC_readout )
         print("itm_DC",       sol.views.itm_DC.DC_readout      )

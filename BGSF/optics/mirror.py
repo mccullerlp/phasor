@@ -36,24 +36,21 @@ class Mirror(
 
     @decl.dproperty
     def T_hr(self, val = 0):
-        self.ooa_params.setdefault('T_hr', val)
+        val = self.ooa_params.setdefault('T_hr', val)
         return val
 
     @decl.dproperty
     def L_hr(self, val = 0):
-        self.ooa_params.setdefault('L_hr', val)
+        val = self.ooa_params.setdefault('L_hr', val)
         return val
 
     @decl.dproperty
     def L_t(self, val = 0):
-        self.ooa_params.setdefault('L_t', val)
+        val = self.ooa_params.setdefault('L_t', val)
         return val
 
     def __init__(
         self,
-        T_hr    = 0,
-        L_hr    = 0,
-        L_t     = 0,
         **kwargs
     ):
         super(Mirror, self).__init__(

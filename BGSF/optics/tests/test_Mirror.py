@@ -50,18 +50,15 @@ def gensys_full():
     )
 
     sled.etm = optics.Mirror(
-        T_hr=.001,
-        name = 'ETM',
+        T_hr = 0.25,
         facing_cardinal = 'W',
     )
     sled.etmPD = optics.MagicPD(
-        name = 'ETMPD',
         facing_cardinal = 'E',
     )
     sled.s1 = optics.Space(
         L_m = 100,
         L_detune_m = 0,
-        name = 's1'
     )
 
     sys.optical_link_sequence_WtoE(
@@ -113,6 +110,7 @@ def test_mirror():
     #sol.coupling_matrix_print(
     #    select_to= b.sled.etm.Fr.i,
     #)
+    assertions.assertAlmostEqual(sol.views.etm_DC.DC_readout, .75)
     print("inv")
     #sol.coupling_matrix_inv_print()
     print('A')
