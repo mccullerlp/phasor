@@ -51,9 +51,9 @@ class SystemElementBase(ElementBase):
             ptup = ()
         else:
             ptup = self.parent.fully_resolved_name_tuple
-        print("PTUP: ", ptup, self.name)
-        if self.name is not None:
-            ptup = ptup + (self.name,)
+        print("PTUP: ", ptup, self.name_child)
+        if self.name_child is not None:
+            ptup = ptup + (self.name_child,)
         return ptup
 
     @mproperty

@@ -108,8 +108,9 @@ class SystemSolver(object):
         #sort this so that shorter name_tups are first
         views_insert.sort()
         print("INSERT: ", views_insert)
+        views = DeepBunch()
         for name_tup, view_obj in views_insert:
-            subview = self.views
+            subview = views
             for idx, name in enumerate(name_tup[:-1]):
                 if not isinstance(subview, DeepBunch):
                     #this can't really be called on the first one
@@ -123,6 +124,8 @@ class SystemSolver(object):
                     print(subview)
                     print(name_tup)
                     subview[name_tup[-1]] = view_obj
+        print("INSERT: ", views)
+        self.views.update_recursive(views.sled)
         return
 
     def _source_vector_generate(

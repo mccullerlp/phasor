@@ -116,21 +116,33 @@ class PD(ports.OpticalNonOriented1PortMixin, OpticalCouplerBase, SystemElementBa
 
 
 class MagicPD(ports.OpticalOriented2PortMixin, OpticalCouplerBase, SystemElementBase):
-    def __init__(
-            self,
-            include_readouts = False,
-            **kwargs
-    ):
-        super(MagicPD, self).__init__(**kwargs)
-        self.Fr   = ports.OpticalPortHolderInOut(self, x = 'Fr')
-        self.Bk   = ports.OpticalPortHolderInOut(self, x = 'Bk')
-        self.Wpd  = ports.SignalPortHolderOut(self, x = 'Wpd')
 
-        OOA_ASSIGN(self).include_readouts = include_readouts
+    @decl.dproperty
+    def Fr(self):
+        return ports.OpticalPortHolderInOut(self, x = 'Fr')
+
+    @decl.dproperty
+    def Wpd(self):
+        return ports.SignalPortHolderOut(self, x    = 'Wpd')
+
+    @decl.dproperty
+    def Bk(self):
+        return ports.OpticalPortHolderInOut(self, x = 'Bk')
+
+    @decl.dproperty
+    def include_readouts(self, val = False):
+        val = self.ooa_params.setdefault('include_readouts', val)
+        return val
+
+    @decl.dproperty
+    def DC(self):
         if self.include_readouts:
-            self.DC    = DCReadout(port = self.Wpd.o)
-            self.noise = NoiseReadout(portN = self.Wpd.o)
-        return
+            return DCReadout(port = self.Wpd.o)
+
+    @decl.dproperty
+    def noise(self):
+        if self.include_readouts:
+            return NoiseReadout(portN = self.Wpd.o)
 
     def system_setup_ports(self, ports_algorithm):
         pmap = {

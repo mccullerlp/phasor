@@ -43,6 +43,14 @@ class DictKey(MappingABC):
             return False
         return self._dict == other._dict
 
+    def __lt__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        #TODO this is probably megaslow. Should likely use id or hash
+        l1 = tuple(sorted(self._dict.items()))
+        o1 = tuple(sorted(self._dict.items()))
+        return l1 < o1
+
     def __repr__(self):
         def recode(v):
             if isinstance(v, str):

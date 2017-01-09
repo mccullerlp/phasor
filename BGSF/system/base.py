@@ -255,7 +255,8 @@ class LinearSystem(RootElement, Constants):
                 pobj, tclass = aterm
                 #have to build within include to get the sled connection
                 #TODO: make this a sane naming scheme
-                name = '{0}({2}-<{1}>)'.format(tclass.__name__, port, pobj.element.fully_resolved_name)
+                #TODO GOTTA GOTTA FIX
+                name = '{0}({2}-<{1}>)'.format(tclass.__name__, port, pobj.element.fully_resolved_name).replace('.', '_')
                 tinst = self.sled.autoterminate.include(name, tclass())
                 self.link(pobj, tinst.Fr)
 

@@ -23,6 +23,29 @@ def gensys():
     sled.laser = optics.Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
+    )
+
+    sled.etmPD = optics.MagicPD(
+        facing_cardinal = 'W',
+    )
+
+    sys.optical_link_sequence_WtoE(
+        sled.laser,
+        sled.etmPD,
+    )
+
+    sled.etm_DC = readouts.DCReadout(port = sled.etmPD.Wpd.o)
+    #sys.AC_freq(np.array([1]))
+    return Bunch(locals())
+
+
+def gensys_full():
+    sys = OpticalSystem(
+    )
+    sled = sys.sled
+    sled.laser = optics.Laser(
+        F = sys.F_carrier_1064,
+        power_W = 1.,
         name = "laser",
     )
 
@@ -56,10 +79,25 @@ def gensys():
     #sys.AC_freq(np.array([1]))
     return Bunch(locals())
 
+import unittest
+assertions = unittest.TestCase('__init__')
+
+@pytest.mark.optics_trivial
+@pytest.mark.optics_fast
+def test_trivial():
+    b = gensys()
+    sys = b.sys
+    sol = sys.solve()
+    #sys.coupling_matrix_print()
+    #sys.source_vector_print()
+    #sol.solution_vector_print()
+    print("etm_DC", sol.views.etm_DC.DC_readout)
+    assertions.assertAlmostEqual(sol.views.etm_DC.DC_readout, 1)
+
 
 @pytest.mark.optics_fast
 def test_mirror():
-    b = gensys()
+    b = gensys_full()
     sys = b.sys
     sol = sys.solve()
     #sys.coupling_matrix_print()

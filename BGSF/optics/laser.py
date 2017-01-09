@@ -40,7 +40,6 @@ class Laser(ports.OpticalNonOriented1PortMixin, bases.OpticalCouplerBase, bases.
 
     @decl.dproperty
     def _fluct(self):
-        print("HMM")
         return vacuum.OpticalVacuumFluctuation(port = self.Fr)
 
     phased = False
@@ -72,12 +71,6 @@ class Laser(ports.OpticalNonOriented1PortMixin, bases.OpticalCouplerBase, bases.
     def F(self, val):
         type_test(val, frequency.OpticalFrequency)
         return val
-
-    def linked_elements(self):
-        return (
-            self.F,
-            self._fluct,
-        )
 
     def system_setup_ports_initial(self, ports_algorithm):
         ports_algorithm.coherent_sources_needed(self.Fr.o, self.fkey | self.polk | ports.LOWER)

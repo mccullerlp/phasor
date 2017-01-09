@@ -15,15 +15,14 @@ from .bases import (
     OOA_ASSIGN,
 )
 
+from . import ports
 from .ports import (
     OpticalPortHolderInOut,
     OpticalPortHolderIn,
-    ports.OpticalPortHolderOut,
     #QuantumKey,
     RAISE, LOWER,
     PolKEY, PolS, PolP,
     OpticalSymmetric2PortMixin,
-    ports.OpticalOriented2PortMixin,
 )
 
 from .polarization import (

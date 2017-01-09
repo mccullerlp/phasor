@@ -26,8 +26,6 @@ class RootElement(Element, dsubstrate.RootElement):
 
 
 class ElementBase(Element, SuperBase):
-    name = None
-
     def __init__(
         self,
         **kwargs
@@ -51,7 +49,7 @@ class ElementBase(Element, SuperBase):
 
     @dproperty
     def _include(self, val = NOARG):
-        if val is NOARG :
+        if val is NOARG:
             self.system.include(self)
 
 
