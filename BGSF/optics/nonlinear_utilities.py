@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
+from __future__ import (division, print_function)
 #from BGSF.utilities.print import print
 #import numpy as np
 
@@ -10,11 +9,7 @@ from ..math.key_matrix import (
     DictKey,
 )
 
-from .ports import (
-    QuantumKey,
-    RAISE, LOWER,
-    ClassicalFreqKey,
-)
+from . import ports
 
 
 def ports_fill_2optical_2classical(
@@ -33,13 +28,13 @@ def ports_fill_2optical_2classical(
                 ports_algorithm.port_coupling_needed(ptoOpt, kfrom)
         if in_port_classical is not None:
             for kfrom, lkfrom in ports_algorithm.symmetric_update(pfrom, in_port_classical.i):
-                if kfrom.contains(LOWER):
-                    ftoOptP = kfrom[ClassicalFreqKey] + lkfrom[ClassicalFreqKey]
+                if kfrom.contains(ports.LOWER):
+                    ftoOptP = kfrom[ports.ClassicalFreqKey] + lkfrom[ports.ClassicalFreqKey]
                 else:
-                    ftoOptP = kfrom[ClassicalFreqKey] - lkfrom[ClassicalFreqKey]
+                    ftoOptP = kfrom[ports.ClassicalFreqKey] - lkfrom[ports.ClassicalFreqKey]
                 if system.reject_classical_frequency_order(ftoOptP):
                     continue
-                ktoOptP = kfrom.without_keys(ClassicalFreqKey) | DictKey({ClassicalFreqKey: ftoOptP})
+                ktoOptP = kfrom.without_keys(ports.ClassicalFreqKey) | DictKey({ports.ClassicalFreqKey: ftoOptP})
 
                 ports_algorithm.prev_solution_needed(pfrom, kfrom)
                 ports_algorithm.prev_solution_needed(in_port_classical.i, lkfrom)
@@ -51,15 +46,15 @@ def ports_fill_2optical_2classical(
 
         if out_port_classical is not None:
             for kfrom, lkto in ports_algorithm.symmetric_update(pfrom, out_port_classical.o):
-                if kfrom.contains(LOWER):
-                    fnew = kfrom[ClassicalFreqKey] - lkto[ClassicalFreqKey]
-                    qKey = RAISE
-                elif kfrom.contains(RAISE):
-                    fnew = kfrom[ClassicalFreqKey] + lkto[ClassicalFreqKey]
-                    qKey = LOWER
+                if kfrom.contains(ports.LOWER):
+                    fnew = kfrom[ports.ClassicalFreqKey] - lkto[ports.ClassicalFreqKey]
+                    qKey = ports.RAISE
+                elif kfrom.contains(ports.RAISE):
+                    fnew = kfrom[ports.ClassicalFreqKey] + lkto[ports.ClassicalFreqKey]
+                    qKey = ports.LOWER
                 if system.reject_classical_frequency_order(fnew):
                     continue
-                kfrom2 = kfrom.without_keys(QuantumKey, ClassicalFreqKey) | DictKey({ClassicalFreqKey: fnew}) | qKey
+                kfrom2 = kfrom.without_keys(ports.QuantumKey, ports.ClassicalFreqKey) | DictKey({ports.ClassicalFreqKey: fnew}) | qKey
                 ports_algorithm.port_coupling_needed(pfrom, kfrom2)
                 pass
 
@@ -68,15 +63,15 @@ def ports_fill_2optical_2classical(
         def subset_second(pool2):
             setdict = dict()
             for kfrom2 in pool2:
-                kfrom1_sm = kfrom2.without_keys(ClassicalFreqKey, QuantumKey)
-                if kfrom2.contains(RAISE):
-                    kfrom1_sm = kfrom1_sm | LOWER
-                elif kfrom2.contains(LOWER):
-                    kfrom1_sm = kfrom1_sm | RAISE
+                kfrom1_sm = kfrom2.without_keys(ports.ClassicalFreqKey, ports.QuantumKey)
+                if kfrom2.contains(ports.RAISE):
+                    kfrom1_sm = kfrom1_sm | ports.LOWER
+                elif kfrom2.contains(ports.LOWER):
+                    kfrom1_sm = kfrom1_sm | ports.RAISE
                 group = setdict.setdefault(kfrom1_sm, [])
                 group.append(kfrom2)
             def subset_func(kfrom1):
-                kfrom1_sm = kfrom1.without_keys(ClassicalFreqKey)
+                kfrom1_sm = kfrom1.without_keys(ports.ClassicalFreqKey)
                 return setdict.get(kfrom1_sm, [])
             return subset_func
         for kfrom1, kfrom2 in ports_algorithm.symmetric_update(
@@ -84,34 +79,34 @@ def ports_fill_2optical_2classical(
                 pfrom,
                 subset_second = subset_second
         ):
-            if kfrom1.contains(LOWER):
-                fdiff = kfrom1[ClassicalFreqKey] - kfrom2[ClassicalFreqKey]
-            elif kfrom1.contains(RAISE):
-                fdiff = kfrom2[ClassicalFreqKey] - kfrom1[ClassicalFreqKey]
+            if kfrom1.contains(ports.LOWER):
+                fdiff = kfrom1[ports.ClassicalFreqKey] - kfrom2[ports.ClassicalFreqKey]
+            elif kfrom1.contains(ports.RAISE):
+                fdiff = kfrom2[ports.ClassicalFreqKey] - kfrom1[ports.ClassicalFreqKey]
             if system.reject_classical_frequency_order(fdiff):
                 continue
             ports_algorithm.port_coupling_needed(
                 out_port_classical.o,
-                DictKey({ClassicalFreqKey: fdiff})
+                DictKey({ports.ClassicalFreqKey: fdiff})
             )
 
     for port in ports_out_optical:
         pto = port.o
         for kto, lkfrom in ports_algorithm.symmetric_update(pto, out_port_classical.o):
-            if kto.contains(LOWER):
-                ffromOptP = kto[ClassicalFreqKey] - lkfrom[ClassicalFreqKey]
+            if kto.contains(ports.LOWER):
+                ffromOptP = kto[ports.ClassicalFreqKey] - lkfrom[ports.ClassicalFreqKey]
             else:
-                ffromOptP = kto[ClassicalFreqKey] + lkfrom[ClassicalFreqKey]
+                ffromOptP = kto[ports.ClassicalFreqKey] + lkfrom[ports.ClassicalFreqKey]
             if system.reject_classical_frequency_order(ffromOptP):
                 continue
             for pfromOpt in pmap[pto]:
                 ports_algorithm.port_coupling_needed(
                     pfromOpt,
-                    kto.without_keys(ClassicalFreqKey) | DictKey({ClassicalFreqKey: ffromOptP})
+                    kto.without_keys(ports.ClassicalFreqKey) | DictKey({ports.ClassicalFreqKey: ffromOptP})
                 )
                 ports_algorithm.port_coupling_needed(
                     pfromOpt,
-                    kto.without_keys(ClassicalFreqKey) | DictKey({ClassicalFreqKey: ffromOptP})
+                    kto.without_keys(ports.ClassicalFreqKey) | DictKey({ports.ClassicalFreqKey: ffromOptP})
                 )
 
 
@@ -138,23 +133,23 @@ def modulations_fill_2optical_2classical(
         #must check and reject already completed ones as the inject generates more lkfroms
         if lkfrom in lkfrom_completed:
             continue
-        lk_freq = lkfrom[ClassicalFreqKey]
-        assert(not lkfrom - DictKey({ClassicalFreqKey: lk_freq}))
+        lk_freq = lkfrom[ports.ClassicalFreqKey]
+        assert(not lkfrom - DictKey({ports.ClassicalFreqKey: lk_freq}))
         lk_freqN = -lk_freq
         if lk_freqN == lk_freq:
             #TODO: make the nonlinear system properly handle the DC cases
             continue
-        lkfromN = DictKey({ClassicalFreqKey: lk_freqN})
+        lkfromN = DictKey({ports.ClassicalFreqKey: lk_freqN})
         #print(pfrom.i, ptoOpt.o)
         #print(lkfromN, lkfroms)
         assert(lkfromN in lkfroms)
         lkfrom_completed.add(lkfrom)
         lkfrom_completed.add(lkfromN)
 
-        if kfrom.contains(LOWER):
-            kfrom_conj = (kfrom - LOWER) | RAISE
+        if kfrom.contains(ports.LOWER):
+            kfrom_conj = (kfrom - ports.LOWER) | ports.RAISE
         else:
-            kfrom_conj = (kfrom - RAISE) | LOWER
+            kfrom_conj = (kfrom - ports.RAISE) | ports.LOWER
 
         optCplg  = (pfrom.i, kfrom)
         optCplgC = (pfrom.i, kfrom_conj)
@@ -162,20 +157,20 @@ def modulations_fill_2optical_2classical(
         posCplgP = (in_port_classical.i, lkfrom)
         posCplgN = (in_port_classical.i, lkfromN)
 
-        ftoOptP = kfrom[ClassicalFreqKey] + lkfrom[ClassicalFreqKey]
-        ftoOptN = kfrom[ClassicalFreqKey] + lkfromN[ClassicalFreqKey]
+        ftoOptP = kfrom[ports.ClassicalFreqKey] + lkfrom[ports.ClassicalFreqKey]
+        ftoOptN = kfrom[ports.ClassicalFreqKey] + lkfromN[ports.ClassicalFreqKey]
 
         if not system.reject_classical_frequency_order(ftoOptP):
-            ktoOptP = kfrom.without_keys(ClassicalFreqKey) | DictKey({ClassicalFreqKey: ftoOptP})
+            ktoOptP = kfrom.without_keys(ports.ClassicalFreqKey) | DictKey({ports.ClassicalFreqKey: ftoOptP})
         else:
             ktoOptP = None
 
         if not system.reject_classical_frequency_order(ftoOptN):
-            ktoOptN = kfrom.without_keys(ClassicalFreqKey) | DictKey({ClassicalFreqKey: ftoOptN})
+            ktoOptN = kfrom.without_keys(ports.ClassicalFreqKey) | DictKey({ports.ClassicalFreqKey: ftoOptN})
         else:
             ktoOptN = None
 
-        if kfrom.contains(LOWER):
+        if kfrom.contains(ports.LOWER):
             if ktoOptP is not None:
                 matrix_algorithm.nonlinear_triplet_insert(
                     optCplg,
@@ -207,7 +202,7 @@ def modulations_fill_2optical_2classical(
                     StdcplgC * CLcplgC
                 )
     if ptoOpt is not None:
-        if kfrom.contains(LOWER):
+        if kfrom.contains(ports.LOWER):
             matrix_algorithm.port_coupling_insert(
                 pfrom.i, kfrom, ptoOpt.o, kfrom,
                 Stdcplg,
@@ -224,37 +219,37 @@ def modulations_fill_2optical_2classical(
         #must check and reject already completed ones as the inject generates more lktos
         if lkto in lkto_completed:
             continue
-        lk_freq = lkto[ClassicalFreqKey]
-        assert(not lkto - DictKey({ClassicalFreqKey: lk_freq}))
+        lk_freq = lkto[ports.ClassicalFreqKey]
+        assert(not lkto - DictKey({ports.ClassicalFreqKey: lk_freq}))
         lk_freqN = -lk_freq
-        lktoN = DictKey({ClassicalFreqKey: lk_freqN})
+        lktoN = DictKey({ports.ClassicalFreqKey: lk_freqN})
         assert(lktoN in lktos)
         lkto_completed.add(lkto)
         lkto_completed.add(lktoN)
 
-        if kfrom.contains(LOWER):
-            kfrom_conj = (kfrom - LOWER) | RAISE
+        if kfrom.contains(ports.LOWER):
+            kfrom_conj = (kfrom - ports.LOWER) | ports.RAISE
         else:
-            kfrom_conj = (kfrom - RAISE) | LOWER
+            kfrom_conj = (kfrom - ports.RAISE) | ports.LOWER
 
         optCplg  = (pfrom.i, kfrom)
         optCplgC = (pfrom.i, kfrom_conj)
 
-        ftoOptP = kfrom[ClassicalFreqKey] + lkto[ClassicalFreqKey]
-        ftoOptN = kfrom[ClassicalFreqKey] + lktoN[ClassicalFreqKey]
+        ftoOptP = kfrom[ports.ClassicalFreqKey] + lkto[ports.ClassicalFreqKey]
+        ftoOptN = kfrom[ports.ClassicalFreqKey] + lktoN[ports.ClassicalFreqKey]
 
         if not system.reject_classical_frequency_order(ftoOptP):
-            ktoOptP = kfrom.without_keys(ClassicalFreqKey) | DictKey({ClassicalFreqKey: ftoOptP})
+            ktoOptP = kfrom.without_keys(ports.ClassicalFreqKey) | DictKey({ports.ClassicalFreqKey: ftoOptP})
         else:
             ktoOptP = None
 
         if not system.reject_classical_frequency_order(ftoOptN):
-            ktoOptN = kfrom.without_keys(ClassicalFreqKey) | DictKey({ClassicalFreqKey: ftoOptN})
+            ktoOptN = kfrom.without_keys(ports.ClassicalFreqKey) | DictKey({ports.ClassicalFreqKey: ftoOptN})
         else:
             ktoOptN = None
-        #Both raising and lowering use optCplgC because it is always the conjugate to the other, so it always matches LOWER with the classical field of RAISE
+        #Both raising and lowering use optCplgC because it is always the conjugate to the other, so it always matches ports.LOWER with the classical field of ports.RAISE
         #and vice-versa
-        if kfrom.contains(LOWER):
+        if kfrom.contains(ports.LOWER):
             #TODO Check factor of 2 overcounting here between raising and lowering
             if ktoOptP is not None:
                 matrix_algorithm.port_coupling_insert(
@@ -266,9 +261,9 @@ def modulations_fill_2optical_2classical(
                     pfrom.i, ktoOptN, out_port_classical.o, lktoN,
                     Stdcplg * BAcplg / 2, optCplgC,
                 )
-        elif kfrom.contains(RAISE):
+        elif kfrom.contains(ports.RAISE):
             #TODO Check factor of 2 overcounting here between raising and lowering
-            # because of conjugation issues, the frequencies are reversed in the lktos for the optical RAISE operators
+            # because of conjugation issues, the frequencies are reversed in the lktos for the optical ports.RAISE operators
             if ktoOptP is not None:
                 matrix_algorithm.port_coupling_insert(
                     pfrom.i, ktoOptP, out_port_classical.o, lktoN,

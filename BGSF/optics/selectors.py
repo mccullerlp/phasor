@@ -1,49 +1,31 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
-#from BGSF.utilities.print import print
-
-from declarative import (
-    mproperty,
-)
-
-from .bases import (
-    OpticalCouplerBase,
-    SystemElementBase,
-    OOA_ASSIGN,
-)
-
-from . import ports
-from .ports import (
-    OpticalPortHolderInOut,
-    OpticalPortHolderIn,
-    #QuantumKey,
-    RAISE, LOWER,
-    PolKEY, PolS, PolP,
-    #OpticalSymmetric2PortMixin,
-)
-
+from __future__ import (division, print_function)
 from collections import defaultdict
 
+#import declarative as decl
 
-class PolSelector(OpticalCouplerBase, SystemElementBase):
+from . import bases
+from . import ports
+
+
+class PolSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
     def __init__(
         self,
         **kwargs
     ):
         super(PolSelector, self).__init__(**kwargs)
-        self.Fr   = OpticalPortHolderInOut(self, x = 'Fr')
-        self.Bk_P = OpticalPortHolderInOut(self, x = 'Bk_P')
-        self.Bk_S = OpticalPortHolderInOut(self, x = 'Bk_S')
+        self.Fr   = ports.OpticalPortHolderInOut(self, x = 'Fr')
+        self.Bk_P = ports.OpticalPortHolderInOut(self, x = 'Bk_P')
+        self.Bk_S = ports.OpticalPortHolderInOut(self, x = 'Bk_S')
         return
 
     def system_setup_ports(self, ports_algorithm):
         for kfrom in ports_algorithm.port_update_get(self.Fr.i):
-            if PolP & kfrom:
+            if ports.PolP & kfrom:
                 ports_algorithm.port_coupling_needed(self.Bk_P.o, kfrom)
-            elif PolS & kfrom:
+            elif ports.PolS & kfrom:
                 ports_algorithm.port_coupling_needed(self.Bk_S.o, kfrom)
             else:
                 assert(False)
@@ -53,9 +35,9 @@ class PolSelector(OpticalCouplerBase, SystemElementBase):
             ports_algorithm.port_coupling_needed(self.Fr.o, kfrom)
 
         for kto in ports_algorithm.port_update_get(self.Fr.o):
-            if PolP & kto:
+            if ports.PolP & kto:
                 ports_algorithm.port_coupling_needed(self.Bk_P.i, kto)
-            elif PolS & kto:
+            elif ports.PolS & kto:
                 ports_algorithm.port_coupling_needed(self.Bk_S.i, kto)
             else:
                 assert(False)
@@ -67,9 +49,9 @@ class PolSelector(OpticalCouplerBase, SystemElementBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         for kfrom in matrix_algorithm.port_set_get(self.Fr.i):
-            if PolP & kfrom:
+            if ports.PolP & kfrom:
                 matrix_algorithm.port_coupling_insert(self.Fr.i, kfrom, self.Bk_P.o, kfrom, 1)
-            elif PolS & kfrom:
+            elif ports.PolS & kfrom:
                 matrix_algorithm.port_coupling_insert(self.Fr.i, kfrom, self.Bk_S.o, kfrom, 1)
             else:
                 assert(False)
@@ -80,7 +62,7 @@ class PolSelector(OpticalCouplerBase, SystemElementBase):
         return
 
 
-class GenericSelector(OpticalCouplerBase, SystemElementBase):
+class GenericSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
     def __init__(
         self,
         select_map,
@@ -90,11 +72,11 @@ class GenericSelector(OpticalCouplerBase, SystemElementBase):
         self.check      = self.system.unique_selections_check
         self.select_map = select_map
         self.port_map   = {}
-        self.Fr         = OpticalPortHolderInOut(self, x = 'Fr')
+        self.Fr         = ports.OpticalPortHolderInOut(self, x = 'Fr')
 
         for name, key in list(self.select_map.items()):
             pname = 'Bk_{0}'.format(name)
-            port = OpticalPortHolderInOut(self, x = pname)
+            port = ports.OpticalPortHolderInOut(self, x = pname)
             setattr(self, pname, port)
             self.port_map[name] = (port, key)
         return
@@ -142,7 +124,7 @@ class GenericSelector(OpticalCouplerBase, SystemElementBase):
         return
 
 
-class OpticalSelectionStack(OpticalCouplerBase, SystemElementBase):
+class OpticalSelectionStack(bases.OpticalCouplerBase, bases.SystemElementBase):
     def __init__(
         self,
         sub_element_map,
@@ -163,8 +145,8 @@ class OpticalSelectionStack(OpticalCouplerBase, SystemElementBase):
             if optical_ports is not None:
                 for pname, port in list(celement.owned_port_keys.items()):
                     if isinstance(port, (
-                            OpticalPortHolderInOut,
-                            OpticalPortHolderIn,
+                            ports.OpticalPortHolderInOut,
+                            ports.OpticalPortHolderIn,
                             ports.OpticalPortHolderOut
                     )):
                         optical_ports[pname] += 1

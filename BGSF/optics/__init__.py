@@ -38,10 +38,7 @@ from .ports import (
     OpticalFreqKey,
     OpticalPortHolderIn,
     OpticalPortHolderOut,
-    OpticalPortHolderInOut,
     ClassicalFreqKey,
-    LOWER, RAISE,
-    PolS,  PolP,
 )
 
 from .circulator import (

@@ -1,35 +1,21 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
+from __future__ import (division, print_function)
 #from BGSF.utilities.print import print
 import numpy as np
-
-from declarative import (
-    mproperty,
-)
+import declarative as decl
 
 from .bases import (
     OpticalCouplerBase,
     SystemElementBase,
 )
 
-from .ports import (
-    OpticalPortHolderInOut,
-    MechanicalPortHolderIn,
-    MechanicalPortHolderOut,
-    OpticalSymmetric2PortMixin,
-)
-
-from .nonlinear_utilities import (
-    #symmetric_update,
-    ports_fill_2optical_2classical,
-    modulations_fill_2optical_2classical,
-)
+from . import ports
+from . import nonlinear_utilities
 
 
-class PPKTP(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
+class PPKTP(ports.OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
     dn_dT_r_25deg = 1.4774e-5
     dn_dT_g_25deg = 2.4188e-5
     n_r = 1.830
@@ -50,14 +36,14 @@ class PPKTP(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
         poling_spacing = wavelen_r_m / (2 * (self.n_g - self.n_r))
 
         #optic mechanical ports
-        self.Theat = MechanicalPortHolderIn(self, x = 'T')
-        self.Qheat = MechanicalPortHolderOut(self, x = 'Q')
+        self.Theat = ports.MechanicalPortHolderIn(self, x = 'T')
+        self.Qheat = ports.MechanicalPortHolderOut(self, x = 'Q')
 
         self.is_4_port = False
-        self.Fr   = OpticalPortHolderInOut(self, x = 'Fr' )
-        self.Bk   = OpticalPortHolderInOut(self, x = 'Bk' )
-        self._LFr = OpticalPortHolderInOut(self, x = 'LFr')
-        self._LBk = OpticalPortHolderInOut(self, x = 'LBk')
+        self.Fr   = ports.OpticalPortHolderInOut(self, x = 'Fr' )
+        self.Bk   = ports.OpticalPortHolderInOut(self, x = 'Bk' )
+        self._LFr = ports.OpticalPortHolderInOut(self, x = 'LFr')
+        self._LBk = ports.OpticalPortHolderInOut(self, x = 'LBk')
         return
 
     def phase_mismatch(self):
@@ -73,7 +59,7 @@ class PPKTP(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
     def d_phase_dY(self):
         return 2 * 2 * np.pi / wavelen_m * self.Lc_m * (self.alpha_KTP * (self.n_g - self.n_r) * self.dn_dT_g_25deg + self.dn_dT_r_25deg)
 
-    @mproperty
+    @decl.mproperty
     def ports_optical(self):
         return [
             self.Fr,
@@ -126,7 +112,7 @@ class PPKTP(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
                 system.port_coupling_needed(lmap[port].i, kto)
                 system.port_coupling_needed(rmap[port].i, kto)
 
-        ports_fill_2optical_2classical(
+        nonlinear_utilities.ports_fill_2optical_2classical(
             system,
             self.ports_optical,
             self.ports_optical,
@@ -214,7 +200,7 @@ class PPKTP(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
                 R_cplg   = R_cplgF
                 R_cplgC  = R_cplg
 
-                modulations_fill_2optical_2classical(
+                nonlinear_utilities.modulations_fill_2optical_2classical(
                     system,
                     port, kfrom,
                     ptoOpt,

@@ -11,9 +11,8 @@ from .bases import (
     SystemElementBase,
 )
 
-from .ports import (
-    OpticalPortHolderInOut,
-)
+from . import bases
+from . import ports
 
 
 class OpticalCirculator(OpticalCouplerBase, SystemElementBase):
@@ -28,7 +27,7 @@ class OpticalCirculator(OpticalCouplerBase, SystemElementBase):
 
         for idx in range(0, N_ports):
             pname = "P{0}".format(idx)
-            port = OpticalPortHolderInOut(self, x = pname)
+            port = ports.OpticalPortHolderInOut(self, x = pname)
             setattr(self, pname, port)
             self.port_list.append(port)
         return

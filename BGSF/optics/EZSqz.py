@@ -1,31 +1,16 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
-#from BGSF.utilities.print import print
+from __future__ import (division, print_function)
 import numpy as np
 
-from declarative import (
-    mproperty,
-)
+import declarative as decl
 
-from .bases import (
-    OpticalCouplerBase,
-    SystemElementBase,
-    OOA_ASSIGN,
-)
-
-from .ports import (
-    OpticalPortHolderInOut,
-    OpticalSymmetric2PortMixin,
-    ClassicalFreqKey,
-    OpticalFreqKey,
-    RAISE, LOWER,
-)
+from . import ports
+from . import bases
 
 
-class EZSqz(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
+class EZSqz(ports.OpticalSymmetric2PortMixin, bases.OpticalCouplerBase, bases.SystemElementBase):
     """
     Defaults to squeezing amplitude quadrature, the two_photon matrix is chosen to be
     [nonlinear_field_gain_1 -nonlinear_field_gain_2]
@@ -76,35 +61,35 @@ class EZSqz(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
             raise RuntimeError("Must specify some squeezing parameter")
 
         #TODO, actually respect this variable
-        OOA_ASSIGN(self).phi_sqz_deg = phi_sqz_deg
+        bases.OOA_ASSIGN(self).phi_sqz_deg = phi_sqz_deg
 
-        OOA_ASSIGN(self).use_parameter = use_parameter
+        bases.OOA_ASSIGN(self).use_parameter = use_parameter
 
         if self.use_parameter == 'nonlinear_power_gain':
             subtype = 'gain'
-            OOA_ASSIGN(self).nonlinear_power_gain = nonlinear_power_gain
+            bases.OOA_ASSIGN(self).nonlinear_power_gain = nonlinear_power_gain
             if loss is None:
                 loss = 0
-            OOA_ASSIGN(self).loss                 = loss
+            bases.OOA_ASSIGN(self).loss                 = loss
             nonlinear_field_gain_1 = np.sqrt(self.nonlinear_power_gain)
             nonlinear_field_gain_2 = np.sqrt(self.nonlinear_power_gain - 1)
             normalized_nonlinear_field_gain = 1 - 1/nonlinear_field_gain_1
         elif self.use_parameter == 'nonlinear_field_gain':
             subtype = 'gain'
-            OOA_ASSIGN(self).nonlinear_field_gain = nonlinear_field_gain
+            bases.OOA_ASSIGN(self).nonlinear_field_gain = nonlinear_field_gain
             if loss is None:
                 loss = 0
-            OOA_ASSIGN(self).loss                 = loss
+            bases.OOA_ASSIGN(self).loss                 = loss
             nonlinear_field_gain_1 = self.nonlinear_field_gain
             nonlinear_power_gain   = nonlinear_field_gain_1**2
             nonlinear_field_gain_2 = np.sqrt(nonlinear_power_gain - 1)
             normalized_nonlinear_field_gain = 1 - 1/nonlinear_field_gain_1
         elif self.use_parameter == 'normalized_nonlinear_field_gain':
             subtype = 'gain'
-            OOA_ASSIGN(self).normalized_nonlinear_field_gain = normalized_nonlinear_field_gain
+            bases.OOA_ASSIGN(self).normalized_nonlinear_field_gain = normalized_nonlinear_field_gain
             if loss is None:
                 loss = 0
-            OOA_ASSIGN(self).loss                 = loss
+            bases.OOA_ASSIGN(self).loss                 = loss
             nonlinear_field_gain = 1/(1 - normalized_nonlinear_field_gain)
             nonlinear_field_gain_1 = nonlinear_field_gain
             nonlinear_power_gain = nonlinear_field_gain_1**2
@@ -121,10 +106,10 @@ class EZSqz(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
             antisqzDB = +10 * np.log(rel_variance_2) / np.log(10)
         elif self.use_parameter == 'sqzDB':
             subtype = 'variance'
-            OOA_ASSIGN(self).sqzDB = sqzDB
+            bases.OOA_ASSIGN(self).sqzDB = sqzDB
             if antisqzDB is None:
                 antisqzDB = self.sqzDB
-            OOA_ASSIGN(self).antisqzDB = antisqzDB
+            bases.OOA_ASSIGN(self).antisqzDB = antisqzDB
             rel_variance_1 = 10**(-self.sqzDB    / 10)
             rel_variance_2 = 10**(self.antisqzDB / 10)
         else:
@@ -153,14 +138,14 @@ class EZSqz(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
             #print(rel_variance_1 , Xrel_variance_1)
             #print(rel_variance_2 , Xrel_variance_2)
 
-        OOA_ASSIGN(self).nonlinear_power_gain            = nonlinear_power_gain
-        OOA_ASSIGN(self).nonlinear_field_gain            = nonlinear_field_gain_1
-        OOA_ASSIGN(self).normalized_nonlinear_field_gain = normalized_nonlinear_field_gain
-        OOA_ASSIGN(self).loss                            = loss
-        OOA_ASSIGN(self).rel_variance_1                  = rel_variance_1
-        OOA_ASSIGN(self).rel_variance_2                  = rel_variance_2
-        OOA_ASSIGN(self).sqzDB                           = sqzDB
-        OOA_ASSIGN(self).antisqzDB                       = antisqzDB
+        bases.OOA_ASSIGN(self).nonlinear_power_gain            = nonlinear_power_gain
+        bases.OOA_ASSIGN(self).nonlinear_field_gain            = nonlinear_field_gain_1
+        bases.OOA_ASSIGN(self).normalized_nonlinear_field_gain = normalized_nonlinear_field_gain
+        bases.OOA_ASSIGN(self).loss                            = loss
+        bases.OOA_ASSIGN(self).rel_variance_1                  = rel_variance_1
+        bases.OOA_ASSIGN(self).rel_variance_2                  = rel_variance_2
+        bases.OOA_ASSIGN(self).sqzDB                           = sqzDB
+        bases.OOA_ASSIGN(self).antisqzDB                       = antisqzDB
 
         self.used_nonlinear_power_gain            = nonlinear_power_gain
         self.used_nonlinear_field_gain_1          = nonlinear_field_gain_1
@@ -174,20 +159,20 @@ class EZSqz(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
 
         self.Fkey_QC_center = Fkey_QC_center
 
-        self.Fr   = OpticalPortHolderInOut(self, x = 'Fr' )
-        self.Bk   = OpticalPortHolderInOut(self, x = 'Bk' )
-        self._LFr = OpticalPortHolderInOut(self, x = 'LFr')
-        self._LBk = OpticalPortHolderInOut(self, x = 'LBk')
+        self.Fr   = ports.OpticalPortHolderInOut(self, x = 'Fr' )
+        self.Bk   = ports.OpticalPortHolderInOut(self, x = 'Bk' )
+        self._LFr = ports.OpticalPortHolderInOut(self, x = 'LFr')
+        self._LBk = ports.OpticalPortHolderInOut(self, x = 'LBk')
         return
 
-    @mproperty
+    @decl.mproperty
     def ports_optical(self):
         return (
             self.Fr,
             self.Bk,
         )
 
-    @mproperty
+    @decl.mproperty
     def ports_optical_loss(self):
         return (
             self._LFr,
@@ -207,36 +192,36 @@ class EZSqz(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
             self._LBk: self.Bk,
         }
         #direct couplings
-        okey = self.Fkey_QC_center[OpticalFreqKey]
-        ckey = self.Fkey_QC_center[ClassicalFreqKey]
+        okey = self.Fkey_QC_center[ports.OpticalFreqKey]
+        ckey = self.Fkey_QC_center[ports.ClassicalFreqKey]
 
         for port in self.ports_optical:
             for kfrom in ports_algorithm.port_update_get(port.i):
                 ports_algorithm.port_coupling_needed(tmap[port].o, kfrom)
                 ports_algorithm.port_coupling_needed(lmap[port].o, kfrom)
 
-                if kfrom[OpticalFreqKey] != okey:
+                if kfrom[ports.OpticalFreqKey] != okey:
                     continue
-                kckey = kfrom[ClassicalFreqKey]
+                kckey = kfrom[ports.ClassicalFreqKey]
                 reflected_SB = 2*ckey - kckey
-                if kfrom.contains(LOWER):
-                    ktoR = kfrom.replace_keys({ClassicalFreqKey: reflected_SB}, RAISE)
-                elif kfrom.contains(RAISE):
-                    ktoR = kfrom.replace_keys({ClassicalFreqKey: reflected_SB}, LOWER)
+                if kfrom.contains(ports.LOWER):
+                    ktoR = kfrom.replace_keys({ports.ClassicalFreqKey: reflected_SB}, ports.RAISE)
+                elif kfrom.contains(ports.RAISE):
+                    ktoR = kfrom.replace_keys({ports.ClassicalFreqKey: reflected_SB}, ports.LOWER)
 
                 ports_algorithm.port_coupling_needed(tmap[port].o, ktoR)
             for kto in ports_algorithm.port_update_get(port.o):
                 ports_algorithm.port_coupling_needed(tmap[port].i, kto)
                 ports_algorithm.port_coupling_needed(lmap[port].i, kto)
 
-                if kto[OpticalFreqKey] != okey:
+                if kto[ports.OpticalFreqKey] != okey:
                     continue
-                kckey = kto[ClassicalFreqKey]
+                kckey = kto[ports.ClassicalFreqKey]
                 reflected_SB = 2*ckey - kckey
-                if kto.contains(LOWER):
-                    kfromR = kto.replace_keys({ClassicalFreqKey: reflected_SB}, RAISE)
-                elif kto.contains(RAISE):
-                    kfromR = kto.replace_keys({ClassicalFreqKey: reflected_SB}, LOWER)
+                if kto.contains(ports.LOWER):
+                    kfromR = kto.replace_keys({ports.ClassicalFreqKey: reflected_SB}, ports.RAISE)
+                elif kto.contains(ports.RAISE):
+                    kfromR = kto.replace_keys({ports.ClassicalFreqKey: reflected_SB}, ports.LOWER)
                 ports_algorithm.port_coupling_needed(tmap[port].i, kfromR)
         return
 
@@ -255,22 +240,22 @@ class EZSqz(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
             self._LBk: self.Bk  ,
         }
 
-        okey = self.Fkey_QC_center[OpticalFreqKey]
-        ckey = self.Fkey_QC_center[ClassicalFreqKey]
+        okey = self.Fkey_QC_center[ports.OpticalFreqKey]
+        ckey = self.Fkey_QC_center[ports.ClassicalFreqKey]
 
         for port in self.ports_optical:
             for kfrom in matrix_algorithm.port_set_get(port.i):
-                if kfrom[OpticalFreqKey] != okey:
+                if kfrom[ports.OpticalFreqKey] != okey:
                     continue
-                kckey = kfrom[ClassicalFreqKey]
+                kckey = kfrom[ports.ClassicalFreqKey]
                 reflected_SB = 2*ckey - kckey
                 #if self.system.reject_classical_frequency_order(reflected_SB):
                 #    continue
-                if kfrom.contains(LOWER):
-                    ktoR = kfrom.replace_keys({ClassicalFreqKey: reflected_SB}, RAISE)
+                if kfrom.contains(ports.LOWER):
+                    ktoR = kfrom.replace_keys({ports.ClassicalFreqKey: reflected_SB}, ports.RAISE)
                     phi_cplC = self.system.math.exp(2 * -self.system.i2pi * self.phi_sqz_deg / 360)
-                elif kfrom.contains(RAISE):
-                    ktoR = kfrom.replace_keys({ClassicalFreqKey: reflected_SB}, LOWER)
+                elif kfrom.contains(ports.RAISE):
+                    ktoR = kfrom.replace_keys({ports.ClassicalFreqKey: reflected_SB}, ports.LOWER)
                     phi_cplC = self.system.math.exp(2 * self.system.i2pi * self.phi_sqz_deg / 360)
 
                 pto = tmap[port]

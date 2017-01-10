@@ -11,12 +11,7 @@ from .bases import (
     SystemElementBase,
 )
 
-from .ports import (
-    OpticalPortHolderInOut,
-    MechanicalPortHolderIn,
-    MechanicalPortHolderOut,
-    OpticalDegenerate4PortMixin,
-)
+from . import ports
 
 from .nonlinear_utilities import (
     ports_fill_2optical_2classical,
@@ -29,7 +24,7 @@ from .vacuum import (
 
 
 class Mirror(
-    OpticalDegenerate4PortMixin,
+    ports.OpticalDegenerate4PortMixin,
     OpticalCouplerBase,
     SystemElementBase
 ):
@@ -62,35 +57,35 @@ class Mirror(
 
     @decl.dproperty
     def posZ(self):
-        return MechanicalPortHolderIn(self, x = 'pZ')
+        return ports.MechanicalPortHolderIn(self, x = 'pZ')
 
     @decl.dproperty
     def forceZ(self):
-        return MechanicalPortHolderOut(self, x = 'fZ')
+        return ports.MechanicalPortHolderOut(self, x = 'fZ')
 
     @decl.dproperty
     def Fr(self):
         if not self.is_4_port:
-            return OpticalPortHolderInOut(self, x = 'Fr' )
+            return ports.OpticalPortHolderInOut(self, x = 'Fr' )
         else:
             return None
 
     @decl.dproperty
     def Bk(self):
         if not self.is_4_port:
-            return OpticalPortHolderInOut(self, x = 'Bk' )
+            return ports.OpticalPortHolderInOut(self, x = 'Bk' )
         else:
             return None
 
     @decl.dproperty
     def _LFr(self):
         if not self.is_4_port:
-            return OpticalPortHolderInOut(self, x = 'LFr')
+            return ports.OpticalPortHolderInOut(self, x = 'LFr')
 
     @decl.dproperty
     def _LBk(self):
         if not self.is_4_port:
-            return OpticalPortHolderInOut(self, x = 'LBk')
+            return ports.OpticalPortHolderInOut(self, x = 'LBk')
 
     @decl.dproperty
     def _LFrA_vac(self):
@@ -113,56 +108,56 @@ class Mirror(
     @decl.dproperty
     def FrA(self):
         if self.is_4_port:
-            return OpticalPortHolderInOut(self, x = 'FrA' )
+            return ports.OpticalPortHolderInOut(self, x = 'FrA' )
         else:
             return self.Fr
 
     @decl.dproperty
     def FrB(self):
         if self.is_4_port:
-            return OpticalPortHolderInOut(self, x = 'FrB' )
+            return ports.OpticalPortHolderInOut(self, x = 'FrB' )
         else:
             return self.Fr
 
     @decl.dproperty
     def BkA(self):
         if self.is_4_port:
-            return OpticalPortHolderInOut(self, x = 'BkA' )
+            return ports.OpticalPortHolderInOut(self, x = 'BkA' )
         else:
             return self.Bk
 
     @decl.dproperty
     def BkB(self):
         if self.is_4_port:
-            return OpticalPortHolderInOut(self, x = 'BkB' )
+            return ports.OpticalPortHolderInOut(self, x = 'BkB' )
         else:
             return self.Bk
 
     @decl.dproperty
     def _LFrA(self):
         if self.is_4_port:
-            return OpticalPortHolderInOut(self, x = 'LFrA' )
+            return ports.OpticalPortHolderInOut(self, x = 'LFrA' )
         else:
             return self._LFr
 
     @decl.dproperty
     def _LFrB(self):
         if self.is_4_port:
-            return OpticalPortHolderInOut(self, x = 'LFrB' )
+            return ports.OpticalPortHolderInOut(self, x = 'LFrB' )
         else:
             return self._LFr
 
     @decl.dproperty
     def _LBkA(self):
         if self.is_4_port:
-            return OpticalPortHolderInOut(self, x = 'LBkA' )
+            return ports.OpticalPortHolderInOut(self, x = 'LBkA' )
         else:
             return self._LBk
 
     @decl.dproperty
     def _LBkB(self):
         if self.is_4_port:
-            return OpticalPortHolderInOut(self, x = 'LBkB' )
+            return ports.OpticalPortHolderInOut(self, x = 'LBkB' )
         else:
             return self._LBk
 

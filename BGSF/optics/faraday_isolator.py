@@ -1,43 +1,17 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
-#from BGSF.utilities.print import print
+from __future__ import (division, print_function)
 
-from declarative import (
-    mproperty,
-)
-
-from .bases import (
-    OpticalCouplerBase,
-    SystemElementBase,
-    OOA_ASSIGN,
-)
-
+from . import bases
 from . import ports
-from .ports import (
-    OpticalPortHolderInOut,
-    OpticalPortHolderIn,
-    #QuantumKey,
-    RAISE, LOWER,
-    PolKEY, PolS, PolP,
-    OpticalSymmetric2PortMixin,
-)
+from . import polarization as pol
 
-from .polarization import (
-    HalfWavePlate,
-    #QuarterWavePlate,
-    #OpticalCirculator,
-    FaradayRotator,
-    PolarizingBeamsplitter,
-    polarization_opposite,
-)
 
 class FaradayIsolator(
         ports.OpticalOriented2PortMixin,
-        OpticalCouplerBase,
-        SystemElementBase
+        bases.OpticalCouplerBase,
+        bases.SystemElementBase
 ):
     def __init__(
             self,
@@ -46,25 +20,25 @@ class FaradayIsolator(
             **kwargs
     ):
         super(FaradayIsolator, self).__init__(**kwargs)
-        OOA_ASSIGN(self).pol_from = pol_from
-        OOA_ASSIGN(self).pol_to   = pol_to
+        bases.OOA_ASSIGN(self).pol_from = pol_from
+        bases.OOA_ASSIGN(self).pol_to   = pol_to
 
-        self.pol_BS_in  = PolarizingBeamsplitter(
+        self.pol_BS_in  = pol.PolarizingBeamsplitter(
             pass_polarization = pol_from,
         )
 
-        self.faraday = FaradayRotator()
+        self.faraday = pol.FaradayRotator()
 
         if self.pol_from == self.pol_to:
             rotate_sign = -1
         else:
             rotate_sign = 1
 
-        self.lambda2 = HalfWavePlate(
+        self.lambda2 = pol.HalfWavePlate(
             rotate_deg = rotate_sign * 45 / 2,
         )
 
-        self.pol_BS_out = PolarizingBeamsplitter(
+        self.pol_BS_out = pol.PolarizingBeamsplitter(
             pass_polarization = pol_to,
         )
 
@@ -79,13 +53,13 @@ class FaradayIsolator(
         self.Bk_pol      = self.pol_to
 
         self.Fr_Prej     = self.pol_BS_in.FrB
-        self.Fr_Prej_pol = polarization_opposite(self.pol_from)
+        self.Fr_Prej_pol = pol.polarization_opposite(self.pol_from)
 
         self.Bk_Prej     = self.pol_BS_out.BkB
-        self.Bk_Prej_pol = polarization_opposite(self.pol_to)
+        self.Bk_Prej_pol = pol.polarization_opposite(self.pol_to)
 
         self.Fr_ins      = self.pol_BS_out.FrB
-        self.Fr_ins_pol  = polarization_opposite(self.pol_to)
+        self.Fr_ins_pol  = pol.polarization_opposite(self.pol_to)
 
 
 

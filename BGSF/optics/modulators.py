@@ -1,51 +1,35 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
+from __future__ import (division, print_function)
 #from BGSF.utilities.print import print
 
 import declarative as decl
 
-from .bases import (
-    OpticalCouplerBase,
-    SystemElementBase,
-    #OOA_ASSIGN,
-)
-
+from . import bases
 from . import ports
-from .ports import (
-    OpticalPortHolderInOut,
-    SignalPortHolderIn,
-    QuantumKey, RAISE, LOWER,
-    PolKEY, PolS, PolP,
-    OpticalSymmetric2PortMixin,
-)
-
-from .nonlinear_utilities import (
-    #symmetric_update,
-    ports_fill_2optical_2classical,
-    modulations_fill_2optical_2classical,
-)
-
-
+from . import nonlinear_utilities
 
 #TODO
 #class AOM(OpticalCouplerBase):
 
 
-class Optical2PortModulator(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
+class Optical2PortModulator(
+    ports.OpticalSymmetric2PortMixin,
+    bases.OpticalCouplerBase,
+    bases.SystemElementBase,
+):
     @decl.dproperty
     def Fr(self):
-        return OpticalPortHolderInOut(self, x = 'Fr')
+        return ports.OpticalPortHolderInOut(self, x = 'Fr')
 
     @decl.dproperty
     def Bk(self):
-        return OpticalPortHolderInOut(self, x = 'Bk')
+        return ports.OpticalPortHolderInOut(self, x = 'Bk')
 
     @decl.dproperty
     def Drv(self):
-        return SignalPortHolderIn(self, x = 'Drv')
+        return ports.SignalPortHolderIn(self, x = 'Drv')
 
     @decl.dproperty
     def BA(self):
@@ -75,7 +59,7 @@ class Optical2PortModulator(OpticalSymmetric2PortMixin, OpticalCouplerBase, Syst
                 for pfrom in pmap[port.o]:
                     ports_algorithm.port_coupling_needed(pfrom, kto)
 
-        ports_fill_2optical_2classical(
+        nonlinear_utilities.ports_fill_2optical_2classical(
             self.system,
             ports_algorithm,
             self.ports_optical,
@@ -104,7 +88,7 @@ class PM(Optical2PortModulator):
                 ptoOpt, std_cplg = cmap[pfrom]
                 std_cplgC = std_cplg
 
-                modulations_fill_2optical_2classical(
+                nonlinear_utilities.modulations_fill_2optical_2classical(
                     self.system,
                     matrix_algorithm,
                     pfrom, kfrom,
@@ -138,7 +122,7 @@ class AM(Optical2PortModulator):
                 ptoOpt, std_cplg = cmap[pfrom]
                 std_cplgC = std_cplg
 
-                modulations_fill_2optical_2classical(
+                nonlinear_utilities.modulations_fill_2optical_2classical(
                     self.system,
                     matrix_algorithm,
                     pfrom, kfrom,
@@ -156,7 +140,7 @@ class AM(Optical2PortModulator):
 
 
 #class EOM(Optical2PortModulator):
-#    polarization = PolS
+#    polarization = ports.PolS
 #
 #    def system_setup_ports(self, system):
 #        pmap = {
@@ -175,7 +159,7 @@ class AM(Optical2PortModulator):
 #                for pfrom in pmap[port.o]:
 #                    system.port_coupling_needed(pfrom, kfrom)
 #
-#        ports_fill_2optical_2classical(
+#        nonlinear_utilities.ports_fill_2optical_2classical(
 #            system,
 #            self.ports_optical,
 #            self.ports_optical,
@@ -198,7 +182,7 @@ class AM(Optical2PortModulator):
 #                std_cplgC = std_cplg
 #
 #                if kfrom.contains(self.polarization):
-#                    modulations_fill_2optical_2classical(
+#                    nonlinear_utilities.modulations_fill_2optical_2classical(
 #                        system,
 #                        port, kfrom,
 #                        ptoOpt,
@@ -212,7 +196,7 @@ class AM(Optical2PortModulator):
 #                        1 / self.system.c_m_s,
 #                    )
 #                else:
-#                    if kfrom.contains(LOWER):
+#                    if kfrom.contains(ports.LOWER):
 #                        system.port_coupling_insert(port.i, kfrom, ptoOpt.o, kfrom, std_cplg)
 #                    else:
 #                        system.port_coupling_insert(port.i, kfrom, ptoOpt.o, kfrom, std_cplgC)

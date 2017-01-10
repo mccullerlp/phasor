@@ -7,28 +7,18 @@ from __future__ import print_function
 
 import declarative as decl
 
-from .bases import (
-    OpticalCouplerBase,
-    SystemElementBase,
-    OOA_ASSIGN,
-)
-
-from .ports import (
-    OpticalPortHolderInOut,
-    #QuantumKey,
-    RAISE, LOWER,
-    OpticalSymmetric2PortMixin,
-)
+from . import bases
+from . import ports
 
 
-class Space(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
+class Space(ports.OpticalSymmetric2PortMixin, bases.OpticalCouplerBase, bases.SystemElementBase):
     @decl.dproperty
     def Fr(self):
-        return OpticalPortHolderInOut(self, x = 'Fr')
+        return ports.OpticalPortHolderInOut(self, x = 'Fr')
 
     @decl.dproperty
     def Bk(self):
-        return OpticalPortHolderInOut(self, x = 'Bk')
+        return ports.OpticalPortHolderInOut(self, x = 'Bk')
 
     @decl.dproperty
     def L_m(self, val):
@@ -74,9 +64,9 @@ class Space(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
         for port in self.ports_optical:
             for kfrom in matrix_algorithm.port_set_get(port.i):
                 iwavelen_m, freq = self.system.optical_frequency_extract(kfrom)
-                if kfrom.subkey_has(LOWER):
+                if kfrom.subkey_has(ports.LOWER):
                     cplg = self.phase_lower(iwavelen_m, freq)
-                elif kfrom.subkey_has(RAISE):
+                elif kfrom.subkey_has(ports.RAISE):
                     cplg = self.phase_raise(iwavelen_m, freq)
                 else:
                     raise RuntimeError("Boo")

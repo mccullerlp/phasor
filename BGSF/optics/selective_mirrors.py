@@ -5,22 +5,12 @@ from __future__ import division
 from __future__ import print_function
 #from BGSF.utilities.print import print
 
-from .bases import (
-    #OpticalCouplerBase,
-    #SystemElementBase,
-    OOA_ASSIGN,
-)
-
-from .ports import (
-    PolS, PolP,
-    OpticalDegenerate4PortMixin,
-)
-
+from . import ports
 from .selectors import OpticalSelectionStack
 
 
 class MirrorSelectionStack(
-    OpticalDegenerate4PortMixin,
+    ports.OpticalDegenerate4PortMixin,
     OpticalSelectionStack,
 ):
     def __init__(
@@ -68,8 +58,8 @@ class PolarizingMirror(MirrorSelectionStack):
                 pol_S = mirror_S,
             ),
             select_map = dict(
-                pol_S = PolS,
-                pol_P = PolP,
+                pol_S = ports.PolS,
+                pol_P = ports.PolP,
             ),
             **kwargs
         )

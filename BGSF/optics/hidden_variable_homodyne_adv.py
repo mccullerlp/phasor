@@ -18,7 +18,7 @@ from ..math.key_matrix import (
 
 from .ports import (
     QuantumKey,
-    RAISE, LOWER,
+    ports.RAISE, ports.LOWER,
     ClassicalFreqKey,
 )
 
@@ -33,7 +33,7 @@ from . import ports
 from .ports import (
     OpticalPortHolderIn,
     #ports.OpticalPortHolderOut,
-    OpticalPortHolderInOut,
+    ports.OpticalPortHolderInOut,
     SignalPortHolderIn,
 )
 
@@ -131,12 +131,12 @@ class HiddenVariableHomodynePD(
             port = self.source_port,
         )
 
-        self.Fr    = OpticalPortHolderInOut(self, x = 'Fr')
+        self.Fr    = ports.OpticalPortHolderInOut(self, x = 'Fr')
         OOA_ASSIGN(self).phase_deg = phase_deg
 
         self.magic = magic
         if magic:
-            self.Bk = OpticalPortHolderInOut(self, x = 'Bk')
+            self.Bk = ports.OpticalPortHolderInOut(self, x = 'Bk')
 
         self.rtWpdI = ports.SignalPortHolderOut(self, x = 'rtWpdI')
         self.rtWpdQ = ports.SignalPortHolderOut(self, x = 'rtWpdQ')
@@ -167,12 +167,12 @@ class HiddenVariableHomodynePD(
         ):
             pfrom = self.Fr.i
             for kfrom, lkto in ports_algorithm.symmetric_update(self.source_port, out_port_classical.o):
-                if kfrom.contains(LOWER):
+                if kfrom.contains(ports.LOWER):
                     fnew = kfrom[ClassicalFreqKey] - lkto[ClassicalFreqKey]
-                    qKey = RAISE
-                elif kfrom.contains(RAISE):
+                    qKey = ports.RAISE
+                elif kfrom.contains(ports.RAISE):
                     fnew = kfrom[ClassicalFreqKey] + lkto[ClassicalFreqKey]
-                    qKey = LOWER
+                    qKey = ports.LOWER
                 if self.system.reject_classical_frequency_order(fnew):
                     continue
                 kfrom2 = kfrom.without_keys(QuantumKey, ClassicalFreqKey) | DictKey({ClassicalFreqKey: fnew}) | qKey
@@ -182,10 +182,10 @@ class HiddenVariableHomodynePD(
                 setdict = dict()
                 for kfrom2 in pool2:
                     kfrom1_sm = kfrom2.without_keys(ClassicalFreqKey, QuantumKey)
-                    if kfrom2.contains(RAISE):
-                        kfrom1_sm = kfrom1_sm | LOWER
-                    elif kfrom2.contains(LOWER):
-                        kfrom1_sm = kfrom1_sm | RAISE
+                    if kfrom2.contains(ports.RAISE):
+                        kfrom1_sm = kfrom1_sm | ports.LOWER
+                    elif kfrom2.contains(ports.LOWER):
+                        kfrom1_sm = kfrom1_sm | ports.RAISE
                     group = setdict.setdefault(kfrom1_sm, [])
                     group.append(kfrom2)
                 def subset_func(kfrom1):
@@ -197,9 +197,9 @@ class HiddenVariableHomodynePD(
                     pfrom,
                     subset_second = subset_second
             ):
-                if kfrom1.contains(LOWER):
+                if kfrom1.contains(ports.LOWER):
                     fdiff = kfrom1[ClassicalFreqKey] - kfrom2[ClassicalFreqKey]
-                elif kfrom1.contains(RAISE):
+                elif kfrom1.contains(ports.RAISE):
                     fdiff = kfrom2[ClassicalFreqKey] - kfrom1[ClassicalFreqKey]
                 if self.system.reject_classical_frequency_order(fdiff):
                     continue
@@ -252,10 +252,10 @@ class HiddenVariableHomodynePD(
                     lkto_completed.add(lkto)
                     lkto_completed.add(lktoN)
 
-                    if kfrom.contains(LOWER):
-                        kfrom_conj = (kfrom - LOWER) | RAISE
+                    if kfrom.contains(ports.LOWER):
+                        kfrom_conj = (kfrom - ports.LOWER) | ports.RAISE
                     else:
-                        kfrom_conj = (kfrom - RAISE) | LOWER
+                        kfrom_conj = (kfrom - ports.RAISE) | ports.LOWER
 
                     #optCplg  = (self.phase_reference_port, kfrom)
                     optCplgC = (self.phase_reference_port, kfrom_conj)
@@ -280,9 +280,9 @@ class HiddenVariableHomodynePD(
                         ktoOptN = kfrom.without_keys(ClassicalFreqKey) | DictKey({ClassicalFreqKey: ftoOptN})
                     else:
                         ktoOptN = None
-                    #Both raising and lowering use optCplgC because it is always the conjugate to the other, so it always matches LOWER with the classical field of RAISE
+                    #Both raising and lowering use optCplgC because it is always the conjugate to the other, so it always matches ports.LOWER with the classical field of ports.RAISE
                     #and vice-versa
-                    if kfrom.contains(LOWER):
+                    if kfrom.contains(ports.LOWER):
                         #TODO Check factor of 2 overcounting here between raising and lowering
                         if ktoOptP is not None:
                             inj = HomodyneCoupling(
@@ -304,9 +304,9 @@ class HiddenVariableHomodynePD(
                                 cplg        = Stdcplg / 2,
                             )
                             matrix_algorithm.injection_insert(inj)
-                    elif kfrom.contains(RAISE):
+                    elif kfrom.contains(ports.RAISE):
                         #TODO Check factor of 2 overcounting here between raising and lowering
-                        # because of conjugation issues, the frequencies are reversed in the lktos for the optical RAISE operators
+                        # because of conjugation issues, the frequencies are reversed in the lktos for the optical ports.RAISE operators
                         if ktoOptP is not None:
                             inj = HomodyneCoupling(
                                 pkfrom      = (self.Fr.i, ktoOptP),
@@ -362,10 +362,10 @@ class TotalDCPowerPD(
 
     def system_setup_ports(self, ports_algorithm):
         for kfrom in ports_algorithm.port_update_get(self.port):
-            if kfrom.contains(LOWER):
-                qKey = RAISE
-            elif kfrom.contains(RAISE):
-                qKey = LOWER
+            if kfrom.contains(ports.LOWER):
+                qKey = ports.RAISE
+            elif kfrom.contains(ports.RAISE):
+                qKey = ports.LOWER
             kfrom2 = kfrom.without_keys(QuantumKey) | qKey
             ports_algorithm.port_coupling_needed(self.port, kfrom2)
         ports_algorithm.port_coupling_needed(
@@ -377,10 +377,10 @@ class TotalDCPowerPD(
     def system_setup_coupling(self, matrix_algorithm):
         lkto = DictKey({ClassicalFreqKey: FrequencyKey({})})
         for kfrom in matrix_algorithm.port_set_get(self.port):
-            if kfrom.contains(LOWER):
-                kfrom_conj = (kfrom - LOWER) | RAISE
+            if kfrom.contains(ports.LOWER):
+                kfrom_conj = (kfrom - ports.LOWER) | ports.RAISE
             else:
-                kfrom_conj = (kfrom - RAISE) | LOWER
+                kfrom_conj = (kfrom - ports.RAISE) | ports.LOWER
 
             matrix_algorithm.port_coupling_insert(
                 self.port, kfrom,

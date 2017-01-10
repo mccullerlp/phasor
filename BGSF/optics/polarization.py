@@ -1,52 +1,38 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
-#from BGSF.utilities.print import print
+from __future__ import (division, print_function)
+import declarative as decl
 
-from declarative import (
-    mproperty,
-)
-
-from .bases import (
-    OpticalCouplerBase,
-    SystemElementBase,
-    OOA_ASSIGN,
-)
-
+from . import bases
 from . import ports
-from .ports import (
-    OpticalPortHolderInOut,
-    RAISE, LOWER,
-    PolS, PolP,
-    OpticalSymmetric2PortMixin,
-)
 
-from .selective_mirrors import PolarizingMirror
 from .mirror import Mirror
+from .selective_mirrors import PolarizingMirror
 
 
-class BaseRotator(OpticalCouplerBase, SystemElementBase):
-    def __init__(
-        self,
-        rotate_deg = 0,
-        **kwargs
-    ):
-        super(BaseRotator, self).__init__(**kwargs)
-        OOA_ASSIGN(self).rotate_deg = rotate_deg
-        self.Fr = OpticalPortHolderInOut(self, x = 'Fr')
-        self.Bk = OpticalPortHolderInOut(self, x = 'Bk')
-        return
+class BaseRotator(bases.OpticalCouplerBase, bases.SystemElementBase):
+    @decl.dproperty
+    def Fr(self):
+        return ports.OpticalPortHolderInOut(self, x = 'Fr' )
 
-    @mproperty
+    @decl.dproperty
+    def Bk(self):
+        return ports.OpticalPortHolderInOut(self, x = 'Bk' )
+
+    @decl.dproperty
+    def rotate_deg(self, val):
+        val = self.ooa_params.setdefault('rotate_deg', val)
+        return val
+
+    @decl.mproperty
     def ports_optical(self):
         return [
             self.Fr,
             self.Bk,
         ]
 
-    @mproperty
+    @decl.mproperty
     def pmap(self):
         return {
             self.Fr : self.Bk,
@@ -63,23 +49,23 @@ class BaseRotator(OpticalCouplerBase, SystemElementBase):
         elif self.rotate_deg in (90, -90, 270, -270):
             for port in self.ports_optical:
                 for kfrom in ports_algorithm.port_update_get(port.i):
-                    if kfrom & PolS:
-                        ports_algorithm.port_coupling_needed(self.pmap[port].o, kfrom.replace_keys(PolP))
-                    elif kfrom & PolP:
-                        ports_algorithm.port_coupling_needed(self.pmap[port].o, kfrom.replace_keys(PolS))
+                    if kfrom & ports.PolS:
+                        ports_algorithm.port_coupling_needed(self.pmap[port].o, kfrom.replace_keys(ports.PolP))
+                    elif kfrom & ports.PolP:
+                        ports_algorithm.port_coupling_needed(self.pmap[port].o, kfrom.replace_keys(ports.PolS))
                 for kto in ports_algorithm.port_update_get(port.o):
-                    if kto & PolS:
-                        ports_algorithm.port_coupling_needed(self.pmap[port].i, kto.replace_keys(PolP))
-                    elif kto & PolP:
-                        ports_algorithm.port_coupling_needed(self.pmap[port].i, kto.replace_keys(PolS))
+                    if kto & ports.PolS:
+                        ports_algorithm.port_coupling_needed(self.pmap[port].i, kto.replace_keys(ports.PolP))
+                    elif kto & ports.PolP:
+                        ports_algorithm.port_coupling_needed(self.pmap[port].i, kto.replace_keys(ports.PolS))
         else:
             for port in self.ports_optical:
                 for kfrom in ports_algorithm.port_update_get(port.i):
-                    ports_algorithm.port_coupling_needed(self.pmap[port].o, kfrom.replace_keys(PolS))
-                    ports_algorithm.port_coupling_needed(self.pmap[port].o, kfrom.replace_keys(PolP))
+                    ports_algorithm.port_coupling_needed(self.pmap[port].o, kfrom.replace_keys(ports.PolS))
+                    ports_algorithm.port_coupling_needed(self.pmap[port].o, kfrom.replace_keys(ports.PolP))
                 for kto in ports_algorithm.port_update_get(port.o):
-                    ports_algorithm.port_coupling_needed(self.pmap[port].i, kto.replace_keys(PolS))
-                    ports_algorithm.port_coupling_needed(self.pmap[port].i, kto.replace_keys(PolP))
+                    ports_algorithm.port_coupling_needed(self.pmap[port].i, kto.replace_keys(ports.PolS))
+                    ports_algorithm.port_coupling_needed(self.pmap[port].i, kto.replace_keys(ports.PolP))
         return
 
     def system_setup_coupling(self, matrix_algorithm):
@@ -102,20 +88,20 @@ class BaseRotator(OpticalCouplerBase, SystemElementBase):
                 else:
                     cplg = -cplg_O
                 for kfrom in matrix_algorithm.port_set_get(port.i):
-                    if kfrom & PolS:
+                    if kfrom & ports.PolS:
                         matrix_algorithm.port_coupling_insert(
                             port.i,
                             kfrom,
                             self.pmap[port].o,
-                            kfrom.replace_keys(PolP),
+                            kfrom.replace_keys(ports.PolP),
                             cplg,
                         )
-                    elif kfrom & PolP:
+                    elif kfrom & ports.PolP:
                         matrix_algorithm.port_coupling_insert(
                             port.i,
                             kfrom,
                             self.pmap[port].o,
-                            kfrom.replace_keys(PolS),
+                            kfrom.replace_keys(ports.PolS),
                             -cplg,
                         )
         else:
@@ -127,7 +113,7 @@ class BaseRotator(OpticalCouplerBase, SystemElementBase):
                 else:
                     cplgS = -cplgS_O
                 for kfrom in matrix_algorithm.port_set_get(port.i):
-                    if kfrom & PolS:
+                    if kfrom & ports.PolS:
                         matrix_algorithm.port_coupling_insert(
                             port.i,
                             kfrom,
@@ -139,10 +125,10 @@ class BaseRotator(OpticalCouplerBase, SystemElementBase):
                             port.i,
                             kfrom,
                             self.pmap[port].o,
-                            kfrom.replace_keys(PolP),
+                            kfrom.replace_keys(ports.PolP),
                             cplgS,
                         )
-                    elif kfrom & PolP:
+                    elif kfrom & ports.PolP:
                         matrix_algorithm.port_coupling_insert(
                             port.i,
                             kfrom,
@@ -154,13 +140,16 @@ class BaseRotator(OpticalCouplerBase, SystemElementBase):
                             port.i,
                             kfrom,
                             self.pmap[port].o,
-                            kfrom.replace_keys(PolS),
+                            kfrom.replace_keys(ports.PolS),
                             -cplgS,
                         )
         return
 
 
-class PolarizationRotator(ports.OpticalOriented2PortMixin, BaseRotator):
+class PolarizationRotator(
+        ports.OpticalOriented2PortMixin,
+        BaseRotator
+):
     def system_setup_coupling(self, matrix_algorithm):
         if self.rotate_deg in (0, 180, -180):
             if self.rotate_deg == 0:
@@ -181,20 +170,20 @@ class PolarizationRotator(ports.OpticalOriented2PortMixin, BaseRotator):
                 else:
                     cplg = -cplg_O
                 for kfrom in matrix_algorithm.port_set_get(port.i):
-                    if kfrom & PolS:
+                    if kfrom & ports.PolS:
                         matrix_algorithm.port_coupling_insert(
                             port.i,
                             kfrom,
                             self.pmap[port].o,
-                            kfrom.replace_keys(PolP),
+                            kfrom.replace_keys(ports.PolP),
                             cplg,
                         )
-                    elif kfrom & PolP:
+                    elif kfrom & ports.PolP:
                         matrix_algorithm.port_coupling_insert(
                             port.i,
                             kfrom,
                             self.pmap[port].o,
-                            kfrom.replace_keys(PolS),
+                            kfrom.replace_keys(ports.PolS),
                             -cplg,
                         )
         else:
@@ -206,7 +195,7 @@ class PolarizationRotator(ports.OpticalOriented2PortMixin, BaseRotator):
                 else:
                     cplgS = -cplgS_O
                 for kfrom in matrix_algorithm.port_set_get(port.i):
-                    if kfrom & PolS:
+                    if kfrom & ports.PolS:
                         matrix_algorithm.port_coupling_insert(
                             port.i,
                             kfrom,
@@ -218,10 +207,10 @@ class PolarizationRotator(ports.OpticalOriented2PortMixin, BaseRotator):
                             port.i,
                             kfrom,
                             self.pmap[port].o,
-                            kfrom.replace_keys(PolP),
+                            kfrom.replace_keys(ports.PolP),
                             cplgS,
                         )
-                    elif kfrom & PolP:
+                    elif kfrom & ports.PolP:
                         matrix_algorithm.port_coupling_insert(
                             port.i,
                             kfrom,
@@ -233,13 +222,13 @@ class PolarizationRotator(ports.OpticalOriented2PortMixin, BaseRotator):
                             port.i,
                             kfrom,
                             self.pmap[port].o,
-                            kfrom.replace_keys(PolS),
+                            kfrom.replace_keys(ports.PolS),
                             -cplgS,
                         )
         return
 
 
-class FaradayRotator(OpticalSymmetric2PortMixin, BaseRotator):
+class FaradayRotator(ports.OpticalSymmetric2PortMixin, BaseRotator):
     def system_setup_coupling(self, matrix_algorithm):
         if self.rotate_deg in (0, 180, -180):
             if self.rotate_deg == 0:
@@ -256,20 +245,20 @@ class FaradayRotator(OpticalSymmetric2PortMixin, BaseRotator):
                 cplg = -1
             for port in self.ports_optical:
                 for kfrom in matrix_algorithm.port_set_get(port.i):
-                    if kfrom & PolS:
+                    if kfrom & ports.PolS:
                         matrix_algorithm.port_coupling_insert(
                             port.i,
                             kfrom,
                             self.pmap[port].o,
-                            kfrom.replace_keys(PolP),
+                            kfrom.replace_keys(ports.PolP),
                             cplg,
                         )
-                    elif kfrom & PolP:
+                    elif kfrom & ports.PolP:
                         matrix_algorithm.port_coupling_insert(
                             port.i,
                             kfrom,
                             self.pmap[port].o,
-                            kfrom.replace_keys(PolS),
+                            kfrom.replace_keys(ports.PolS),
                             -cplg,
                         )
         else:
@@ -277,7 +266,7 @@ class FaradayRotator(OpticalSymmetric2PortMixin, BaseRotator):
             cplgS = self.system.math.sin(self.rotate_deg / 180 * self.system.pi)
             for port in self.ports_optical:
                 for kfrom in matrix_algorithm.port_set_get(port.i):
-                    if kfrom & PolS:
+                    if kfrom & ports.PolS:
                         matrix_algorithm.port_coupling_insert(
                             port.i,
                             kfrom,
@@ -289,10 +278,10 @@ class FaradayRotator(OpticalSymmetric2PortMixin, BaseRotator):
                             port.i,
                             kfrom,
                             self.pmap[port].o,
-                            kfrom.replace_keys(PolP),
+                            kfrom.replace_keys(ports.PolP),
                             cplgS,
                         )
-                    elif kfrom & PolP:
+                    elif kfrom & ports.PolP:
                         matrix_algorithm.port_coupling_insert(
                             port.i,
                             kfrom,
@@ -304,12 +293,12 @@ class FaradayRotator(OpticalSymmetric2PortMixin, BaseRotator):
                             port.i,
                             kfrom,
                             self.pmap[port].o,
-                            kfrom.replace_keys(PolS),
+                            kfrom.replace_keys(ports.PolS),
                             -cplgS,
                         )
         return
 
-class WavePlate(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBase):
+class WavePlate(ports.OpticalSymmetric2PortMixin, bases.OpticalCouplerBase, bases.SystemElementBase):
     def __init__(
             self,
             cplgP  = 1,
@@ -320,27 +309,27 @@ class WavePlate(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBas
     ):
         super(WavePlate, self).__init__(**kwargs)
 
-        OOA_ASSIGN(self).cplgP  = cplgP
+        bases.OOA_ASSIGN(self).cplgP  = cplgP
         if cplgPC is None:
             cplgPC = self.cplgP.conjugate()
-        OOA_ASSIGN(self).cplgPC = cplgPC
-        OOA_ASSIGN(self).cplgS  = cplgS
+        bases.OOA_ASSIGN(self).cplgPC = cplgPC
+        bases.OOA_ASSIGN(self).cplgS  = cplgS
         if cplgSC is None:
             cplgSC = self.cplgS.conjugate()
-        OOA_ASSIGN(self).cplgSC = cplgSC
+        bases.OOA_ASSIGN(self).cplgSC = cplgSC
 
-        self.Fr = OpticalPortHolderInOut(self, x = 'Fr')
-        self.Bk = OpticalPortHolderInOut(self, x = 'Bk')
+        self.Fr = ports.OpticalPortHolderInOut(self, x = 'Fr')
+        self.Bk = ports.OpticalPortHolderInOut(self, x = 'Bk')
         return
 
-    @mproperty
+    @decl.mproperty
     def ports_optical(self):
         return [
             self.Fr,
             self.Bk,
         ]
 
-    @mproperty
+    @decl.mproperty
     def pmap(self):
         return {
             self.Fr : self.Bk,
@@ -358,10 +347,10 @@ class WavePlate(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBas
     def system_setup_coupling(self, matrix_algorithm):
         for port in self.ports_optical:
             for kfrom in matrix_algorithm.port_set_get(port.i):
-                if kfrom & PolS:
-                    if LOWER & kfrom:
+                if kfrom & ports.PolS:
+                    if ports.LOWER & kfrom:
                         cplgS = self.cplgS
-                    elif RAISE & kfrom:
+                    elif ports.RAISE & kfrom:
                         cplgS = self.cplgSC
                     matrix_algorithm.port_coupling_insert(
                         port.i,
@@ -370,10 +359,10 @@ class WavePlate(OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementBas
                         kfrom,
                         cplgS,
                     )
-                elif kfrom & PolP:
-                    if LOWER & kfrom:
+                elif kfrom & ports.PolP:
+                    if ports.LOWER & kfrom:
                         cplgP = self.cplgP
-                    elif RAISE & kfrom:
+                    elif ports.RAISE & kfrom:
                         cplgP = self.cplgPC
                     matrix_algorithm.port_coupling_insert(
                         port.i,
@@ -402,7 +391,7 @@ class UnmountedHalfWavePlate(WavePlate):
             **kwargs
         )
 
-class WavePlateMount(ports.OpticalOriented2PortMixin, OpticalCouplerBase, SystemElementBase):
+class WavePlateMount(ports.OpticalOriented2PortMixin, bases.OpticalCouplerBase, bases.SystemElementBase):
     def __init__(
         self,
         plate,
@@ -412,7 +401,7 @@ class WavePlateMount(ports.OpticalOriented2PortMixin, OpticalCouplerBase, System
         super(WavePlateMount, self).__init__(**kwargs)
 
         self.plate = plate
-        OOA_ASSIGN(self).rotate_deg = rotate_deg
+        bases.OOA_ASSIGN(self).rotate_deg = rotate_deg
         self.coord_Fr = PolarizationRotator(rotate_deg = self.rotate_deg)
         self.coord_Bk = PolarizationRotator(rotate_deg = -self.rotate_deg)
 
@@ -458,11 +447,11 @@ class PolarizingBeamsplitter(PolarizingMirror):
         **kwargs
     ):
         self.__init_ooa__(**kwargs)
-        OOA_ASSIGN(self).pass_polarization = pass_polarization
-        OOA_ASSIGN(self).selection_defect  = selection_defect
-        OOA_ASSIGN(self).rejection_defect  = rejection_defect
-        OOA_ASSIGN(self).select_loss       = select_loss
-        OOA_ASSIGN(self).reject_loss       = reject_loss
+        bases.OOA_ASSIGN(self).pass_polarization = pass_polarization
+        bases.OOA_ASSIGN(self).selection_defect  = selection_defect
+        bases.OOA_ASSIGN(self).rejection_defect  = rejection_defect
+        bases.OOA_ASSIGN(self).select_loss       = select_loss
+        bases.OOA_ASSIGN(self).reject_loss       = reject_loss
 
         select_mirror = Mirror(
             T_hr = 1 - self.selection_defect,

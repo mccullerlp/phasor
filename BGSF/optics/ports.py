@@ -24,10 +24,6 @@ from ..signals.ports import(
     SignalPortHolderOut,
 )
 
-from .bases import (
-    OOA_ASSIGN,
-)
-
 QuantumKey = u'Ψ'
 RAISE = DictKey({QuantumKey: u'↑'})
 LOWER = DictKey({QuantumKey: u'↓'})
