@@ -2,6 +2,7 @@
 """
 """
 from __future__ import (division, print_function)
+import declarative as decl
 
 from . import bases
 from . import ports
@@ -13,18 +14,20 @@ class FaradayIsolator(
         bases.OpticalCouplerBase,
         bases.SystemElementBase
 ):
-    def __init__(
-            self,
-            pol_from = 'S',
-            pol_to   = 'S',
-            **kwargs
-    ):
-        super(FaradayIsolator, self).__init__(**kwargs)
-        bases.OOA_ASSIGN(self).pol_from = pol_from
-        bases.OOA_ASSIGN(self).pol_to   = pol_to
 
+    @decl.dproperty
+    def pol_from(self, val = 'S'):
+        val = self.ooa_params.setdefault('pol_from', val)
+        return val
+
+    @decl.dproperty
+    def pol_to(self, val = 'S'):
+        val = self.ooa_params.setdefault('pol_from', val)
+        return val
+
+    def __build__(self):
         self.pol_BS_in  = pol.PolarizingBeamsplitter(
-            pass_polarization = pol_from,
+            pass_polarization = self.pol_from,
         )
 
         self.faraday = pol.FaradayRotator()
@@ -39,7 +42,7 @@ class FaradayIsolator(
         )
 
         self.pol_BS_out = pol.PolarizingBeamsplitter(
-            pass_polarization = pol_to,
+            pass_polarization = self.pol_to,
         )
 
         self.system.link(self.pol_BS_in.BkA, self.faraday.Fr)

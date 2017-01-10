@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 
 FIXUP=(
-    MechanicalPortHolderIn \
-    MechanicalPortHolderOut \
-    OpticalDegenerate4PortMixin \
+        optics.Mirror \
+        optics.PD \
+        optics.MagicPD \
+        optics.Space \
+        optics.Laser \
+        system.OpticalSystem \
+        readouts.DCReadout \
+        readouts.ACReadout \
 )
 for THING in ${FIXUP[@]}; do
-    sed -e "s/\([^.]\)\(${THING}\)/\1ports\.\2/g" -i *.py
+    IFS='.' set $THING
+    sed -e "s/\([^.]\)\(${2}\)/\1$1\.\2/g" -i *.py
 done
