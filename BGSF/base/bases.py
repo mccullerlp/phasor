@@ -67,6 +67,10 @@ class NoiseBase(ElementBase):
 
 
 class FrequencyBase(ElementBase):
+    def __lt__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        return id(self) < id(other)
     pass
 
 

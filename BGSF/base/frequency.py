@@ -1,22 +1,14 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
-#from BGSF.utilities.print import print
+from __future__ import division, print_function
 import numpy as np
 
-from .bases import (
-    FrequencyBase,
-)
-
-from .elements import (
-    SystemElementBase,
-    OOA_ASSIGN,
-)
+from . import bases
+from . import elements
 
 
-class Frequency(FrequencyBase, SystemElementBase):
+class Frequency(bases.FrequencyBase, elements.SystemElementBase):
     def __init__(
             self,
             F_Hz,
@@ -28,19 +20,19 @@ class Frequency(FrequencyBase, SystemElementBase):
     ):
         super(Frequency, self).__init__(**kwargs)
 
-        OOA_ASSIGN(self).F_Hz = F_Hz
+        elements.OOA_ASSIGN(self).F_Hz = F_Hz
 
         if F_center_Hz is None:
             F_center_Hz = (np.max(self.F_Hz) + np.min(self.F_Hz)) / 2
 
-        OOA_ASSIGN(self).F_center_Hz = F_center_Hz
+        elements.OOA_ASSIGN(self).F_center_Hz = F_center_Hz
 
         if F_width_Hz is None:
             F_center_Hz = (np.max(self.F_Hz) - np.min(self.F_Hz)) / 2
 
-        OOA_ASSIGN(self).F_width_Hz  = F_width_Hz
+        elements.OOA_ASSIGN(self).F_width_Hz  = F_width_Hz
 
-        OOA_ASSIGN(self).order = order
+        elements.OOA_ASSIGN(self).order = order
 
         for group, b_incl in list(groups.items()):
             self.ooa_params.groups[group] = b_incl

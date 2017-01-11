@@ -121,8 +121,6 @@ class SystemSolver(object):
                 if not isinstance(subview, DeepBunch):
                     subview.subview_insert(name_tup[-1:], view_obj)
                 else:
-                    print(subview)
-                    print(name_tup)
                     subview[name_tup[-1]] = view_obj
         print("INSERT: ", views)
         self.views.update_recursive(views.sled)
@@ -465,7 +463,7 @@ class SystemSolver(object):
         for key, value in solution_bunch.solution:
             dk = key[0] | key[1]
             if dk.contains(select_to):
-                print(("[{0: <50}]={1}".format(key, value)))
+                print(("[{0: <50}]={1}".format(str(key), str(value))))
 
     def source_vector_print(
             self,

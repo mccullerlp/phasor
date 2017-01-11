@@ -106,7 +106,7 @@ def gensys(
     #    name = 'RMSQ'
     #)
     sled.sDelay = Space(
-        1,
+        L_m = 1,
         #L_detune_m = 1064e-9 / 4,
         name = 'delay',
     )

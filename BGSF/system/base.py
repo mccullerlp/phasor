@@ -179,7 +179,7 @@ class LinearSystem(RootElement, Constants):
     def _setup_sequence(self):
         while self._include_lst:
             self.do_includes()
-            print(self._include_lst)
+            #print("INCLUDE LST: ", self._include_lst)
             self._autoterminate()
         self._frozen = True
 
@@ -219,7 +219,7 @@ class LinearSystem(RootElement, Constants):
             raise RuntimeError("Cannot include elements or link after solution requested")
         if element in self.elements:
             return
-        print("INCLUDE: ", element, element.fully_resolved_name)
+        #print("INCLUDE: ", element, element.fully_resolved_name)
         self.elements.add(element)
         try:
             op = element.owned_ports

@@ -1,8 +1,6 @@
 """
 """
-
-from __future__ import division
-from __future__ import print_function
+from __future__ import (division, print_function)
 
 from unittest import TestCase, main
 
@@ -63,11 +61,11 @@ def gensys(
     )
 
     sled.sX = Space(
-        1,
+        L_m = 1,
         L_detune_m = 1064e-9 / 8 * .01,
     )
     sled.sY = Space(
-        1,
+        L_m = 1,
         L_detune_m = 0,
     )
 

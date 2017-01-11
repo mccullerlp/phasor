@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
-#from BGSF.utilities.print import print
-#import numpy as np
+from __future__ import division, print_function
 
 def type_test(obj, types):
     if not isinstance(obj, types):
