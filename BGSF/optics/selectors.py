@@ -124,7 +124,10 @@ class GenericSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
         return
 
 
-class OpticalSelectionStack(bases.OpticalCouplerBase, bases.SystemElementBase):
+class OpticalSelectionStack(
+    bases.OpticalCouplerBase,
+    bases.SystemElementBase,
+):
     def __init__(
         self,
         sub_element_map,
@@ -133,13 +136,15 @@ class OpticalSelectionStack(bases.OpticalCouplerBase, bases.SystemElementBase):
         **kwargs
     ):
         super(OpticalSelectionStack, self).__init__(**kwargs)
+
         if port_set is None:
             optical_ports = defaultdict(lambda : 0)
         else:
             optical_ports = None
 
         for ename, element in list(sub_element_map.items()):
-            setattr(self, ename, element)
+            print(self, ename, element)
+            setattr(self.my, ename, element)
             #separate these as the setattr "constructs" the element through the sled mechanism
             celement = getattr(self, ename)
             if optical_ports is not None:

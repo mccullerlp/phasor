@@ -20,6 +20,11 @@ class Element(dsubstrate.Element):
     def __build__(self):
         return
 
+    def insert(self, obj, name = None, invalidate = True):
+        print("INSERT", obj, name, invalidate)
+        super(Element, self).insert(obj, name = name, invalidate = invalidate)
+        print("REG: ", self._registry_children)
+
 
 class RootElement(Element, dsubstrate.RootElement):
     pass
