@@ -46,7 +46,7 @@ def gensys(
         freq_order_max_default = 40,
     )
     sled = sys.sled
-    sled.laser = Laser(
+    sled.my.laser = Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
     )
@@ -88,16 +88,16 @@ def gensys(
         sled.transPD
     )
 
-    sled.refl_DC     = DCReadout(port = sled.reflPD.Wpd.o)
-    sled.transmon_DC = DCReadout(port = sled.transPD.Wpd.o)
-    sled.etm_DC      = DCReadout(port = sled.etmPD.Wpd.o)
-    sled.itm_DC      = DCReadout(port = sled.itmPD.Wpd.o)
-    sled.itm_ForceZ  = DCReadout(port = sled.itm.forceZ.o)
-    sled.etm_ForceZ  = DCReadout(port = sled.etm.forceZ.o)
+    sled.my.refl_DC     = DCReadout(port = sled.reflPD.Wpd.o)
+    sled.my.transmon_DC = DCReadout(port = sled.transPD.Wpd.o)
+    sled.my.etm_DC      = DCReadout(port = sled.etmPD.Wpd.o)
+    sled.my.itm_DC      = DCReadout(port = sled.itmPD.Wpd.o)
+    sled.my.itm_ForceZ  = DCReadout(port = sled.itm.forceZ.o)
+    sled.my.etm_ForceZ  = DCReadout(port = sled.etm.forceZ.o)
 
     if not no_ac:
-        sled.ETM_Drive = ACReadout(portD = sled.etm.posZ.i, portN = sled.etmPD.Wpd.o)
-        sled.ITM_Drive = ACReadout(portD = sled.etm.posZ.i, portN = sled.itmPD.Wpd.o)
+        sled.my.ETM_Drive = ACReadout(portD = sled.etm.posZ.i, portN = sled.etmPD.Wpd.o)
+        sled.my.ITM_Drive = ACReadout(portD = sled.etm.posZ.i, portN = sled.itmPD.Wpd.o)
 
     #analytic sensitivity calculations
     k          = 2 * np.pi * sys.F_carrier_1064.iwavelen_m

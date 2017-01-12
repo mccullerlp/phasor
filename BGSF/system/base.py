@@ -119,10 +119,10 @@ class LinearSystem(RootElement, Constants):
         self.my.sled = SystemElementSled(
             ooa_params = self.ooa_params,
         )
-        self.sled.environment = SystemElementSled()
+        self.sled.my.environment = SystemElementSled()
         self.environment = self.sled.environment
 
-        self.sled.environment.F_AC = Frequency(
+        self.sled.environment.my.F_AC = Frequency(
             F_Hz  = 0,
             name  = 'AC',
             order = 1,

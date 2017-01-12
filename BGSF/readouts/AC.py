@@ -54,11 +54,9 @@ class ACReadout(SystemElementBase):
         self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : -1})})
 
         if include_noise:
-            self.noise = NoiseReadout(
+            self.my.noise = NoiseReadout(
                 portN = self.portN,
             )
-        else:
-            self.noise = None
         return
 
     def system_setup_ports_initial(self, system):

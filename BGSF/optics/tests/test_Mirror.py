@@ -20,12 +20,12 @@ def gensys():
     sys = OpticalSystem(
     )
     sled = sys.sled
-    sled.laser = optics.Laser(
+    sled.my.laser = optics.Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
     )
 
-    sled.etmPD = optics.MagicPD(
+    sled.my.etmPD = optics.MagicPD(
         facing_cardinal = 'W',
     )
 
@@ -34,7 +34,7 @@ def gensys():
         sled.etmPD,
     )
 
-    sled.etm_DC = readouts.DCReadout(port = sled.etmPD.Wpd.o)
+    sled.my.etm_DC = readouts.DCReadout(port = sled.etmPD.Wpd.o)
     #sys.AC_freq(np.array([1]))
     return Bunch(locals())
 
@@ -43,20 +43,20 @@ def gensys_full():
     sys = OpticalSystem(
     )
     sled = sys.sled
-    sled.laser = optics.Laser(
+    sled.my.laser = optics.Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
         name = "laser",
     )
 
-    sled.etm = optics.Mirror(
+    sled.my.etm = optics.Mirror(
         T_hr = 0.25,
         facing_cardinal = 'W',
     )
-    sled.etmPD = optics.MagicPD(
+    sled.my.etmPD = optics.MagicPD(
         facing_cardinal = 'E',
     )
-    sled.s1 = optics.Space(
+    sled.my.s1 = optics.Space(
         L_m = 100,
         L_detune_m = 0,
     )
@@ -68,8 +68,8 @@ def gensys_full():
         sled.etm
     )
 
-    sled.etm_DC = readouts.DCReadout(port = sled.etmPD.Wpd.o)
-    sled.etm_drive = readouts.ACReadout(
+    sled.my.etm_DC = readouts.DCReadout(port = sled.etmPD.Wpd.o)
+    sled.my.etm_drive = readouts.ACReadout(
         portN = sled.etmPD.Wpd.o,
         portD = sled.etm.posZ.i,
     )

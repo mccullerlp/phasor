@@ -49,13 +49,13 @@ class PolTester(
 ):
     def __init__(self, **kwargs):
         super(PolTester, self).__init__(**kwargs)
-        self.PSL = Laser(
+        self.my.PSL = Laser(
             F = self.system.F_carrier_1064,
             power_W = 1.,
             polarization = 'S',
         )
 
-        self.mBS = PolarizingMirror(
+        self.my.mBS = PolarizingMirror(
             mirror_S = Mirror(
                 T_hr = 0,
             ),
@@ -65,8 +65,8 @@ class PolTester(
             AOI_deg = 45,
             facing_cardinal = 'NW',
         )
-        self.PD_S = PD()
-        self.PD_P = PD()
+        self.my.PD_S = PD()
+        self.my.PD_P = PD()
 
         self.system.optical_link_sequence_WtoE(
             self.PSL,
@@ -78,10 +78,10 @@ class PolTester(
             self.PD_S,
         )
 
-        self.DC_P = DCReadout(
+        self.my.DC_P = DCReadout(
             port = self.PD_P.Wpd.o,
         )
-        self.DC_S = DCReadout(
+        self.my.DC_S = DCReadout(
             port = self.PD_S.Wpd.o,
         )
 
@@ -91,7 +91,7 @@ class WavePlateTester(
 ):
     def __init__(self, **kwargs):
         super(WavePlateTester, self).__init__(**kwargs)
-        self.PSL = Laser(
+        self.my.PSL = Laser(
             F = self.system.F_carrier_1064,
             power_W = 1.,
             polarization = 'S',
@@ -100,19 +100,19 @@ class WavePlateTester(
         OOA_ASSIGN(self).waveplate_type = 'half'
 
         if self.waveplate_type == 'half':
-            self.waveplate = HalfWavePlate(
+            self.my.waveplate = HalfWavePlate(
                 facing_cardinal = 'W',
             )
         elif self.waveplate_type == 'quarter':
-            self.waveplate = QuarterWavePlate(
+            self.my.waveplate = QuarterWavePlate(
                 facing_cardinal = 'W',
             )
         elif self.waveplate_type == 'faraday':
-            self.waveplate = FaradayRotator(
+            self.my.waveplate = FaradayRotator(
                 rotate_deg = 0
             )
 
-        self.mBS = PolarizingMirror(
+        self.my.mBS = PolarizingMirror(
             mirror_S = Mirror(
                 T_hr = 0,
             ),
@@ -122,8 +122,8 @@ class WavePlateTester(
             AOI_deg = 45,
             facing_cardinal = 'NW',
         )
-        self.PD_S = PD()
-        self.PD_P = PD()
+        self.my.PD_S = PD()
+        self.my.PD_P = PD()
 
         self.system.optical_link_sequence_WtoE(
             self.PSL,
@@ -136,10 +136,10 @@ class WavePlateTester(
             self.PD_S,
         )
 
-        self.DC_P = DCReadout(
+        self.my.DC_P = DCReadout(
             port = self.PD_P.Wpd.o,
         )
-        self.DC_S = DCReadout(
+        self.my.DC_S = DCReadout(
             port = self.PD_S.Wpd.o,
         )
 
@@ -149,7 +149,7 @@ class WavePlateTesterRetro(
 ):
     def __init__(self, **kwargs):
         super(WavePlateTesterRetro, self).__init__(**kwargs)
-        self.PSL = Laser(
+        self.my.PSL = Laser(
             F = self.system.F_carrier_1064,
             power_W = 1.,
             polarization = 'S',
@@ -157,26 +157,26 @@ class WavePlateTesterRetro(
 
         OOA_ASSIGN(self).waveplate_type = 'half'
 
-        self.circulator = OpticalCirculator(N_ports = 3)
+        self.my.circulator = OpticalCirculator(N_ports = 3)
 
         if self.waveplate_type == 'half':
-            self.waveplate = HalfWavePlate(
+            self.my.waveplate = HalfWavePlate(
                 facing_cardinal = 'W',
             )
         elif self.waveplate_type == 'quarter':
-            self.waveplate = QuarterWavePlate(
+            self.my.waveplate = QuarterWavePlate(
                 facing_cardinal = 'W',
             )
         elif self.waveplate_type == 'faraday':
-            self.waveplate = FaradayRotator(
+            self.my.waveplate = FaradayRotator(
                 rotate_deg = 0,
             )
 
-        self.reflector = Mirror(
+        self.my.reflector = Mirror(
             T_hr = 0,
             facing_cardinal = 'W',
         )
-        self.mBS = PolarizingMirror(
+        self.my.mBS = PolarizingMirror(
             mirror_S = Mirror(
                 T_hr = 0,
             ),
@@ -186,8 +186,8 @@ class WavePlateTesterRetro(
             AOI_deg = 45,
             facing_cardinal = 'NW',
         )
-        self.PD_S = PD()
-        self.PD_P = PD()
+        self.my.PD_S = PD()
+        self.my.PD_P = PD()
 
         self.system.optical_link_sequence_WtoE(
             self.PSL,
@@ -208,10 +208,10 @@ class WavePlateTesterRetro(
             self.PD_S,
         )
 
-        self.DC_P = DCReadout(
+        self.my.DC_P = DCReadout(
             port = self.PD_P.Wpd.o,
         )
-        self.DC_S = DCReadout(
+        self.my.DC_S = DCReadout(
             port = self.PD_S.Wpd.o,
         )
 
@@ -219,7 +219,7 @@ class WavePlateTesterRetro(
 class TestPolarizations(TestCase):
     def test_split(self):
         sys = OpticalSystem()
-        sys.sled.test = PolTester()
+        sys.sled.my.test = PolTester()
         print("A")
         pprint(sys.ooa_params.test.PSL)
         sol = sys.solve()
@@ -231,7 +231,7 @@ class TestPolarizations(TestCase):
         sys = OpticalSystem(
             ooa_params = db,
         )
-        sys.sled.test = PolTester()
+        sys.sled.my.test = PolTester()
         sol = sys.solve()
         print("B")
         pprint(db)
@@ -244,7 +244,7 @@ class TestPolarizations(TestCase):
 
     def test_waveplate(self):
         sys = OpticalSystem()
-        sys.sled.test = WavePlateTester()
+        sys.sled.my.test = WavePlateTester()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
@@ -255,7 +255,7 @@ class TestPolarizations(TestCase):
         sys = OpticalSystem(
             ooa_params = db,
         )
-        sys.sled.test = WavePlateTester()
+        sys.sled.my.test = WavePlateTester()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
@@ -265,7 +265,7 @@ class TestPolarizations(TestCase):
         sys = OpticalSystem(
             ooa_params = db,
         )
-        sys.sled.test = WavePlateTester()
+        sys.sled.my.test = WavePlateTester()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 0)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 1)
@@ -276,7 +276,7 @@ class TestPolarizations(TestCase):
 
         db.test.waveplate.rotate_deg = 0
         sys = OpticalSystem()
-        sys.sled.test = WavePlateTester()
+        sys.sled.my.test = WavePlateTester()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
@@ -284,14 +284,14 @@ class TestPolarizations(TestCase):
 
         db.test.waveplate.rotate_deg = 90
         sys = OpticalSystem(ooa_params = db)
-        sys.sled.test = WavePlateTester()
+        sys.sled.my.test = WavePlateTester()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
 
         db.test.waveplate.rotate_deg = 45
         sys = OpticalSystem(ooa_params = db)
-        sys.sled.test = WavePlateTester()
+        sys.sled.my.test = WavePlateTester()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, .5)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, .5)
@@ -302,7 +302,7 @@ class TestPolarizations(TestCase):
 
         db.test.waveplate.rotate_deg = 0
         sys = OpticalSystem()
-        sys.sled.test = WavePlateTester()
+        sys.sled.my.test = WavePlateTester()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
@@ -310,21 +310,21 @@ class TestPolarizations(TestCase):
 
         db.test.waveplate.rotate_deg = 90
         sys = OpticalSystem(ooa_params = db)
-        sys.sled.test = WavePlateTester()
+        sys.sled.my.test = WavePlateTester()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 0)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 1)
 
         db.test.waveplate.rotate_deg = 45
         sys = OpticalSystem(ooa_params = db)
-        sys.sled.test = WavePlateTester()
+        sys.sled.my.test = WavePlateTester()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, .5)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, .5)
 
     def test_waveplate_retro(self):
         sys = OpticalSystem()
-        sys.sled.test = WavePlateTesterRetro()
+        sys.sled.my.test = WavePlateTesterRetro()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
@@ -335,7 +335,7 @@ class TestPolarizations(TestCase):
         sys = OpticalSystem(
             ooa_params = db,
         )
-        sys.sled.test = WavePlateTesterRetro()
+        sys.sled.my.test = WavePlateTesterRetro()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
@@ -345,7 +345,7 @@ class TestPolarizations(TestCase):
         sys = OpticalSystem(
             ooa_params = db,
         )
-        sys.sled.test = WavePlateTesterRetro()
+        sys.sled.my.test = WavePlateTesterRetro()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
@@ -355,7 +355,7 @@ class TestPolarizations(TestCase):
         sys = OpticalSystem(
             ooa_params = db,
         )
-        sys.sled.test = WavePlateTesterRetro()
+        sys.sled.my.test = WavePlateTesterRetro()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
@@ -365,7 +365,7 @@ class TestPolarizations(TestCase):
         sys = OpticalSystem(
             ooa_params = db,
         )
-        sys.sled.test = WavePlateTesterRetro()
+        sys.sled.my.test = WavePlateTesterRetro()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
@@ -375,7 +375,7 @@ class TestPolarizations(TestCase):
         db.test.waveplate_type = 'quarter'
 
         sys = OpticalSystem(ooa_params = db)
-        sys.sled.test = WavePlateTesterRetro()
+        sys.sled.my.test = WavePlateTesterRetro()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
@@ -383,21 +383,21 @@ class TestPolarizations(TestCase):
 
         db.test.waveplate.rotate_deg = 90
         sys = OpticalSystem(ooa_params = db)
-        sys.sled.test = WavePlateTesterRetro()
+        sys.sled.my.test = WavePlateTesterRetro()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
 
         db.test.waveplate.rotate_deg = 45
         sys = OpticalSystem(ooa_params = db)
-        sys.sled.test = WavePlateTesterRetro()
+        sys.sled.my.test = WavePlateTesterRetro()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 0)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 1)
 
         db.test.waveplate.rotate_deg = -45
         sys = OpticalSystem(ooa_params = db)
-        sys.sled.test = WavePlateTesterRetro()
+        sys.sled.my.test = WavePlateTesterRetro()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 0)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 1)
@@ -407,7 +407,7 @@ class TestPolarizations(TestCase):
         db.test.waveplate_type = 'faraday'
 
         sys = OpticalSystem(ooa_params = db)
-        sys.sled.test = WavePlateTesterRetro()
+        sys.sled.my.test = WavePlateTesterRetro()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
@@ -415,28 +415,28 @@ class TestPolarizations(TestCase):
 
         db.test.waveplate.rotate_deg = 90
         sys = OpticalSystem(ooa_params = db)
-        sys.sled.test = WavePlateTesterRetro()
+        sys.sled.my.test = WavePlateTesterRetro()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
 
         db.test.waveplate.rotate_deg = 45
         sys = OpticalSystem(ooa_params = db)
-        sys.sled.test = WavePlateTesterRetro()
+        sys.sled.my.test = WavePlateTesterRetro()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 0)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 1)
 
         db.test.waveplate.rotate_deg = -45
         sys = OpticalSystem(ooa_params = db)
-        sys.sled.test = WavePlateTesterRetro()
+        sys.sled.my.test = WavePlateTesterRetro()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 0)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 1)
 
         db.test.waveplate.rotate_deg = 45/2
         sys = OpticalSystem(ooa_params = db)
-        sys.sled.test = WavePlateTesterRetro()
+        sys.sled.my.test = WavePlateTesterRetro()
         sol = sys.solve()
         self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, .5)
         self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, .5)

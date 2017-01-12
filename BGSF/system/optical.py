@@ -23,7 +23,7 @@ class OpticalSystem(LinearSystem):
         self.optical_frequencies = set()
         self.elements_by_type[OpticalFrequency] = self.optical_frequencies
 
-        self.sled.environment.F_carrier_1064 = OpticalFrequency(
+        self.sled.environment.my.F_carrier_1064 = OpticalFrequency(
             wavelen_m = 1064e-9,
             name = u'λIR',
         )

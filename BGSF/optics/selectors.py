@@ -168,7 +168,7 @@ class OpticalSelectionStack(
         self.split_ports = {}
         for pname in port_set:
             sname = "psel_{0}".format(pname)
-            setattr(self, sname, GenericSelector(
+            setattr(self.my, sname, GenericSelector(
                 select_map = select_map,
             ))
             psel = getattr(self, sname)

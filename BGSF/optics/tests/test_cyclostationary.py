@@ -53,12 +53,12 @@ def gensys(
     )
     sled = sys.sled
 
-    sled.F_shift = Frequency(
+    sled.my.F_shift = Frequency(
         F_Hz = 1000,
         F_center_Hz = 1000,
         name = 'beatnote',
     )
-    sled.laser_upper = Laser(
+    sled.my.laser_upper = Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
         name = "PSL+",
@@ -66,7 +66,7 @@ def gensys(
             sled.F_shift : 1,
         },
     )
-    sled.laser_lower = Laser(
+    sled.my.laser_lower = Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
         name = "PSL-",
@@ -75,7 +75,7 @@ def gensys(
         },
     )
 
-    sled.mBS = Mirror(
+    sled.my.mBS = Mirror(
         T_hr = .5,
         L_hr = loss_BS,
         name = 'mBS',
@@ -83,29 +83,29 @@ def gensys(
         facing_cardinal = 'NW',
     )
 
-    sled.PD1 = PD(
+    sled.my.PD1 = PD(
         name = 'PD1',
     )
-    sled.PD2 = PD(
+    sled.my.PD2 = PD(
         name = 'PD2',
     )
 
-    sled.mix_LO = SignalGenerator(
+    sled.my.mix_LO = SignalGenerator(
         F = sled.F_shift,
         multiple = 1,
         amplitude = 2,
         name = 'LO',
     )
-    sled.mixer = Mixer(
+    sled.my.mixer = Mixer(
         name = 'extract',
     )
-    #sled.mixerIRMS = RMSMixer(
+    #sled.my.mixerIRMS = RMSMixer(
     #    name = 'RMSI'
     #)
-    #sled.mixerQRMS = RMSMixer(
+    #sled.my.mixerQRMS = RMSMixer(
     #    name = 'RMSQ'
     #)
-    sled.sDelay = Space(
+    sled.my.sDelay = Space(
         L_m = 1,
         #L_detune_m = 1064e-9 / 4,
         name = 'delay',
@@ -122,15 +122,15 @@ def gensys(
         sled.laser_lower, sled.mBS, sled.PD2,
     )
 
-    sled.PD1_DC       = DCReadout(port = sled.PD1.Wpd.o)
-    sled.PD2_DC       = DCReadout(port = sled.PD2.Wpd.o)
-    sled.PD1_MIX_I    = DCReadout(port = sled.mixer.R_I.o)
-    sled.PD1_MIX_Q    = DCReadout(port = sled.mixer.R_Q.o)
-    #sled.PD1_MIX_IRMS = DCReadout(port = sled.mixerIRMS.RMS.o)
-    #sled.PD1_MIX_QRMS = DCReadout(port = sled.mixerQRMS.RMS.o)
-    sled.PD1_AC       = NoiseReadout(portN = sled.PD1.Wpd.o)
-    sled.PD1_MIX_I_N  = NoiseReadout(portN = sled.mixer.R_I.o)
-    sled.PD1_MIX_Q_N  = NoiseReadout(portN = sled.mixer.R_Q.o)
+    sled.my.PD1_DC       = DCReadout(port = sled.PD1.Wpd.o)
+    sled.my.PD2_DC       = DCReadout(port = sled.PD2.Wpd.o)
+    sled.my.PD1_MIX_I    = DCReadout(port = sled.mixer.R_I.o)
+    sled.my.PD1_MIX_Q    = DCReadout(port = sled.mixer.R_Q.o)
+    #sled.my.PD1_MIX_IRMS = DCReadout(port = sled.mixerIRMS.RMS.o)
+    #sled.my.PD1_MIX_QRMS = DCReadout(port = sled.mixerQRMS.RMS.o)
+    sled.my.PD1_AC       = NoiseReadout(portN = sled.PD1.Wpd.o)
+    sled.my.PD1_MIX_I_N  = NoiseReadout(portN = sled.mixer.R_I.o)
+    sled.my.PD1_MIX_Q_N  = NoiseReadout(portN = sled.mixer.R_Q.o)
     return Bunch(locals())
 
 class TestPolarizations(TestCase):

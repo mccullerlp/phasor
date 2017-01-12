@@ -62,13 +62,6 @@ class SystemElementBase(ElementBase):
         ret = ".".join(self.fully_resolved_name_tuple)
         return ret
 
-    def __setattr__(self, name, item):
-        if isinstance(item, PropertyTransforming):
-            setattr(self.my, name, item)
-        else:
-            super(SystemElementBase, self).__setattr__(name, item)
-        return
-
 
 class SystemElementSled(SystemElementBase):
     pass

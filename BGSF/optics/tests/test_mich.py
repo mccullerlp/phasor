@@ -37,42 +37,42 @@ def gensys(
 ):
     sys = OpticalSystem()
     sled = sys.sled
-    sled.PSL = Laser(
+    sled.my.PSL = Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
     )
 
-    sled.mX = Mirror(
+    sled.my.mX = Mirror(
         T_hr = 0,
         L_hr = loss_EM,
         facing_cardinal = 'W',
     )
-    sled.mY = Mirror(
+    sled.my.mY = Mirror(
         T_hr = 0,
         L_hr = loss_EM,
         facing_cardinal = 'S',
     )
     #T_hr = sys.optical_harmonic_value(.3),
-    sled.mBS = Mirror(
+    sled.my.mBS = Mirror(
         T_hr = .5,
         L_hr = loss_BS,
         AOI_deg = 45,
         facing_cardinal = 'NW',
     )
 
-    sled.sX = Space(
+    sled.my.sX = Space(
         L_m = 1,
         L_detune_m = 1064e-9 / 8 * .01,
     )
-    sled.sY = Space(
+    sled.my.sY = Space(
         L_m = 1,
         L_detune_m = 0,
     )
 
-    sled.symPD = MagicPD(
+    sled.my.symPD = MagicPD(
         facing_cardinal = 'E',
     )
-    sled.asymPD = PD()
+    sled.my.asymPD = PD()
 
     sys.optical_link_sequence_WtoE(
         sled.PSL,
@@ -88,13 +88,13 @@ def gensys(
         sled.mY,
     )
 
-    sled.sym_DC = DCReadout(
+    sled.my.sym_DC = DCReadout(
         port = sled.symPD.Wpd.o,
     )
-    sled.asym_DC = DCReadout(
+    sled.my.asym_DC = DCReadout(
         port = sled.asymPD.Wpd.o,
     )
-    sled.asym_drive = ACReadout(
+    sled.my.asym_drive = ACReadout(
         portD = sled.mX.posZ.i,
         portN = sled.asymPD.Wpd.o,
     )

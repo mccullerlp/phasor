@@ -400,10 +400,10 @@ class WavePlateMount(ports.OpticalOriented2PortMixin, bases.OpticalCouplerBase, 
     ):
         super(WavePlateMount, self).__init__(**kwargs)
 
-        self.plate = plate
+        self.my.plate = plate
         bases.OOA_ASSIGN(self).rotate_deg = rotate_deg
-        self.coord_Fr = PolarizationRotator(rotate_deg = self.rotate_deg)
-        self.coord_Bk = PolarizationRotator(rotate_deg = -self.rotate_deg)
+        self.my.coord_Fr = PolarizationRotator(rotate_deg = self.rotate_deg)
+        self.my.coord_Bk = PolarizationRotator(rotate_deg = -self.rotate_deg)
 
         self.system.link(self.coord_Fr.Bk, self.plate.Fr)
         self.system.link(self.plate.Bk, self.coord_Bk.Fr)
