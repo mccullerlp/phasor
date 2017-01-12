@@ -27,13 +27,8 @@ from .matrix_algorithm import (
     MatrixBuildAlgorithm,
 )
 
-from .ports_algorithm import (
-    PortUpdatesAlgorithm,
-)
-
-from .solver_algorithm import (
-    SystemSolver
-)
+from . import ports_algorithm
+from . import solver_algorithm
 
 from ..base import Element, RootElement
 
@@ -90,32 +85,39 @@ class LinearSystem(RootElement, Constants):
         #should use environment_query instead
         return self
 
-    def __build__(self):
+    @decl.mproperty
+    def elements_named(self):
+        return dict()
 
-        #TODO, remove to use self.building
-        #this is a tag for the method calls whether to record the elements.
-        #any methods or state applied to the system outside of the world_builder
-        #can be replayed during N'th constructions. The world builder is a more
-        #versatile way to replay constructions, since it is aware of the ooa_params
-        self._record_build = False
+    @decl.mproperty
+    def elements(self):
+        return set()
 
-        self.elements_named   = {}
-        self.elements         = set()
+    @decl.mproperty
+    def port_owners(self):
+        return dict()
 
-        self.port_owners = dict()
-        self.owners_ports = dict()
-        self.owners_ports_virtual = dict()
-        self.port_autoterminate = dict()
+    @decl.mproperty
+    def owners_ports(self):
+        return dict()
 
+    @decl.mproperty
+    def owners_ports_virtual(self):
+        return dict()
+    @decl.mproperty
+    def port_autoterminate(self):
+        return dict()
+
+    @decl.mproperty
+    def link_pairs(self):
         #TODO: enforce single linkage if possible
-        self.link_pairs = defaultdict(set)
-        self.port_owners_virtual = defaultdict(set)
+        return defaultdict(set)
 
-        self.frequencies      = set()
-        self.elements_by_type = {
-            Frequency : self.frequencies,
-        }
+    @decl.mproperty
+    def port_owners_virtual(self):
+        return defaultdict(set)
 
+    def __build__(self):
         self.my.sled = SystemElementSled(
             ooa_params = self.ooa_params,
         )
@@ -131,16 +133,11 @@ class LinearSystem(RootElement, Constants):
 
         #now that the system is done constructing, switch to recording mode so that any further
         #construction can be replayed
-        self._record_build = True
-        self._record_build_sequence = []
         super(LinearSystem, self).__build__()
         return
 
     def number(self, num):
         return num
-
-    def variant(self, params = None):
-        raise NotImplementedError("TODO")
 
     @decl.mproperty
     def fully_resolved_name_tuple(self):
@@ -190,14 +187,14 @@ class LinearSystem(RootElement, Constants):
             self._autoterminate()
         self._frozen = True
 
-        self.port_algo = PortUpdatesAlgorithm(
+        self.port_algo = ports_algorithm.PortUpdatesAlgorithm(
             system = self,
         )
         self.matrix_algorithm = MatrixBuildAlgorithm(
             system = self,
             ports_algorithm = self.port_algo,
         )
-        self.solver = SystemSolver(
+        self.solver = solver_algorithm.SystemSolver(
             system = self,
             ports_algorithm = self.port_algo,
             matrix_algorithm = self.matrix_algorithm,
@@ -227,7 +224,7 @@ class LinearSystem(RootElement, Constants):
             raise RuntimeError("Cannot include elements or link after solution requested")
         if element in self.elements:
             return
-        #print("INCLUDE: ", element, element.fully_resolved_name)
+        #print("INCLUDE: ", element, element.name_system)
         self.elements.add(element)
         try:
             op = element.owned_ports
@@ -240,18 +237,15 @@ class LinearSystem(RootElement, Constants):
                 self.owners_ports_virtual.setdefault(element, [])
                 #have the port objects autoterminate
                 pobj.autoterminations(self.port_autoterminate)
-        if element.fully_resolved_name in self.elements_named:
+        if element.name_system in self.elements_named:
             warnings.warn((
                 "Multiple elements added with name {0}"
                 ", may be confusing and prevent system rebuilding from functioning"
-            ).format(element.fully_resolved_name))
+            ).format(element.name_system))
             #break the elements named so that there isn't confusion later
-            self.elements_named[element.fully_resolved_name] = None
+            self.elements_named[element.name_system] = None
         else:
-            self.elements_named[element.fully_resolved_name] = element
-        for t, s in list(self.elements_by_type.items()):
-            if isinstance(element, t):
-                s.add(element)
+            self.elements_named[element.name_system] = element
 
     def _autoterminate(self):
         terminated_ports = set()
@@ -274,7 +268,7 @@ class LinearSystem(RootElement, Constants):
                 #have to build within include to get the sled connection
                 #TODO: make this a sane naming scheme
                 #TODO GOTTA GOTTA FIX
-                name = '{0}({2}-<{1}>)'.format(tclass.__name__, port, pobj.element.fully_resolved_name).replace('.', '_')
+                name = '{0}({2}-<{1}>)'.format(tclass.__name__, port, pobj.element.name_system).replace('.', '_')
                 tinst = self.sled.autoterminate.insert(tclass(), name)
                 self.link(pobj, tinst.Fr)
 

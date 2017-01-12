@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
+from __future__ import (division, print_function)
 import numpy as np
 
 oldprint = print
@@ -18,3 +17,8 @@ def print(*args):
             rep = repr(a)
         pargs.append(rep)
     oldprint(*args)
+
+try:
+    from IPython.lib.pretty import pprint
+except ImportError:
+    from pprint import pprint

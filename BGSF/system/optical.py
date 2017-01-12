@@ -20,8 +20,6 @@ from .base import LinearSystem
 class OpticalSystem(LinearSystem):
     def __build__(self):
         super(OpticalSystem, self).__build__()
-        self.optical_frequencies = set()
-        self.elements_by_type[OpticalFrequency] = self.optical_frequencies
 
         self.sled.environment.my.F_carrier_1064 = OpticalFrequency(
             wavelen_m = 1064e-9,

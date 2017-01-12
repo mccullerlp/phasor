@@ -3,10 +3,7 @@
 """
 from __future__ import division
 
-from declarative import (
-    dproperty,
-    NOARG,
-)
+import declarative as decl
 from declarative.utilities import SuperBase
 import declarative.substrate as dsubstrate
 
@@ -44,15 +41,25 @@ class ElementBase(Element, SuperBase):
             return "{cls}({name})".format(cls = self.__class__.__name__, name = self.name)
         return self.__class__.__name__ + '(<unknown>)'
 
-    @dproperty
+    @decl.dproperty
     def system(self):
         sys = self.parent.system
         return sys
 
-    @dproperty
-    def _include(self, val = NOARG):
-        if val is NOARG:
+    @decl.dproperty
+    def _include(self, val = decl.NOARG):
+        if val is decl.NOARG:
             self.system.include(self)
+
+    @decl.mproperty
+    def fully_resolved_name_tuple(self):
+        if self.parent is None:
+            ptup = ()
+        else:
+            ptup = self.parent.fully_resolved_name_tuple
+        if self.name_child is not None:
+            ptup = ptup + (self.name_child,)
+        return ptup
 
 
 class CouplerBase(ElementBase):

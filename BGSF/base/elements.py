@@ -47,21 +47,6 @@ class SystemElementBase(ElementBase):
     create the object, it's creation is completed only on the sled
     """
 
-    @mproperty
-    def fully_resolved_name_tuple(self):
-        if self.parent is None:
-            ptup = ()
-        else:
-            ptup = self.parent.fully_resolved_name_tuple
-        if self.name_child is not None:
-            ptup = ptup + (self.name_child,)
-        return ptup
-
-    @mproperty
-    def fully_resolved_name(self):
-        ret = ".".join(self.fully_resolved_name_tuple)
-        return ret
-
 
 class SystemElementSled(SystemElementBase):
     pass

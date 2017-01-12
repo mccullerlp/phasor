@@ -176,7 +176,7 @@ class NoiseMatrixView(object):
                             pspec_tot = np.real(pspec_tot)
 
                         if not np.all(np.isfinite(pspec_tot)):
-                            print("BADNESS: ", nobj.fully_resolved_name, pspec_tot)
+                            print("BADNESS: ", nobj.name_system, pspec_tot)
                         else:
                             nsum += pspec_tot
                             ncollect[nobj][pnameP, pnameN] = ncollect[nobj][pnameP, pnameN] + pspec_tot
