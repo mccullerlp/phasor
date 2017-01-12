@@ -10,6 +10,7 @@ from declarative import (
     mproperty,
 )
 
+import warnings
 from declarative.properties import PropertyTransforming
 
 
@@ -35,6 +36,7 @@ class OOABridge(object):
 
 
 def OOA_ASSIGN(obj):
+    warnings.warn("OOA_ASSIGN", DeprecationWarning)
     return OOABridge(obj, obj.ooa_params)
 
 
@@ -66,11 +68,6 @@ class SystemElementBase(ElementBase):
         else:
             super(SystemElementBase, self).__setattr__(name, item)
         return
-
-    def include(self, name, constructor):
-        constructed_item = self.system._subsled_construct(self, name, constructor)
-        self.__dict__[name] = constructed_item
-        return constructed_item
 
 
 class SystemElementSled(SystemElementBase):

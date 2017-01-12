@@ -12,18 +12,18 @@ import declarative.substrate as dsubstrate
 
 
 class Element(dsubstrate.Element):
-    def __post_init__(self):
-        super(Element, self).__post_init__()
+    def __mid_init__(self):
+        super(Element, self).__mid_init__()
         with self.building:
             self.__build__()
 
     def __build__(self):
         return
 
-    def insert(self, obj, name = None, invalidate = True):
-        print("INSERT", obj, name, invalidate)
-        super(Element, self).insert(obj, name = name, invalidate = invalidate)
-        print("REG: ", self._registry_children)
+    #def insert(self, obj, name = None, invalidate = True):
+    #    print("INSERT", obj, name, invalidate)
+    #    super(Element, self).insert(obj, name = name, invalidate = invalidate)
+    #    print("REG: ", self._registry_children)
 
 
 class RootElement(Element, dsubstrate.RootElement):
@@ -39,12 +39,9 @@ class ElementBase(Element, SuperBase):
         self.owned_port_keys = dict()
         super(ElementBase, self).__init__(**kwargs)
 
-    def linked_elements(self):
-        return ()
-
     def __repr__(self):
         if self.name is not None:
-            return self.name
+            return "{cls}({name})".format(cls = self.__class__.__name__, name = self.name)
         return self.__class__.__name__ + '(<unknown>)'
 
     @dproperty

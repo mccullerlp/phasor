@@ -5,7 +5,7 @@ from __future__ import division, print_function
 from builtins import str
 import numpy as np
 
-#from pprint import pprint
+from pprint import pprint
 from matplotlib.text import OffsetFrom
 
 from declarative import (
@@ -216,7 +216,7 @@ class MPlotter(OverridableObject):
 
         for wdesc in sys.target_descriptions():
             all_desc_by_z.append((
-                wdesc.z, None,
+                wdesc.z, -float('inf'),
                 wdesc.str,
                 dict(
                     color = 'orange',
@@ -249,8 +249,6 @@ class MPlotter(OverridableObject):
                 desc = u"{0}: {desc}".format(str_m(z, 3), desc = desc)
                 return desc
         for idx, (z, width, desc, lkw, akw) in enumerate(reversed(left_list)):
-            if isinstance(desc, str):
-                desc = str(desc, 'utf-8')
             desc = desc_format(z, desc)
             #top elements
             arrowkw = dict(self.arrow_args)
@@ -285,8 +283,6 @@ class MPlotter(OverridableObject):
                 F.Gouy.axvline(z_unit * float(z), **lkw)
 
         for idx, (z, width, desc, lkw, akw) in enumerate(right_list):
-            if isinstance(desc, str):
-                desc = str(desc, 'utf-8')
             desc = desc_format(z, desc)
             #bottom elements
             arrowkw = dict(self.arrow_args)

@@ -69,7 +69,7 @@ class GenericSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
         **kwargs
     ):
         super(GenericSelector, self).__init__(**kwargs)
-        self.check      = self.system.unique_selections_check
+        self.check      = True
         self.select_map = select_map
         self.port_map   = {}
         self.Fr         = ports.OpticalPortHolderInOut(self, x = 'Fr')
@@ -143,7 +143,6 @@ class OpticalSelectionStack(
             optical_ports = None
 
         for ename, element in list(sub_element_map.items()):
-            print(self, ename, element)
             setattr(self.my, ename, element)
             #separate these as the setattr "constructs" the element through the sled mechanism
             celement = getattr(self, ename)

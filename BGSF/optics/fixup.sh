@@ -11,6 +11,7 @@ FIXUP=(
         readouts.ACReadout \
 )
 for THING in ${FIXUP[@]}; do
-    IFS='.' set $THING
-    sed -e "s/\([^.]\)\(${2}\)/\1$1\.\2/g" -i *.py
+    LEFT=${THING##}
+    RIGHT=${THING//.*\.//}
+    echo -e "s/\([^.]\)\(${RIGHT}\)/\1${LEFT}\.\2/g" -i *.py
 done

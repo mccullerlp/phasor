@@ -71,19 +71,26 @@ class LinearSystem(RootElement, Constants):
     ):
         super(LinearSystem, self).__init__(**kwargs)
 
+    @decl.dproperty
+    def adjust_PSD(self):
+        if self.sided_spectra == 1:
+            val = 2
+        elif self.sided_spectra == 2:
+            val = 1
+        val = self.ooa_params.setdefault('adjust_PSD', val)
+        return val
+
+    @decl.dproperty
+    def sided_spectra(self, val = 1):
+        val = self.ooa_params.setdefault('sided_spectra', val)
+        return val
+
+    @decl.dproperty
+    def system(self):
+        #should use environment_query instead
+        return self
+
     def __build__(self):
-        #TODO, remove this once all elements use substrate
-        #use environment_query instead
-        self.system     = self
-
-        #debugging assignments
-        OOA_ASSIGN(self).unique_selections_check = True
-
-        OOA_ASSIGN(self).sided_spectra = 1
-        if self.sided_spectra == 2:
-            OOA_ASSIGN(self).adjust_PSD = 1
-        elif self.sided_spectra == 1:
-            OOA_ASSIGN(self).adjust_PSD = 2
 
         #TODO, remove to use self.building
         #this is a tag for the method calls whether to record the elements.
@@ -207,6 +214,7 @@ class LinearSystem(RootElement, Constants):
         return []
 
     def include(self, element):
+        #TODO get rid of this deferred include business
         self._include_lst.append(element)
 
     def do_includes(self):
@@ -244,9 +252,6 @@ class LinearSystem(RootElement, Constants):
         for t, s in list(self.elements_by_type.items()):
             if isinstance(element, t):
                 s.add(element)
-        #TODO not sure linked_elements is relevant anymore with the sled system
-        for sub_element in element.linked_elements():
-            self.include(sub_element)
 
     def _autoterminate(self):
         terminated_ports = set()
@@ -270,31 +275,13 @@ class LinearSystem(RootElement, Constants):
                 #TODO: make this a sane naming scheme
                 #TODO GOTTA GOTTA FIX
                 name = '{0}({2}-<{1}>)'.format(tclass.__name__, port, pobj.element.fully_resolved_name).replace('.', '_')
-                tinst = self.sled.autoterminate.include(name, tclass())
+                tinst = self.sled.autoterminate.insert(tclass(), name)
                 self.link(pobj, tinst.Fr)
 
-    def _link_record(self, enameA, pkeyA, enameB, pkeyB):
-        eA = self.elements_named[enameA]
-        pA = eA.owned_port_keys[pkeyA]
-        eB = self.elements_named[enameB]
-        pB = eB.owned_port_keys[pkeyB]
-        return self.link(pA, pB)
-
     def link(self, port_A, port_B):
-        if self._record_build:
-            self._record_build_sequence.append((
-                '_link_record',
-                port_A.element.fully_resolved_name,
-                port_A.key,
-                port_B.element.fully_resolved_name,
-                port_B.key,
-            ))
-        #print("Linking: ", port_A, port_B)
         self.include(port_A.element)
         self.include(port_B.element)
 
-        #print(port_A)
-        #print(port_B)
         either_included = False
         try:
             port_A.o
@@ -329,38 +316,7 @@ class LinearSystem(RootElement, Constants):
         return
 
     def own_port_virtual(self, element, port):
-        if self._record_build:
-            #TODO
-            pass
-
         self.port_owners_virtual[port].add(element)
         self.owners_ports_virtual.setdefault(element, []).append(port)
         return
-
-    def _subsled_construct_record(self, sled_fqn, name, constructor):
-        sled = self.elements_named[sled_fqn]
-        return self._subsled_construct(sled, name, constructor)
-
-    def _subsled_construct(
-            self,
-            element,
-            name,
-            constructor,
-    ):
-        #store the constructor so that it may be replayed
-        if self._record_build:
-            self._record_build_sequence.append((
-                '_subsled_construct_record',
-                element.fully_resolved_name,
-                name,
-                constructor,
-            ))
-        #TODO there may be a cleaner way to construct these dictionaries
-        #ooa_params = element.ooa_params[name]
-        constructed_item = constructor.construct(
-            parent = element,
-            name   = name,
-        )
-        self.include(constructed_item)
-        return constructed_item
 
