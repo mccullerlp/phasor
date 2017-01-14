@@ -29,21 +29,21 @@ from .bases import (
 
 from .ports import (
     OpticalPortHolderIn,
-    ports.OpticalPortHolderOut,
-    ports.OpticalPortHolderInOut,
-    ports.MechanicalPortHolderIn,
-    ports.MechanicalPortHolderOut,
+    OpticalPortHolderOut,
+    OpticalPortHolderInOut,
+    MechanicalPortHolderIn,
+    MechanicalPortHolderOut,
     SignalPortHolderIn,
-    ports.SignalPortHolderOut,
+    SignalPortHolderOut,
     QuantumKey,
-    ports.RAISE, ports.LOWER,
+    RAISE, LOWER,
     PolKEY,
-    ports.PolS, ports.PolP,
+    PolS, PolP,
     OpticalFreqKey,
     ClassicalFreqKey,
-    ports.OpticalSymmetric2PortMixin,
-    ports.OpticalOriented2PortMixin,
-    ports.OpticalNonOriented1PortMixin,
+    OpticalSymmetric2PortMixin,
+    OpticalOriented2PortMixin,
+    OpticalNonOriented1PortMixin,
 )
 
 from .nonlinear_utilities import (

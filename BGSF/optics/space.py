@@ -70,7 +70,6 @@ class Space(ports.OpticalSymmetric2PortMixin, bases.OpticalCouplerBase, bases.Sy
                     cplg = self.phase_raise(iwavelen_m, freq)
                 else:
                     raise RuntimeError("Boo")
-                print("CPLG: ", cplg)
                 matrix_algorithm.port_coupling_insert(port.i, kfrom, self.pmap[port].o, kfrom, cplg)
         return
 
