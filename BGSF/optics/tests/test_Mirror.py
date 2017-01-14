@@ -13,6 +13,9 @@ from BGSF.system.optical import (
     OpticalSystem
 )
 
+import unittest
+assertions = unittest.TestCase('__init__')
+
 
 #from BGSF.utilities.np import logspaced
 
@@ -76,64 +79,59 @@ def gensys_full():
     #sys.AC_freq(np.array([1]))
     return Bunch(locals())
 
-import unittest
-assertions = unittest.TestCase('__init__')
-
 @pytest.mark.optics_trivial
 @pytest.mark.optics_fast
 def test_trivial():
     b = gensys()
     sys = b.sys
-    sol = sys.solve()
     #sys.coupling_matrix_print()
     #sys.source_vector_print()
-    #sol.solution_vector_print()
-    print("etm_DC", sol.views.etm_DC.DC_readout)
-    assertions.assertAlmostEqual(sol.views.etm_DC.DC_readout, 1)
+    #sys.solution.solution_vector_print()
+    print("etm_DC", sys.sled.etm_DC.DC_readout)
+    assertions.assertAlmostEqual(sys.sled.etm_DC.DC_readout, 1)
 
 
 @pytest.mark.optics_fast
 def test_mirror():
     b = gensys_full()
     sys = b.sys
-    sol = sys.solve()
     #sys.coupling_matrix_print()
     #sys.source_vector_print()
-    #sol.solution_vector_print()
-    print("etm_DC", sol.views.etm_DC.DC_readout)
-    print("etm_drive", sol.views.etm_drive.AC_sensitivity)
+    #sys.solution.solution_vector_print()
+    print("etm_DC", sys.sled.etm_DC.DC_readout)
+    print("etm_drive", sys.sled.etm_drive.AC_sensitivity)
     #print("etm_Force[N]", sys.DC_readout('etm_ForceZ'))
 
     #print("A")
     #sys.coupling_matrix_print(select_from = b.sled.etm.posZ.i, select_to = b.sled.etm.Fr.o)
     #print("B")
-    #sol.coupling_matrix_print(
+    #sys.solution.coupling_matrix_print(
     #    select_to= b.sled.etm.Fr.i,
     #)
-    assertions.assertAlmostEqual(sol.views.etm_DC.DC_readout, .75)
+    assertions.assertAlmostEqual(sys.sled.etm_DC.DC_readout, .75)
     print("inv")
-    #sol.coupling_matrix_inv_print()
+    #sys.solution.coupling_matrix_inv_print()
     print('A')
-    sol.coupling_matrix_inv_print(
+    sys.solution.coupling_matrix_inv_print(
         select_from = b.sled.etm.posZ.i,
         select_to = b.sled.etmPD.Fr.i,
     )
     print('B')
 
-    sol.coupling_matrix_print(
+    sys.solution.coupling_matrix_print(
         select_from = b.sled.etmPD.Fr.i,
         select_to = b.sled.etmPD.Wpd.o,
         drive_set = 'AC',
         readout_set = 'AC',
     )
     print('B inv')
-    sol.coupling_matrix_inv_print(
+    sys.solution.coupling_matrix_inv_print(
         select_from = b.sled.etmPD.Fr.i,
         select_to = b.sled.etmPD.Wpd.o,
         drive_set = 'AC',
         readout_set = 'AC',
     )
-    sol.coupling_matrix_inv_print(
+    sys.solution.coupling_matrix_inv_print(
         select_from = b.sled.etm.posZ.i,
         select_to = b.sled.etmPD.Wpd.o,
         drive_set = 'AC',

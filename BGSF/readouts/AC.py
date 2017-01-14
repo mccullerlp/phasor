@@ -7,9 +7,7 @@ from __future__ import print_function
 
 #import numpy as np
 
-from declarative import (
-    mproperty,
-)
+import declarative as decl
 
 from ..math.key_matrix import (
     DictKey,
@@ -69,48 +67,25 @@ class ACReadout(SystemElementBase):
         system.drive_port_needed(self.portDrv, self.keyN, portsets)
         return
 
-    def system_associated_readout_view(self, solver):
-        if self.noise is not None:
-            noise_view = self.noise.system_associated_readout_view(solver)
-        else:
-            noise_view = None
-        return ACReadoutView(
-            readout = self,
-            system = self.system,
-            solver = solver,
-            noise_view = noise_view,
-        )
-
-
-class ACReadoutView(ReadoutViewBase):
-    def __init__(
-            self,
-            noise_view = None,
-            **kwargs
-    ):
-        super(ACReadoutView, self).__init__(**kwargs)
-        self.noise = noise_view
-        return
-
-    @mproperty
+    @decl.mproperty
     def F_Hz(self):
-        return self.readout.F_sep.F_Hz
+        return self.F_sep.F_Hz
 
-    @mproperty
+    @decl.mproperty
     def AC_sensitivity(self):
 
-        pk_DP = (self.readout.portD, self.readout.keyP)
-        #pk_DN = (self.readout.portD, self.readout.keyN)
+        pk_DP = (self.portD, self.keyP)
+        #pk_DN = (self.portD, self.keyN)
 
-        pk_NP = (self.readout.portN, self.readout.keyP)
-        #pk_NN = (self.readout.portD, self.readout.keyN)
+        pk_NP = (self.portN, self.keyP)
+        #pk_NN = (self.portD, self.keyN)
 
-        pk_DrP = (self.readout.portDrv, self.readout.keyP)
-        pk_DrN = (self.readout.portDrv, self.readout.keyN)
+        pk_DrP = (self.portDrv, self.keyP)
+        pk_DrN = (self.portDrv, self.keyN)
 
-        cbunch = self.solver.coupling_solution_get(
-            drive_set = self.readout.port_set,
-            readout_set = self.readout.port_set,
+        cbunch = self.system.solution.coupling_solution_get(
+            drive_set = self.port_set,
+            readout_set = self.port_set,
         )
 
         coupling_matrix_inv = cbunch.coupling_matrix_inv
@@ -127,19 +102,19 @@ class ACReadoutView(ReadoutViewBase):
         #The factor of 2 captures the missing readout power from the negative frequencies
         return 2 * N_tot / D_tot
 
-    @mproperty
+    @decl.mproperty
     def AC_noise_limited_sensitivity(self):
         return self.AC_ASD / abs(self.AC_sensitivity)
 
-    @mproperty
+    @decl.mproperty
     def AC_ASD(self):
         return self.AC_PSD**.5
 
-    @mproperty
+    @decl.mproperty
     def AC_PSD(self):
         return self.noise.CSD['R', 'R']
 
-    @mproperty
+    @decl.mproperty
     def AC_PSD_by_source(self):
         eachCSD = dict()
         for nobj, subCSD in list(self.noise.CSD_by_source.items()):
@@ -187,45 +162,22 @@ class ACReadoutCLG(SystemElementBase):
         system.drive_port_needed(self.portD, self.keyN, portsets)
         return
 
-    def system_associated_readout_view(self, solver):
-        if self.noise is not None:
-            noise_view = self.noise.system_associated_readout_view(solver)
-        else:
-            noise_view = None
-        return ACReadoutCLGView(
-            readout = self,
-            system = self.system,
-            solver = solver,
-            noise_view = noise_view,
-        )
-
-
-class ACReadoutCLGView(ReadoutViewBase):
-    def __init__(
-            self,
-            noise_view = None,
-            **kwargs
-    ):
-        super(ACReadoutCLGView, self).__init__(**kwargs)
-        self.noise = noise_view
-        return
-
-    @mproperty
+    @decl.mproperty
     def F_Hz(self):
-        return self.readout.F_sep.F_Hz
+        return self.F_sep.F_Hz
 
-    @mproperty
+    @decl.mproperty
     def AC_sensitivity(self):
 
-        pk_NP = (self.readout.portN, self.readout.keyP)
-        #pk_NN = (self.readout.portD, self.readout.keyN)
+        pk_NP = (self.portN, self.keyP)
+        #pk_NN = (self.portD, self.keyN)
 
-        pk_DrP = (self.readout.portD, self.readout.keyP)
-        pk_DrN = (self.readout.portD, self.readout.keyN)
+        pk_DrP = (self.portD, self.keyP)
+        pk_DrN = (self.portD, self.keyN)
 
-        cbunch = self.solver.coupling_solution_get(
-            drive_set = self.readout.port_set,
-            readout_set = self.readout.port_set,
+        cbunch = self.system.solution.coupling_solution_get(
+            drive_set = self.port_set,
+            readout_set = self.port_set,
         )
 
         coupling_matrix_inv = cbunch.coupling_matrix_inv
@@ -238,23 +190,24 @@ class ACReadoutCLGView(ReadoutViewBase):
         #The factor of 2 captures the missing readout power from the negative frequencies
         return 2 * N_tot
 
-    @mproperty
+    @decl.mproperty
     def AC_noise_limited_sensitivity(self):
         return self.AC_ASD / abs(self.AC_sensitivity)
 
-    @mproperty
+    @decl.mproperty
     def AC_ASD(self):
         return self.AC_PSD**.5
 
-    @mproperty
+    @decl.mproperty
     def AC_PSD(self):
         return self.noise.CSD['R', 'R']
 
-    @mproperty
+    @decl.mproperty
     def AC_PSD_by_source(self):
         eachCSD = dict()
         for nobj, subCSD in list(self.noise.CSD_by_source.items()):
             nsum = subCSD['R', 'R']
             eachCSD[nobj] = nsum
         return eachCSD
+
 

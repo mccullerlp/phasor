@@ -222,9 +222,8 @@ class TestPolarizations(TestCase):
         sys.sled.my.test = PolTester()
         print("A")
         pprint(sys.ooa_params.test.PSL)
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 0)
 
         db = DeepBunch()
         db.test.PSL.polarization = 'P'
@@ -232,22 +231,20 @@ class TestPolarizations(TestCase):
             ooa_params = db,
         )
         sys.sled.my.test = PolTester()
-        sol = sys.solve()
         print("B")
         pprint(db)
         pprint(sys.ooa_params.test.PSL)
 
-        print("DC_S:", sol.views.test.DC_S.DC_readout)
-        print("DC_P:", sol.views.test.DC_P.DC_readout)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 1)
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 0)
+        print("DC_S:", sys.sled.test.DC_S.DC_readout)
+        print("DC_P:", sys.sled.test.DC_P.DC_readout)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 0)
 
     def test_waveplate(self):
         sys = OpticalSystem()
         sys.sled.my.test = WavePlateTester()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 0)
         pprint(sys.ooa_params.test.waveplate)
 
         db = DeepBunch()
@@ -256,9 +253,8 @@ class TestPolarizations(TestCase):
             ooa_params = db,
         )
         sys.sled.my.test = WavePlateTester()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 0)
 
         db = DeepBunch()
         db.test.waveplate.rotate_deg = 45
@@ -266,9 +262,8 @@ class TestPolarizations(TestCase):
             ooa_params = db,
         )
         sys.sled.my.test = WavePlateTester()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 0)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 1)
 
     def test_waveplateQ(self):
         db = DeepBunch()
@@ -277,24 +272,21 @@ class TestPolarizations(TestCase):
         db.test.waveplate.rotate_deg = 0
         sys = OpticalSystem()
         sys.sled.my.test = WavePlateTester()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 0)
         pprint(sys.ooa_params.test.waveplate)
 
         db.test.waveplate.rotate_deg = 90
         sys = OpticalSystem(ooa_params = db)
         sys.sled.my.test = WavePlateTester()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 0)
 
         db.test.waveplate.rotate_deg = 45
         sys = OpticalSystem(ooa_params = db)
         sys.sled.my.test = WavePlateTester()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, .5)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, .5)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, .5)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, .5)
 
     def test_waveplateF(self):
         db = DeepBunch()
@@ -303,31 +295,27 @@ class TestPolarizations(TestCase):
         db.test.waveplate.rotate_deg = 0
         sys = OpticalSystem()
         sys.sled.my.test = WavePlateTester()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 0)
         pprint(sys.ooa_params.test.waveplate)
 
         db.test.waveplate.rotate_deg = 90
         sys = OpticalSystem(ooa_params = db)
         sys.sled.my.test = WavePlateTester()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 0)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 1)
 
         db.test.waveplate.rotate_deg = 45
         sys = OpticalSystem(ooa_params = db)
         sys.sled.my.test = WavePlateTester()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, .5)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, .5)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, .5)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, .5)
 
     def test_waveplate_retro(self):
         sys = OpticalSystem()
         sys.sled.my.test = WavePlateTesterRetro()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 0)
         pprint(sys.ooa_params.test.waveplate)
 
         db = DeepBunch()
@@ -336,9 +324,8 @@ class TestPolarizations(TestCase):
             ooa_params = db,
         )
         sys.sled.my.test = WavePlateTesterRetro()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 0)
 
         db = DeepBunch()
         db.test.waveplate.rotate_deg = 45
@@ -346,9 +333,8 @@ class TestPolarizations(TestCase):
             ooa_params = db,
         )
         sys.sled.my.test = WavePlateTesterRetro()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 0)
 
         db = DeepBunch()
         db.test.waveplate.rotate_deg = 11
@@ -356,9 +342,8 @@ class TestPolarizations(TestCase):
             ooa_params = db,
         )
         sys.sled.my.test = WavePlateTesterRetro()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 0)
 
         db = DeepBunch()
         db.test.waveplate.rotate_deg = 232
@@ -366,9 +351,8 @@ class TestPolarizations(TestCase):
             ooa_params = db,
         )
         sys.sled.my.test = WavePlateTesterRetro()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 0)
 
     def test_waveplate_retro_quarter(self):
         db = DeepBunch()
@@ -376,31 +360,27 @@ class TestPolarizations(TestCase):
 
         sys = OpticalSystem(ooa_params = db)
         sys.sled.my.test = WavePlateTesterRetro()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 0)
         pprint(sys.ooa_params.test.waveplate)
 
         db.test.waveplate.rotate_deg = 90
         sys = OpticalSystem(ooa_params = db)
         sys.sled.my.test = WavePlateTesterRetro()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 0)
 
         db.test.waveplate.rotate_deg = 45
         sys = OpticalSystem(ooa_params = db)
         sys.sled.my.test = WavePlateTesterRetro()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 0)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 1)
 
         db.test.waveplate.rotate_deg = -45
         sys = OpticalSystem(ooa_params = db)
         sys.sled.my.test = WavePlateTesterRetro()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 0)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 1)
 
     def test_waveplate_retro_faraday(self):
         db = DeepBunch()
@@ -408,38 +388,33 @@ class TestPolarizations(TestCase):
 
         sys = OpticalSystem(ooa_params = db)
         sys.sled.my.test = WavePlateTesterRetro()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 0)
         pprint(sys.ooa_params.test.waveplate)
 
         db.test.waveplate.rotate_deg = 90
         sys = OpticalSystem(ooa_params = db)
         sys.sled.my.test = WavePlateTesterRetro()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 1)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 0)
 
         db.test.waveplate.rotate_deg = 45
         sys = OpticalSystem(ooa_params = db)
         sys.sled.my.test = WavePlateTesterRetro()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 0)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 1)
 
         db.test.waveplate.rotate_deg = -45
         sys = OpticalSystem(ooa_params = db)
         sys.sled.my.test = WavePlateTesterRetro()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, 0)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, 1)
 
         db.test.waveplate.rotate_deg = 45/2
         sys = OpticalSystem(ooa_params = db)
         sys.sled.my.test = WavePlateTesterRetro()
-        sol = sys.solve()
-        self.assertAlmostEqual(sol.views.test.DC_S.DC_readout, .5)
-        self.assertAlmostEqual(sol.views.test.DC_P.DC_readout, .5)
+        self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, .5)
+        self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, .5)
 
 
 

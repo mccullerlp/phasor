@@ -44,25 +44,9 @@ class DCReadout(SystemElementBase):
         system.readout_port_needed(self.port, self.key, portsets)
         return
 
-    def system_associated_readout_view(self, solver):
-        return DCReadoutView(
-            readout = self,
-            system = self.system,
-            solver = solver,
-        )
-
-
-class DCReadoutView(ReadoutViewBase):
-    def __init__(
-            self,
-            **kwargs
-    ):
-        super(DCReadoutView, self).__init__(**kwargs)
-        return
-
     @mproperty
     def DC_readout(self):
-        sbunch = self.solver.driven_solution_get(self.readout.port_set)
-        pk_view = (self.readout.port, self.readout.key)
+        sbunch = self.system.solution.driven_solution_get(self.port_set)
+        pk_view = (self.port, self.key)
         val = sbunch.solution[pk_view]
         return val.real

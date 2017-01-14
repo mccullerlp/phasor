@@ -7,7 +7,6 @@ from builtins import range
 #from BGSF.utilities.print import print
 
 import numpy as np
-from collections import defaultdict
 
 from declarative import (
     mproperty,

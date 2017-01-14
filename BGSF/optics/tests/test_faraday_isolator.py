@@ -92,16 +92,16 @@ class TestFaradayIsolator(TestCase):
         sys.link(sys.sled.test.PSL.Fr, sys.sled.test.circulator_Fr.P0)
         sol = sys.solve()
 
-        print("DC_Fr     : ", sol.views.test.DC_Fr.DC_readout)
-        print("DC_Bk     : ", sol.views.test.DC_Bk.DC_readout)
-        print("DC_Fr_Prej: ", sol.views.test.DC_Fr_Prej.DC_readout)
-        print("DC_Bk_Prej: ", sol.views.test.DC_Bk_Prej.DC_readout)
-        print("DC_Fr_ins : ", sol.views.test.DC_Fr_ins.DC_readout)
-        self.assertAlmostEqual(sol.views.test.DC_Fr.DC_readout, 0)
-        self.assertAlmostEqual(sol.views.test.DC_Bk.DC_readout, 1)
-        self.assertAlmostEqual(sol.views.test.DC_Fr_Prej.DC_readout, 0)
-        self.assertAlmostEqual(sol.views.test.DC_Bk_Prej.DC_readout, 0)
-        self.assertAlmostEqual(sol.views.test.DC_Fr_ins.DC_readout, 0)
+        print("DC_Fr     : ", sys.sled.test.DC_Fr.DC_readout)
+        print("DC_Bk     : ", sys.sled.test.DC_Bk.DC_readout)
+        print("DC_Fr_Prej: ", sys.sled.test.DC_Fr_Prej.DC_readout)
+        print("DC_Bk_Prej: ", sys.sled.test.DC_Bk_Prej.DC_readout)
+        print("DC_Fr_ins : ", sys.sled.test.DC_Fr_ins.DC_readout)
+        self.assertAlmostEqual(sys.sled.test.DC_Fr.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_Bk.DC_readout, 1)
+        self.assertAlmostEqual(sys.sled.test.DC_Fr_Prej.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_Bk_Prej.DC_readout, 0)
+        self.assertAlmostEqual(sys.sled.test.DC_Fr_ins.DC_readout, 0)
 
 
 if __name__ == '__main__':

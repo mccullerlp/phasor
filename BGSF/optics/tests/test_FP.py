@@ -121,19 +121,19 @@ def test_FP_base():
     #sys.coupling_matrix_print()
     #sys.source_vector_print()
     #sys.solution_vector_print()
-    pprint(sol.views)
+    pprint(sys.sled)
     print("Detune [m]: ", b.sys.sled.s1.L_detune_m)
-    print("refl_DC",      sol.views.refl_DC.DC_readout     )
-    print("transmon_DC",  sol.views.transmon_DC.DC_readout )
-    print("itm_DC",       sol.views.itm_DC.DC_readout      )
-    print("etm_DC",       sol.views.etm_DC.DC_readout      )
-    print("etm_Force[N]", sol.views.etm_ForceZ.DC_readout  )
+    print("refl_DC",      sys.sled.refl_DC.DC_readout     )
+    print("transmon_DC",  sys.sled.transmon_DC.DC_readout )
+    print("itm_DC",       sys.sled.itm_DC.DC_readout      )
+    print("etm_DC",       sys.sled.etm_DC.DC_readout      )
+    print("etm_Force[N]", sys.sled.etm_ForceZ.DC_readout  )
 
-    test.assert_almost_equal(sol.views.refl_DC.DC_readout    , 0.582198960706    , 7 )
-    test.assert_almost_equal(sol.views.transmon_DC.DC_readout, 0.417801039293    , 7 )
-    test.assert_almost_equal(sol.views.itm_DC.DC_readout     , 417.801039293     , 7 )
-    test.assert_almost_equal(sol.views.etm_DC.DC_readout     , 417.383238254     , 7 )
-    test.assert_almost_equal(sol.views.etm_ForceZ.DC_readout , -2.78587453006e-06, 7 )
+    test.assert_almost_equal(sys.sled.refl_DC.DC_readout    , 0.582198960706    , 7 )
+    test.assert_almost_equal(sys.sled.transmon_DC.DC_readout, 0.417801039293    , 7 )
+    test.assert_almost_equal(sys.sled.itm_DC.DC_readout     , 417.801039293     , 7 )
+    test.assert_almost_equal(sys.sled.etm_DC.DC_readout     , 417.383238254     , 7 )
+    test.assert_almost_equal(sys.sled.etm_ForceZ.DC_readout , -2.78587453006e-06, 7 )
 
     #sys.coupling_matrix_print(select_from = b.etm.posZ.i, select_to = b.etm.Fr.o)
     #sys.coupling_matrix_print(
@@ -175,7 +175,7 @@ def test_FP_base():
     #print("LSBLU: ", rt_inv.get((b.etm.Fr.o, lsb_keyL), (b.etm.posZ.i, ucl_key), 0))
     #print("LSBRU: ", rt_inv.get((b.etm.Fr.o, lsb_keyR), (b.etm.posZ.i, ucl_key), 0))
 
-    AC = sol.views.ETM_Drive.AC_sensitivity
+    AC = sys.sled.ETM_Drive.AC_sensitivity
     print("AC:", AC)
 
     #from BGSF.utilities.mpl.autoniceplot import (mplfigB)
@@ -197,17 +197,17 @@ def test_FP_DC():
     #sol.source_vector_print()
     #print()
     #sol.solution_vector_print()
-    print("refl_DC",      sol.views.refl_DC.DC_readout)
-    print("transmon_DC",  sol.views.transmon_DC.DC_readout)
-    print("itm_DC",       sol.views.itm_DC.DC_readout)
-    print("etm_DC",       sol.views.etm_DC.DC_readout)
-    print("etm_Force[N]", sol.views.etm_ForceZ.DC_readout)
+    print("refl_DC",      sys.sled.refl_DC.DC_readout)
+    print("transmon_DC",  sys.sled.transmon_DC.DC_readout)
+    print("itm_DC",       sys.sled.itm_DC.DC_readout)
+    print("etm_DC",       sys.sled.etm_DC.DC_readout)
+    print("etm_Force[N]", sys.sled.etm_ForceZ.DC_readout)
 
-    test.assert_almost_equal(sol.views.refl_DC.DC_readout    , 1.21042817297e-26 , 7 )
-    test.assert_almost_equal(sol.views.transmon_DC.DC_readout, 1.0               , 7 )
-    test.assert_almost_equal(sol.views.itm_DC.DC_readout     , 1000.0            , 7 )
-    test.assert_almost_equal(sol.views.etm_DC.DC_readout     , 999.0             , 7 )
-    test.assert_almost_equal(sol.views.etm_ForceZ.DC_readout , -6.66794542869e-06, 7 )
+    test.assert_almost_equal(sys.sled.refl_DC.DC_readout    , 1.21042817297e-26 , 7 )
+    test.assert_almost_equal(sys.sled.transmon_DC.DC_readout, 1.0               , 7 )
+    test.assert_almost_equal(sys.sled.itm_DC.DC_readout     , 1000.0            , 7 )
+    test.assert_almost_equal(sys.sled.etm_DC.DC_readout     , 999.0             , 7 )
+    test.assert_almost_equal(sys.sled.etm_ForceZ.DC_readout , -6.66794542869e-06, 7 )
 
 def test_FP_sensitivity():
     print('test_FP_sensitivity')
@@ -218,17 +218,17 @@ def test_FP_sensitivity():
     sys = b.sys
     sol = sys.solve()
 
-    print("refl_DC",      sol.views.refl_DC.DC_readout)
-    print("transmon_DC",  sol.views.transmon_DC.DC_readout)
+    print("refl_DC",      sys.sled.refl_DC.DC_readout)
+    print("transmon_DC",  sys.sled.transmon_DC.DC_readout)
     print()
-    print("itm_DC",       sol.views.itm_DC.DC_readout)
+    print("itm_DC",       sys.sled.itm_DC.DC_readout)
     print("itm_DC_calc",  b.PcavITM)
-    test.assert_almost_equal(sol.views.itm_DC.DC_readout , b.PcavITM, 7 )
+    test.assert_almost_equal(sys.sled.itm_DC.DC_readout , b.PcavITM, 7 )
     print()
-    print("etm_DC",       sol.views.etm_DC.DC_readout)
-    print("etm_Force[N]", sol.views.etm_ForceZ.DC_readout)
+    print("etm_DC",       sys.sled.etm_DC.DC_readout)
+    print("etm_Force[N]", sys.sled.etm_ForceZ.DC_readout)
 
-    AC = sol.views.ITM_Drive.AC_sensitivity
+    AC = sys.sled.ITM_Drive.AC_sensitivity
     print("AC:", AC)
     print ("AC ratio: ", AC / b.dPcavITMdL)
     test.assert_almost_equal(AC , b.dPcavITMdL, 1 )

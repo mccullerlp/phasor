@@ -52,6 +52,10 @@ class NoiseReadout(SystemElementBase):
         else:
             self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({})})
             self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({})})
+
+        self.port_map = dict(
+            R = self.portN,
+        )
         return
 
     def system_setup_ports_initial(self, system):
@@ -60,54 +64,6 @@ class NoiseReadout(SystemElementBase):
         system.readout_port_needed(self.portN, self.keyN, portsets)
         return
 
-    def system_associated_readout_view(self, solver):
-        return NoiseMatrixView(
-            system   = self.system,
-            solver   = solver,
-            readout  = self,
-            port_set = self.port_set,
-            port_map = dict(
-                R = self.portN,
-            ),
-            keyP     = self.keyP,
-            keyN     = self.keyN,
-        )
-
-
-class NoiseMatrixView(object):
-    def __init__(
-            self,
-            system,
-            solver,
-            readout,
-            port_set,
-            port_map,
-            keyP,
-            keyN,
-            external_collect = None,
-            **kwargs
-    ):
-        super(NoiseMatrixView, self).__init__(**kwargs)
-        self.system           = system
-        self.solver           = solver
-        self.readout          = readout
-        self.port_set         = port_set
-        self.port_map         = port_map
-        self.keyP             = keyP
-        self.keyN             = keyN
-        self.external_collect = external_collect
-        return
-
-    def subview_insert(self, subname_tup, view_obj):
-        raise RuntimeWarning("Noise Readout does not support sub-readouts")
-        if len(subname_tup) > 1:
-            db = DeepBunch()
-            setattr(self, subname_tup[0], db)
-            subdb = db
-            for name in subname_tup[1:-1]:
-                subdb = subdb[name]
-            subdb[subname_tup[-1]] = view_obj
-
     @mproperty
     def CSD(self):
         return self.CSD_builds.nsums
@@ -115,6 +71,16 @@ class NoiseMatrixView(object):
     @mproperty
     def CSD_by_source(self):
         return self.CSD_builds.ncollect
+
+    @mproperty
+    def external_collect(self):
+        return None
+        #TODO
+        external_collect = dict()
+        for nobj, sumdict in list(self.CSD_by_source.items()):
+            if nobj_filter_func(nobj):
+                external_collect[nobj] = sumdict
+        return external_collect
 
     @mproperty
     def CSD_builds(self):
@@ -132,12 +98,12 @@ class NoiseMatrixView(object):
             )
 
         #TODO, can definitely condense this
-        cbunch = self.solver.coupling_solution_get(
+        cbunch = self.system.solution.coupling_solution_get(
             drive_set = 'noise',
             readout_set = self.port_set,
         )
         coupling_matrix_inv = cbunch.coupling_matrix_inv
-        nmap = self.solver.noise_map()
+        nmap = self.system.solution.noise_map()
 
         pkviewsP = dict()
         pkviewsN = dict()
@@ -193,10 +159,11 @@ class NoiseMatrixView(object):
                 external_collect[nobj] = sumdict
         return self.__class__(
             system           = self.system,
-            solver           = self.solver,
+            solver           = self.system.solution,
             port_set         = self.port_set,
             port_map         = self.port_map,
             keyP             = self.keyP,
             keyN             = self.keyN,
             external_collect = external_collect,
         )
+

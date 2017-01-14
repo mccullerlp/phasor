@@ -212,6 +212,10 @@ class LinearSystem(RootElement, Constants):
         return self.solver
 
     @decl.mproperty
+    def solution(self):
+        return self.solve()
+
+    @decl.mproperty
     def _include_lst(self):
         return []
 
