@@ -106,15 +106,15 @@ class MagicPD(
 
     @decl.dproperty
     def Fr(self):
-        return ports.OpticalPortHolderInOut(self, x = 'Fr')
+        return ports.OpticalPortHolderInOut(self, x = 'Fr', pchain = 'Bk')
 
     @decl.dproperty
     def Wpd(self):
-        return ports.SignalPortHolderOut(self, x    = 'Wpd')
+        return ports.SignalPortHolderOut(self, x = 'Wpd')
 
     @decl.dproperty
     def Bk(self):
-        return ports.OpticalPortHolderInOut(self, x = 'Bk')
+        return ports.OpticalPortHolderInOut(self, x = 'Bk', pchain = 'Fr')
 
     @decl.dproperty
     def include_readouts(self, val = False):

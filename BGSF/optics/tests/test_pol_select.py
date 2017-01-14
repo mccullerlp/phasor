@@ -63,19 +63,18 @@ class PolTester(
                 T_hr = 1,
             ),
             AOI_deg = 45,
-            facing_cardinal = 'NW',
         )
         self.my.PD_S = PD()
         self.my.PD_P = PD()
 
-        self.system.optical_link_sequence_WtoE(
-            self.PSL,
-            self.mBS,
-            self.PD_P,
+        self.system.bond_sequence(
+            self.PSL.Fr,
+            self.mBS.FrA,
+            self.PD_P.Fr,
         )
-        self.system.optical_link_sequence_StoN(
-            self.mBS,
-            self.PD_S,
+        self.system.bond_sequence(
+            self.mBS.FrB,
+            self.PD_S.Fr,
         )
 
         self.my.DC_P = DCReadout(
@@ -101,11 +100,11 @@ class WavePlateTester(
 
         if self.waveplate_type == 'half':
             self.my.waveplate = HalfWavePlate(
-                facing_cardinal = 'W',
+                #facing_cardinal = 'W',
             )
         elif self.waveplate_type == 'quarter':
             self.my.waveplate = QuarterWavePlate(
-                facing_cardinal = 'W',
+                #facing_cardinal = 'W',
             )
         elif self.waveplate_type == 'faraday':
             self.my.waveplate = FaradayRotator(
@@ -120,20 +119,20 @@ class WavePlateTester(
                 T_hr = 1,
             ),
             AOI_deg = 45,
-            facing_cardinal = 'NW',
+            #facing_cardinal = 'NW',
         )
         self.my.PD_S = PD()
         self.my.PD_P = PD()
 
-        self.system.optical_link_sequence_WtoE(
-            self.PSL,
-            self.waveplate,
-            self.mBS,
-            self.PD_P,
+        self.system.bond_sequence(
+            self.PSL.Fr,
+            self.waveplate.Fr,
+            self.mBS.FrA,
+            self.PD_P.Fr,
         )
-        self.system.optical_link_sequence_StoN(
-            self.mBS,
-            self.PD_S,
+        self.system.bond_sequence(
+            self.mBS.FrB,
+            self.PD_S.Fr,
         )
 
         self.my.DC_P = DCReadout(
@@ -161,11 +160,11 @@ class WavePlateTesterRetro(
 
         if self.waveplate_type == 'half':
             self.my.waveplate = HalfWavePlate(
-                facing_cardinal = 'W',
+                #facing_cardinal = 'W',
             )
         elif self.waveplate_type == 'quarter':
             self.my.waveplate = QuarterWavePlate(
-                facing_cardinal = 'W',
+                #facing_cardinal = 'W',
             )
         elif self.waveplate_type == 'faraday':
             self.my.waveplate = FaradayRotator(
@@ -174,7 +173,7 @@ class WavePlateTesterRetro(
 
         self.my.reflector = Mirror(
             T_hr = 0,
-            facing_cardinal = 'W',
+            #facing_cardinal = 'W',
         )
         self.my.mBS = PolarizingMirror(
             mirror_S = Mirror(
@@ -184,28 +183,28 @@ class WavePlateTesterRetro(
                 T_hr = 1,
             ),
             AOI_deg = 45,
-            facing_cardinal = 'NW',
+            #facing_cardinal = 'NW',
         )
         self.my.PD_S = PD()
         self.my.PD_P = PD()
 
-        self.system.optical_link_sequence_WtoE(
-            self.PSL,
+        self.system.bond_sequence(
+            self.PSL.Fr,
             self.circulator.P0,
         )
-        self.system.optical_link_sequence_WtoE(
+        self.system.bond_sequence(
             self.circulator.P1,
-            self.waveplate,
-            self.reflector,
+            self.waveplate.Fr,
+            self.reflector.Fr,
         )
-        self.system.optical_link_sequence_WtoE(
+        self.system.bond_sequence(
             self.circulator.P2,
-            self.mBS,
-            self.PD_P,
+            self.mBS.FrA,
+            self.PD_P.Fr,
         )
-        self.system.optical_link_sequence_StoN(
-            self.mBS,
-            self.PD_S,
+        self.system.bond_sequence(
+            self.mBS.FrB,
+            self.PD_S.Fr,
         )
 
         self.my.DC_P = DCReadout(

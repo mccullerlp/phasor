@@ -134,17 +134,17 @@ class OpticalDegenerate4PortMixin(object):
         val = self.ooa_params.setdefault('AOI_deg', val)
         return val
 
-    @decl.dproperty
-    def facing_cardinal(self, val = None):
-        val = self.ooa_params.setdefault('facing_cardinal', val)
-        if self.AOI_deg == 0:
-            assert(val in ['N', 'S', 'E', 'W', None])
-        else:
-            if self.AOI_deg == 45:
-                assert(val in ['N', 'S', 'E', 'W', 'NE', 'NW', 'SE', 'SW', None])
-            else:
-                assert(val in ['N', 'S', 'E', 'W', None])
-        return val
+    #@decl.dproperty
+    #def facing_cardinal(self, val = None):
+    #    val = self.ooa_params.setdefault('facing_cardinal', val)
+    #    if self.AOI_deg == 0:
+    #        assert(val in ['N', 'S', 'E', 'W', None])
+    #    else:
+    #        if self.AOI_deg == 45:
+    #            assert(val in ['N', 'S', 'E', 'W', 'NE', 'NW', 'SE', 'SW', None])
+    #        else:
+    #            assert(val in ['N', 'S', 'E', 'W', None])
+    #    return val
 
     @decl.mproperty
     def is_4_port(self):

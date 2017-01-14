@@ -317,6 +317,16 @@ class LinearSystem(RootElement, Constants):
             raise RuntimeError("Trying to bond, but the pair is not in-out compatible")
         return
 
+    def bond_sequence(self, first, *args):
+        next = first
+        for bond_arg in args[:-1]:
+            self.bond(next, bond_arg)
+            next = bond_arg.chain_next
+            if next is None:
+                raise RuntimeError("Bond in sequence doesn't indicate a natural 'next' element: ".format(bond_arg))
+        self.bond(next, args[-1])
+        pass
+
     def own_port_virtual(self, element, port):
         self.port_owners_virtual[port].add(element)
         self.owners_ports_virtual.setdefault(element, []).append(port)

@@ -14,11 +14,11 @@ from .selective_mirrors import PolarizingMirror
 class BaseRotator(bases.OpticalCouplerBase, bases.SystemElementBase):
     @decl.dproperty
     def Fr(self):
-        return ports.OpticalPortHolderInOut(self, x = 'Fr' )
+        return ports.OpticalPortHolderInOut(self, x = 'Fr' , pchain = 'Bk')
 
     @decl.dproperty
     def Bk(self):
-        return ports.OpticalPortHolderInOut(self, x = 'Bk' )
+        return ports.OpticalPortHolderInOut(self, x = 'Bk' , pchain = 'Fr')
 
     @decl.dproperty
     def rotate_deg(self, val):
@@ -410,6 +410,10 @@ class WavePlateMount(ports.OpticalOriented2PortMixin, bases.OpticalCouplerBase, 
 
         self.Fr = self.coord_Fr.Fr
         self.Bk = self.coord_Bk.Bk
+
+        #TODO, HACK
+        self.Fr.pchain = self.Bk
+        self.Bk.pchain = self.Fr
 
 
 class HalfWavePlate(WavePlateMount):

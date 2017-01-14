@@ -28,13 +28,11 @@ def gensys():
         power_W = 1.,
     )
 
-    sled.my.etmPD = optics.MagicPD(
-        facing_cardinal = 'W',
-    )
+    sled.my.etmPD = optics.MagicPD()
 
-    sys.optical_link_sequence_WtoE(
-        sled.laser,
-        sled.etmPD,
+    sys.bond_sequence(
+        sled.laser.Fr,
+        sled.etmPD.Fr,
     )
 
     sled.my.etm_DC = readouts.DCReadout(port = sled.etmPD.Wpd.o)
@@ -54,21 +52,18 @@ def gensys_full():
 
     sled.my.etm = optics.Mirror(
         T_hr = 0.25,
-        facing_cardinal = 'W',
     )
-    sled.my.etmPD = optics.MagicPD(
-        facing_cardinal = 'E',
-    )
+    sled.my.etmPD = optics.MagicPD()
     sled.my.s1 = optics.Space(
         L_m = 100,
         L_detune_m = 0,
     )
 
-    sys.optical_link_sequence_WtoE(
-        sled.laser,
-        sled.etmPD,
-        sled.s1,
-        sled.etm
+    sys.bond_sequence(
+        sled.laser.Fr,
+        sled.etmPD.Bk,
+        sled.s1.Fr,
+        sled.etm.Fr,
     )
 
     sled.my.etm_DC = readouts.DCReadout(port = sled.etmPD.Wpd.o)

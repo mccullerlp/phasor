@@ -66,14 +66,14 @@ class Mirror(
     @decl.dproperty
     def Fr(self):
         if not self.is_4_port:
-            return ports.OpticalPortHolderInOut(self, x = 'Fr' )
+            return ports.OpticalPortHolderInOut(self, x = 'Fr', pchain = 'Bk')
         else:
             return None
 
     @decl.dproperty
     def Bk(self):
         if not self.is_4_port:
-            return ports.OpticalPortHolderInOut(self, x = 'Bk' )
+            return ports.OpticalPortHolderInOut(self, x = 'Bk', pchain = 'Fr')
         else:
             return None
 
@@ -108,28 +108,28 @@ class Mirror(
     @decl.dproperty
     def FrA(self):
         if self.is_4_port:
-            return ports.OpticalPortHolderInOut(self, x = 'FrA' )
+            return ports.OpticalPortHolderInOut(self, x = 'FrA', pchain = 'BkA')
         else:
             return self.Fr
 
     @decl.dproperty
     def FrB(self):
         if self.is_4_port:
-            return ports.OpticalPortHolderInOut(self, x = 'FrB' )
+            return ports.OpticalPortHolderInOut(self, x = 'FrB', pchain = 'BkB')
         else:
             return self.Fr
 
     @decl.dproperty
     def BkA(self):
         if self.is_4_port:
-            return ports.OpticalPortHolderInOut(self, x = 'BkA' )
+            return ports.OpticalPortHolderInOut(self, x = 'BkA', pchain = 'FrA')
         else:
             return self.Bk
 
     @decl.dproperty
     def BkB(self):
         if self.is_4_port:
-            return ports.OpticalPortHolderInOut(self, x = 'BkB' )
+            return ports.OpticalPortHolderInOut(self, x = 'BkB', pchain = 'FrB')
         else:
             return self.Bk
 

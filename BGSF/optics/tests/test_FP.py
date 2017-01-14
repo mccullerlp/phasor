@@ -53,11 +53,9 @@ def gensys(
 
     sled.my.itm = Mirror(
         T_hr=.001,
-        facing_cardinal = 'E',
     )
     sled.my.etm = Mirror(
         T_hr=.001,
-        facing_cardinal = 'W',
     )
 
     sled.my.s1 = Space(
@@ -65,27 +63,20 @@ def gensys(
         L_detune_m = L_detune_m,
     )
 
-    sled.my.reflPD = MagicPD(
-        facing_cardinal = 'E',
-    )
-    sled.my.itmPD = MagicPD(
-        facing_cardinal = 'W',
-    )
-    sled.my.etmPD = MagicPD(
-        facing_cardinal = 'E',
-    )
-    sled.my.transPD = PD(
-    )
+    sled.my.reflPD = MagicPD()
+    sled.my.itmPD = MagicPD()
+    sled.my.etmPD = MagicPD()
+    sled.my.transPD = PD()
 
-    sys.optical_link_sequence_WtoE(
-        sled.laser,
-        sled.reflPD,
-        sled.itm,
-        sled.itmPD,
-        sled.s1,
-        sled.etmPD,
-        sled.etm,
-        sled.transPD
+    sys.bond_sequence(
+        sled.laser.Fr,
+        sled.reflPD.Bk,
+        sled.itm.Bk,
+        sled.itmPD.Fr,
+        sled.s1.Fr,
+        sled.etmPD.Bk,
+        sled.etm.Fr,
+        sled.transPD.Fr,
     )
 
     sled.my.refl_DC     = DCReadout(port = sled.reflPD.Wpd.o)

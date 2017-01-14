@@ -21,11 +21,11 @@ class Optical2PortModulator(
 ):
     @decl.dproperty
     def Fr(self):
-        return ports.OpticalPortHolderInOut(self, x = 'Fr')
+        return ports.OpticalPortHolderInOut(self, x = 'Fr', pchain = 'Bk')
 
     @decl.dproperty
     def Bk(self):
-        return ports.OpticalPortHolderInOut(self, x = 'Bk')
+        return ports.OpticalPortHolderInOut(self, x = 'Bk', pchain = 'Fr')
 
     @decl.dproperty
     def Drv(self):

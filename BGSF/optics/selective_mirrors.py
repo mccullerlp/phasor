@@ -18,7 +18,6 @@ class MirrorSelectionStack(
         sub_element_map,
         select_map,
         AOI_deg = 0,
-        facing_cardinal = None,
         **kwargs
     ):
         if AOI_deg == 0:
@@ -30,7 +29,6 @@ class MirrorSelectionStack(
         for mname, mconstr in list(sub_element_map.items()):
             mconstr.adjust_safe(
                 AOI_deg         = AOI_deg,
-                facing_cardinal = facing_cardinal,
             )
             mconstr.adjust_defer(**kwargs)
 
@@ -39,9 +37,19 @@ class MirrorSelectionStack(
             select_map      = select_map,
             port_set        = port_set,
             AOI_deg         = AOI_deg,
-            facing_cardinal = facing_cardinal,
             **kwargs
         )
+
+        #TODO, HACK!
+        if AOI_deg == 0:
+            self.Fr.pchain = self.Bk
+            self.Bk.pchain = self.Fr
+        else:
+            self.FrA.pchain = self.BkA
+            self.BkA.pchain = self.FrA
+            self.FrB.pchain = self.BkB
+            self.BkB.pchain = self.FrB
+
         #TODO, combine mechanicals
 
 

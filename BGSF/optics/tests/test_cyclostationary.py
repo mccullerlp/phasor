@@ -56,12 +56,10 @@ def gensys(
     sled.my.F_shift = Frequency(
         F_Hz = 1000,
         F_center_Hz = 1000,
-        name = 'beatnote',
     )
     sled.my.laser_upper = Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
-        name = "PSL+",
         classical_fdict = {
             sled.F_shift : 1,
         },
@@ -69,7 +67,6 @@ def gensys(
     sled.my.laser_lower = Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
-        name = "PSL-",
         classical_fdict = {
             sled.F_shift : -1,
         },
@@ -78,48 +75,41 @@ def gensys(
     sled.my.mBS = Mirror(
         T_hr = .5,
         L_hr = loss_BS,
-        name = 'mBS',
         AOI_deg = 45,
-        facing_cardinal = 'NW',
     )
 
-    sled.my.PD1 = PD(
-        name = 'PD1',
-    )
-    sled.my.PD2 = PD(
-        name = 'PD2',
-    )
+    sled.my.PD1 = PD()
+    sled.my.PD2 = PD()
 
     sled.my.mix_LO = SignalGenerator(
         F = sled.F_shift,
         multiple = 1,
         amplitude = 2,
-        name = 'LO',
     )
     sled.my.mixer = Mixer(
-        name = 'extract',
     )
     #sled.my.mixerIRMS = RMSMixer(
-    #    name = 'RMSI'
     #)
     #sled.my.mixerQRMS = RMSMixer(
-    #    name = 'RMSQ'
     #)
     sled.my.sDelay = Space(
         L_m = 1,
         #L_detune_m = 1064e-9 / 4,
-        name = 'delay',
     )
     sys.bond(sled.mix_LO.Out, sled.mixer.LO)
     sys.bond(sled.PD2.Wpd,   sled.mixer.I)
     #sys.link(sled.mixer.R_I, sled.mixerIRMS.I)
     #sys.link(sled.mixer.R_Q, sled.mixerQRMS.I)
 
-    sys.optical_link_sequence_WtoE(
-        sled.laser_upper, sled.mBS, sled.PD1,
+    sys.bond_sequence(
+        sled.laser_upper.Fr,
+        sled.mBS.FrA,
+        sled.PD1.Fr,
     )
-    sys.optical_link_sequence_StoN(
-        sled.laser_lower, sled.mBS, sled.PD2,
+    sys.bond_sequence(
+        sled.laser_lower.Fr,
+        sled.mBS.BkB,
+        sled.PD2.Fr,
     )
 
     sled.my.PD1_DC       = DCReadout(port = sled.PD1.Wpd.o)

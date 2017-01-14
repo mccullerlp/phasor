@@ -7,6 +7,8 @@ from .elements import SystemElementBase
 
 from ..math.key_matrix import DictKey
 
+import declarative as decl
+
 
 ElementKey = u'▲'
 PortKey = u'🔌'
@@ -15,8 +17,7 @@ MechKey = u'⌖'
 ClassicalFreqKey = u'F'
 
 
-class PortHolderBase(object):
-    __slots__ = ('element',)
+class PortHolderBase(decl.OverridableObject):
     _port_key = PortKey
 
     multiple_attach = False
@@ -24,13 +25,31 @@ class PortHolderBase(object):
     def autoterminations(self, port_map):
         return
 
+    @decl.mproperty
+    def key(self):
+        return self._x
+
+    pchain = None
+
+    @decl.mproperty
+    def chain_next(self):
+        if self.pchain is not None:
+            if isinstance(self.pchain, str):
+                return getattr(self.element, self.pchain)
+            else:
+                return self.pchain
+        else:
+            return None
+
 
 class PortHolderInBase(PortHolderBase):
-    __slots__ = ('i', '_x')
-    def __init__(self, element, x):
-        if not (isinstance(element, SystemElementBase)):
-            print(element)
-            assert(False)
+    def __init__(
+            self,
+            element,
+            x,
+            **kwargs
+    ):
+        super(PortHolderInBase, self).__init__(**kwargs)
         self.element = element
         self._x = x
         self.i = DictKey({
@@ -41,20 +60,22 @@ class PortHolderInBase(PortHolderBase):
         okey = self.element.owned_port_keys.setdefault(self.key, self)
         assert(okey is self)
 
-    @property
+    @decl.mproperty
     def key(self):
         return self._x
 
     def __repr__(self):
-        return u"{0}.{1}".format(self.element, self._x.encode('utf-8')).encode('utf-8')
+        return u"{0}.{1}".format(self.element, self._x)
 
 
 class PortHolderOutBase(PortHolderBase):
-    __slots__ = ('o', '_x')
-    def __init__(self, element, x):
-        if not (isinstance(element, SystemElementBase)):
-            print(element)
-            assert(False)
+    def __init__(
+            self,
+            element,
+            x,
+            **kwargs
+    ):
+        super(PortHolderOutBase, self).__init__(**kwargs)
         self.element = element
         self._x = x
         self.o = DictKey({
@@ -65,7 +86,7 @@ class PortHolderOutBase(PortHolderBase):
         okey = self.element.owned_port_keys.setdefault(self.key, self)
         assert(okey is self)
 
-    @property
+    @decl.mproperty
     def key(self):
         return self._x
 
@@ -74,11 +95,13 @@ class PortHolderOutBase(PortHolderBase):
 
 
 class PortHolderInOutBase(PortHolderBase):
-    __slots__ = ('i', 'o', '_x')
-    def __init__(self, element, x):
-        if not (isinstance(element, SystemElementBase)):
-            print(element)
-            assert(False)
+    def __init__(
+            self,
+            element,
+            x,
+            **kwargs
+    ):
+        super(PortHolderInOutBase, self).__init__(**kwargs)
         self.element = element
         self._x = x
         self.i = DictKey({
@@ -94,12 +117,12 @@ class PortHolderInOutBase(PortHolderBase):
         okey = self.element.owned_port_keys.setdefault(self.key, self)
         assert(okey is self)
 
-    @property
+    @decl.mproperty
     def key(self):
         return self._x
 
     def __repr__(self):
-        return u"{0}.{1}".format(self.element, self._x).encode('utf-8')
+        return u"{0}.{1}".format(self.element, self._x)
 
 
 class MechanicalPortHolderIn(PortHolderInBase):

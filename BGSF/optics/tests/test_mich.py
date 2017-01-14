@@ -45,19 +45,16 @@ def gensys(
     sled.my.mX = Mirror(
         T_hr = 0,
         L_hr = loss_EM,
-        facing_cardinal = 'W',
     )
     sled.my.mY = Mirror(
         T_hr = 0,
         L_hr = loss_EM,
-        facing_cardinal = 'S',
     )
     #T_hr = sys.optical_harmonic_value(.3),
     sled.my.mBS = Mirror(
         T_hr = .5,
         L_hr = loss_BS,
         AOI_deg = 45,
-        facing_cardinal = 'NW',
     )
 
     sled.my.sX = Space(
@@ -69,23 +66,21 @@ def gensys(
         L_detune_m = 0,
     )
 
-    sled.my.symPD = MagicPD(
-        facing_cardinal = 'E',
-    )
+    sled.my.symPD = MagicPD()
     sled.my.asymPD = PD()
 
-    sys.optical_link_sequence_WtoE(
-        sled.PSL,
-        sled.symPD,
-        sled.mBS,
-        sled.sX,
-        sled.mX,
+    sys.bond_sequence(
+        sled.PSL.Fr,
+        sled.symPD.Bk,
+        sled.mBS.FrA,
+        sled.sX.Fr,
+        sled.mX.Fr,
     )
-    sys.optical_link_sequence_StoN(
-        sled.asymPD,
-        sled.mBS,
-        sled.sY,
-        sled.mY,
+    sys.bond_sequence(
+        sled.asymPD.Fr,
+        sled.mBS.BkB,
+        sled.sY.Fr,
+        sled.mY.Fr,
     )
 
     sled.my.sym_DC = DCReadout(
