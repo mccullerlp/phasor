@@ -1,97 +1,38 @@
-from collections import namedtuple
+# -*- coding: utf-8 -*-
+from __future__ import division
+from __future__ import print_function
+from builtins import object
 
-from .dictionary_keys import DictKey
-from .optics_bases import ElectricalCouplerBase
+import declarative as decl
 
+#from ..math.key_matrix import DictKey
 
-ElectricalCableBase = namedtuple('ElectricalCableBase', ('element', 'port_name'))
+from ..base.ports import(
+    ElementKey,
+    PortKey,
+    MechKey,
+    ClassicalFreqKey,
+    PortHolderInBase,
+    PortHolderOutBase,
+    PortHolderInOutBase,
+    MechanicalPortHolderIn,
+    MechanicalPortHolderOut,
+)  # NOQA
 
-
-class ElectricalCableVI(ElectricalCableBase):
-    basis = 'VI'
-
-    @property
-    def V(self):
-        return DictKey(
-            optic = self.element,
-            port = self.element._port_map[self.port_name, 'V'],
-        )
-
-    @property
-    def I(self):
-        return DictKey(
-            optic = self.element,
-            port = self.element._port_map[self.port_name, 'I'],
-        )
-
-
-class ElectricalCableScattering(ElectricalCableBase):
-    basis = 'S'
-    impedance = None
-
-    @property
-    def to(self):
-        return DictKey(
-            optic = self.element,
-            port = self.element._port_map[self.port_name, 'to'],
-        )
-
-    @property
-    def out(self):
-        return DictKey(
-            optic = self.element,
-            port = self.element._port_map[self.port_name, 'out'],
-        )
+from ..signals.ports import(
+    SignalPortHolderIn,
+    SignalPortHolderOut,
+)
 
 
-class ElectricalPassiveBase(ElectricalCouplerBase):
-    _port_map = {
-        ('A', 'V') : 'V_A',
-        ('A', 'I') : 'I_A',
-        ('B', 'V') : 'V_B',
-        ('B', 'I') : 'I_B',
-    }
-
-    @property
-    def A(self):
-        return ElectricalCableVI(self, 'A')
-
-    @property
-    def B(self):
-        return ElectricalCableVI(self, 'B')
+class ElectricalPortHolderIn(PortHolderInBase):
+    pass
 
 
-class ElectricalAmpBase(ElectricalCouplerBase):
-    _port_map = {
-        ('in_p', 'V') : 'in_P_V',
-        ('in_p', 'V') : 'in_P_I',
-        ('in_n', 'V') : 'in_N_V',
-        ('in_n', 'V') : 'in_N_I',
-        ('out',  'V') : 'out_V',
-        ('out',  'V') : 'out_V',
-    }
-
-    @property
-    def in_p(self):
-        return ElectricalCableVI(self, 'in_p')
-
-    @property
-    def in_n(self):
-        return ElectricalCableVI(self, 'in_n')
-
-    @property
-    def out(self):
-        return ElectricalCableVI(self, 'out')
+class ElectricalPortHolderOut(PortHolderOutBase):
+    pass
 
 
-class ElectricalSrcBase(ElectricalCouplerBase):
-    _port_map = {
-        ('out',  'V') : 'out_V',
-        ('out',  'I') : 'out_I',
-    }
-
-    @property
-    def out(self):
-        return ElectricalCableVI(self, 'out')
-
+class ElectricalPortHolderInOut(PortHolderInOutBase):
+    pass
 

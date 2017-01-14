@@ -45,6 +45,7 @@ class Constants(Element):
         OOA_ASSIGN(self).i2pi     = np.pi * 2j
         OOA_ASSIGN(self).math     = np
         OOA_ASSIGN(self).temp_K   = 299
+        OOA_ASSIGN(self).Z_termination = 50
         super(Constants, self).__build__()
 
 

@@ -1,9 +1,9 @@
 """
 """
 from __future__ import division
-from past.utils import old_div
 from builtins import object
 
+import declarative as decl
 #import numpy as np
 #import warnings
 
@@ -19,51 +19,21 @@ from collections import namedtuple
 
 
 class ElectricalElementBase(object):
-    name = None
-
-    def __init__(self, name = None):
-        if name is not None:
-            self.name = name
-
-    def linked_elements(self):
-        return ()
-
-    def frequencies_needed(self):
-        return ()
-
-    def __repr__(self):
-        if self.name is not None:
-            return self.name
-        return self.__class__.__name__ + '(<unknown>)'
-
-
-
-class Frequency(ElectricalElementBase):
-    def __init__(
-        self,
-        F_Hz,
-        order        = 0,
-        order_center = 1,
-        **kwargs
-    ):
-        super(Frequency, self).__init__(**kwargs)
-        self.F_Hz = F_Hz
-        self.order_max = order_center + order
-        self.order_min = order_center - order
+    pass
 
 
 ElectricalWireBase = namedtuple('ElectricalWireBase', ('element', 'port_name'))
 
 
 class ElectricalPort(ElectricalWireBase):
-    @property
+    @decl.mproperty
     def i(self):
         return DictKey(
             element = self.element,
             port = '>' + self.port_name,
         )
 
-    @property
+    @decl.mproperty
     def o(self):
         return DictKey(
             element = self.element,
@@ -78,37 +48,19 @@ class ElectricalPort(ElectricalWireBase):
 
 
 class Electrical1PortBase(ElectricalElementBase):
-    @property
+    @decl.mproperty
     def A(self):
         return ElectricalPort(self, 'A')
 
 
 class Electrical2PortBase(ElectricalElementBase):
-    @property
+    @decl.mproperty
     def A(self):
         return ElectricalPort(self, 'A')
 
-    @property
+    @decl.mproperty
     def B(self):
         return ElectricalPort(self, 'B')
-
-
-
-def type_test(obj, types):
-    if not isinstance(obj, types):
-        if not isinstance(types, tuple):
-            types = (types, )
-        example_names = []
-        for t in types:
-            for oname, obj in list(globals().items()):
-                try:
-                    if isinstance(obj, t) or issubclass(obj, t):
-                        if obj is not t:
-                            example_names.append(oname)
-                except TypeError:
-                    pass
-        raise RuntimeError("Argument Must be an object such as: {0}".format(example_names))
-    return
 
 
 class SMatrix1PortBase(Electrical1PortBase):
@@ -181,7 +133,7 @@ class VoltageSource(SMatrix1PortBase):
     def S11_by_freq(self, F, system):
         return -1
 
-    @property
+    @decl.mproperty
     def V(self):
         return DictKey(virtual = self)
 
@@ -205,7 +157,7 @@ class CurrentSource(SMatrix1PortBase):
     def S11_by_freq(self, F, system):
         return 1
 
-    @property
+    @decl.mproperty
     def I(self):
         return DictKey(virtual = self)
 
@@ -238,11 +190,11 @@ class VoltageSourceBalanced(SMatrix2PortBase):
     def S22_by_freq(self, F, system):
         return 0
 
-    @property
+    @decl.mproperty
     def V(self):
         return DictKey(virtual = self, val = 'voltage')
 
-    @property
+    @decl.mproperty
     def I(self):
         return DictKey(virtual = self, val = 'current')
 
@@ -255,19 +207,19 @@ class VoltageSourceBalanced(SMatrix2PortBase):
             matrix[
                 df_key | self.V,
                 df_key | self.A.o
-            ] = old_div(1,_2)
+            ] = 1 / _2
             matrix[
                 df_key | self.V,
                 df_key | self.B.o
-            ] = old_div(-1,_2)
+            ] = -1 / _2
             matrix[
                 df_key | self.I,
                 df_key | self.A.o
-            ] = old_div(system.Z_termination,_2)
+            ] = system.Z_termination / _2
             matrix[
                 df_key | self.I,
                 df_key | self.B.o
-            ] = old_div(system.Z_termination,_2)
+            ] = system.Z_termination / _2
 
         matrix.insert(
             into = system.coupling_matrix,
@@ -288,14 +240,13 @@ class CurrentSourceBalanced(SMatrix2PortBase):
     def S22_by_freq(self, F, system):
         return 1
 
-    @property
+    @decl.mproperty
     def I(self):
         return DictKey(virtual = self)
 
     def system_setup_coupling(self, system):
         super(CurrentSourceBalanced, self).system_setup_coupling(system)
         matrix = ForewardDictMatrix()
-        _2 = system.number(2)
         for f_key in system.F_key_basis:
             df_key = DictKey(F = f_key)
             matrix[
@@ -338,9 +289,6 @@ class Connection(ElectricalElementBase):
         self.port_list = tuple(port_list)
         return
 
-    def linked_elements(self):
-        return (w.element for w in self.port_list)
-
     def system_setup_coupling(self, system):
         _2 = system.number(2)
         N_wires = system.number(len(self.port_list))
@@ -348,9 +296,9 @@ class Connection(ElectricalElementBase):
         for portA in self.port_list:
             for portB in self.port_list:
                 if portA is portB:
-                    couplings[portA.o, portB.i] = old_div((_2 - N_wires), N_wires)
+                    couplings[portA.o, portB.i] = (_2 - N_wires) / N_wires
                 else:
-                    couplings[portA.o, portB.i] = old_div(_2, N_wires)
+                    couplings[portA.o, portB.i] = (_2 / N_wires)
 
         delay_matrix = ForewardDictMatrix()
         for f_key in system.F_key_basis:
@@ -368,29 +316,28 @@ class Connection(ElectricalElementBase):
 class Cable(ElectricalElementBase):
     def __init__(
         self,
-        eport,
         length_ns,
         **kwargs
     ):
         super(Connection, self).__init__(**kwargs)
-        self.eport = eport
         self.length_ns = length_ns
         return
-
-    def linked_elements(self):
-        return (self.eport.element,)
 
     def phase_advance(self, system, F):
         return system.math.exp(-2 * system.i * system.pi * F * self.length_ns)
 
-    @property
+    @decl.mproperty
     def A(self):
         return ElectricalPort(self, 'A')
 
+    @decl.mproperty
+    def B(self):
+        return ElectricalPort(self, 'B')
+
     def system_setup_coupling(self, system):
         couplings = ForewardDictMatrix()
-        couplings[self.eport.i, self.A.i] = 1
-        couplings[self.A.o, self.eport.o] = 1
+        couplings[self.B.i, self.A.i] = 1
+        couplings[self.A.o, self.B.o] = 1
 
         delay_matrix = ForewardDictMatrix()
         for f_key in system.F_key_basis:
@@ -422,7 +369,7 @@ class CapacitorBase(object):
         self.capacitance_Farads = capacitance_Farads
 
     def impedance_by_freq(self, F, system):
-        return old_div(1,(2 * system.i * system.pi * F * self.capacitance_Farads))
+        return (1 / (2 * system.i * system.pi * F * self.capacitance_Farads))
 
 
 class InductorBase(object):
@@ -440,7 +387,7 @@ class TerminatorImpedance(SMatrix1PortBase):
 
     def S11_by_freq(self, F, system):
         Z = self.impedance_by_freq(F, system)
-        return old_div((Z - system.Z_termination), (Z + system.Z_termination))
+        return ((Z - system.Z_termination) / (Z + system.Z_termination))
 
 
 class TerminatorResistor(ResistorBase, TerminatorImpedance):
@@ -468,19 +415,19 @@ class SeriesImpedance(SMatrix2PortBase):
 
     def S11_by_freq(self, F, system):
         Z = self.impedance_by_freq(F, system)
-        return old_div(Z, (Z + system.Z_termination * 2))
+        return (Z / (Z + system.Z_termination * 2))
 
     def S12_by_freq(self, F, system):
         Z = self.impedance_by_freq(F, system)
-        return old_div((2 * system.Z_termination), (Z + system.Z_termination * 2))
+        return ((2 * system.Z_termination) / (Z + system.Z_termination * 2))
 
     def S21_by_freq(self, F, system):
         Z = self.impedance_by_freq(F, system)
-        return old_div((2 * system.Z_termination), (Z + system.Z_termination * 2))
+        return ((2 * system.Z_termination) / (Z + system.Z_termination * 2))
 
     def S22_by_freq(self, F, system):
         Z = self.impedance_by_freq(F, system)
-        return old_div(Z, (Z + system.Z_termination * 2))
+        return (Z / (Z + system.Z_termination * 2))
 
 
 class SeriesResistor(ResistorBase, SeriesImpedance):
@@ -497,15 +444,15 @@ class SeriesInductor(InductorBase, SeriesImpedance):
 
 class OpAmp(ElectricalElementBase):
 
-    @property
+    @decl.mproperty
     def in_p(self):
         return ElectricalPort(self, 'in_p')
 
-    @property
+    @decl.mproperty
     def in_n(self):
         return ElectricalPort(self, 'in_n')
 
-    @property
+    @decl.mproperty
     def out(self):
         return ElectricalPort(self, 'out')
 
@@ -560,11 +507,11 @@ class VAmp(ElectricalElementBase):
     Y_input = 0
     Z_output = 0
 
-    @property
+    @decl.mproperty
     def in_n(self):
         return ElectricalPort(self, 'in_n')
 
-    @property
+    @decl.mproperty
     def out(self):
         return ElectricalPort(self, 'out')
 
@@ -578,15 +525,17 @@ class VAmp(ElectricalElementBase):
             matrix[
                 df_key | self.in_n.i,
                 df_key | self.in_n.o
-            ] = old_div((1 - self.Y_input * system.Z_termination), (1 + self.Y_input * system.Z_termination))
+            ] = ((1 - self.Y_input * system.Z_termination) / (1 + self.Y_input * system.Z_termination))
             matrix[
                 df_key | self.out.i,
                 df_key | self.out.o
-            ] = old_div((self.Z_output - system.Z_termination), (self.Z_output + system.Z_termination))
+            ] = ((self.Z_output - system.Z_termination) / (self.Z_output + system.Z_termination))
+
             gbf = self.gain_by_freq(
                 F = f_key.frequency(),
                 system = system
             )
+
             matrix[
                 df_key | self.in_n.i,
                 df_key | self.out.o
