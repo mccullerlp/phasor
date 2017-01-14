@@ -1,6 +1,6 @@
 """
 """
-from __future__ import division, print_function
+from __future__ import (division, print_function)
 
 from ..base.bases import (
     ElementBase,
@@ -8,14 +8,7 @@ from ..base.bases import (
     CouplerBase,
 )
 
-from ..base.elements import (
-    SystemElementBase,
-    OOA_ASSIGN,
-)
-
 import declarative as decl
-#import numpy as np
-#import warnings
 
 from . import ports
 
@@ -75,9 +68,9 @@ class Connection(ElectricalElementBase):
         for port1 in self.ports_electrical:
             for port2 in self.ports_electrical:
                 for kfrom in ports_algorithm.port_update_get(port1.i):
-                    ports_algorithm.port_coupling_needed(self.pmap[port2].o, kfrom)
-                for kto in ports_algorithm.port_update_get(port1.o):
-                    ports_algorithm.port_coupling_needed(self.pmap[port2].i, kto)
+                    ports_algorithm.port_coupling_needed(port2.o, kfrom)
+                for kto in ports_algorithm.port_update_get(port2.o):
+                    ports_algorithm.port_coupling_needed(port1.i, kto)
         return
 
     def system_setup_coupling(self, matrix_algorithm):
@@ -114,8 +107,8 @@ class Cable(Electrical2PortBase):
         ]:
             for kfrom in ports_algorithm.port_update_get(port1.i):
                 ports_algorithm.port_coupling_needed(port2.o, kfrom)
-            for kto in ports_algorithm.port_update_get(port1.o):
-                ports_algorithm.port_coupling_needed(port2.i, kto)
+            for kto in ports_algorithm.port_update_get(port2.o):
+                ports_algorithm.port_coupling_needed(port1.i, kto)
         return
 
     def system_setup_coupling(self, matrix_algorithm):

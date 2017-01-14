@@ -4,11 +4,7 @@ from __future__ import division
 from builtins import object
 
 import declarative as decl
-#import numpy as np
-#import warnings
 
-#from . import ports
-#from . import elements
 from . import smatrix
 
 

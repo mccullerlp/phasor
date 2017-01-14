@@ -3,8 +3,6 @@
 from __future__ import division
 
 import declarative as decl
-#import numpy as np
-#import warnings
 
 from . import ports
 from . import elements
@@ -57,26 +55,26 @@ class SMatrix2PortBase(elements.Electrical2PortBase):
             for port2 in self.ports_electrical:
                 for kfrom in ports_algorithm.port_update_get(port1.i):
                     ports_algorithm.port_coupling_needed(port2.o, kfrom)
-                for kto in ports_algorithm.port_update_get(port1.o):
-                    ports_algorithm.port_coupling_needed(port2.i, kto)
+                for kto in ports_algorithm.port_update_get(port2.o):
+                    ports_algorithm.port_coupling_needed(port1.i, kto)
         return
 
     def system_setup_coupling(self, matrix_algorithm):
-        for p1, p2, func in [
+        for port1, port2, func in [
             (self.A, self.A, self.S11_by_freq),
             (self.A, self.B, self.S12_by_freq),
             (self.B, self.A, self.S21_by_freq),
             (self.B, self.B, self.S22_by_freq),
         ]:
-            for kfrom in matrix_algorithm.port_set_get(p1.i):
+            for kfrom in matrix_algorithm.port_set_get(port1.i):
                 #if self.system.classical_frequency_test_max(kfrom, self.max_freq):
                 #    continue
                 freq = self.system.classical_frequency_extract(kfrom)
                 pgain = self.S11_by_freq(freq)
                 matrix_algorithm.port_coupling_insert(
-                    p1.i,
+                    port1.i,
                     kfrom,
-                    p2.o,
+                    port2.o,
                     kfrom,
                     pgain,
                 )

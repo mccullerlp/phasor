@@ -115,6 +115,10 @@ class LinearSystem(RootElement, Constants):
         return defaultdict(set)
 
     @decl.mproperty
+    def linked_set(self):
+        return set()
+
+    @decl.mproperty
     def port_owners_virtual(self):
         return defaultdict(set)
 
@@ -249,11 +253,7 @@ class LinearSystem(RootElement, Constants):
             self.elements_named[element.name_system] = element
 
     def _autoterminate(self):
-        terminated_ports = set()
-        for k, v in list(self.link_pairs.items()):
-            if v:
-                terminated_ports.add(k)
-                terminated_ports.update(v)
+        terminated_ports = set(self.linked_set)
         registered_ports = set(self.port_owners.keys())
         unterminated_ports = registered_ports - terminated_ports
         if unterminated_ports and not hasattr(self.sled, 'autoterminate'):
@@ -286,10 +286,11 @@ class LinearSystem(RootElement, Constants):
         else:
             either_included = True
             if (not port_B.multiple_attach):
-                assert(port_B.i not in self.link_pairs)
+                assert(port_B.i not in self.linked_set)
             if not (port_A.multiple_attach):
-                assert(port_A.o not in self.link_pairs)
-
+                assert(port_A.o not in self.linked_set)
+            self.linked_set.add(port_A.o)
+            self.linked_set.add(port_B.i)
             self.link_pairs[port_A.o].add(port_B.i)
 
         #also attach the duals
@@ -301,9 +302,11 @@ class LinearSystem(RootElement, Constants):
         else:
             either_included = True
             if (not port_A.multiple_attach):
-                assert(port_A.i not in self.link_pairs)
+                assert(port_A.i not in self.linked_set)
             if (not port_B.multiple_attach):
-                assert(port_B.o not in self.link_pairs)
+                assert(port_B.o not in self.linked_set)
+            self.linked_set.add(port_B.o)
+            self.linked_set.add(port_A.i)
             self.link_pairs[port_B.o].add(port_A.i)
 
         if not either_included:
