@@ -129,58 +129,58 @@ class BalancedHomodyneDetector(SystemElementSled):
             phase_deg       = 00,
         )
         if True or P_link_intermediate is None:
-            self.system.link(
+            self.system.bond(
                 self.CMN_loss_M.Bk,
                 self.PD_IQ.Fr,
             )
         else:
-            self.system.link(
+            self.system.bond(
                 self.CMN_loss_M.Bk,
                 P_link_intermediate[0],
             )
-            self.system.link(
+            self.system.bond(
                 P_link_intermediate[1],
                 self.PD_IQ.Fr,
             )
-        self.system.link(
+        self.system.bond(
             self.PD_IQ.Bk,
             self.BHD_BS.FrA,
         )
-        self.system.link(
+        self.system.bond(
             self.LO_phase.Bk,
             self.BHD_BS.BkB,
         )
         if P_link_intermediate is None:
-            self.system.link(
+            self.system.bond(
                 self.BHD_BS.FrB,
                 self.PD_P_loss_M.Fr,
             )
         else:
-            self.system.link(
+            self.system.bond(
                 self.BHD_BS.FrB,
                 P_link_intermediate[0],
             )
-            self.system.link(
+            self.system.bond(
                 P_link_intermediate[1],
                 self.PD_P_loss_M.Fr,
             )
-        self.system.link(
+        self.system.bond(
             self.PD_P_loss_M.Bk,
             self.PD_IQ_P.Fr,
         )
-        self.system.link(
+        self.system.bond(
             self.PD_IQ_P.Bk,
             self.PD_P.Fr,
         )
-        self.system.link(
+        self.system.bond(
             self.BHD_BS.BkA,
             self.PD_N_loss_M.Fr,
         )
-        self.system.link(
+        self.system.bond(
             self.PD_N_loss_M.Bk,
             self.PD_IQ_N.Fr,
         )
-        self.system.link(
+        self.system.bond(
             self.PD_IQ_N.Bk,
             self.PD_N.Fr,
         )
@@ -194,8 +194,8 @@ class BalancedHomodyneDetector(SystemElementSled):
                 N = -1,
             )
         )
-        self.system.link(self.PD_P.Wpd, self.amp_Wpd_diff.P)
-        self.system.link(self.PD_N.Wpd, self.amp_Wpd_diff.N)
+        self.system.bond(self.PD_P.Wpd, self.amp_Wpd_diff.P)
+        self.system.bond(self.PD_N.Wpd, self.amp_Wpd_diff.N)
 
         self.amp_Wpd_cmn = SummingAmplifier(
             port_gains = dict(
@@ -203,8 +203,8 @@ class BalancedHomodyneDetector(SystemElementSled):
                 N = +1,
             )
         )
-        self.system.link(self.PD_P.Wpd, self.amp_Wpd_cmn.P)
-        self.system.link(self.PD_N.Wpd, self.amp_Wpd_cmn.N)
+        self.system.bond(self.PD_P.Wpd, self.amp_Wpd_cmn.P)
+        self.system.bond(self.PD_N.Wpd, self.amp_Wpd_cmn.N)
 
         self.Wpd_diff = self.amp_Wpd_diff.O
         self.Wpd_cmn  = self.amp_Wpd_cmn.O

@@ -110,8 +110,8 @@ def gensys(
         #L_detune_m = 1064e-9 / 4,
         name = 'delay',
     )
-    sys.link(sled.mix_LO.Out, sled.mixer.LO)
-    sys.link(sled.PD2.Wpd,   sled.mixer.I)
+    sys.bond(sled.mix_LO.Out, sled.mixer.LO)
+    sys.bond(sled.PD2.Wpd,   sled.mixer.I)
     #sys.link(sled.mixer.R_I, sled.mixerIRMS.I)
     #sys.link(sled.mixer.R_Q, sled.mixerQRMS.I)
 

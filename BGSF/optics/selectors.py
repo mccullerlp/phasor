@@ -178,7 +178,7 @@ class OpticalSelectionStack(
             for ename, element in list(sub_element_map.items()):
                 celement = getattr(self, ename)
                 port = getattr(celement, pname)
-                self.system.link(psel.port_map[ename][0], port)
+                self.system.bond(psel.port_map[ename][0], port)
         return
 
 

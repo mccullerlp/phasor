@@ -45,11 +45,11 @@ class OpticalSystem(LinearSystem):
             next_src = getattr(first, funcname)()[idx_R]
         for arg in arg_iter:
             if isinstance(arg, PortHolderBase):
-                self.link(next_src, arg)
+                self.bond(next_src, arg)
                 break
             else:
                 connection_pair = getattr(arg, funcname)()
-                self.link(next_src, connection_pair[idx_L])
+                self.bond(next_src, connection_pair[idx_L])
 
                 #this signals that it is not the through device like a laser source or PD
                 if len(connection_pair) == 1:
@@ -58,7 +58,7 @@ class OpticalSystem(LinearSystem):
                     next_src = connection_pair[idx_R]
         # arg iter should be exhausted if we called break on the last one or didn't call break, so check with a for-loop on it
         for arg_past_end in arg_iter:
-            raise RuntimeError("link sequence defined past a non-through element, {0}".format(arg))
+            raise RuntimeError("bond sequence defined past a non-through element, {0}".format(arg))
         return
 
     def optical_link_sequence_EtoW(self, first, *args):

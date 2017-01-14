@@ -163,11 +163,11 @@ class Mirror(
 
     @decl.dproperty
     def _link(self):
-        self.system.link(self._LFrA, self._LFrA_vac.Fr)
-        self.system.link(self._LBkA, self._LBkA_vac.Fr)
+        self.system.bond(self._LFrA, self._LFrA_vac.Fr)
+        self.system.bond(self._LBkA, self._LBkA_vac.Fr)
         if self.is_4_port:
-            self.system.link(self._LFrB, self._LFrB_vac.Fr)
-            self.system.link(self._LBkB, self._LBkB_vac.Fr)
+            self.system.bond(self._LFrB, self._LFrB_vac.Fr)
+            self.system.bond(self._LBkB, self._LBkB_vac.Fr)
 
     @decl.mproperty
     def ports_optical(self):

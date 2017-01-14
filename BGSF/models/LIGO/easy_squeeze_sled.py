@@ -310,11 +310,11 @@ class EasySqueezeSetupFP(SystemElementSled):
             nonlinear_power_gain = 2,
             phi_sqz_deg = 90,
         )
-        self.system.link(self.sqzM1.FrB, self.sqzM2.FrA)
-        self.system.link(self.sqzM2.FrB, self.sqzS.Fr)
-        self.system.link(self.sqzS.Bk, self.sqzM3.FrA)
-        self.system.link(self.sqzM3.FrB, self.sqz.Fr)
-        self.system.link(self.sqz.Bk, self.sqzM1.FrA)
+        self.system.bond(self.sqzM1.FrB, self.sqzM2.FrA)
+        self.system.bond(self.sqzM2.FrB, self.sqzS.Fr)
+        self.system.bond(self.sqzS.Bk, self.sqzM3.FrA)
+        self.system.bond(self.sqzM3.FrB, self.sqz.Fr)
+        self.system.bond(self.sqz.Bk, self.sqzM1.FrA)
 
         self.EOM = PM()
         self.AM  = AM()

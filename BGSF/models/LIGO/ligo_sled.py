@@ -82,10 +82,10 @@ class QuadMirrorBasic(SystemElementSled):
         self.actuate_pos_m   = self.pos_amp.actuator
         self.testpoint_pos_m = self.pos_amp.O
 
-        self.system.link(self.force_amp.O, self.quad_xfer.In)
-        self.system.link(self.quad_xfer.Out, self.pos_amp.mech)
-        self.system.link(self.pos_amp.O, self.mirror.posZ)
-        self.system.link(self.mirror.forceZ, self.force_amp.optical)
+        self.system.bond(self.force_amp.O, self.quad_xfer.In)
+        self.system.bond(self.quad_xfer.Out, self.pos_amp.mech)
+        self.system.bond(self.pos_amp.O, self.mirror.posZ)
+        self.system.bond(self.mirror.forceZ, self.force_amp.optical)
 
         self.mirror_ACCLG = ACReadoutCLG(
             portN = self.mirror.posZ.i,
@@ -281,8 +281,8 @@ class LIGODetector(SystemElementSled):
                 EY = +1 / 2,
             )
         )
-        self.system.link(self.actuate_DARM_m.EX, self.EX.actuate_pos_m)
-        self.system.link(self.actuate_DARM_m.EY, self.EY.actuate_pos_m)
+        self.system.bond(self.actuate_DARM_m.EX, self.EX.actuate_pos_m)
+        self.system.bond(self.actuate_DARM_m.EY, self.EY.actuate_pos_m)
 
         self.actuate_DARM_N = DistributionAmplifier(
             port_gains = dict(
@@ -290,8 +290,8 @@ class LIGODetector(SystemElementSled):
                 EY = +1 / 2,
             )
         )
-        self.system.link(self.actuate_DARM_N.EX, self.EX.actuate_force_N)
-        self.system.link(self.actuate_DARM_N.EY, self.EY.actuate_force_N)
+        self.system.bond(self.actuate_DARM_N.EX, self.EX.actuate_force_N)
+        self.system.bond(self.actuate_DARM_N.EY, self.EY.actuate_force_N)
 
         self.actuate_CARM_m = DistributionAmplifier(
             port_gains = dict(
@@ -299,8 +299,8 @@ class LIGODetector(SystemElementSled):
                 EY = 1,
             )
         )
-        self.system.link(self.actuate_CARM_m.EX, self.EX.actuate_pos_m)
-        self.system.link(self.actuate_CARM_m.EY, self.EY.actuate_pos_m)
+        self.system.bond(self.actuate_CARM_m.EX, self.EX.actuate_pos_m)
+        self.system.bond(self.actuate_CARM_m.EY, self.EY.actuate_pos_m)
 
         self.actuate_CARM_N = DistributionAmplifier(
             port_gains = dict(
@@ -308,8 +308,8 @@ class LIGODetector(SystemElementSled):
                 EY = 1,
             )
         )
-        self.system.link(self.actuate_CARM_N.EX, self.EX.actuate_force_N)
-        self.system.link(self.actuate_CARM_N.EY, self.EY.actuate_force_N)
+        self.system.bond(self.actuate_CARM_N.EX, self.EX.actuate_force_N)
+        self.system.bond(self.actuate_CARM_N.EY, self.EY.actuate_force_N)
 
         self.testpoint_DARM_pos_m = SummingAmplifier(
             port_gains = dict(
@@ -317,8 +317,8 @@ class LIGODetector(SystemElementSled):
                 EY = +1,
             )
         )
-        self.system.link(self.EX.testpoint_pos_m, self.testpoint_DARM_pos_m.EX)
-        self.system.link(self.EY.testpoint_pos_m, self.testpoint_DARM_pos_m.EY)
+        self.system.bond(self.EX.testpoint_pos_m, self.testpoint_DARM_pos_m.EX)
+        self.system.bond(self.EY.testpoint_pos_m, self.testpoint_DARM_pos_m.EY)
 
         self.testpoint_CARM_pos_m = SummingAmplifier(
             port_gains = dict(
@@ -326,8 +326,8 @@ class LIGODetector(SystemElementSled):
                 EY = +1 / 2,
             )
         )
-        self.system.link(self.EX.testpoint_pos_m, self.testpoint_CARM_pos_m.EX)
-        self.system.link(self.EY.testpoint_pos_m, self.testpoint_CARM_pos_m.EY)
+        self.system.bond(self.EX.testpoint_pos_m, self.testpoint_CARM_pos_m.EX)
+        self.system.bond(self.EY.testpoint_pos_m, self.testpoint_CARM_pos_m.EY)
 
         #since it is facing east
         self.INPUT_ATTACH_POINT = self.REFLPD.Bk

@@ -83,7 +83,7 @@ class MatrixBuildAlgorithm(object):
             else:
                 ssc(self)
 
-        for pfrom, pto_set in list(self.system.link_pairs.items()):
+        for pfrom, pto_set in list(self.system.bond_pairs.items()):
             for pto in pto_set:
                 for pkey in self.port_set_get(pfrom):
                     assert(pkey in self.port_set_get(pto))
@@ -242,7 +242,7 @@ class MatrixBuildAlgorithm(object):
         seq = defaultdict(set)
         req = defaultdict(set)
 
-        for pfrom, pto_set in list(self.system.link_pairs.items()):
+        for pfrom, pto_set in list(self.system.bond_pairs.items()):
             for pto in pto_set:
                 for kkey in self.port_set_get(pfrom):
                     pkfrom = (pfrom, kkey)

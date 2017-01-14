@@ -405,8 +405,8 @@ class WavePlateMount(ports.OpticalOriented2PortMixin, bases.OpticalCouplerBase, 
         self.my.coord_Fr = PolarizationRotator(rotate_deg = self.rotate_deg)
         self.my.coord_Bk = PolarizationRotator(rotate_deg = -self.rotate_deg)
 
-        self.system.link(self.coord_Fr.Bk, self.plate.Fr)
-        self.system.link(self.plate.Bk, self.coord_Bk.Fr)
+        self.system.bond(self.coord_Fr.Bk, self.plate.Fr)
+        self.system.bond(self.plate.Bk, self.coord_Bk.Fr)
 
         self.Fr = self.coord_Fr.Fr
         self.Bk = self.coord_Bk.Bk

@@ -197,8 +197,8 @@ class MZModulator(SystemElementSled):
                 mY = +1 / 2,
             )
         )
-        self.system.link(self.actuate_DARM_m.mX, self.mX.posZ)
-        self.system.link(self.actuate_DARM_m.mY, self.mY.posZ)
+        self.system.bond(self.actuate_DARM_m.mX, self.mX.posZ)
+        self.system.bond(self.actuate_DARM_m.mY, self.mY.posZ)
 
         self.Drv_m = self.actuate_DARM_m.I
 

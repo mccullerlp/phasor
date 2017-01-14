@@ -110,12 +110,12 @@ class LinearSystem(RootElement, Constants):
         return dict()
 
     @decl.mproperty
-    def link_pairs(self):
+    def bond_pairs(self):
         #TODO: enforce single linkage if possible
         return defaultdict(set)
 
     @decl.mproperty
-    def linked_set(self):
+    def bonded_set(self):
         return set()
 
     @decl.mproperty
@@ -226,7 +226,7 @@ class LinearSystem(RootElement, Constants):
 
     def _include(self, element):
         if self._frozen:
-            raise RuntimeError("Cannot include elements or link after solution requested")
+            raise RuntimeError("Cannot include elements or bond after solution requested")
         if element in self.elements:
             return
         #print("INCLUDE: ", element, element.name_system)
@@ -253,7 +253,7 @@ class LinearSystem(RootElement, Constants):
             self.elements_named[element.name_system] = element
 
     def _autoterminate(self):
-        terminated_ports = set(self.linked_set)
+        terminated_ports = set(self.bonded_set)
         registered_ports = set(self.port_owners.keys())
         unterminated_ports = registered_ports - terminated_ports
         if unterminated_ports and not hasattr(self.sled, 'autoterminate'):
@@ -271,9 +271,9 @@ class LinearSystem(RootElement, Constants):
                 #TODO GOTTA GOTTA FIX
                 name = '{0}({2}-<{1}>)'.format(tclass.__name__, port, pobj.element.name_system).replace('.', '_')
                 tinst = self.sled.autoterminate.insert(tclass(), name)
-                self.link(pobj, tinst.Fr)
+                self.bond(pobj, tinst.Fr)
 
-    def link(self, port_A, port_B):
+    def bond(self, port_A, port_B):
         self.include(port_A.element)
         self.include(port_B.element)
 
@@ -286,12 +286,12 @@ class LinearSystem(RootElement, Constants):
         else:
             either_included = True
             if (not port_B.multiple_attach):
-                assert(port_B.i not in self.linked_set)
+                assert(port_B.i not in self.bonded_set)
             if not (port_A.multiple_attach):
-                assert(port_A.o not in self.linked_set)
-            self.linked_set.add(port_A.o)
-            self.linked_set.add(port_B.i)
-            self.link_pairs[port_A.o].add(port_B.i)
+                assert(port_A.o not in self.bonded_set)
+            self.bonded_set.add(port_A.o)
+            self.bonded_set.add(port_B.i)
+            self.bond_pairs[port_A.o].add(port_B.i)
 
         #also attach the duals
         try:
@@ -302,15 +302,15 @@ class LinearSystem(RootElement, Constants):
         else:
             either_included = True
             if (not port_A.multiple_attach):
-                assert(port_A.i not in self.linked_set)
+                assert(port_A.i not in self.bonded_set)
             if (not port_B.multiple_attach):
-                assert(port_B.o not in self.linked_set)
-            self.linked_set.add(port_B.o)
-            self.linked_set.add(port_A.i)
-            self.link_pairs[port_B.o].add(port_A.i)
+                assert(port_B.o not in self.bonded_set)
+            self.bonded_set.add(port_B.o)
+            self.bonded_set.add(port_A.i)
+            self.bond_pairs[port_B.o].add(port_A.i)
 
         if not either_included:
-            raise RuntimeError("Trying to link, but the pair is not in-out compatible")
+            raise RuntimeError("Trying to bond, but the pair is not in-out compatible")
         return
 
     def own_port_virtual(self, element, port):

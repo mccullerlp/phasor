@@ -30,7 +30,7 @@ class PortUpdatesAlgorithm(object):
         self.readout_pk_sets    = defaultdict(set)
 
         self.link_pairsR = defaultdict(set)
-        for k, v_set in list(self.system.link_pairs.items()):
+        for k, v_set in list(self.system.bond_pairs.items()):
             for v in v_set:
                 self.link_pairsR[v].add(k)
 
@@ -137,7 +137,7 @@ class PortUpdatesAlgorithm(object):
         self._coherent_sources_needed(pto, kto)
         #TODO: make this dispersal occur during resolve_port_updates
 
-        ptolink_set = self.system.link_pairs.get(pto, NOARG)
+        ptolink_set = self.system.bond_pairs.get(pto, NOARG)
         if ptolink_set is not NOARG:
             for ptolink in ptolink_set:
                 #print('link port: ', ptolink, kto)

@@ -109,7 +109,7 @@ class BHDTestSled(SystemElementSled):
             self.MZsensor,
             self.BHD.port_signal,
         )
-        self.system.link(
+        self.system.bond(
             self.LO.Fr,
             self.BHD.port_LO,
         )
@@ -166,11 +166,11 @@ class SBHDTestSled(SystemElementSled):
             self.sqz,
             self.BHD.port_signal,
         )
-        self.system.link(
+        self.system.bond(
             self.PSL.Fr,
             self.MZsensor.FrA,
         )
-        self.system.link(
+        self.system.bond(
             self.LO.Fr,
             self.BHD.port_LO,
         )
