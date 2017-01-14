@@ -69,6 +69,7 @@ class FitterSym(FitterBase):
         return
 
     def ooa_reinject(self, meta_ooa, param_map):
+        print("REINJECT")
         for datum, sysname in list(self._parameter_sysnames.items()):
             nval = param_map[datum]
             datum.reinject(meta_ooa[sysname], nval)

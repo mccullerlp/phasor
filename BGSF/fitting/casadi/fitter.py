@@ -41,10 +41,10 @@ class FitterRoot(RootElement, FitterBase):
     def systems(self):
         prefill = dict()
         if self.inst_preincarnation is not None:
-            for name, sys in list(self.inst_preincarnation.systems.items()):
-                newsys = self._system_map[sys]
-                prefill[name] = self._system_map[sys]
-                self._root_register(name, newsys)
+            for sysname, sys in list(self.inst_preincarnation.systems.items()):
+                newsys = self._system_map[sysname]
+                prefill[sysname] = self._system_map[sysname]
+                self._root_register(sysname, newsys)
         return HookBunch(
             prefill,
             insert_hook = self._root_register
@@ -90,7 +90,7 @@ class FitterRoot(RootElement, FitterBase):
         for sysname in list(self.systems.keys()):
             ooa_meta[sysname] = DeepBunch(vpath=True)
 
-        injectors = self.targets_recurse('ooa_inject')
+        injectors = self.targets_recurse(VISIT.ooa_inject)
         for injector in injectors:
             injector(ooa_meta)
 
@@ -120,11 +120,9 @@ class FitterRoot(RootElement, FitterBase):
             constraint_lb.append(lb)
             constraint_ub.append(ub)
 
-        constraints_remapped = []
+        constraints_remapped = constraint_expr[:]
         for remapper in self.targets_recurse(VISIT.constraints_remap):
-            for constraint in constraint_expr:
-                constraint = remapper(constraint_expr)
-            constraints_remapped.append(constraint)
+            constraints_remapped = remapper(constraints_remapped)
 
         ret = Bunch(
             expr = [],
@@ -137,9 +135,14 @@ class FitterRoot(RootElement, FitterBase):
             constraint_ub
         ):
             ret.expr.append(constraint)
-            ones = np.ones(constraint.shape)
-            lb = ones * lb
-            ub = ones * ub
+            try:
+                shape = constraint.shape
+            except AttributeError:
+                pass
+            else:
+                ones = np.ones(shape)
+                lb = ones * lb
+                ub = ones * ub
             ret.lb.append(lb)
             ret.ub.append(ub)
         #TODO expression remapping on the constraints
@@ -148,7 +151,7 @@ class FitterRoot(RootElement, FitterBase):
     @mproperty
     @invalidate_auto
     def symbol_map(self):
-        smappers   = self.targets_recurse('symbol_map')
+        smappers   = self.targets_recurse(VISIT.symbol_map)
         sym_list   = []
         ival_list  = []
         datum_list = []

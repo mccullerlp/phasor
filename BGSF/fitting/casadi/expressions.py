@@ -142,7 +142,7 @@ class FitterExpression(FitterBase):
         expr = expr_combine[0]
 
         #type II
-        for remapper in self.targets_recurse(VISIT.expression_remap):
+        for remapper in self.root.targets_recurse(VISIT.expression_remap):
             expr = remapper(expr)
 
         N_total = N_expr * expr.shape[0] * expr.shape[1]
@@ -219,21 +219,21 @@ class FitterExpression(FitterBase):
             sol_map[datum] = sol_val
 
         ooa_meta = Bunch()
-        for obj in list(self.root.object_roots_inv.keys()):
-            ooa_meta[obj] = DeepBunch()
+        for sysname in list(self.root.systems.keys()):
+            ooa_meta[sysname] = DeepBunch()
 
-        injectors = self.targets_recurse('ooa_reinject')
+        injectors = self.root.targets_recurse(VISIT.ooa_reinject)
         for injector in injectors:
             injector(ooa_meta, sol_map)
 
         systems = Bunch()
         systems_map = dict()
-        for obj, name in list(self.root.object_roots_inv.items()):
+        for obj, sysname in list(self.root.object_roots_inv.items()):
             new_obj = obj.regenerate(
-                ooa_params = ooa_meta[obj],
+                ooa_params = ooa_meta[sysname],
             )
-            systems[name] = new_obj
-            systems_map[obj] = new_obj
+            systems[sysname] = new_obj
+            systems_map[sysname] = new_obj
         return self.root.regenerate(
             _system_map = systems_map
         )
