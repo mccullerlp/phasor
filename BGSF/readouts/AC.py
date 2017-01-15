@@ -16,22 +16,24 @@ from ..math.key_matrix import (
 
 from ..base import (
     SystemElementBase,
-    OOA_ASSIGN,
     ClassicalFreqKey,
 )
 
-from .base import ReadoutViewBase
 from .noise import NoiseReadout
 
 
 class ACReadout(SystemElementBase):
+
+    @decl.dproperty
+    def port_set(self, val = 'AC'):
+        val = self.ooa_params.setdefault('port_set', val)
+        return val
 
     def __init__(
         self,
         portN,
         portD,
         portDrv = None,
-        port_set = 'AC',
         include_noise = True,
         **kwargs
     ):
@@ -42,8 +44,6 @@ class ACReadout(SystemElementBase):
         self.portD = portD
         self.portN = portN
         self.portDrv = portDrv
-
-        OOA_ASSIGN(self).port_set = 'AC'
 
         #TODO: make this adjustable
         self.F_sep = self.system.F_AC
@@ -125,20 +125,22 @@ class ACReadout(SystemElementBase):
 
 class ACReadoutCLG(SystemElementBase):
 
+    @decl.dproperty
+    def port_set(self, val = 'AC'):
+        val = self.ooa_params.setdefault('port_set', val)
+        return val
+
     def __init__(
         self,
         system,
         portN,
         portD,
-        port_set = 'AC',
         include_noise = True,
         **kwargs
     ):
         super(ACReadoutCLG, self).__init__(system = system, **kwargs)
         self.portD = portD
         self.portN = portN
-
-        OOA_ASSIGN(self).port_set = 'AC'
 
         #TODO: make this adjustable
         self.F_sep = system.F_AC

@@ -36,7 +36,7 @@ class ElectricalPortHolderOut(PortHolderOutBase):
 class ElectricalPortHolderInOut(PortHolderInOutBase):
     def autoterminations(self, port_map):
         #I don't like having to import from here, but what can you do...
-        from .elements import TerminatorOpen
+        from . import TerminatorOpen
         port_map[self] = (self, TerminatorOpen)
 
 

@@ -4,6 +4,11 @@ from __future__ import division
 
 import declarative as decl
 
+from ..math.key_matrix.dictionary_keys import (
+    DictKey,
+    FrequencyKey,
+)
+
 from . import ports
 from . import elements
 
@@ -15,8 +20,8 @@ class SMatrix1PortBase(elements.Electrical1PortBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         for kfrom in matrix_algorithm.port_set_get(self.A.i):
-            if self.system.classical_frequency_test_max(kfrom, self.max_freq):
-                continue
+            #if self.system.classical_frequency_test_max(kfrom, self.max_freq):
+            #    continue
             freq = self.system.classical_frequency_extract(kfrom)
             pgain = self.S11_by_freq(freq)
             matrix_algorithm.port_coupling_insert(
@@ -107,6 +112,16 @@ class VoltageSource(SMatrix1PortBase):
     def V(self):
         return ports.SignalPortHolderIn(self, x = 'V')
 
+    @decl.mproperty
+    def fkey(self):
+        return DictKey({
+            ports.ClassicalFreqKey: FrequencyKey({}),
+        })
+
+    def system_setup_ports_initial(self, ports_algorithm):
+        ports_algorithm.coherent_sources_needed(self.A.o, self.fkey)
+        return
+
     def system_setup_ports(self, ports_algorithm):
         super(VoltageSource, self).system_setup_ports(ports_algorithm)
         for kfrom in ports_algorithm.port_update_get(self.V.i):
@@ -118,6 +133,13 @@ class VoltageSource(SMatrix1PortBase):
     def system_setup_coupling(self, matrix_algorithm):
         #TODO setup DC
         super(VoltageSource, self).system_setup_coupling(matrix_algorithm)
+
+        matrix_algorithm.coherent_sources_insert(
+            self.A.o,
+            self.fkey,
+            self.V_DC
+        )
+
         for kfrom in matrix_algorithm.port_set_get(self.V.i):
             matrix_algorithm.port_coupling_insert(
                 self.V.i,
@@ -142,20 +164,37 @@ class CurrentSource(SMatrix1PortBase):
     def I(self):
         return ports.SignalPortHolderIn(self, x = 'I')
 
+    @decl.mproperty
+    def fkey(self):
+        return DictKey({
+            ports.ClassicalFreqKey: FrequencyKey({}),
+        })
+
+    def system_setup_ports_initial(self, ports_algorithm):
+        ports_algorithm.coherent_sources_needed(self.A.o, self.fkey)
+        return
+
     def system_setup_ports(self, ports_algorithm):
-        super(VoltageSource, self).system_setup_ports(ports_algorithm)
-        for kfrom in ports_algorithm.port_update_get(self.V.i):
+        super(CurrentSource, self).system_setup_ports(ports_algorithm)
+        for kfrom in ports_algorithm.port_update_get(self.I.i):
             ports_algorithm.port_coupling_needed(self.A.o, kfrom)
         for kto in ports_algorithm.port_update_get(self.A.o):
-            ports_algorithm.port_coupling_needed(self.V.i, kto)
+            ports_algorithm.port_coupling_needed(self.I.i, kto)
         return
 
     def system_setup_coupling(self, matrix_algorithm):
         #TODO setup DC
-        super(VoltageSource, self).system_setup_coupling(matrix_algorithm)
-        for kfrom in matrix_algorithm.port_set_get(self.V.i):
+        super(CurrentSource, self).system_setup_coupling(matrix_algorithm)
+
+        matrix_algorithm.coherent_sources_insert(
+            self.A.o,
+            self.fkey,
+            self.I_DC * self.Z_termination
+        )
+
+        for kfrom in matrix_algorithm.port_set_get(self.I.i):
             matrix_algorithm.port_coupling_insert(
-                self.V.i,
+                self.I.i,
                 kfrom,
                 self.A.o,
                 kfrom,
