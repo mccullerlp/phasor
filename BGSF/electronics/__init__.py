@@ -20,12 +20,16 @@ from .smatrix import (
     TerminatorMatched,
     TerminatorOpen,
     TerminatorShorted,
+    SMatrix2PortBase,
+    SMatrix1PortBase,
+)
+
+
+from .sources import (
     VoltageSource,
     CurrentSource,
     VoltageSourceBalanced,
     CurrentSourceBalanced,
-    SMatrix2PortBase,
-    SMatrix1PortBase,
 )
 
 from .passive import (

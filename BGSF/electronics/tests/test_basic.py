@@ -48,6 +48,68 @@ def test_I():
     )
     test.assert_almost_equal(sled.R1.DC_readout, 1)
 
+def test_bdV():
+    sys = OpticalSystem()
+    sled = sys.sled
+    sled.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
+    sled.my.T1 = electronics.TerminatorOpen()
+    sys.bond(sled.V1.A, sled.T1.A)
+    sled.my.T2 = electronics.TerminatorShorted()
+    sys.bond(sled.V1.B, sled.T2.A)
+    sled.my.R1 = electronics.VoltageReadout(
+        terminal = sled.V1.A,
+    )
+    test.assert_almost_equal(sled.R1.DC_readout, 1)
+
+    sys = OpticalSystem()
+    sled = sys.sled
+    sled.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
+    #sled.my.T1 = electronics.TerminatorOpen()
+    #sys.bond(sled.V1.A, sled.T1.A)
+    sled.my.T2 = electronics.TerminatorShorted()
+    sys.bond(sled.V1.B, sled.T2.A)
+    sled.my.R1 = electronics.VoltageReadout(
+        terminal = sled.V1.A,
+    )
+    test.assert_almost_equal(sled.R1.DC_readout, 1)
+
+    #This one actually probably should be wrong
+    sys = OpticalSystem()
+    sled = sys.sled
+    sled.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
+    sled.my.T2 = electronics.TerminatorMatched()
+    sys.bond(sled.V1.B, sled.T2.A)
+    sled.my.R1 = electronics.VoltageReadout(
+        terminal = sled.V1.A,
+    )
+    test.assert_almost_equal(sled.R1.DC_readout, 1)
+
+    sys = OpticalSystem()
+    sled = sys.sled
+    sled.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
+    sled.my.T2 = electronics.TerminatorShorted()
+    sys.bond(sled.V1.B, sled.T2.A)
+    sled.my.T1 = electronics.TerminatorMatched()
+    sys.bond(sled.V1.A, sled.T1.A)
+    sled.my.R1 = electronics.VoltageReadout(
+        terminal = sled.V1.A,
+        terminal_N = sled.V1.B,
+    )
+    test.assert_almost_equal(sled.R1.DC_readout, 1)
+
+    sys = OpticalSystem()
+    sled = sys.sled
+    sled.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
+    sled.my.T1 = electronics.TerminatorMatched()
+    sys.bond(sled.V1.A, sled.T1.A)
+    sled.my.T2 = electronics.TerminatorMatched()
+    sys.bond(sled.V1.B, sled.T2.A)
+    sled.my.R1 = electronics.VoltageReadout(
+        terminal = sled.V1.A,
+        terminal_N = sled.V1.B,
+    )
+    test.assert_almost_equal(sled.R1.DC_readout, 1)
+
 
 
 

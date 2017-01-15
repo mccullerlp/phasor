@@ -26,9 +26,13 @@ class ElectricalNoiseBase(NoiseBase, ElectricalElementBase):
 
 
 class Electrical1PortBase(ElectricalElementBase):
-    @decl.mproperty
+    @decl.dproperty
     def A(self):
         return ports.ElectricalPortHolderInOut(self, 'A')
+
+    @decl.mproperty
+    def Fr(self):
+        return self.A
 
     def system_setup_ports(self, ports_algorithm):
         for kfrom in ports_algorithm.port_update_get(self.A.i):
@@ -39,14 +43,21 @@ class Electrical1PortBase(ElectricalElementBase):
 
 
 class Electrical2PortBase(ElectricalElementBase):
-    @decl.mproperty
+    @decl.dproperty
     def A(self):
         return ports.ElectricalPortHolderInOut(self, 'A')
 
-    @decl.mproperty
+    @decl.dproperty
     def B(self):
         return ports.ElectricalPortHolderInOut(self, 'B')
 
+    @decl.mproperty
+    def Fr(self):
+        return self.A
+
+    @decl.mproperty
+    def Bk(self):
+        return self.B
 
 class Connection(ElectricalElementBase):
     @decl.dproperty
