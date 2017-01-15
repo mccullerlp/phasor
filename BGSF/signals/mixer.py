@@ -75,17 +75,32 @@ class Mixer(CouplerBase, SystemElementBase):
                 freq_LO = self.system.classical_frequency_extract(kfrom1)
                 kto = DictKey({ClassicalFreqKey: f_new})
 
-                #TODO add inhomogenous term
-                matrix_algorithm.nonlinear_triplet_insert(
-                    (self.LO.i,  kfrom1),
-                    (self.I.i,   kfrom2),
-                    (self.R_I.o, kto),
-                    1 / 2,
-                )
-                matrix_algorithm.nonlinear_triplet_insert(
-                    (self.LO.i,  kfrom1),
-                    (self.I.i,   kfrom2),
-                    (self.R_Q.o, kto),
-                    self.system.i * np.sign(freq_LO) / 2,
-                )
+                if not f_new.DC_is():
+                    #TODO add inhomogenous term
+                    matrix_algorithm.nonlinear_triplet_insert(
+                        (self.LO.i,  kfrom1),
+                        (self.I.i,   kfrom2),
+                        (self.R_I.o, kto),
+                        1 / 2,
+                    )
+                    matrix_algorithm.nonlinear_triplet_insert(
+                        (self.LO.i,  kfrom1),
+                        (self.I.i,   kfrom2),
+                        (self.R_Q.o, kto),
+                        self.system.i * np.sign(freq_LO) / 2,
+                    )
+                else:
+                    #TODO add inhomogenous term
+                    matrix_algorithm.nonlinear_triplet_insert(
+                        (self.LO.i,  kfrom1),
+                        (self.I.i,   kfrom2),
+                        (self.R_I.o, kto),
+                        1 / 4,
+                    )
+                    matrix_algorithm.nonlinear_triplet_insert(
+                        (self.LO.i,  kfrom1),
+                        (self.I.i,   kfrom2),
+                        (self.R_Q.o, kto),
+                        self.system.i * np.sign(freq_LO) / 4,
+                    )
         return

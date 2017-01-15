@@ -251,28 +251,42 @@ def modulations_fill_2optical_2classical(
         #and vice-versa
         if kfrom.contains(ports.LOWER):
             #TODO Check factor of 2 overcounting here between raising and lowering
-            if ktoOptP is not None:
-                matrix_algorithm.port_coupling_insert(
-                    pfrom.i, ktoOptP, out_port_classical.o, lkto,
-                    Stdcplg * BAcplg / 2, optCplgC,
-                )
-            if lktoN != lkto and ktoOptN is not None:
-                matrix_algorithm.port_coupling_insert(
-                    pfrom.i, ktoOptN, out_port_classical.o, lktoN,
-                    Stdcplg * BAcplg / 2, optCplgC,
-                )
+            if lktoN != lkto:
+                if ktoOptP is not None:
+                    matrix_algorithm.port_coupling_insert(
+                        pfrom.i, ktoOptP, out_port_classical.o, lkto,
+                        Stdcplg * BAcplg, optCplgC,
+                    )
+                if ktoOptN is not None:
+                    matrix_algorithm.port_coupling_insert(
+                        pfrom.i, ktoOptN, out_port_classical.o, lktoN,
+                        Stdcplg * BAcplg, optCplgC,
+                    )
+            else:
+                if ktoOptP is not None:
+                    matrix_algorithm.port_coupling_insert(
+                        pfrom.i, ktoOptP, out_port_classical.o, lkto,
+                        Stdcplg * BAcplg / 2, optCplgC,
+                    )
         elif kfrom.contains(ports.RAISE):
             #TODO Check factor of 2 overcounting here between raising and lowering
             # because of conjugation issues, the frequencies are reversed in the lktos for the optical ports.RAISE operators
-            if ktoOptP is not None:
-                matrix_algorithm.port_coupling_insert(
-                    pfrom.i, ktoOptP, out_port_classical.o, lktoN,
-                    StdcplgC * BAcplgC / 2, optCplgC,
-                )
-            if lktoN != lkto and ktoOptN is not None:
-                matrix_algorithm.port_coupling_insert(
-                    pfrom.i, ktoOptN, out_port_classical.o, lkto,
-                    StdcplgC * BAcplgC / 2, optCplgC,
-                )
+            if lktoN != lkto:
+                if ktoOptP is not None:
+                    matrix_algorithm.port_coupling_insert(
+                        pfrom.i, ktoOptP, out_port_classical.o, lktoN,
+                        StdcplgC * BAcplgC, optCplgC,
+                    )
+                if ktoOptN is not None:
+                    matrix_algorithm.port_coupling_insert(
+                        pfrom.i, ktoOptN, out_port_classical.o, lkto,
+                        StdcplgC * BAcplgC, optCplgC,
+                    )
+            else:
+                if ktoOptP is not None:
+                    matrix_algorithm.port_coupling_insert(
+                        pfrom.i, ktoOptP, out_port_classical.o, lktoN,
+                        StdcplgC * BAcplgC / 2, optCplgC,
+                    )
         else:
             raise RuntimeError("Boo")
