@@ -45,11 +45,11 @@ class Electrical1PortBase(ElectricalElementBase):
 class Electrical2PortBase(ElectricalElementBase):
     @decl.dproperty
     def A(self):
-        return ports.ElectricalPortHolderInOut(self, 'A')
+        return ports.ElectricalPortHolderInOut(self, 'A', pchain = 'B')
 
     @decl.dproperty
     def B(self):
-        return ports.ElectricalPortHolderInOut(self, 'B')
+        return ports.ElectricalPortHolderInOut(self, 'B', pchain = 'A')
 
     @decl.mproperty
     def Fr(self):

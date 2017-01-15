@@ -41,3 +41,7 @@ from .passive import (
     SeriesInductor,
 )
 
+from .noise import (
+    VoltageFluctuation,
+    CurrentFluctuation,
+)

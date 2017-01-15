@@ -9,15 +9,15 @@ from . import elements
 
 class OpAmp(elements.ElectricalElementBase):
 
-    @decl.mproperty
+    @decl.dproperty
     def in_p(self):
         return ports.ElectricalPortHolderInOut(self, 'in_p')
 
-    @decl.mproperty
+    @decl.dproperty
     def in_n(self):
         return ports.ElectricalPortHolderInOut(self, 'in_n')
 
-    @decl.mproperty
+    @decl.dproperty
     def out(self):
         return ports.ElectricalPortHolderInOut(self, 'out')
 
@@ -102,11 +102,11 @@ class VAmp(elements.ElectricalElementBase):
     Y_input = 0
     Z_output = 0
 
-    @decl.mproperty
+    @decl.dproperty
     def in_n(self):
         return ports.ElectricalPortHolderInOut(self, 'in_n')
 
-    @decl.mproperty
+    @decl.dproperty
     def out(self):
         return ports.ElectricalPortHolderInOut(self, 'out')
 
