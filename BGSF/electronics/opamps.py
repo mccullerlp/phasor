@@ -28,9 +28,7 @@ class OpAmp(elements.ElectricalElementBase):
         #TODO could reduce these with more information about used S-matrix elements
         for port1, port2 in (
             (self.in_p.i, self.out.o),
-            (self.in_p.o, self.out.o),
             (self.in_n.i, self.out.o),
-            (self.in_n.o, self.out.o),
             (self.in_p.i, self.in_p.o),
             (self.in_n.i, self.in_n.o),
             (self.out.i, self.out.o),
@@ -42,6 +40,11 @@ class OpAmp(elements.ElectricalElementBase):
         return
 
     def system_setup_coupling(self, matrix_algorithm):
+        #inputs terminated like an OPEN/CURRENT SOURCE
+        input_term = 1
+        #outputs terminated like an SHORT/VOLTAGE SOURCE
+        output_term = -1
+
         #Should use two for-loops, but the .i and .o of port1 have the same kfrom's
         for port1, port2 in (
             (self.in_p, self.out),
@@ -60,17 +63,9 @@ class OpAmp(elements.ElectricalElementBase):
                     kfrom,
                     port2.o,
                     kfrom,
-                    pgain,
-                )
-                matrix_algorithm.port_coupling_insert(
-                    port1.o,
-                    kfrom,
-                    port2.o,
-                    kfrom,
-                    pgain,
+                    pgain * (1 + input_term),
                 )
 
-        #terminated like an OPEN/CURRENT SOURCE
         for port1, port2 in (
             (self.in_p, self.in_p),
             (self.in_n, self.in_n),
@@ -81,10 +76,9 @@ class OpAmp(elements.ElectricalElementBase):
                     kfrom,
                     port2.o,
                     kfrom,
-                    1,
+                    input_term,
                 )
 
-        #terminated like an SHORT/VOLTAGE SOURCE
         for port1, port2 in (
             (self.out, self.out),
         ):
@@ -94,7 +88,7 @@ class OpAmp(elements.ElectricalElementBase):
                     kfrom,
                     port2.o,
                     kfrom,
-                    -1,
+                    output_term,
                 )
 
 

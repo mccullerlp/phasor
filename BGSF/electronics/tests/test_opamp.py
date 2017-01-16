@@ -86,10 +86,11 @@ def test_noise_open_loop():
 
     sled.my.VN = electronics.VoltageFluctuation(
         port = sled.amp.in_p,
+        #port = sled.T1.A,
         Vsq_Hz_by_freq = lambda F : 1,
     )
     test.assert_almost_equal(sled.RAC_N.AC_sensitivity, -gain)
-    test.assert_almost_equal(sled.RAC_N.AC_PSD, 1)
+    test.assert_almost_equal(sled.RAC_N.AC_PSD, 2)
 
     resistance_Ohms = 10
     sys = OpticalSystem()
@@ -113,10 +114,11 @@ def test_noise_open_loop():
 
     sled.my.VN = electronics.CurrentFluctuation(
         port = sled.amp.in_p,
+        #port = sled.T1.A,
         Isq_Hz_by_freq = lambda F : 1,
     )
     test.assert_almost_equal(sled.RAC_N.AC_sensitivity, -gain)
-    test.assert_almost_equal(sled.RAC_N.AC_PSD, gain**2 * resistance_Ohms**2)
+    test.assert_almost_equal(sled.RAC_N.AC_PSD / (gain**2 * resistance_Ohms**2), 2)
 
 def test_closed_loop_opamp_noise():
     gain = 10
@@ -133,6 +135,7 @@ def test_closed_loop_opamp_noise():
     )
     sled.my.VN = electronics.VoltageFluctuation(
         port = sled.amp.in_n,
+        #port = sled.amp.out,
         Vsq_Hz_by_freq = lambda F : 1,
     )
     sled.my.RAC_P = readouts.ACReadout(
@@ -140,7 +143,7 @@ def test_closed_loop_opamp_noise():
         portN = sled.R1.V.o,
     )
     test.assert_almost_equal(sled.RAC_P.AC_sensitivity, gain/(1 + gain))
-    test.assert_almost_equal(sled.RAC_P.AC_PSD, (gain/(1 + gain))**2)
+    test.assert_almost_equal(sled.RAC_P.AC_PSD / (gain/(1 + gain))**2, 2)
 
     gain = 10
     resistance_Ohms = 10
@@ -160,6 +163,7 @@ def test_closed_loop_opamp_noise():
     )
     sled.my.VN = electronics.CurrentFluctuation(
         port = sled.amp.in_n,
+        #port = sled.RTRans.B,
         Isq_Hz_by_freq = lambda F : 1,
     )
     sled.my.RAC_P = readouts.ACReadout(
@@ -167,7 +171,7 @@ def test_closed_loop_opamp_noise():
         portN = sled.R1.V.o,
     )
     test.assert_almost_equal(sled.RAC_P.AC_sensitivity, gain/(1 + gain))
-    test.assert_almost_equal(sled.RAC_P.AC_PSD, resistance_Ohms**2 * (gain/(1 + gain))**2)
+    test.assert_almost_equal(sled.RAC_P.AC_PSD / (resistance_Ohms**2 * (gain/(1 + gain))**2), 2)
 
 
 

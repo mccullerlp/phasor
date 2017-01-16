@@ -66,15 +66,15 @@ class CurrentFluctuation(elements.ElectricalNoiseBase):
             matrix_algorithm.noise_pair_insert(
                 self.port.o, k1, self.port.o, k2, self
             )
-            #matrix_algorithm.noise_pair_insert(
-            #    self.port.i, k1, self.port.o, k2, self
-            #)
-            #matrix_algorithm.noise_pair_insert(
-            #    self.port.o, k1, self.port.i, k2, self
-            #)
-            #matrix_algorithm.noise_pair_insert(
-            #    self.port.i, k1, self.port.i, k2, self
-            #)
+            matrix_algorithm.noise_pair_insert(
+                self.port.i, k1, self.port.o, k2, self
+            )
+            matrix_algorithm.noise_pair_insert(
+                self.port.o, k1, self.port.i, k2, self
+            )
+            matrix_algorithm.noise_pair_insert(
+                self.port.i, k1, self.port.i, k2, self
+            )
         pass
 
     def noise_2pt_expectation(self, p1, k1, p2, k2):

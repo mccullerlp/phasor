@@ -137,8 +137,7 @@ class NoiseReadout(SystemElementBase):
                         p1, k1, p2, k2, nobj = vals
                         pspec_2sided = nobj.noise_2pt_expectation(p1, k1, p2, k2)
                         print("PSPEC: ", p1, k1, p2, k2, pspec_2sided, cplg1 * cplg2)
-                        #factor of 2 from undercounting the negative to positive values (only doing pos to neg)
-                        pspec_tot = 2 * self.system.adjust_PSD * pspec_2sided * cplg1 * cplg2
+                        pspec_tot = self.system.adjust_PSD * pspec_2sided * cplg1 * cplg2
                         if pnameP == pnameN:
                             pspec_tot = np.real(pspec_tot)
 
