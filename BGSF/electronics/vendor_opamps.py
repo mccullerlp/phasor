@@ -11,13 +11,13 @@ from . import noise
 
 class Op27(opamps.OpAmp):
 
-    #@decl.dproperty
-    #def V_noise(self):
-    #    return noise.VoltageFluctuation(
-    #        port = self.in_n,
-    #        Vsq_Hz_by_freq = lambda F : (3e-9)**2 * abs(2.7j / F + 1)**2,
-    #        sided = 'one-sided',
-    #    )
+    @decl.dproperty
+    def V_noise(self):
+        return noise.VoltageFluctuation(
+            port = self.in_n,
+            Vsq_Hz_by_freq = lambda F : (3e-9)**2 * abs(2.7j / F + 1)**2,
+            sided = 'one-sided',
+        )
 
     @decl.dproperty
     def I_noise(self):
@@ -33,16 +33,15 @@ class Op27(opamps.OpAmp):
 
 
 class AD8675(opamps.OpAmp):
-    pass
 
-    #@decl.dproperty
-    #def V_noise(self):
-    #    return noise.VoltageFluctuation(
-    #        port = self.in_n,
-    #        Vsq_Hz_by_freq = lambda F : (2.8e-9)**2 * abs(1j / F + 1),
-    #        sided = 'one-sided',
-    #    )
-    #    return None
+    @decl.dproperty
+    def V_noise(self):
+        return noise.VoltageFluctuation(
+            port = self.in_n,
+            Vsq_Hz_by_freq = lambda F : (2.8e-9)**2 * abs(1j / F + 1),
+            sided = 'one-sided',
+        )
+        return None
 
     @decl.dproperty
     def I_noise(self):
