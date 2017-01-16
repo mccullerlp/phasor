@@ -73,7 +73,6 @@ class SMatrix2PortBase(elements.Electrical2PortBase):
             (self.B, self.B, self.S22_by_freq),
         ]:
             for kfrom in matrix_algorithm.port_set_get(port1.i):
-                print(port1, kfrom)
                 #if self.system.classical_frequency_test_max(kfrom, self.max_freq):
                 #    continue
                 freq = self.system.classical_frequency_extract(kfrom)

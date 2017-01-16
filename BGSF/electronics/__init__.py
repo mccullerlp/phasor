@@ -4,6 +4,7 @@
 from .elements import (
     Connection,
     Cable,
+    ElectricalElementBase,
 )
 
 from .multimeter import (

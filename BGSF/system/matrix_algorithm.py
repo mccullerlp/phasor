@@ -136,7 +136,7 @@ class MatrixBuildAlgorithm(object):
 
         #self.coupling_matrix_print(select_from = (p1, k2))
         nmap_inner = self._nmap.setdefault((p1, k1), dict())
-        nmap_inner[(p2, k2)] = (p1, k1, p2, k2, genfunc)
+        nmap_inner.setdefault((p2, k2), []).append((p1, k1, p2, k2, genfunc))
         return
 
     def port_set_get(self, port):

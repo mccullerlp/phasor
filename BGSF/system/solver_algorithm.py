@@ -110,7 +110,6 @@ class SystemSolver(object):
                 )
         #sort this so that shorter name_tups are first
         views_insert.sort()
-        print("INSERT: ", views_insert)
         views = DeepBunch()
         for name_tup, view_obj in views_insert:
             subview = views
@@ -125,7 +124,6 @@ class SystemSolver(object):
                     subview.subview_insert(name_tup[-1:], view_obj)
                 else:
                     subview[name_tup[-1]] = view_obj
-        print("INSERT: ", views)
         self.views.update_recursive(views.sled)
         return
 
@@ -199,7 +197,6 @@ class SystemSolver(object):
                         )
                         #print('multi-edge: ', pkto, factor_func)
                     coupling_matrix[pkfrom, pkto] = val
-        pprint(("CMATRIX: ", coupling_matrix))
         return coupling_matrix
 
     def _perturbation_iterate(self, N):

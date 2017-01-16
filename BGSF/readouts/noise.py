@@ -108,7 +108,7 @@ class NoiseReadout(SystemElementBase):
             readout_set = self.port_set,
         )
         coupling_matrix_inv = cbunch.coupling_matrix_inv
-        pprint(coupling_matrix_inv)
+        #pprint(coupling_matrix_inv)
         nmap = self.system.solution.noise_map()
 
         pkviewsP = dict()
@@ -140,18 +140,18 @@ class NoiseReadout(SystemElementBase):
                         vals = nmap_inner.get(pk2, None)
                         if vals is None:
                             continue
-                        p1, k1, p2, k2, nobj = vals
-                        pspec_2sided = nobj.noise_2pt_expectation(p1, k1, p2, k2)
-                        print("PSPEC: ", p1, k1, p2, k2, pspec_2sided, cplg1 * cplg2)
-                        pspec_tot = self.system.adjust_PSD * pspec_2sided * cplg1 * cplg2
-                        if pnameP == pnameN:
-                            pspec_tot = np.real(pspec_tot)
+                        for p1, k1, p2, k2, nobj in vals:
+                            pspec_2sided = nobj.noise_2pt_expectation(p1, k1, p2, k2)
+                            #print("PSPEC: ", p1, k1, p2, k2, pspec_2sided, cplg1 * cplg2)
+                            pspec_tot = self.system.adjust_PSD * pspec_2sided * cplg1 * cplg2
+                            if pnameP == pnameN:
+                                pspec_tot = np.real(pspec_tot)
 
-                        if not np.all(np.isfinite(pspec_tot)):
-                            print("BADNESS: ", nobj.name_system, pspec_tot)
-                        else:
-                            nsum += pspec_tot
-                            ncollect[nobj][pnameP, pnameN] = ncollect[nobj][pnameP, pnameN] + pspec_tot
+                            if not np.all(np.isfinite(pspec_tot)):
+                                print("BADNESS: ", nobj.name_system, pspec_tot)
+                            else:
+                                nsum += pspec_tot
+                                ncollect[nobj][pnameP, pnameN] = ncollect[nobj][pnameP, pnameN] + pspec_tot
                 nsums[pnameP, pnameN] = nsum
         return Bunch(
             ncollect = ncollect,

@@ -71,9 +71,10 @@ class Connection(ElectricalElementBase):
         for idx in range(self.N_ports):
             name = 'p{0}'.format(idx)
             pobj = ports.ElectricalPortHolderInOut(self, x = name)
-            pobj = self.insert(pobj, name)
+            setattr(self, name, pobj)
             ports_electrical.append(pobj)
         self.ports_electrical = ports_electrical
+        self.p1
 
     def system_setup_ports(self, ports_algorithm):
         for port1 in self.ports_electrical:
@@ -90,9 +91,9 @@ class Connection(ElectricalElementBase):
             for kfrom in matrix_algorithm.port_set_get(port1.i):
                 for port2 in self.ports_electrical:
                     if port1 is port2:
-                        pgain = (_2 - self.N_wires) / self.N_wires
+                        pgain = (_2 - self.N_ports) / self.N_ports
                     else:
-                        pgain = (_2 / self.N_wires)
+                        pgain = (_2 / self.N_ports)
                     matrix_algorithm.port_coupling_insert(
                         port1.i,
                         kfrom,

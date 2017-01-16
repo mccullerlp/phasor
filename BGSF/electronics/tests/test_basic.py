@@ -110,6 +110,35 @@ def test_VIR():
     test.assert_almost_equal(sled.R1.DC_readout, 1)
     test.assert_almost_equal(sled.R2.DC_readout, 50)
 
+def test_VIR_conn():
+    sys = OpticalSystem()
+    sled = sys.sled
+    sled.my.I1 = electronics.CurrentSource(I_DC = 1)
+    sled.my.Conn1 = electronics.Connection(N_ports = 3)
+    sled.my.T1 = electronics.TerminatorResistor(
+        resistance_Ohms = 10,
+    )
+    sled.my.T2 = electronics.TerminatorResistor(
+        resistance_Ohms = 10,
+    )
+    sys.bond(sled.I1.A, sled.Conn1.p0)
+    sys.bond(sled.Conn1.p1, sled.T1.A)
+    sys.bond(sled.Conn1.p2, sled.T2.A)
+    sled.my.R1 = electronics.CurrentReadout(
+        terminal = sled.I1.A,
+        direction = 'out',
+    )
+    sled.my.R2 = electronics.VoltageReadout(
+        terminal = sled.I1.A,
+    )
+    sled.my.R3 = electronics.CurrentReadout(
+        terminal = sled.T1.A,
+        direction = 'in',
+    )
+    test.assert_almost_equal(sled.R1.DC_readout, 1)
+    test.assert_almost_equal(sled.R2.DC_readout, 5)
+    test.assert_almost_equal(sled.R3.DC_readout, .5)
+
 def test_bdV():
     """
     Test the balanced voltage source with different pairs of terminations. Not allowed to short both sides or have

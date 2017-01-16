@@ -251,6 +251,21 @@ def test_johnson_noise_parallel():
     test.assert_almost_equal(sled.RN.CSD['R', 'R'] / (4 * sys.kB_J_K * sys.temp_K * resistance_Ohms / 2), 1)
 
 
+def test_johnson_noise_terminator():
+    sys = OpticalSystem()
+    sled = sys.sled
+    sled.my.Z1 = electronics.TerminatorMatched()
+    sled.my.T1 = electronics.TerminatorOpen()
+    sys.bond(sled.Z1.A, sled.T1.A)
+    sled.my.R1 = electronics.VoltageReadout(
+        terminal = sled.Z1.A,
+    )
+    sled.my.RN = readouts.NoiseReadout(
+        portN = sled.R1.V.o,
+    )
+    test.assert_almost_equal(sled.RN.CSD['R', 'R'] / (4 * sys.kB_J_K * sys.temp_K * sled.Z1.Z_termination.real), 1)
+
+
 
 
 

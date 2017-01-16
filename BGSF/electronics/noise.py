@@ -67,7 +67,7 @@ class VoltageFluctuation(elements.ElectricalNoiseBase):
         pass
 
     def noise_2pt_expectation(self, p1, k1, p2, k2):
-        freq = k1[ports.ClassicalFreqKey]
+        freq = k1[ports.ClassicalFreqKey].frequency()
         Vsq_Hz = self.Vsq_Hz_by_freq(freq) / self.conversion
         if p1 == p2:
             return Vsq_Hz / 4
@@ -115,7 +115,7 @@ class CurrentFluctuation(elements.ElectricalNoiseBase):
         pass
 
     def noise_2pt_expectation(self, p1, k1, p2, k2):
-        freq = k1[ports.ClassicalFreqKey]
+        freq = k1[ports.ClassicalFreqKey].frequency()
         Isq_Hz = self.Isq_Hz_by_freq(freq) / self.conversion
         if p1 == p2:
             return (self.Z_termination)**2 * Isq_Hz / 4
