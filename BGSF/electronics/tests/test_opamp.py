@@ -17,8 +17,8 @@ import unittest
 assertions = unittest.TestCase('__init__')
 
 
-def test_open_loop_opamp():
-    gain = 10
+pytest.mark.parametrize('gain', [(1), (10), (100)])
+def test_open_loop_opamp(gain = 10):
     sys = OpticalSystem()
     sled = sys.sled
     sled.my.V_P = electronics.VoltageSource()
@@ -43,8 +43,8 @@ def test_open_loop_opamp():
     test.assert_almost_equal(sled.RAC_N.AC_sensitivity, -gain)
 
 
-def test_closed_loop_opamp():
-    gain = 10
+pytest.mark.parametrize('gain', [(1), (10), (100)])
+def test_closed_loop_opamp(gain = 10):
     sys = OpticalSystem()
     sled = sys.sled
     sled.my.V_P = electronics.VoltageSource()
@@ -63,8 +63,8 @@ def test_closed_loop_opamp():
     test.assert_almost_equal(sled.RAC_P.AC_sensitivity, gain/(1 + gain))
 
 
-def test_noise_open_loop():
-    gain = 1
+pytest.mark.parametrize('gain', [(1), (10), (100)])
+def test_noise_open_loop(gain = 1):
     sys = OpticalSystem()
     sled = sys.sled
     sled.my.V_N = electronics.VoltageSource()
@@ -85,12 +85,13 @@ def test_noise_open_loop():
     #sys.bond(sled.amp.in_p, sled.T1.A)
 
     sled.my.VN = electronics.VoltageFluctuation(
-        port = sled.amp.in_p,
-        #port = sled.T1.A,
+        #port = sled.amp.in_p,
+        port = sled.T1.A,
         Vsq_Hz_by_freq = lambda F : 1,
+        sided = 'one-sided',
     )
     test.assert_almost_equal(sled.RAC_N.AC_sensitivity, -gain)
-    test.assert_almost_equal(sled.RAC_N.AC_PSD, 2)
+    test.assert_almost_equal(sled.RAC_N.AC_PSD, 1)
 
     resistance_Ohms = 10
     sys = OpticalSystem()
@@ -116,9 +117,10 @@ def test_noise_open_loop():
         port = sled.amp.in_p,
         #port = sled.T1.A,
         Isq_Hz_by_freq = lambda F : 1,
+        sided = 'one-sided',
     )
     test.assert_almost_equal(sled.RAC_N.AC_sensitivity, -gain)
-    test.assert_almost_equal(sled.RAC_N.AC_PSD / (gain**2 * resistance_Ohms**2), 2)
+    test.assert_almost_equal(sled.RAC_N.AC_PSD / (gain**2 * resistance_Ohms**2), 1)
 
 def test_closed_loop_opamp_noise():
     gain = 10
@@ -137,13 +139,15 @@ def test_closed_loop_opamp_noise():
         port = sled.amp.in_n,
         #port = sled.amp.out,
         Vsq_Hz_by_freq = lambda F : 1,
+        sided = 'one-sided',
     )
     sled.my.RAC_P = readouts.ACReadout(
         portD = sled.V_P.V.i,
         portN = sled.R1.V.o,
     )
+    sys.solution.coupling_matrix_print()
     test.assert_almost_equal(sled.RAC_P.AC_sensitivity, gain/(1 + gain))
-    test.assert_almost_equal(sled.RAC_P.AC_PSD / (gain/(1 + gain))**2, 2)
+    test.assert_almost_equal(sled.RAC_P.AC_PSD / (gain/(1 + gain))**2, 1)
 
     gain = 10
     resistance_Ohms = 10
@@ -165,13 +169,86 @@ def test_closed_loop_opamp_noise():
         port = sled.amp.in_n,
         #port = sled.RTRans.B,
         Isq_Hz_by_freq = lambda F : 1,
+        sided = 'one-sided',
     )
     sled.my.RAC_P = readouts.ACReadout(
         portD = sled.V_P.V.i,
         portN = sled.R1.V.o,
     )
     test.assert_almost_equal(sled.RAC_P.AC_sensitivity, gain/(1 + gain))
-    test.assert_almost_equal(sled.RAC_P.AC_PSD / (resistance_Ohms**2 * (gain/(1 + gain))**2), 2)
+    test.assert_almost_equal(sled.RAC_P.AC_PSD / (resistance_Ohms**2 * (gain/(1 + gain))**2), 1)
+
+
+def test_johnson_noise():
+    resistance_Ohms = 1000
+    sys = OpticalSystem()
+    sled = sys.sled
+    sled.my.Z1 = electronics.TerminatorResistor(
+        resistance_Ohms = resistance_Ohms,
+    )
+    sled.my.T1 = electronics.TerminatorOpen()
+    sys.bond(sled.Z1.A, sled.T1.A)
+    sled.my.R1 = electronics.VoltageReadout(
+        terminal = sled.T1.A,
+    )
+    sled.my.RN = readouts.NoiseReadout(
+        portN = sled.R1.V.o,
+    )
+    test.assert_almost_equal(sled.RN.CSD['R', 'R'] / (4 * sys.kB_J_K * sys.temp_K * resistance_Ohms), 1)
+
+    #now connect to other terminal
+    sys = OpticalSystem()
+    sled = sys.sled
+    sled.my.Z1 = electronics.TerminatorResistor(
+        resistance_Ohms = resistance_Ohms,
+    )
+    sled.my.T1 = electronics.TerminatorOpen()
+    sys.bond(sled.Z1.A, sled.T1.A)
+    sled.my.R1 = electronics.VoltageReadout(
+        terminal = sled.Z1.A,
+    )
+    sled.my.RN = readouts.NoiseReadout(
+        portN = sled.R1.V.o,
+    )
+    test.assert_almost_equal(sled.RN.CSD['R', 'R'] / (4 * sys.kB_J_K * sys.temp_K * resistance_Ohms), 1)
+
+def test_johnson_noise_shorted():
+    resistance_Ohms = 1000
+    #now connect to other terminal
+    sys = OpticalSystem()
+    sled = sys.sled
+    sled.my.Z1 = electronics.TerminatorResistor(
+        resistance_Ohms = resistance_Ohms,
+    )
+    sled.my.T1 = electronics.TerminatorShorted()
+    sys.bond(sled.Z1.A, sled.T1.A)
+    sled.my.R1 = electronics.VoltageReadout(
+        terminal = sled.Z1.A,
+    )
+    sled.my.RN = readouts.NoiseReadout(
+        portN = sled.R1.V.o,
+    )
+    test.assert_almost_equal(sled.RN.CSD['R', 'R'] / (4 * sys.kB_J_K * sys.temp_K * resistance_Ohms), 0)
+
+def test_johnson_noise_parallel():
+    resistance_Ohms = 1000
+    #now connect to other terminal
+    sys = OpticalSystem()
+    sled = sys.sled
+    sled.my.Z1 = electronics.TerminatorResistor(
+        resistance_Ohms = resistance_Ohms,
+    )
+    sled.my.Z2 = electronics.TerminatorResistor(
+        resistance_Ohms = resistance_Ohms,
+    )
+    sys.bond(sled.Z1.A, sled.Z2.A)
+    sled.my.R1 = electronics.VoltageReadout(
+        terminal = sled.Z1.A,
+    )
+    sled.my.RN = readouts.NoiseReadout(
+        portN = sled.R1.V.o,
+    )
+    test.assert_almost_equal(sled.RN.CSD['R', 'R'] / (4 * sys.kB_J_K * sys.temp_K * resistance_Ohms / 2), 1)
 
 
 

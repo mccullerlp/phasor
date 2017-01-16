@@ -13,8 +13,9 @@ import declarative as decl
 ElementKey = u'▲'
 PortKey = u'🔌'
 MechKey = u'⌖'
+PostBondKey = u'№'
 
-ClassicalFreqKey = u'F'
+ClassicalFreqKey = u'𝓕'
 
 
 class PortHolderBase(decl.OverridableObject):

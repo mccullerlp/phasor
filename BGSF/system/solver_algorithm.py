@@ -13,6 +13,8 @@ from declarative import (
     DeepBunch,
 )
 
+from ..utilities.print import pprint
+
 from ..math.key_matrix import (
     KVSpace,
     KeyVector,
@@ -73,6 +75,7 @@ class SystemSolver(object):
         self.readout_pk_sets['perturbative'] = csgb.outputs_set
 
         self.drive_pk_sets['noise'] = set(self.matrix_algorithm.noise_pk_set)
+        #pprint(("NSET: ", self.matrix_algorithm.noise_pk_set))
 
         all_set = set(csgb.seq_full.keys())
         assert('all' not in self.drive_pk_sets)
@@ -166,15 +169,21 @@ class SystemSolver(object):
                 try:
                     factor_func_list = malgo.coupling_matrix_inj_funclist[pkfrom, pkto]
                 except KeyError:
-                    #if it's not in the injection funclist then it must be a link
-                    #TODO: assert that links are not stacked with the funclist
+                    #if it's not in the injection funclist then it must be a bond
+                    #TODO: assert that bond are not stacked with the funclist
                     pfrom, kfrom = pkfrom
                     pto, kto     = pkto
-                    pkey = kto
                     assert(kto == kfrom)
-                    assert(pkey in malgo.port_set_get(pto))
+                    #pkey = kto
+                    #assert(pkey in malgo.port_set_get(pto))
+                    #assert(pto in self.system.bond_pairs[pfrom])
+                    assert(pkto in malgo.bonds_trivial[pkfrom])
                     coupling_matrix[pkfrom, pkto] = 1
                 else:
+                    assert(pkto not in malgo.bonds_trivial[pkfrom])
+                    #pfrom, kfrom = pkfrom
+                    #pto, kto     = pkto
+                    #assert(pto not in self.system.bond_pairs[pfrom])
                     if not factor_func_list:
                         coupling_matrix[pkfrom, pkto] = 0
                         continue
@@ -190,6 +199,7 @@ class SystemSolver(object):
                         )
                         #print('multi-edge: ', pkto, factor_func)
                     coupling_matrix[pkfrom, pkto] = val
+        pprint(("CMATRIX: ", coupling_matrix))
         return coupling_matrix
 
     def _perturbation_iterate(self, N):
@@ -232,14 +242,14 @@ class SystemSolver(object):
             outputs_set   = outputs_set.union(self.matrix_algorithm.AC_out_all),
             inputs_map    = source_vector,
             inputs_AC_set = self.matrix_algorithm.AC_in_all,
-            edge_map      = dict(list(coupling_matrix.items())),
+            edge_map      = dict(coupling_matrix.items()),
             purge_in      = True,
             purge_out     = True,
         )
         solution_dict = solution_bunch.outputs_map
         solution_vector_kv = KeyVector(field_space)
         #TODO make be able to avoid this copy
-        for node, val in list(solution_dict.items()):
+        for node, val in solution_dict.items():
             solution_vector_kv[node] = val
 
         solution_bunch = Bunch(
@@ -268,7 +278,7 @@ class SystemSolver(object):
             solution_vector
     ):
         delta_v_rel_max = 0
-        for k, v in list(solution_vector.items()):
+        for k, v in solution_vector.items():
             v_prev = solution_vector_prev.get(k, 0)
             v = np.asarray(v)
             v_prev = np.asarray(v_prev)
@@ -343,7 +353,7 @@ class SystemSolver(object):
             req           = req,
             outputs_set   = outputs_set,
             inputs_map    = source_vector,
-            edge_map      = dict(list(coupling_matrix.items())),
+            edge_map      = dict(coupling_matrix.items()),
             purge_in      = True,
             purge_out     = True,
         )
@@ -410,7 +420,7 @@ class SystemSolver(object):
             req           = req,
             inputs_set    = inputs_set,
             outputs_set   = outputs_set,
-            edge_map      = dict(list(coupling_matrix.items())),
+            edge_map      = dict(coupling_matrix.items()),
             purge_in      = True,
             purge_out     = True,
         )
@@ -535,59 +545,3 @@ class SystemSolver(object):
             print(val)
 
 
-#class SystemSolverDense(object):
-#    def _setup_system_minimal(self):
-#        if self.field_space_proto is None:
-#            field_space = KVSpace('field_ports', dtype = object)
-#        else:
-#            field_space = self.field_space_proto.copy()
-#
-#        self.field_space                 = field_space
-#        self.source_vector               = KeyVector(field_space)
-#        self.coupling_matrix             = KeyMatrix(field_space, field_space)
-#
-#        #TODO only fill out the coherent perturbation subgraph
-#        for pkto, factor_list_list in self.source_vector_factors.items():
-#            val = 0
-#            for vcplg, factor_pk_list in factor_list_list:
-#                for pkprev in factor_pk_list:
-#                    svec = self.solution_vectors[-1].get(pkprev, 0)
-#                    vcplg *= svec
-#                val += vcplg
-#            self.source_vector[pkto] = val
-#
-#        for (pkfrom, pkto), (vcplg, factor_pk_list) in self.coupling_matrix_factors.items():
-#            for pprev, kprev in factor_pk_list:
-#                svec = self.solution_vectors[-1].get(pkprev, 0)
-#                vcplg *= svec
-#            self.coupling_matrix[pkfrom, pkto] = vcplg
-#
-#        for pfrom, pto_set in self.link_pairs.items():
-#            for pto in pto_set:
-#                for pkey in self.port_set_get(pfrom):
-#                    assert(pkey in self.port_set_get(pto))
-#                    self.coupling_matrix[(pfrom, pkey), (pto, pkey)] = 1
-#
-#        field_space.freeze()
-#        return
-#
-#    def _solve_system(self):
-#        mat_eye = key_matrix_eye(self.field_space)
-#        self.coupling_matrix_rt = mat_eye - self.coupling_matrix
-#        self.coupling_matrix_rt_inv = None
-#
-#        solution_vector_array = linalg_solve_bcast(
-#            self.coupling_matrix_rt.array.astype(complex),
-#            self.source_vector.array.astype(complex),
-#        )
-#        self.field_spaces.append(self.field_space)
-#        solution_vector_kv = self.source_vector.backmap_vector(solution_vector_array)
-#        self.solution_vectors.append(solution_vector_kv)
-#        return
-#
-#    def invert_system(self):
-#        if self.coupling_matrix_rt_inv is not None:
-#            return self.coupling_matrix_rt_inv
-#        rt_inv = np.linalg.inv(self.coupling_matrix_rt.array.astype(complex))
-#        self.coupling_matrix_rt_inv = self.coupling_matrix_rt.backmap_array(rt_inv)
-#        return self.coupling_matrix_rt_inv

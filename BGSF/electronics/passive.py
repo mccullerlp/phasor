@@ -6,6 +6,7 @@ from builtins import object
 import declarative as decl
 
 from . import smatrix
+from . import noise
 
 
 class ResistorBase(object):
@@ -15,6 +16,16 @@ class ResistorBase(object):
 
     def impedance_by_freq(self, F):
         return self.resistance_Ohms
+
+    @decl.dproperty
+    def johnson_noise(self):
+        if self.system.include_johnson_noise:
+            return noise.VoltageFluctuation(
+                port = self.A,
+                Vsq_Hz_by_freq = lambda F : 4 * self.resistance_Ohms * self.system.temp_K * self.system.kB_J_K,
+                sided = 'one-sided',
+            )
+        return None
 
 
 class CapacitorBase(object):

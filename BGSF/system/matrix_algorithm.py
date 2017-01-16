@@ -13,6 +13,8 @@ from declarative import (
     #dproperty, OverridableObject,
 )
 
+from ..base.ports import PostBondKey
+
 from ..math.key_matrix import (
     KVSpace,
     KeyMatrix,
@@ -50,12 +52,6 @@ class MatrixBuildAlgorithm(object):
         else:
             field_space = system.field_space_proto.copy()
         self.field_space                 = field_space
-        self.coupling_matrix_sparsity    = KeyMatrix(field_space, field_space)
-
-        #TODO, stopgap for generating an exhaustive field space
-        for p, k_set in list(self.port_cplgs.items()):
-            for k in k_set:
-                self.field_space.keys_add((p, k))
 
         self.source_vector_injlist        = defaultdict(list)
         self.source_vector_inj_funclist   = defaultdict(list)
@@ -65,13 +61,30 @@ class MatrixBuildAlgorithm(object):
 
         self.noise_pk_set = set()
 
-        self._setup_system()
         self._noise_map()
+        self._setup_system()
+
+        #TODO, stopgap for generating an exhaustive field space
+        for p, k_set in self.port_cplgs.items():
+            port = p
+            while port is not None:
+                for k in k_set:
+                    self.field_space.keys_add((port, k))
+                port = self.system.ports_post.get(port, None)
+            port = p
+            while True:
+                port = self.system.ports_pre.get(port, None)
+                if port is None:
+                    break
+                for k in k_set:
+                    self.field_space.keys_add((port, k))
+
+        self.field_space.freeze()
 
         #freeze the lists
-        self.source_vector_injlist            = dict(list(self.source_vector_injlist.items()))
+        self.source_vector_injlist        = dict(list(self.source_vector_injlist.items()))
         self.source_vector_inj_funclist   = dict(list(self.source_vector_inj_funclist.items()))
-        self.coupling_matrix_injlist          = dict(list(self.coupling_matrix_injlist.items()))
+        self.coupling_matrix_injlist      = dict(list(self.coupling_matrix_injlist.items()))
         self.coupling_matrix_inj_funclist = dict(list(self.coupling_matrix_inj_funclist.items()))
 
     def _setup_system(self):
@@ -82,15 +95,6 @@ class MatrixBuildAlgorithm(object):
                 pass
             else:
                 ssc(self)
-
-        for pfrom, pto_set in list(self.system.bond_pairs.items()):
-            for pto in pto_set:
-                for pkey in self.port_set_get(pfrom):
-                    assert(pkey in self.port_set_get(pto))
-                    self.coupling_matrix_sparsity[(pfrom, pkey), (pto, pkey)] = 1
-        self.field_space.freeze()
-        #print("SPACE SIZE: ", len(self.field_space))
-        #print("MATRIX SIZE: ", len(self.coupling_matrix_sparsity))
 
         AC_in_all = set()
         AC_out_all = set()
@@ -120,9 +124,9 @@ class MatrixBuildAlgorithm(object):
 
     def noise_pair_insert(self, p1, k1, p2, k2, genfunc):
         #print('noise pair: ', p1, k2, p2, k2)
-        ptofull1 = self.port_cplgs.get(p1, NOARG)
+        ptofull1 = self.port_cplgs.get(p1.purge_keys(PostBondKey), NOARG)
         assert(k1 in ptofull1)
-        ptofull2 = self.port_cplgs.get(p2, NOARG)
+        ptofull2 = self.port_cplgs.get(p2.purge_keys(PostBondKey), NOARG)
         assert(k2 in ptofull2)
 
         self.field_space.keys_add((p1, k1))
@@ -136,6 +140,8 @@ class MatrixBuildAlgorithm(object):
         return
 
     def port_set_get(self, port):
+        #maybe get rid of
+        port = port.purge_keys(PostBondKey)
         pkey = self.port_cplgs[port]
         return pkey
 
@@ -194,7 +200,6 @@ class MatrixBuildAlgorithm(object):
 
             self.field_space.keys_add(pkf)
             self.field_space.keys_add(pkt)
-            self.coupling_matrix_sparsity[pkf, pkt] = 1
         for pks, func in list(inj_obj.sources_pk_dict.items()):
             psrc , ksrc = pks
             ptofull = self.port_cplgs.get(psrc, NOARG)
@@ -241,16 +246,38 @@ class MatrixBuildAlgorithm(object):
         edge_sourcing_order = dict()
         seq = defaultdict(set)
         req = defaultdict(set)
+        self.bonds_trivial = defaultdict(set)
 
+        def bond_trivial(pkfrom, pkto):
+            edge_sourcing_order[pkfrom, pkto] = []
+            seq[pkfrom].add(pkto)
+            req[pkto].add(pkfrom)
+            #pkfrom = (pfrom, kkey)
+            #pkto = (pto, kkey)
+            self.bonds_trivial[pkfrom].add(pkto)
+
+        #Setup all of the bond linkages first
         for pfrom, pto_set in list(self.system.bond_pairs.items()):
+            pfrom_orig = pfrom
             for pto in pto_set:
-                for kkey in self.port_set_get(pfrom):
-                    pkfrom = (pfrom, kkey)
-                    pkto = (pto, kkey)
-                    edge_sourcing_order[pkfrom, pkto] = []
-                    seq[pkfrom].add(pkto)
-                    req[pkto].add(pkfrom)
+                while True:
+                    pfrom_post = self.system.ports_post.get(pfrom, None)
+                    if pfrom_post is None:
+                        break
+                    for kkey in self.port_set_get(pfrom_orig):
+                        bond_trivial((pfrom, kkey), (pfrom_post, kkey))
+                    pfrom = pfrom_post
+                while True:
+                    pto_pre = self.system.ports_pre.get(pto, None)
+                    if pto_pre is None:
+                        break
+                    for kkey in self.port_set_get(pfrom_orig):
+                        bond_trivial((pto_pre, kkey), (pto, kkey))
+                    pto = pto_pre
+                for kkey in self.port_set_get(pfrom_orig):
+                    bond_trivial((pfrom, kkey), (pto, kkey))
 
+        #begin the linkage algorithm
         source_invlist = defaultdict(list)
         for pkto, injlist in list(self.source_vector_injlist.items()):
             order_list = []

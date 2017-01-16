@@ -16,6 +16,10 @@ import warnings
 
 import declarative as decl
 
+from ..math.key_matrix.dictionary_keys import (
+    DictKey,
+)
+
 from ..base import (
     Frequency,
     SystemElementSled,
@@ -31,21 +35,23 @@ from . import ports_algorithm
 from . import solver_algorithm
 
 from ..base import Element, RootElement
+from ..base.ports import PostBondKey
 
 
 class Constants(Element):
 
     def __build__(self):
-        OOA_ASSIGN(self).c_m_s    = 299792458
-        OOA_ASSIGN(self).kB_J_K   = 1.380658e-23
-        OOA_ASSIGN(self).h_Js     = 6.6260700408e-34
-        OOA_ASSIGN(self).hbar_Js  = 1.0545718001e-34
-        OOA_ASSIGN(self).pi       = np.pi
-        OOA_ASSIGN(self).i        = 1j
-        OOA_ASSIGN(self).i2pi     = np.pi * 2j
-        OOA_ASSIGN(self).math     = np
-        OOA_ASSIGN(self).temp_K   = 299
-        OOA_ASSIGN(self).Z_termination = 50
+        OOA_ASSIGN(self).c_m_s                 = 299792458
+        OOA_ASSIGN(self).kB_J_K                = 1.380658e-23
+        OOA_ASSIGN(self).h_Js                  = 6.6260700408e-34
+        OOA_ASSIGN(self).hbar_Js               = 1.0545718001e-34
+        OOA_ASSIGN(self).pi                    = np.pi
+        OOA_ASSIGN(self).i                     = 1j
+        OOA_ASSIGN(self).i2pi                  = np.pi * 2j
+        OOA_ASSIGN(self).math                  = np
+        OOA_ASSIGN(self).temp_K                = 299
+        OOA_ASSIGN(self).Z_termination         = 50
+        OOA_ASSIGN(self).include_johnson_noise = True
         super(Constants, self).__build__()
 
 
@@ -113,6 +119,26 @@ class LinearSystem(RootElement, Constants):
     def bond_pairs(self):
         #TODO: enforce single linkage if possible
         return defaultdict(set)
+
+    @decl.mproperty
+    def ports_post(self):
+        return dict()
+
+    def ports_post_get(self, port):
+        val = port.get(PostBondKey, 0)
+        nport = port | DictKey({PostBondKey : val + 1})
+        self.ports_post[port] = nport
+        return nport
+
+    @decl.mproperty
+    def ports_pre(self):
+        return dict()
+
+    def ports_pre_get(self, port):
+        val = port.get(PostBondKey, 0)
+        nport = port | DictKey({PostBondKey : val - 1})
+        self.ports_pre[port] = nport
+        return nport
 
     @decl.mproperty
     def bonded_set(self):

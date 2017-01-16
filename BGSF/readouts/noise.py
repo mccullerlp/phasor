@@ -2,6 +2,7 @@
 """
 """
 from __future__ import (division, print_function)
+from ..utilities.print import pprint
 from builtins import object
 
 import numpy as np
@@ -30,6 +31,7 @@ class NoiseReadout(SystemElementBase):
             portN,
             port_set = None,
             AC_sidebands_use = True,
+            port_map = None,
             **kwargs
     ):
         super(NoiseReadout, self).__init__(
@@ -53,9 +55,12 @@ class NoiseReadout(SystemElementBase):
             self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({})})
             self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({})})
 
-        self.port_map = dict(
-            R = self.portN,
-        )
+        if port_map is None:
+            self.port_map = dict(
+                R = self.portN,
+            )
+        else:
+            self.port_map = port_map
         return
 
     def system_setup_ports_initial(self, system):
@@ -103,6 +108,7 @@ class NoiseReadout(SystemElementBase):
             readout_set = self.port_set,
         )
         coupling_matrix_inv = cbunch.coupling_matrix_inv
+        pprint(coupling_matrix_inv)
         nmap = self.system.solution.noise_map()
 
         pkviewsP = dict()

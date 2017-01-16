@@ -99,6 +99,15 @@ class DictKey(MappingABC):
             del cp[key]
         return self.__class__(**cp)
 
+    def purge_keys(self, *keys):
+        cp = dict(self._dict)
+        for key in keys:
+            try:
+                del cp[key]
+            except KeyError:
+                pass
+        return self.__class__(**cp)
+
     def replace_keys(self, key_dict, *more_key_dicts):
         cp = dict(self._dict)
         for key, val in list(key_dict.items()):

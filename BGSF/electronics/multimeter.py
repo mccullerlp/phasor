@@ -43,8 +43,8 @@ class VoltageReadout(readouts.DCReadout, elements.ElectricalElementBase):
         #TODO, not sure about the 1/2 everywhere
         _2 = self.math.number(2)
         pcplgs = {
-            self.terminal.i : 1,
-            self.terminal.o : 1,
+            self.system.ports_pre_get(self.terminal.i) : 1,
+            self.system.ports_post_get(self.terminal.o) : 1,
         }
         if self.terminal_N is not None:
             pcplgs[self.terminal_N.i] = -1

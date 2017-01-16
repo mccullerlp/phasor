@@ -18,6 +18,7 @@ assertions = unittest.TestCase('__init__')
 
 
 def test_V():
+    #with explicit terminator
     sys = OpticalSystem()
     sled = sys.sled
     sled.my.V1 = electronics.VoltageSource(V_DC = 1)
@@ -28,6 +29,7 @@ def test_V():
     )
     test.assert_almost_equal(sled.R1.DC_readout, 1)
 
+    #without explicit terminator
     sys = OpticalSystem()
     sled = sys.sled
     sled.my.V1 = electronics.VoltageSource(V_DC = 1)
@@ -35,6 +37,18 @@ def test_V():
         terminal =sled.V1.A,
     )
     test.assert_almost_equal(sled.R1.DC_readout, 1)
+
+    #measure across terminator
+    sys = OpticalSystem()
+    sled = sys.sled
+    sled.my.V1 = electronics.VoltageSource(V_DC = 1)
+    sled.my.T1 = electronics.TerminatorOpen()
+    sys.bond(sled.V1.A, sled.T1.A)
+    sled.my.R1 = electronics.VoltageReadout(
+        terminal =sled.T1.A,
+    )
+    test.assert_almost_equal(sled.R1.DC_readout, 1)
+
 
 def test_I():
     sys = OpticalSystem()
@@ -45,6 +59,18 @@ def test_I():
     sled.my.R1 = electronics.CurrentReadout(
         terminal = sled.I1.A,
         direction = 'out',
+    )
+    test.assert_almost_equal(sled.R1.DC_readout, 1)
+
+    #measure across terminator
+    sys = OpticalSystem()
+    sled = sys.sled
+    sled.my.I1 = electronics.CurrentSource(I_DC = 1)
+    sled.my.T1 = electronics.TerminatorShorted()
+    sys.bond(sled.I1.A, sled.T1.A)
+    sled.my.R1 = electronics.CurrentReadout(
+        terminal = sled.T1.A,
+        direction = 'in',
     )
     test.assert_almost_equal(sled.R1.DC_readout, 1)
 
@@ -113,7 +139,6 @@ def test_bdV():
     )
     test.assert_almost_equal(sled.R1.DC_readout, 1)
 
-    #This one actually probably should be wrong
     sys = OpticalSystem()
     sled = sys.sled
     sled.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)

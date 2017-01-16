@@ -11,6 +11,7 @@ from ..math.key_matrix.dictionary_keys import (
 
 from . import ports
 from . import elements
+from . import noise
 
 
 class SMatrix1PortBase(elements.Electrical1PortBase):
@@ -89,6 +90,16 @@ class SMatrix2PortBase(elements.Electrical2PortBase):
 class TerminatorMatched(SMatrix1PortBase):
     def S11_by_freq(self, F):
         return 0
+
+    @decl.dproperty
+    def johnson_noise(self):
+        if self.system.include_johnson_noise:
+            return noise.VoltageFluctuation(
+                port = self.A,
+                Vsq_Hz_by_freq = lambda F : 4 * self.Z_termination.real * self.system.temp_K * self.system.kB_J_K,
+                sided = 'one-sided',
+            )
+        return None
 
 
 class TerminatorOpen(SMatrix1PortBase):
