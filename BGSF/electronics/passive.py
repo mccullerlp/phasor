@@ -34,7 +34,7 @@ class CapacitorBase(object):
         return val
 
     def admittance_by_freq(self, F):
-        return (2 * self.math.i * self.math.pi * F * self.capacitance_Farads)
+        return (self.math.i2pi * F * self.capacitance_Farads)
 
 
 class InductorBase(object):
@@ -43,7 +43,7 @@ class InductorBase(object):
         return val
 
     def impedance_by_freq(self, F):
-        return (2 * self.math.i * self.math.pi * F * self.inductance_Henries)
+        return (self.math.i2pi * F * self.inductance_Henries)
 
 
 class TerminatorImpedance(smatrix.SMatrix1PortBase):

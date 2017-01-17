@@ -66,6 +66,16 @@ class PortUpdatesAlgorithm(object):
                 self._current_element = el
                 ssp(self)
                 self.resolve_port_updates()
+
+        #TODO: hate this, required for electronics noise
+        for el in self.system.elements:
+            try:
+                sspi = el.system_setup_ports_final
+            except AttributeError:
+                pass
+            else:
+                sspi(self)
+
         return
 
     def resolve_port_updates(self):

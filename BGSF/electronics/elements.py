@@ -61,20 +61,29 @@ class Electrical2PortBase(ElectricalElementBase):
 
 class Connection(ElectricalElementBase):
     @decl.dproperty
-    def N_ports(self, val = 3):
+    def N_ports(self, val = 0):
+        return val
+
+    @decl.dproperty
+    def connect(self, val = ()):
         return val
 
     def __build__(self):
         super(Connection, self).__build__()
 
+        total_ports = self.N_ports + len(self.connect)
         ports_electrical = []
-        for idx in range(self.N_ports):
+        for idx in range(total_ports):
             name = 'p{0}'.format(idx)
             pobj = ports.ElectricalPortHolderInOut(self, x = name)
             setattr(self, name, pobj)
             ports_electrical.append(pobj)
         self.ports_electrical = ports_electrical
-        self.p1
+        for idx in range(len(self.connect)):
+            name = 'p{0}'.format(idx + self.N_ports)
+            port = getattr(self, name)
+            self.system.bond(self.connect[idx], port)
+        return
 
     def system_setup_ports(self, ports_algorithm):
         for port1 in self.ports_electrical:
@@ -87,13 +96,14 @@ class Connection(ElectricalElementBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         _2 = self.math.number(2)
+        total_ports = len(self.ports_electrical)
         for port1 in self.ports_electrical:
             for kfrom in matrix_algorithm.port_set_get(port1.i):
                 for port2 in self.ports_electrical:
                     if port1 is port2:
-                        pgain = (_2 - self.N_ports) / self.N_ports
+                        pgain = (_2 - total_ports) / total_ports
                     else:
-                        pgain = (_2 / self.N_ports)
+                        pgain = (_2 / total_ports)
                     matrix_algorithm.port_coupling_insert(
                         port1.i,
                         kfrom,

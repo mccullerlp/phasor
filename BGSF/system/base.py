@@ -289,7 +289,7 @@ class LinearSystem(RootElement, Constants):
         if unterminated_ports and not hasattr(self.sled, 'autoterminate'):
             self.sled.my.autoterminate = SystemElementSled()
         for port in unterminated_ports:
-            #print("UNTERMINATED: ", port)
+            print("UNTERMINATED: ", port)
             aterm = self.port_autoterminate.get(port, None)
             if aterm is None:
                 #print("unterminated port", port)

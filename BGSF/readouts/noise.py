@@ -110,6 +110,7 @@ class NoiseReadout(SystemElementBase):
         coupling_matrix_inv = cbunch.coupling_matrix_inv
         #pprint(coupling_matrix_inv)
         nmap = self.system.solution.noise_map()
+        pprint(("NMAP: ", nmap))
 
         pkviewsP = dict()
         pkviewsN = dict()
@@ -142,7 +143,7 @@ class NoiseReadout(SystemElementBase):
                             continue
                         for p1, k1, p2, k2, nobj in vals:
                             pspec_2sided = nobj.noise_2pt_expectation(p1, k1, p2, k2)
-                            #print("PSPEC: ", p1, k1, p2, k2, pspec_2sided, cplg1 * cplg2)
+                            print("PSPEC: ", p1, k1, p2, k2, pspec_2sided, cplg1 * cplg2)
                             pspec_tot = self.system.adjust_PSD * pspec_2sided * cplg1 * cplg2
                             if pnameP == pnameN:
                                 pspec_tot = np.real(pspec_tot)

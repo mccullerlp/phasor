@@ -90,6 +90,7 @@ def test_noise_open_loop(gain = 1):
         Vsq_Hz_by_freq = lambda F : 1,
         sided = 'one-sided',
     )
+    #sys.solution.coupling_matrix_inv_print()
     test.assert_almost_equal(sled.RAC_N.AC_sensitivity, -gain)
     test.assert_almost_equal(sled.RAC_N.AC_PSD, 1)
 

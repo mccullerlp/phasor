@@ -61,8 +61,8 @@ class MatrixBuildAlgorithm(object):
 
         self.noise_pk_set = set()
 
-        self._noise_map()
         self._setup_system()
+        self._noise_map()
 
         #TODO, stopgap for generating an exhaustive field space
         for p, k_set in self.port_cplgs.items():
