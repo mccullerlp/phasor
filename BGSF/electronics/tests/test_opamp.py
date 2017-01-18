@@ -146,7 +146,7 @@ def test_closed_loop_opamp_noise():
         portD = sled.V_P.V.i,
         portN = sled.R1.V.o,
     )
-    sys.solution.coupling_matrix_print()
+    #sys.solution.coupling_matrix_print()
     test.assert_almost_equal(sled.RAC_P.AC_sensitivity, gain/(1 + gain))
     test.assert_almost_equal(sled.RAC_P.AC_PSD / (gain/(1 + gain))**2, 1)
 

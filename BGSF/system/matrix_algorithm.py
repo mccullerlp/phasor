@@ -61,8 +61,8 @@ class MatrixBuildAlgorithm(object):
 
         self.noise_pk_set = set()
 
-        self._setup_system()
         self._noise_map()
+        self._setup_system()
 
         #TODO, stopgap for generating an exhaustive field space
         for p, k_set in self.port_cplgs.items():
@@ -187,7 +187,7 @@ class MatrixBuildAlgorithm(object):
             pto, kto = pkt
             ptofull = self.port_cplgs.get(pto, NOARG)
             if ptofull is NOARG:
-                print("Missing Connection:", kto)
+                print("Missing Connection:", pto, kto)
             else:
                 assert(kto in ptofull)
 

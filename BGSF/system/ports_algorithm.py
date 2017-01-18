@@ -67,15 +67,6 @@ class PortUpdatesAlgorithm(object):
                 ssp(self)
                 self.resolve_port_updates()
 
-        #TODO: hate this, required for electronics noise
-        for el in self.system.elements:
-            try:
-                sspi = el.system_setup_ports_final
-            except AttributeError:
-                pass
-            else:
-                sspi(self)
-
         return
 
     def resolve_port_updates(self):
@@ -137,6 +128,7 @@ class PortUpdatesAlgorithm(object):
                 self.owners_update.add(owner)
                 for Vowner in self.system.port_owners_virtual[pto]:
                     v = self.port_cplgs_update[Vowner, pto]
+                    v.add(kto)
                     self.owners_update.add(Vowner)
         return
 

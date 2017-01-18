@@ -42,8 +42,22 @@ class InductorBase(object):
     def inductance_Henries(self, val):
         return val
 
+    @decl.dproperty
+    def resistance_Ohms(self, val = 0):
+        return val
+
     def impedance_by_freq(self, F):
-        return (self.math.i2pi * F * self.inductance_Henries)
+        return (self.resistance_Ohms + self.math.i2pi * F * self.inductance_Henries)
+
+    @decl.dproperty
+    def johnson_noise(self):
+        if self.system.include_johnson_noise and self.resistance_Ohms != 0:
+            return noise.VoltageFluctuation(
+                port = self.A,
+                Vsq_Hz_by_freq = lambda F : 4 * self.resistance_Ohms * self.system.temp_K * self.system.kB_J_K,
+                sided = 'one-sided',
+            )
+        return None
 
 
 class TerminatorImpedance(smatrix.SMatrix1PortBase):

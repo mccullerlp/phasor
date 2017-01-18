@@ -286,19 +286,17 @@ class CurrentSourceBalanced(smatrix.SMatrix2PortBase):
     def system_setup_coupling(self, matrix_algorithm):
         #TODO setup DC
         super(CurrentSourceBalanced, self).system_setup_coupling(matrix_algorithm)
-        #TODO, not sure about the 1/2 everywhere
-        _2 = self.math.number(2)
 
         matrix_algorithm.coherent_sources_insert(
             self.A.o,
             self.fkey,
-            self.Z_termination * self.I_DC / _2,
+            self.Z_termination * self.I_DC,
         )
 
         matrix_algorithm.coherent_sources_insert(
             self.B.o,
             self.fkey,
-            self.Z_termination * self.I_DC / _2,
+            self.Z_termination * self.I_DC,
         )
 
         for kfrom in matrix_algorithm.port_set_get(self.I.i):
@@ -307,14 +305,14 @@ class CurrentSourceBalanced(smatrix.SMatrix2PortBase):
                 kfrom,
                 self.A.o,
                 kfrom,
-                self.Z_termination / _2,
+                self.Z_termination,
             )
             matrix_algorithm.port_coupling_insert(
                 self.I.i,
                 kfrom,
                 self.B.o,
                 kfrom,
-                self.Z_termination / _2,
+                self.Z_termination,
             )
 
 

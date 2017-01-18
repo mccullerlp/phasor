@@ -44,5 +44,6 @@ from .passive import (
 
 from .noise import (
     VoltageFluctuation,
+    VoltageFluctuation2,
     CurrentFluctuation,
 )
