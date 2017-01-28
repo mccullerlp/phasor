@@ -40,6 +40,7 @@ from .passive import (
     SeriesResistor,
     SeriesCapacitor,
     SeriesInductor,
+    Transformer,
 )
 
 from .noise import (

@@ -59,6 +59,40 @@ class Electrical2PortBase(ElectricalElementBase):
     def Bk(self):
         return self.B
 
+class Electrical4PortBase(ElectricalElementBase):
+    @decl.dproperty
+    def A(self):
+        return ports.ElectricalPortHolderInOut(self, 'A')
+
+    @decl.dproperty
+    def B(self):
+        return ports.ElectricalPortHolderInOut(self, 'B')
+
+    @decl.dproperty
+    def C(self):
+        return ports.ElectricalPortHolderInOut(self, 'C')
+
+    @decl.dproperty
+    def D(self):
+        return ports.ElectricalPortHolderInOut(self, 'D')
+
+    @decl.mproperty
+    def FrA(self):
+        return self.A
+
+    @decl.mproperty
+    def FrB(self):
+        return self.B
+
+    @decl.mproperty
+    def BkA(self):
+        return self.C
+
+    @decl.mproperty
+    def BkB(self):
+        return self.D
+
+
 class Connection(ElectricalElementBase):
     @decl.dproperty
     def N_ports(self, val = 0):

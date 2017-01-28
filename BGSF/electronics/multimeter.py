@@ -12,10 +12,15 @@ class VoltageReadout(readouts.DCReadout, elements.ElectricalElementBase):
 
     @decl.dproperty
     def terminal(self, port):
+        self.system.own_port_virtual(self, port.i)
+        self.system.own_port_virtual(self, port.o)
         return port
 
     @decl.dproperty
     def terminal_N(self, port = None):
+        if port is not None:
+            self.system.own_port_virtual(self, port.i)
+            self.system.own_port_virtual(self, port.o)
         return port
 
     @decl.dproperty
@@ -33,15 +38,13 @@ class VoltageReadout(readouts.DCReadout, elements.ElectricalElementBase):
         if self.terminal_N is not None:
             ports.extend([self.terminal_N.i, self.terminal_N.o])
         for port1 in ports:
-            #for kfrom in ports_algorithm.port_update_get(port1):
-            #    ports_algorithm.port_coupling_needed(self.V.o, kfrom)
+            for kfrom in ports_algorithm.port_update_get(port1):
+                ports_algorithm.port_coupling_needed(self.V.o, kfrom)
             for kto in ports_algorithm.port_update_get(self.V.o):
                 ports_algorithm.port_coupling_needed(port1, kto)
         return
 
     def system_setup_coupling(self, matrix_algorithm):
-        #TODO, not sure about the 1/2 everywhere
-        _2 = self.math.number(2)
         pcplgs = {
             self.system.ports_pre_get(self.terminal.i) : 1,
             self.system.ports_post_get(self.terminal.o) : 1,

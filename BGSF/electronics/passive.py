@@ -2,10 +2,12 @@
 """
 from __future__ import division
 from builtins import object
+import numpy as np
 
 import declarative as decl
 
 from . import smatrix
+from . import elements
 from . import noise
 
 
@@ -142,5 +144,147 @@ class SeriesCapacitor(CapacitorBase, SeriesAdmittance):
 
 class SeriesInductor(InductorBase, SeriesImpedance):
     pass
+
+
+class Z2x2To4Port(elements.Electrical4PortBase):
+    def Z11_by_freq(self, F):
+        return 0
+
+    def Z12_by_freq(self, F):
+        return 0
+
+    def Z21_by_freq(self, F):
+        return 0
+
+    def Z22_by_freq(self, F):
+        return 0
+
+    @decl.mproperty
+    def ports_electrical(self):
+        return [
+            self.A,
+            self.B,
+            self.C,
+            self.D,
+        ]
+
+    def system_setup_ports(self, ports_algorithm):
+        #TODO could reduce these with more information about used S-matrix elements
+        for port1 in self.ports_electrical:
+            for port2 in self.ports_electrical:
+                for kfrom in ports_algorithm.port_update_get(port1.i):
+                    ports_algorithm.port_coupling_needed(port2.o, kfrom)
+                for kto in ports_algorithm.port_update_get(port2.o):
+                    ports_algorithm.port_coupling_needed(port1.i, kto)
+        return
+
+    def system_setup_coupling(self, matrix_algorithm):
+        #assumes that all ports have the same setup/keys
+        for kfrom in matrix_algorithm.port_set_get(self.A.i):
+            Y = 1/self.Z_termination
+            freq = self.system.classical_frequency_extract(kfrom)
+            Z11 = self.Z11_by_freq(freq)
+            Z22 = self.Z22_by_freq(freq)
+            Z12 = self.Z12_by_freq(freq)
+            Z21 = self.Z21_by_freq(freq)
+            det = (Z11 * Z22 - Z12 * Z12)
+            tr = (Z11 + Z22)
+            N11 = Y * Z11 * Z12 * Z21 * (Y * Z22 + 2)
+            N12 = 2 * Y * Z12 * Z21 * Z22 - 4 * det
+            N33 = Y * Z22 * Z12 * Z21 * (Y * Z11 + 2)
+            N34 = 2 * Y * Z12 * Z21 * Z11 - 4 * det
+            N13 = -2 * Y * Z11 * Z22 * Z21
+            N31 = -2 * Y * Z11 * Z22 * Z12
+            D   = Y**2 * (Z11 * Z22 * Z12 * Z21) + 2 * Y * (Z12 * Z21) * tr - 4 * det
+            for port1, port2, num in [
+                (self.A, self.A, N11),
+                (self.A, self.B, N12),
+                (self.B, self.A, N12),
+                (self.B, self.B, N11),
+                (self.C, self.C, N33),
+                (self.C, self.D, N34),
+                (self.D, self.C, N34),
+                (self.D, self.D, N33),
+                (self.A, self.C, N13),
+                (self.A, self.D, -N13),
+                (self.B, self.C, -N13),
+                (self.B, self.D, N13),
+                (self.C, self.A, N31),
+                (self.C, self.B, -N31),
+                (self.D, self.A, -N31),
+                (self.D, self.B, N31),
+            ]:
+                @np.vectorize
+                def ddiv(num, D):
+                    if num != 0:
+                        pgain = num / D
+                    else:
+                        pgain = 0
+                    return pgain
+                pgain = ddiv(num, D)
+                matrix_algorithm.port_coupling_insert(
+                    port1.i,
+                    kfrom,
+                    port2.o,
+                    kfrom,
+                    pgain,
+                )
+
+
+class Transformer(Z2x2To4Port):
+
+    @decl.dproperty
+    def L1_inductance_Henries(self, val):
+        return val
+
+    @decl.dproperty
+    def L2_inductance_Henries(self, val):
+        return val
+
+    def transformer_k_by_freq(self, F_Hz):
+        return 1
+
+    @decl.dproperty
+    def L1_resistance_Ohms(self, val = 0):
+        return val
+
+    @decl.dproperty
+    def L1_johnson_noise(self):
+        if self.system.include_johnson_noise and self.L1_resistance_Ohms != 0:
+            return noise.VoltageFluctuation(
+                port = self.A,
+                Vsq_Hz_by_freq = lambda F : 4 * self.L1_resistance_Ohms * self.system.temp_K * self.system.kB_J_K,
+                sided = 'one-sided',
+            )
+        return None
+
+    @decl.dproperty
+    def L2_resistance_Ohms(self, val = 0):
+        return val
+
+    @decl.dproperty
+    def L2_johnson_noise(self):
+        if self.system.include_johnson_noise and self.L2_resistance_Ohms != 0:
+            return noise.VoltageFluctuation(
+                port = self.C,
+                Vsq_Hz_by_freq = lambda F : 4 * self.L2_resistance_Ohms * self.system.temp_K * self.system.kB_J_K,
+                sided = 'one-sided',
+            )
+        return None
+
+    def Z11_by_freq(self, F):
+        return (self.L1_resistance_Ohms + self.math.i2pi * F * self.L1_inductance_Henries)
+
+    def Z12_by_freq(self, F):
+        M = self.transformer_k_by_freq(F) * (self.L1_inductance_Henries * self.L2_inductance_Henries)**.5
+        return (self.math.i2pi * F * M)
+
+    def Z21_by_freq(self, F):
+        return self.Z12_by_freq(F)
+
+    def Z22_by_freq(self, F):
+        return (self.L2_resistance_Ohms + self.math.i2pi * F * self.L2_inductance_Henries)
+
+
 
 
