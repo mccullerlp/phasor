@@ -8,6 +8,11 @@ from ..base.ports import (
     ClassicalFreqKey,
 )
 
+from ..math.key_matrix import (
+    DictKey,
+)
+
+
 class SignalPortHolderIn(PortHolderInBase):
     multiple_attach = True
     pass

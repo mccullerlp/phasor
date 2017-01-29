@@ -98,17 +98,17 @@ class FitterSym(FitterBase):
 
 class FitterSymJitterPlacement(FitterSym):
 
-    @group_dproperty
-    def shift_m(desc):
-        return generate_refval_attribute(
-            desc,
-            units = 'length',
-            stems = ['shift', ],
-            ooa_name = 'shift',
-            preferred_attr = 'shift_preferred',
-            default_attr = '_shift_default',
-            prototypes = ['full'],
-        )
+    #@group_dproperty
+    #def shift_m(desc):
+    #    return generate_refval_attribute(
+    #        desc,
+    #        ubunch = ,
+    #        stems = ['shift', ],
+    #        ooa_name = 'shift',
+    #        preferred_attr = 'shift_preferred',
+    #        default_attr = '_shift_default',
+    #        prototypes = ['full'],
+    #    )
 
     def transforms(self, datum):
         return [

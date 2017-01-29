@@ -55,5 +55,5 @@ class OpticalVacuumFluctuation(bases.OpticalNoiseBase, bases.SystemElementBase):
         iwavelen_m, freq_Hz = self.system.optical_frequency_extract(k1)
         #this is in the TWO SIDED PSPEC
         #TODO double thing this value (/ 2 part)
-        return self.system.h_Js * self.system.c_m_s * iwavelen_m / 2
+        return self.symbols.h_Js * self.symbols.c_m_s * iwavelen_m / 2
 

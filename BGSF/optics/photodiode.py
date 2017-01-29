@@ -90,8 +90,8 @@ class PD(
                 self.Wpd,
                 std_cplg,
                 std_cplgC,
-                +self.system.i,
-                -self.system.i,
+                +self.symbols.i,
+                -self.symbols.i,
                 1,
                 1,
             )

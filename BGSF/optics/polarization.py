@@ -105,8 +105,8 @@ class BaseRotator(bases.OpticalCouplerBase, bases.SystemElementBase):
                             -cplg,
                         )
         else:
-            cplgC = self.system.math.cos(self.rotate_deg / 180 * self.system.pi)
-            cplgS_O = self.system.math.sin(self.rotate_deg / 180 * self.system.pi)
+            cplgC = self.symbols.math.cos(self.rotate_deg / 180 * self.symbols.pi)
+            cplgS_O = self.symbols.math.sin(self.rotate_deg / 180 * self.symbols.pi)
             for port in self.ports_optical:
                 if port is self.Fr:
                     cplgS = cplgS_O
@@ -187,8 +187,8 @@ class PolarizationRotator(
                             -cplg,
                         )
         else:
-            cplgC = self.system.math.cos(self.rotate_deg / 180 * self.system.pi)
-            cplgS_O = self.system.math.sin(self.rotate_deg / 180 * self.system.pi)
+            cplgC = self.symbols.math.cos(self.rotate_deg / 180 * self.symbols.pi)
+            cplgS_O = self.symbols.math.sin(self.rotate_deg / 180 * self.symbols.pi)
             for port in self.ports_optical:
                 if port is self.Fr:
                     cplgS = cplgS_O
@@ -262,8 +262,8 @@ class FaradayRotator(ports.OpticalSymmetric2PortMixin, BaseRotator):
                             -cplg,
                         )
         else:
-            cplgC = self.system.math.cos(self.rotate_deg / 180 * self.system.pi)
-            cplgS = self.system.math.sin(self.rotate_deg / 180 * self.system.pi)
+            cplgC = self.symbols.math.cos(self.rotate_deg / 180 * self.symbols.pi)
+            cplgS = self.symbols.math.sin(self.rotate_deg / 180 * self.symbols.pi)
             for port in self.ports_optical:
                 for kfrom in matrix_algorithm.port_set_get(port.i):
                     if kfrom & ports.PolS:

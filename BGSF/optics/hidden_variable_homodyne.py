@@ -181,17 +181,17 @@ class HiddenVariableHomodynePD(
                 Stdcplg            = 1
                 StdcplgC           = 1
             elif self.phase_deg in (90, -270):
-                Stdcplg            = self.system.i
-                StdcplgC           = -self.system.i
+                Stdcplg            = self.symbols.i
+                StdcplgC           = -self.symbols.i
             elif self.phase_deg in (-180,180):
                 Stdcplg            = 1
                 StdcplgC           = 1
             elif self.phase_deg in (-90, 270):
-                Stdcplg            = -self.system.i
-                StdcplgC           = self.system.i
+                Stdcplg            = -self.symbols.i
+                StdcplgC           = self.symbols.i
             else:
-                Stdcplg            = self.system.math.exp(self.phase_deg / 360 * self.system.i2pi)
-                StdcplgC           = self.system.math.exp(-self.phase_deg / 360 * self.system.i2pi)
+                Stdcplg            = self.symbols.math.exp(self.phase_deg / 360 * self.symbols.i2pi)
+                StdcplgC           = self.symbols.math.exp(-self.phase_deg / 360 * self.symbols.i2pi)
 
             def insert_coupling(
                     out_port_classical,
@@ -284,8 +284,8 @@ class HiddenVariableHomodynePD(
             )
             insert_coupling(
                 self.rtWpdQ,
-                self.system.i * Stdcplg,
-                -self.system.i * StdcplgC,
+                self.symbols.i * Stdcplg,
+                -self.symbols.i * StdcplgC,
             )
 
         for kfrom in matrix_algorithm.port_set_get(self.Bk.i):

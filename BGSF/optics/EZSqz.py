@@ -226,8 +226,8 @@ class EZSqz(ports.OpticalSymmetric2PortMixin, bases.OpticalCouplerBase, bases.Sy
         return
 
     def system_setup_coupling(self, matrix_algorithm):
-        lR = self.system.math.sqrt(self.used_loss)
-        lT = self.system.math.sqrt(1 - self.used_loss)
+        lR = self.symbols.math.sqrt(self.used_loss)
+        lT = self.symbols.math.sqrt(1 - self.used_loss)
         tmap = {
             self.Fr: self.Bk,
             self.Bk: self.Fr,
@@ -253,14 +253,14 @@ class EZSqz(ports.OpticalSymmetric2PortMixin, bases.OpticalCouplerBase, bases.Sy
                 #    continue
                 if kfrom.contains(ports.LOWER):
                     ktoR = kfrom.replace_keys({ports.ClassicalFreqKey: reflected_SB}, ports.RAISE)
-                    phi_cplC = self.system.math.exp(2 * -self.system.i2pi * self.phi_sqz_deg / 360)
+                    phi_cplC = self.symbols.math.exp(2 * -self.symbols.i2pi * self.phi_sqz_deg / 360)
                 elif kfrom.contains(ports.RAISE):
                     ktoR = kfrom.replace_keys({ports.ClassicalFreqKey: reflected_SB}, ports.LOWER)
-                    phi_cplC = self.system.math.exp(2 * self.system.i2pi * self.phi_sqz_deg / 360)
+                    phi_cplC = self.symbols.math.exp(2 * self.symbols.i2pi * self.phi_sqz_deg / 360)
 
                 pto = tmap[port]
-                cplg1 = self.used_nonlinear_field_gain_1 * self.system.math.sqrt(1 - self.used_loss)
-                cplg2 = phi_cplC * self.used_nonlinear_field_gain_2 * self.system.math.sqrt(1 - self.used_loss)
+                cplg1 = self.used_nonlinear_field_gain_1 * self.symbols.math.sqrt(1 - self.used_loss)
+                cplg2 = phi_cplC * self.used_nonlinear_field_gain_2 * self.symbols.math.sqrt(1 - self.used_loss)
                 matrix_algorithm.port_coupling_insert(
                     port.i,
                     kfrom,

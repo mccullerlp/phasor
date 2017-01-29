@@ -222,17 +222,17 @@ class HiddenVariableHomodynePD(
                 Stdcplg            = 1
                 StdcplgC           = 1
             elif self.phase_deg == 90:
-                Stdcplg            = self.system.i
-                StdcplgC           = -self.system.i
+                Stdcplg            = self.symbols.i
+                StdcplgC           = -self.symbols.i
             elif self.phase_deg == 180:
                 Stdcplg            = 1
                 StdcplgC           = 1
             elif self.phase_deg == 270:
-                Stdcplg            = -self.system.i
-                StdcplgC           = self.system.i
+                Stdcplg            = -self.symbols.i
+                StdcplgC           = self.symbols.i
             else:
-                Stdcplg            = self.system.e**(self.phase_deg / 360 * self.system.i2pi)
-                StdcplgC           = self.system.e**(-self.phase_deg / 360 * self.system.i2pi)
+                Stdcplg            = self.system.e**(self.phase_deg / 360 * self.symbols.i2pi)
+                StdcplgC           = self.system.e**(-self.phase_deg / 360 * self.symbols.i2pi)
 
             def insert_coupling(
                     out_port_classical,
@@ -337,8 +337,8 @@ class HiddenVariableHomodynePD(
             )
             insert_coupling(
                 self.rtWpdQ,
-                self.system.i * Stdcplg,
-                -self.system.i * StdcplgC,
+                self.symbols.i * Stdcplg,
+                -self.symbols.i * StdcplgC,
             )
         return
 

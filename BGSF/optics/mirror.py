@@ -258,11 +258,11 @@ class Mirror(
         L = self.L_hr + self.L_t
         R = 1 - T - L
 
-        t     = +self.system.math.sqrt(T)
-        r     = +self.system.math.sqrt(R)
-        r_neg = -self.system.math.sqrt(R)
-        l     = +self.system.math.sqrt(L)
-        lT    = +self.system.math.sqrt(1 - L)
+        t     = +self.symbols.math.sqrt(T)
+        r     = +self.symbols.math.sqrt(R)
+        r_neg = -self.symbols.math.sqrt(R)
+        l     = +self.symbols.math.sqrt(L)
+        lT    = +self.symbols.math.sqrt(1 - L)
 
         mod_sign_map = {
             self.FrA: 1,
@@ -300,7 +300,7 @@ class Mirror(
             if self.AOI_deg == 45:
                 coupling = 1 / 2**.5
             else:
-                coupling = self.system.math.cos(self.AOI_deg * self.system.pi / 180)
+                coupling = self.symbols.math.cos(self.AOI_deg * self.symbols.pi / 180)
             couplingC = coupling
         else:
             coupling = 1
@@ -335,8 +335,8 @@ class Mirror(
                 )
 
                 iwavelen_m, freq = self.system.optical_frequency_extract(kfrom)
-                index_coupling  = -2 * coupling * self.system.pi * 2 * iwavelen_m
-                index_couplingC = -2 * couplingC * self.system.pi * 2 * iwavelen_m
+                index_coupling  = -2 * coupling * self.symbols.pi * 2 * iwavelen_m
+                index_couplingC = -2 * couplingC * self.symbols.pi * 2 * iwavelen_m
                 force_coupling  = -2 * coupling
                 force_couplingC = -2 * couplingC
                 ptoOpt, R_cplgF  = rmap[port]
@@ -353,10 +353,10 @@ class Mirror(
                     self.forceZ,
                     R_cplg,
                     R_cplgC,
-                    mod_sign * +self.system.i * index_coupling,
-                    mod_sign * -self.system.i * index_couplingC,
-                    mod_sign * force_coupling / self.system.c_m_s,
-                    mod_sign * force_couplingC / self.system.c_m_s,
+                    mod_sign * +self.symbols.i * index_coupling,
+                    mod_sign * -self.symbols.i * index_couplingC,
+                    mod_sign * force_coupling / self.symbols.c_m_s,
+                    mod_sign * force_couplingC / self.symbols.c_m_s,
                 )
 
         #to keep the matrix with loss ports unitary

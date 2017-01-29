@@ -43,7 +43,7 @@ from ..optics import (
 )
 
 
-class Constants(Element):
+class SystemSymbols(Element):
     """
     Separate Class for constants to allow replacing them with symbols or more math appropriate ones
     """
@@ -60,15 +60,19 @@ class Constants(Element):
         OOA_ASSIGN(self).temp_K                = 299
         OOA_ASSIGN(self).Z_termination         = 50
         OOA_ASSIGN(self).include_johnson_noise = True
-        super(Constants, self).__build__()
+        super(SystemSymbols, self).__build__()
 
     def number(self, num):
         return num
 
 
-class BGSystem(RootElement, Constants):
+class BGSystem(RootElement):
 
     _frozen = False
+
+    @decl.dproperty
+    def symbols(self):
+        return SystemSymbols()
 
     @decl.mproperty
     def field_space(self, FS = None):

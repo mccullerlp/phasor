@@ -31,12 +31,12 @@ class Space(ports.OpticalSymmetric2PortMixin, bases.OpticalCouplerBase, bases.Sy
         return val
 
     def phase_lower(self, iwavelen_m, F):
-        system = self.system
-        return system.math.exp(-system.i2pi * (F * self.L_m / system.c_m_s + self.L_detune_m * iwavelen_m))
+        symbols = self.symbols
+        return symbols.math.exp(-symbols.i2pi * (F * self.L_m / symbols.c_m_s + self.L_detune_m * iwavelen_m))
 
     def phase_raise(self, iwavelen_m, F):
-        system = self.system
-        return system.math.exp(system.i2pi * (F * self.L_m / system.c_m_s + self.L_detune_m * iwavelen_m))
+        symbols = self.symbols
+        return symbols.math.exp(symbols.i2pi * (F * self.L_m / symbols.c_m_s + self.L_detune_m * iwavelen_m))
 
     @decl.mproperty
     def ports_optical(self):

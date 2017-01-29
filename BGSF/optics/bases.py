@@ -3,6 +3,8 @@
 """
 from __future__ import division
 
+import declarative as decl
+
 from ..base.bases import (
     ElementBase,
     NoiseBase,
@@ -15,6 +17,11 @@ from ..base.elements import (
 )
 
 class OpticalElementBase(ElementBase):
+
+    @decl.mproperty
+    def symbols(self):
+        return self.system.symbols
+
     pass
 
 

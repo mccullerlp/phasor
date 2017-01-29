@@ -97,10 +97,10 @@ class PM(Optical2PortModulator):
                     self.BA,
                     std_cplg,
                     std_cplgC,
-                    self.system.i / 2,
-                    -self.system.i / 2,
-                    1 / self.system.c_m_s,
-                    1 / self.system.c_m_s,
+                    self.symbols.i / 2,
+                    -self.symbols.i / 2,
+                    1 / self.symbols.c_m_s,
+                    1 / self.symbols.c_m_s,
                 )
         return
 
@@ -133,8 +133,8 @@ class AM(Optical2PortModulator):
                     std_cplgC,
                     1 / 2,
                     1 / 2,
-                    self.system.i / self.system.c_m_s,
-                    -self.system.i / self.system.c_m_s,
+                    self.symbols.i / self.symbols.c_m_s,
+                    -self.symbols.i / self.symbols.c_m_s,
                 )
         return
 
@@ -190,10 +190,10 @@ class AM(Optical2PortModulator):
 #                        self.forceZ.o,
 #                        std_cplg,
 #                        std_cplgC,
-#                        self.system.i,
-#                        -self.system.i,
-#                        1 / self.system.c_m_s,
-#                        1 / self.system.c_m_s,
+#                        self.symbols.i,
+#                        -self.symbols.i,
+#                        1 / self.symbols.c_m_s,
+#                        1 / self.symbols.c_m_s,
 #                    )
 #                else:
 #                    if kfrom.contains(ports.LOWER):

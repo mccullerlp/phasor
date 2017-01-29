@@ -270,7 +270,7 @@ class HomodyneACReadoutView(ReadoutViewBase):
     def AC_CSD_ellipse_normSN(self):
         ellipse = self.AC_CSD_ellipse
         #TODO, get appropriate wavelength rather than assuming 1064nm
-        qmag = self.system.adjust_PSD * self.system.h_Js * self.system.c_m_s / 1064e-9  # * iwavelen_m
+        qmag = self.system.adjust_PSD * self.symbols.h_Js * self.symbols.c_m_s / 1064e-9  # * iwavelen_m
         return Bunch(
             min = ellipse.min / qmag,
             max = ellipse.max / qmag,

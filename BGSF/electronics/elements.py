@@ -20,6 +20,10 @@ class ElectricalElementBase(CouplerBase, ElementBase):
     def math(self):
         return self.system
 
+    @decl.mproperty
+    def symbols(self):
+        return self.system.symbols
+
 
 class ElectricalNoiseBase(NoiseBase, ElectricalElementBase):
     pass
@@ -153,7 +157,7 @@ class Cable(Electrical2PortBase):
         return val
 
     def phase_advance(self, F):
-        return self.math.exp(-2 * self.system.i * self.system.pi * F * self.length_ns)
+        return self.math.exp(-2 * self.symbols.i * self.symbols.pi * F * self.length_ns)
 
     def system_setup_ports(self, ports_algorithm):
         #TODO could reduce these with more information about used S-matrix elements

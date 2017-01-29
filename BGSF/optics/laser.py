@@ -81,10 +81,10 @@ class Laser(ports.OpticalNonOriented1PortMixin, bases.OpticalCouplerBase, bases.
         return
 
     def system_setup_coupling(self, matrix_algorithm):
-        field_rtW = self.system.math.sqrt(self.power_W)
+        field_rtW = self.symbols.math.sqrt(self.power_W)
         if self.phased:
-            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.LOWER, field_rtW * self.system.i)
-            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.RAISE, -field_rtW * self.system.i)
+            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.LOWER, field_rtW * self.symbols.i)
+            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.RAISE, -field_rtW * self.symbols.i)
         else:
             matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.LOWER, field_rtW)
             matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.RAISE, field_rtW)

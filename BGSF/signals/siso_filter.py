@@ -130,6 +130,6 @@ class TransferFunctionSISOMechSingleResonance(TransferFunctionSISOBase):
 
     def filter_func(self, freq):
         gain = 1/(self.mass_kg * (2 * np.pi)**2)
-        xfer = gain / (-freq**2 + self.system.i * self.FWHM_Hz * freq + self.center_Hz**2)
+        xfer = gain / (-freq**2 + self.symbols.i * self.FWHM_Hz * freq + self.center_Hz**2)
         return xfer
 
