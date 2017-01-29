@@ -166,6 +166,19 @@ frequency = units_map(
     uHz = None,
 )
 
+laser_power = units_map(
+    principle = "W",
+    W  = None,
+    fW = None,
+    pW = None,
+    nW = None,
+    uW = None,
+    mW = None,
+    kW = None,
+    MW = None,
+    GW = None,
+)
+
 
 
 

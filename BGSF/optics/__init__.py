@@ -5,6 +5,11 @@ from __future__ import division
 from __future__ import print_function
 from BGSF.utilities.print import print
 
+from .bases import (
+    OpticalCouplerBase,
+    SystemElementBase,
+)
+
 from .mirror import (
     Mirror
 )
@@ -54,6 +59,7 @@ from .polarization import (
     QuarterWavePlate,
     UnmountedQuarterWavePlate,
     UnmountedHalfWavePlate,
+    PolarizingMirror,
 )
 
 from .modulators import (

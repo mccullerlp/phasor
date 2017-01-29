@@ -37,6 +37,11 @@ from . import solver_algorithm
 from ..base import Element, RootElement
 from ..base.ports import PostBondKey
 
+from ..optics import (
+    OpticalFrequency,
+    OpticalFreqKey,
+)
+
 
 class Constants(Element):
 
@@ -162,10 +167,25 @@ class LinearSystem(RootElement, Constants):
         )
         self.F_AC = self.sled.environment.F_AC
 
+        self.sled.environment.my.F_carrier_1064 = OpticalFrequency(
+            wavelen_m = 1064e-9,
+            name = u'λIR',
+        )
+        self.F_carrier_1064 = self.sled.environment.F_carrier_1064
+
         #now that the system is done constructing, switch to recording mode so that any further
         #construction can be replayed
         super(LinearSystem, self).__build__()
         return
+
+    def optical_frequency_extract(self, key):
+        iwavelen_m = 0
+        freq_Hz = 0
+        for F, n in list(key[ClassicalFreqKey].F_dict.items()):
+            freq_Hz += n * F.F_Hz
+        for F, n in list(key[OpticalFreqKey].F_dict.items()):
+            iwavelen_m += n * F.iwavelen_m
+        return iwavelen_m, freq_Hz
 
     def number(self, num):
         return num

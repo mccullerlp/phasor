@@ -5,31 +5,16 @@ import numpy as np
 import numpy.testing as test
 import pytest
 
-try:
-    from IPython.lib.pretty import pprint
-except ImportError:
-    from pprint import pprint
 
 from declarative import (
     Bunch,
 )
 
-from BGSF.optics import (
-    Mirror,
-    PD,
-    MagicPD,
-    Space,
-    Laser,
-)
+from BGSF.utilities.print import pprint
 
-from BGSF.system.optical import (
-    OpticalSystem
-)
-
-from BGSF.readouts import (
-    DCReadout,
-    ACReadout,
-)
+from BGSF import system
+from BGSF import optics
+from BGSF import readouts
 
 
 def gensys(
@@ -42,31 +27,31 @@ def gensys(
     R1 = 1 - T1
     R2 = 1 - T1
 
-    sys = OpticalSystem(
+    sys = system.OpticalSystem(
         freq_order_max_default = 40,
     )
     sled = sys.sled
-    sled.my.laser = Laser(
+    sled.my.laser = optics.Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
     )
 
-    sled.my.itm = Mirror(
+    sled.my.itm = optics.Mirror(
         T_hr=.001,
     )
-    sled.my.etm = Mirror(
+    sled.my.etm = optics.Mirror(
         T_hr=.001,
     )
 
-    sled.my.s1 = Space(
+    sled.my.s1 = optics.Space(
         L_m = L_m,
         L_detune_m = L_detune_m,
     )
 
-    sled.my.reflPD = MagicPD()
-    sled.my.itmPD = MagicPD()
-    sled.my.etmPD = MagicPD()
-    sled.my.transPD = PD()
+    sled.my.reflPD = optics.MagicPD()
+    sled.my.itmPD = optics.MagicPD()
+    sled.my.etmPD = optics.MagicPD()
+    sled.my.transPD = optics.PD()
 
     sys.bond_sequence(
         sled.laser.Fr,
@@ -79,16 +64,16 @@ def gensys(
         sled.transPD.Fr,
     )
 
-    sled.my.refl_DC     = DCReadout(port = sled.reflPD.Wpd.o)
-    sled.my.transmon_DC = DCReadout(port = sled.transPD.Wpd.o)
-    sled.my.etm_DC      = DCReadout(port = sled.etmPD.Wpd.o)
-    sled.my.itm_DC      = DCReadout(port = sled.itmPD.Wpd.o)
-    sled.my.itm_ForceZ  = DCReadout(port = sled.itm.forceZ.o)
-    sled.my.etm_ForceZ  = DCReadout(port = sled.etm.forceZ.o)
+    sled.my.refl_DC     = readouts.DCReadout(port = sled.reflPD.Wpd.o)
+    sled.my.transmon_DC = readouts.DCReadout(port = sled.transPD.Wpd.o)
+    sled.my.etm_DC      = readouts.DCReadout(port = sled.etmPD.Wpd.o)
+    sled.my.itm_DC      = readouts.DCReadout(port = sled.itmPD.Wpd.o)
+    sled.my.itm_ForceZ  = readouts.DCReadout(port = sled.itm.forceZ.o)
+    sled.my.etm_ForceZ  = readouts.DCReadout(port = sled.etm.forceZ.o)
 
     if not no_ac:
-        sled.my.ETM_Drive = ACReadout(portD = sled.etm.posZ.i, portN = sled.etmPD.Wpd.o)
-        sled.my.ITM_Drive = ACReadout(portD = sled.etm.posZ.i, portN = sled.itmPD.Wpd.o)
+        sled.my.ETM_Drive = readouts.ACReadout(portD = sled.etm.posZ.i, portN = sled.etmPD.Wpd.o)
+        sled.my.ITM_Drive = readouts.ACReadout(portD = sled.etm.posZ.i, portN = sled.itmPD.Wpd.o)
 
     #analytic sensitivity calculations
     k          = 2 * np.pi * sys.F_carrier_1064.iwavelen_m

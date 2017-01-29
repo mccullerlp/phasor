@@ -3,69 +3,45 @@
 from __future__ import (division, print_function)
 from unittest import TestCase, main
 
-try:
-    from IPython.lib.pretty import pprint
-except ImportError:
-    from pprint import pprint
-
-#import numpy as np
-
+import declarative as decl
 from declarative.bunch import (
     DeepBunch,
 )
 
-from BGSF.optics import (
-    Mirror,
-    PD,
-    Laser,
-    HalfWavePlate,
-    QuarterWavePlate,
-    OpticalCirculator,
-    FaradayRotator,
-)
-
-from BGSF.optics.bases import (
-    OpticalCouplerBase,
-    SystemElementBase,
-    OOA_ASSIGN,
-)
+#import numpy as np
 
 from BGSF.system.optical import (
     OpticalSystem
 )
 
-from BGSF.readouts import (
-    DCReadout,
-)
-
-from BGSF.optics.selective_mirrors import (
-    PolarizingMirror,
-)
+from BGSF import readouts
+from BGSF import optics
+from BGSF.utilities.print import pprint
 
 #from BGSF.utilities.np import logspaced
 
 class PolTester(
-    OpticalCouplerBase, SystemElementBase
+    optics.OpticalCouplerBase, optics.SystemElementBase
 ):
     def __init__(self, **kwargs):
         super(PolTester, self).__init__(**kwargs)
-        self.my.PSL = Laser(
+        self.my.PSL = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = 1.,
             polarization = 'S',
         )
 
-        self.my.mBS = PolarizingMirror(
-            mirror_S = Mirror(
+        self.my.mBS = optics.PolarizingMirror(
+            mirror_S = optics.Mirror(
                 T_hr = 0,
             ),
-            mirror_P = Mirror(
+            mirror_P = optics.Mirror(
                 T_hr = 1,
             ),
             AOI_deg = 45,
         )
-        self.my.PD_S = PD()
-        self.my.PD_P = PD()
+        self.my.PD_S = optics.PD()
+        self.my.PD_P = optics.PD()
 
         self.system.bond_sequence(
             self.PSL.Fr,
@@ -77,52 +53,55 @@ class PolTester(
             self.PD_S.Fr,
         )
 
-        self.my.DC_P = DCReadout(
+        self.my.DC_P = readouts.DCReadout(
             port = self.PD_P.Wpd.o,
         )
-        self.my.DC_S = DCReadout(
+        self.my.DC_S = readouts.DCReadout(
             port = self.PD_S.Wpd.o,
         )
 
 
 class WavePlateTester(
-    OpticalCouplerBase, SystemElementBase
+    optics.OpticalCouplerBase, optics.SystemElementBase
 ):
+    @decl.dproperty
+    def waveplate_type(self, val = 'half'):
+        val = self.ooa_params.setdefault('waveplate_type', 'half')
+        return val
+
     def __init__(self, **kwargs):
         super(WavePlateTester, self).__init__(**kwargs)
-        self.my.PSL = Laser(
+        self.my.PSL = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = 1.,
             polarization = 'S',
         )
 
-        OOA_ASSIGN(self).waveplate_type = 'half'
-
         if self.waveplate_type == 'half':
-            self.my.waveplate = HalfWavePlate(
+            self.my.waveplate = optics.HalfWavePlate(
                 #facing_cardinal = 'W',
             )
         elif self.waveplate_type == 'quarter':
-            self.my.waveplate = QuarterWavePlate(
+            self.my.waveplate = optics.QuarterWavePlate(
                 #facing_cardinal = 'W',
             )
         elif self.waveplate_type == 'faraday':
-            self.my.waveplate = FaradayRotator(
+            self.my.waveplate = optics.FaradayRotator(
                 rotate_deg = 0
             )
 
-        self.my.mBS = PolarizingMirror(
-            mirror_S = Mirror(
+        self.my.mBS = optics.PolarizingMirror(
+            mirror_S = optics.Mirror(
                 T_hr = 0,
             ),
-            mirror_P = Mirror(
+            mirror_P = optics.Mirror(
                 T_hr = 1,
             ),
             AOI_deg = 45,
             #facing_cardinal = 'NW',
         )
-        self.my.PD_S = PD()
-        self.my.PD_P = PD()
+        self.my.PD_S = optics.PD()
+        self.my.PD_P = optics.PD()
 
         self.system.bond_sequence(
             self.PSL.Fr,
@@ -135,58 +114,61 @@ class WavePlateTester(
             self.PD_S.Fr,
         )
 
-        self.my.DC_P = DCReadout(
+        self.my.DC_P = readouts.DCReadout(
             port = self.PD_P.Wpd.o,
         )
-        self.my.DC_S = DCReadout(
+        self.my.DC_S = readouts.DCReadout(
             port = self.PD_S.Wpd.o,
         )
 
 
 class WavePlateTesterRetro(
-    OpticalCouplerBase, SystemElementBase
+    optics.OpticalCouplerBase, optics.SystemElementBase
 ):
+    @decl.dproperty
+    def waveplate_type(self, val = 'half'):
+        val = self.ooa_params.setdefault('waveplate_type', 'half')
+        return val
+
     def __init__(self, **kwargs):
         super(WavePlateTesterRetro, self).__init__(**kwargs)
-        self.my.PSL = Laser(
+        self.my.PSL = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = 1.,
             polarization = 'S',
         )
 
-        OOA_ASSIGN(self).waveplate_type = 'half'
-
-        self.my.circulator = OpticalCirculator(N_ports = 3)
+        self.my.circulator = optics.OpticalCirculator(N_ports = 3)
 
         if self.waveplate_type == 'half':
-            self.my.waveplate = HalfWavePlate(
+            self.my.waveplate = optics.HalfWavePlate(
                 #facing_cardinal = 'W',
             )
         elif self.waveplate_type == 'quarter':
-            self.my.waveplate = QuarterWavePlate(
+            self.my.waveplate = optics.QuarterWavePlate(
                 #facing_cardinal = 'W',
             )
         elif self.waveplate_type == 'faraday':
-            self.my.waveplate = FaradayRotator(
+            self.my.waveplate = optics.FaradayRotator(
                 rotate_deg = 0,
             )
 
-        self.my.reflector = Mirror(
+        self.my.reflector = optics.Mirror(
             T_hr = 0,
             #facing_cardinal = 'W',
         )
-        self.my.mBS = PolarizingMirror(
-            mirror_S = Mirror(
+        self.my.mBS = optics.PolarizingMirror(
+            mirror_S = optics.Mirror(
                 T_hr = 0,
             ),
-            mirror_P = Mirror(
+            mirror_P = optics.Mirror(
                 T_hr = 1,
             ),
             AOI_deg = 45,
             #facing_cardinal = 'NW',
         )
-        self.my.PD_S = PD()
-        self.my.PD_P = PD()
+        self.my.PD_S = optics.PD()
+        self.my.PD_P = optics.PD()
 
         self.system.bond_sequence(
             self.PSL.Fr,
@@ -207,10 +189,10 @@ class WavePlateTesterRetro(
             self.PD_S.Fr,
         )
 
-        self.my.DC_P = DCReadout(
+        self.my.DC_P = readouts.DCReadout(
             port = self.PD_P.Wpd.o,
         )
-        self.my.DC_S = DCReadout(
+        self.my.DC_S = readouts.DCReadout(
             port = self.PD_S.Wpd.o,
         )
 
@@ -414,7 +396,6 @@ class TestPolarizations(TestCase):
         sys.sled.my.test = WavePlateTesterRetro()
         self.assertAlmostEqual(sys.sled.test.DC_S.DC_readout, .5)
         self.assertAlmostEqual(sys.sled.test.DC_P.DC_readout, .5)
-
 
 
 if __name__ == '__main__':

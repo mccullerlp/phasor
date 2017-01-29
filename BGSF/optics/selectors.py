@@ -4,18 +4,14 @@
 from __future__ import (division, print_function)
 from collections import defaultdict
 
-#import declarative as decl
+import declarative as decl
 
 from . import bases
 from . import ports
 
 
 class PolSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
-    def __init__(
-        self,
-        **kwargs
-    ):
-        super(PolSelector, self).__init__(**kwargs)
+    def __build__(self):
         self.Fr   = ports.OpticalPortHolderInOut(self, x = 'Fr')
         self.Bk_P = ports.OpticalPortHolderInOut(self, x = 'Bk_P')
         self.Bk_S = ports.OpticalPortHolderInOut(self, x = 'Bk_S')
@@ -63,19 +59,18 @@ class PolSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
 
 
 class GenericSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
-    def __init__(
-        self,
-        select_map,
-        **kwargs
-    ):
-        super(GenericSelector, self).__init__(**kwargs)
+
+    @decl.dproperty
+    def select_map(self, val):
+        return val
+
+    def __build__(self):
         self.check      = True
-        self.select_map = select_map
         self.port_map   = {}
         self.Fr         = ports.OpticalPortHolderInOut(self, x = 'Fr')
 
         for name, key in list(self.select_map.items()):
-            ooa_name = 'Bk_{0}'.format(name)
+            pname = 'Bk_{0}'.format(name)
             port = ports.OpticalPortHolderInOut(self, x = pname)
             setattr(self, pname, port)
             self.port_map[name] = (port, key)

@@ -318,6 +318,7 @@ class WavePlate(ports.OpticalSymmetric2PortMixin, bases.OpticalCouplerBase, base
             cplgSC = self.cplgS.conjugate()
         bases.OOA_ASSIGN(self).cplgSC = cplgSC
 
+    def __build__(self):
         self.Fr = ports.OpticalPortHolderInOut(self, x = 'Fr')
         self.Bk = ports.OpticalPortHolderInOut(self, x = 'Bk')
         return

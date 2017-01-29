@@ -3,30 +3,27 @@
 """
 from __future__ import division
 from __future__ import print_function
-from builtins import range
 #from BGSF.utilities.print import print
 
-from .bases import (
-    OpticalCouplerBase,
-    SystemElementBase,
-)
+import declarative as decl
 
 from . import bases
 from . import ports
 
 
-class OpticalCirculator(OpticalCouplerBase, SystemElementBase):
-    def __init__(
+class OpticalCirculator(bases.OpticalCouplerBase, bases.SystemElementBase):
+
+    @decl.dproperty
+    def N_ports(self, val = 3):
+        return val
+
+    def __build__(
         self,
-        N_ports = 3,
-        **kwargs
     ):
-        super(OpticalCirculator, self).__init__(**kwargs)
-        self.N_ports = N_ports
         self.port_list = []
 
-        for idx in range(0, N_ports):
-            ooa_name = "P{0}".format(idx)
+        for idx in range(0, self.N_ports):
+            pname = "P{0}".format(idx)
             port = ports.OpticalPortHolderInOut(self, x = pname)
             setattr(self, pname, port)
             self.port_list.append(port)
