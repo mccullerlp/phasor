@@ -44,6 +44,9 @@ from ..optics import (
 
 
 class Constants(Element):
+    """
+    Separate Class for constants to allow replacing them with symbols or more math appropriate ones
+    """
 
     def __build__(self):
         OOA_ASSIGN(self).c_m_s                 = 299792458
@@ -59,6 +62,9 @@ class Constants(Element):
         OOA_ASSIGN(self).include_johnson_noise = True
         super(Constants, self).__build__()
 
+    def number(self, num):
+        return num
+
 
 class BGSystem(RootElement, Constants):
 
@@ -71,12 +77,6 @@ class BGSystem(RootElement, Constants):
     @decl.mproperty
     def freq_order_max_default(self, val = 2):
         return val
-
-    def __init__(
-        self,
-        **kwargs
-    ):
-        super(LinearSystem, self).__init__(**kwargs)
 
     @decl.dproperty
     def adjust_PSD(self):
@@ -116,13 +116,13 @@ class BGSystem(RootElement, Constants):
     @decl.mproperty
     def owners_ports_virtual(self):
         return dict()
+
     @decl.mproperty
     def port_autoterminate(self):
         return dict()
 
     @decl.mproperty
     def bond_pairs(self):
-        #TODO: enforce single linkage if possible
         return defaultdict(set)
 
     @decl.mproperty
@@ -154,27 +154,23 @@ class BGSystem(RootElement, Constants):
         return defaultdict(set)
 
     def __build__(self):
-        self.my.sled = SystemElementSled(
-            ooa_params = self.ooa_params,
-        )
-        self.sled.my.environment = SystemElementSled()
-        self.environment = self.sled.environment
+        self.my.environment = SystemElementSled()
+        self.environment = self.environment
 
-        self.sled.environment.my.F_AC = Frequency(
+        self.environment.my.F_AC = Frequency(
             F_Hz  = 0,
             name  = 'AC',
             order = 1,
         )
-        self.F_AC = self.sled.environment.F_AC
+        self.F_AC = self.environment.F_AC
 
-        self.sled.environment.my.F_carrier_1064 = OpticalFrequency(
+        #Maybe refactor this
+        self.environment.my.F_carrier_1064 = OpticalFrequency(
             wavelen_m = 1064e-9,
             name = u'λIR',
         )
-        self.F_carrier_1064 = self.sled.environment.F_carrier_1064
+        self.F_carrier_1064 = self.environment.F_carrier_1064
 
-        #now that the system is done constructing, switch to recording mode so that any further
-        #construction can be replayed
         super(LinearSystem, self).__build__()
         return
 
@@ -186,9 +182,6 @@ class BGSystem(RootElement, Constants):
         for F, n in list(key[OpticalFreqKey].F_dict.items()):
             iwavelen_m += n * F.iwavelen_m
         return iwavelen_m, freq_Hz
-
-    def number(self, num):
-        return num
 
     @decl.mproperty
     def fully_resolved_name_tuple(self):
@@ -239,15 +232,15 @@ class BGSystem(RootElement, Constants):
         self._frozen = True
 
         self.port_algo = ports_algorithm.PortUpdatesAlgorithm(
-            system = self,
+            system           = self,
         )
         self.matrix_algorithm = MatrixBuildAlgorithm(
-            system = self,
-            ports_algorithm = self.port_algo,
+            system           = self,
+            ports_algorithm  = self.port_algo,
         )
         self.solver = solver_algorithm.SystemSolver(
-            system = self,
-            ports_algorithm = self.port_algo,
+            system           = self,
+            ports_algorithm  = self.port_algo,
             matrix_algorithm = self.matrix_algorithm,
         )
         return
@@ -268,6 +261,7 @@ class BGSystem(RootElement, Constants):
     def include(self, element):
         #TODO get rid of this deferred include business
         self._include_lst.append(element)
+        #self._include(element)
 
     def do_includes(self):
         while self._include_lst:
@@ -306,8 +300,8 @@ class BGSystem(RootElement, Constants):
         terminated_ports = set(self.bonded_set)
         registered_ports = set(self.port_owners.keys())
         unterminated_ports = registered_ports - terminated_ports
-        if unterminated_ports and not hasattr(self.sled, 'autoterminate'):
-            self.sled.my.autoterminate = SystemElementSled()
+        if unterminated_ports and not hasattr(self, 'autoterminate'):
+            self.my.autoterminate = SystemElementSled()
         for port in unterminated_ports:
             #print("UNTERMINATED: ", port)
             aterm = self.port_autoterminate.get(port, None)
@@ -321,7 +315,7 @@ class BGSystem(RootElement, Constants):
                 #TODO: make this a sane naming scheme
                 #TODO GOTTA GOTTA FIX
                 name = '{0}({2}-<{1}>)'.format(tclass.__name__, port, pobj.element.name_system).replace('.', '_')
-                tinst = self.sled.autoterminate.insert(tclass(), name)
+                tinst = self.autoterminate.insert(tclass(), name)
                 self.bond(pobj, tinst.Fr)
 
     def bond(self, port_A, port_B):
@@ -375,8 +369,13 @@ class BGSystem(RootElement, Constants):
         pass
 
     def own_port_virtual(self, element, port):
+        #TODO rename bond port virtual
         self.port_owners_virtual[port].add(element)
         self.owners_ports_virtual.setdefault(element, []).append(port)
         return
 
+#add an additional name for the system
 LinearSystem = BGSystem
+
+
+
