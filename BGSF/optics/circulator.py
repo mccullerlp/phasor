@@ -26,7 +26,7 @@ class OpticalCirculator(OpticalCouplerBase, SystemElementBase):
         self.port_list = []
 
         for idx in range(0, N_ports):
-            pname = "P{0}".format(idx)
+            ooa_name = "P{0}".format(idx)
             port = ports.OpticalPortHolderInOut(self, x = pname)
             setattr(self, pname, port)
             self.port_list.append(port)

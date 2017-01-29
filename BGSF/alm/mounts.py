@@ -12,9 +12,7 @@ from declarative import (
     Bunch,
 )
 
-from ..base.multi_unit_args import (
-    generate_refval_attribute,
-)
+from . import standard_attrs as attrs
 
 from .beam import (
     MatrixAtsBase,
@@ -192,16 +190,7 @@ class LensMount(MountBase):
     _target_type = 'lens_mount'
     substrate = substrate_environment
 
-    @group_dproperty
-    def detune_m(desc):
-        return generate_refval_attribute(
-            desc,
-            units = 'length',
-            stems = ['detune', ],
-            pname = 'detune',
-            preferred_attr = 'detune_preferred',
-            prototypes = ['full', 'base'],
-        )
+    detune_m = attrs.generate_detune_m()
 
     def matrix_detune_left(self, inverse = False):
         n = self.substrate.n()
@@ -235,16 +224,7 @@ class MirrorMount(MountBase):
     subsystem    = CNoP()
     substrate = substrate_environment
 
-    @group_dproperty
-    def detune_m(desc):
-        return generate_refval_attribute(
-            desc,
-            units = 'length',
-            stems = ['detune', ],
-            pname = 'detune',
-            preferred_attr = 'detune_preferred',
-            prototypes = ['full', 'base'],
-        )
+    detune_m = attrs.generate_detune_m()
 
     def matrix_detune_left(self, inverse = False):
         n = self.substrate.n()
@@ -286,16 +266,7 @@ class ConjMirrorMount(MountBase):
     subsystem    = CNoP()
     substrate = substrate_environment
 
-    @group_dproperty
-    def detune_m(desc):
-        return generate_refval_attribute(
-            desc,
-            units = 'length',
-            stems = ['detune', ],
-            pname = 'detune',
-            preferred_attr = 'detune_preferred',
-            prototypes = ['full', 'base'],
-        )
+    detune_m = attrs.generate_detune_m()
 
     def matrix_detune_left(self, inverse = False):
         n = self.substrate.n()

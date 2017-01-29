@@ -32,8 +32,7 @@ from .beam import (
     MatrixAtsBase,
 )
 
-from ..base.multi_unit_args import generate_refval_attribute
-
+from . import standard_attrs as attrs
 
 class CSystem(
     MatrixAtsCompositeBase,
@@ -43,17 +42,7 @@ class CSystem(
         return Element()
 
     _loc_default = ('loc_m', None)
-    @group_dproperty
-    def loc_m(desc):
-        return generate_refval_attribute(
-            desc,
-            units = 'length',
-            stems = ['loc', ],
-            pname = 'location',
-            preferred_attr = 'loc_preferred',
-            default_attr = '_loc_default',
-            prototypes = ['full'],
-        )
+    loc_m = attrs.generate_loc_m()
 
     @mproperty(simple_delete = True)
     @invalidate_auto

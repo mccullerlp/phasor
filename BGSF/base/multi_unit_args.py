@@ -14,9 +14,14 @@ from declarative import (
 from declarative.substrate import Element
 
 from .units import (
-    units_lookup,
-    units_lookup_dim,
+    ureg,
 )
+
+def mag1_units(pint_quantity):
+    if isinstance(pint_quantity, ureg.Quantity):
+        if pint_quantity.m == 1:
+            return str(pint_quantity.units)
+    return str(pint_quantity)
 
 
 class SimpleUnitfulGroup(OverridableObject):
@@ -32,13 +37,22 @@ class SimpleUnitfulGroup(OverridableObject):
     def val(self, val):
         return val
 
+    @mproperty
+    def refQ(self, val):
+        return val * self.units
+
+    @mproperty
+    def valQ(self, val):
+        return val * self.units
+
     def __add__(self, other):
         units_to = self.units
-        type_to = units_lookup[units_to]
+        type_to = ureg[units_to]
         units_from = other.units
-        type_from = units_lookup[units_from]
-        assert(type_to.dim == type_from.dim)
-        rescale = type_from.scale / type_to.scale
+        type_from = ureg[units_from]
+        rescale = type_from / type_to
+        assert(rescale.unitless)
+        rescale = rescale.m_as(ureg.dimensionless)
         return SimpleUnitfulGroup(
             val = self.val + other.val * rescale,
             ref = self.ref + other.ref * rescale,
@@ -47,11 +61,10 @@ class SimpleUnitfulGroup(OverridableObject):
 
     def __sub__(self, other):
         units_to = self.units
-        type_to = units_lookup[units_to]
         units_from = other.units
-        type_from = units_lookup[units_from]
-        assert(type_to.dim == type_from.dim)
-        rescale = type_from.scale / type_to.scale
+        rescale = units_from / units_to
+        assert(rescale.unitless)
+        rescale = rescale.m_as(ureg.dimensionless)
         return SimpleUnitfulGroup(
             val = self.val - other.val * rescale,
             ref = self.ref - other.ref * rescale,
@@ -94,17 +107,16 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
 
     #TODO integrate or name this better
     @mproperty
-    def pname(self, val):
+    def ooa_name(self, val):
         return val
 
     @dproperty
     def ooa_units_scale(self):
         units_to = self.units
-        type_to = units_lookup[units_to]
-        units_from = self.ooa_params.units
-        type_from = units_lookup[units_from]
-        assert(type_to.dim == type_from.dim)
-        return type_from.scale / type_to.scale
+        units_from = ureg[self.ooa_params.units]
+        rescale = units_from / units_to
+        assert(rescale.unitless)
+        return rescale.m_as(ureg.dimensionless)
 
     @dproperty
     def ref(self):
@@ -125,7 +137,7 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
     @mproperty
     def fitter_parameter(self):
         root = self.root
-        names = [self.pname]
+        names = [self.ooa_name]
         current = self.parent
         while current is not root:
             names.append(current.name_child)
@@ -170,14 +182,21 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
 def generate_refval_attribute(
     desc,
     stems,
-    pname,
+    ooa_name,
     preferred_attr,
     prototypes,
-    units,
+    ubunch,
     default_attr = None,
 ):
     desc.stems(*stems)
     prototypes = frozenset(prototypes)
+
+    if preferred_attr is None:
+        preferred_attr = ()
+    elif isinstance(preferred_attr, str):
+        preferred_attr = (preferred_attr,)
+    else:
+        preferred_attr = tuple(preferred_attr)
 
     @desc.setup
     def SETUP(
@@ -188,12 +207,12 @@ def generate_refval_attribute(
     ):
         if self.inst_prototype_t in prototypes:
             #TODO make this do the correct thing
-            oattr = getattr(self.inst_prototype, preferred_attr)
-            ooa = self.ooa_params[pname]
-            ooa.units = oattr.units
+            oattr = getattr(self.inst_prototype, preferred_attr[0])
+            ooa = self.ooa_params[ooa_name]
             ooa.ref   = oattr.ref
             ooa.val   = oattr.val
-            #self.ooa_params[pname]["from"] = self.inst_prototype.name_system + "." + preferred_attr
+            ooa.units = str(oattr.units)
+            #self.ooa_params[ooa_name]["from"] = self.inst_prototype.name_system + "." + preferred_attr
             sources.clear()
         else:
             if len(sources) > 1:
@@ -210,37 +229,53 @@ def generate_refval_attribute(
             else:
                 k, v = sources.popitem()
 
-            if preferred_attr is not None and k == preferred_attr:
-                ooa = self.ooa_params[pname].useidx('immediate')
+            if k in preferred_attr:
+                ooa = self.ooa_params[ooa_name].useidx('immediate')
                 if v is not None:
-                    ooa.setdefault("units", v.units)
-                    ooa.setdefault("ref", v.ref)
-                    ooa.setdefault("val", v.val)
+                    if isinstance(v, SimpleUnitfulGroup):
+                        ooa.setdefault("ref",   v.ref)
+                        ooa.setdefault("val",   v.val)
+                        ooa.setdefault("units", mag1_units(v.units))
+                    elif isinstance(v, ureg.Quantity):
+                        ooa.setdefault("ref",   v.magnitude)
+                        ooa.setdefault("val",   v.magnitude)
+                        ooa.setdefault("units", mag1_units(v.units))
+                    elif isinstance(v, ureg.Unit):
+                        ooa.setdefault("units", mag1_units(v))
+                        ooa.setdefault("ref",  1)
+                        ooa.setdefault("val",  1)
+                    else:
+                        raise RuntimeError("Must be either a unitfulgroup, or a pint.Quantity"
+                        ", if it already appears to be a pint object, it may need to be created"
+                        "from the registry used by the library")
+                        #then it must be a quantity
                 else:
-                    ooa.setdefault("units", "m")
+                    ooa.setdefault("units", ubunch.principle_name)
                     ooa.setdefault("ref", None)
                     ooa.setdefault("val", None)
             else:
                 unit = units[k]
                 #setup defaults
-                ooa = self.ooa_params[pname].useidx('immediate')
+                ooa = self.ooa_params[ooa_name].useidx('immediate')
                 ooa.setdefault("units", unit)
                 ooa.setdefault("ref", v)
                 ooa.setdefault("val", ooa.ref)
         return
 
-    if preferred_attr is not None:
-        @desc.mproperty(name = preferred_attr)
+    if preferred_attr:
         def PREFERRED(
             self,
             storage,
             group,
         ):
+            pint_units = ureg[self.ooa_params[ooa_name].units]
             return ElementRefValue(
-                ooa_params = self.ooa_params[pname],
-                units = self.ooa_params[pname].units,
-                pname = pname,
+                ooa_params = self.ooa_params[ooa_name],
+                units = pint_units,
+                ooa_name = ooa_name,
             )
+        for pattr in preferred_attr:
+            desc.mproperty(PREFERRED, name = pattr)
 
     def VALUE(
         self,
@@ -250,36 +285,15 @@ def generate_refval_attribute(
     ):
         #could get value with
         #k, v = storage.items().next()
-        units = units
+        print("hmm: " ,self.ooa_params[ooa_name].units)
+        pint_units = ureg[self.ooa_params[ooa_name].units]
         return ElementRefValue(
-            ooa_params = self.ooa_params[pname],
-            units = units,
-            pname = pname,
+            ooa_params = self.ooa_params[ooa_name],
+            units      = pint_units,
+            ooa_name   = ooa_name,
         )
 
-    for unitb in units_lookup_dim[units]:
-        desc.mproperty(VALUE, stem = '{stem}_{units}', units = unitb.short)
+    for unitname, unitobj in ubunch.umap.items():
+        desc.mproperty(VALUE, stem = '{stem}_{units}', units = unitname)
     return
-
-"""
-class LocMixin(OverridableObject):
-    _loc_default = None
-
-    @group_dproperty
-    def loc_m(desc):
-        return generate_refval_attribute(
-            desc,
-            stems = ['loc',],
-            pname = 'location',
-            units = 'length',
-            default_attr = '_loc_default',
-            preferred_attr = 'loc_preferred',
-            prototypes = ['full'],
-        )
-
-"""
-#decorator
-
-
-
 

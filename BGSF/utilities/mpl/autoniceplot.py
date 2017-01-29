@@ -4,16 +4,9 @@
 
 import os
 from os import path
-
-
-from declarative import (
-    OverridableObject, NOARG,
-    mproperty,
-    Bunch, DeepBunch,
-)
-
 import matplotlib as mpl
-import matplotlib.pyplot as plt
+import declarative as decl
+
 
 try:
     org_mode
@@ -21,7 +14,7 @@ except NameError:
     org_mode = False
 
 
-class SaveToken(OverridableObject):
+class SaveToken(decl.OverridableObject):
     aps = None
     fbasename = None
 
@@ -73,7 +66,7 @@ def mpl_autorasterize(fig):
             pass
 
 
-class AutoPlotSaver(OverridableObject):
+class AutoPlotSaver(decl.OverridableObject):
     max_width_in = None
     max_height_in = None
     save_dpi = 400
@@ -146,8 +139,6 @@ class AutoPlotSaver(OverridableObject):
         fig.set_dpi(144)
         return
 
-asavefig = AutoPlotSaver()
-
 
 def mplfigB(
         Nrows         = 1,
@@ -164,8 +155,8 @@ def mplfigB(
         width_in = size_in_base[0] + Ncols * size_in_dW_dH[0]
         height_in = size_in_base[1] + Nrows * size_in_dW_dH[1]
 
-    axB = Bunch()
-    axB.fig = plt.figure()
+    axB = decl.Bunch()
+    axB.fig = mpl.figure()
     axB.fig.set_size_inches(width_in, height_in)
 
     global asavefig
@@ -197,3 +188,6 @@ def mplfigB(
                 if idx_row == Nrows-1:
                     axB.ax_bottom = ax
     return axB
+
+
+asavefig = AutoPlotSaver()

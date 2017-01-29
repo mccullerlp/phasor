@@ -18,8 +18,9 @@ from declarative import (
     #group_mproperty,
 )
 
-from ..base.multi_unit_args import (
-    generate_refval_attribute,
+from declarative.substrate import (
+    Element,
+    invalidate_auto
 )
 
 from .beam_param import (
@@ -43,10 +44,7 @@ from .substrates import (
     substrate_environment,
 )
 
-from declarative.substrate import (
-    Element,
-    invalidate_auto
-)
+from . import standard_attrs as attrs
 
 
 class MatrixAtsBase(Element):
@@ -174,17 +172,7 @@ class CThinBase(MatrixAtsBase, OverridableObject):
     width_m      = 0
 
     _loc_default = ('loc_m', None)
-    @group_dproperty
-    def loc_m(desc):
-        return generate_refval_attribute(
-            desc,
-            units = 'length',
-            stems = ['loc', ],
-            pname = 'location',
-            preferred_attr = 'loc_preferred',
-            default_attr = '_loc_default',
-            prototypes = ['full'],
-        )
+    loc_m = attrs.generate_loc_m()
 
     def matrix_target_to_z_single(self, tidx1, z_m, invert = False):
         if z_m != 0:
@@ -327,16 +315,7 @@ class BeamTarget(CNoP):
 
 class CThinLens(CThinBase):
 
-    @group_dproperty
-    def f_m(desc):
-        return generate_refval_attribute(
-            desc,
-            units = 'length',
-            stems = ['f'],
-            pname = 'focal_length',
-            preferred_attr = 'f_preferred',
-            prototypes = ['full', 'base'],
-        )
+    f_m = attrs.generate_f_m()
 
     @mproperty
     def matrix(self):
@@ -366,29 +345,10 @@ class CThinLens(CThinBase):
 class CSpace(MatrixAtsBase, OverridableObject):
     substrate = substrate_environment
 
-    @group_dproperty
-    def L_m(desc):
-        return generate_refval_attribute(
-            desc,
-            units = 'length',
-            stems = ['L', 'length'],
-            pname = 'length',
-            preferred_attr = 'L_preferred',
-            prototypes = ['full', 'base'],
-        )
+    L_m = attrs.generate_L_m()
 
     _loc_default = ('loc_m', None)
-    @group_dproperty
-    def loc_m(desc):
-        return generate_refval_attribute(
-            desc,
-            units = 'length',
-            stems = ['loc', ],
-            pname = 'location',
-            preferred_attr = 'loc_preferred',
-            default_attr = '_loc_default',
-            prototypes = ['full'],
-        )
+    loc_m = attrs.generate_loc_m()
 
     @mproperty
     def width_m(self):
@@ -494,16 +454,7 @@ class CLensInterface(CThinBase):
     substrate_from = substrate_environment
     substrate_to   = substrate_environment
 
-    @group_dproperty
-    def R_m(desc):
-        return generate_refval_attribute(
-            desc,
-            units = 'length',
-            stems = ['R', 'ROC'],
-            pname = 'ROC',
-            preferred_attr = 'ROC_preferred',
-            prototypes = ['full', 'base'],
-        )
+    R_m = attrs.generate_R_m()
 
     @mproperty
     def matrix(self):
@@ -563,16 +514,7 @@ class CLensInterface(CThinBase):
 
 
 class CMirror(CThinBase):
-    @group_dproperty
-    def R_m(desc):
-        return generate_refval_attribute(
-            desc,
-            units = 'length',
-            stems = ['R', 'ROC'],
-            pname = 'ROC',
-            preferred_attr = 'ROC_preferred',
-            prototypes = ['full', 'base'],
-        )
+    R_m = attrs.generate_R_m()
 
     @mproperty
     def matrix(self):
@@ -595,7 +537,7 @@ class CMirror(CThinBase):
             f_m = f_m,
             z = z,
             type = 'mirror',
-            str = 'Mirror, R_m = {R_m}, f_m = {R_m}'.format(R_m = str_m(self.R_m), f_m = str_m(f_m)),
+            str = 'Mirror, R_m = {R_m}, f_m = {R_m}'.format(R_m = str_m(self.R_m.val), f_m = str_m(f_m)),
         )
 
     def system_data_targets(self, typename):

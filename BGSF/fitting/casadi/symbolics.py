@@ -104,7 +104,7 @@ class FitterSymJitterPlacement(FitterSym):
             desc,
             units = 'length',
             stems = ['shift', ],
-            pname = 'shift',
+            ooa_name = 'shift',
             preferred_attr = 'shift_preferred',
             default_attr = '_shift_default',
             prototypes = ['full'],

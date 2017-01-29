@@ -75,7 +75,7 @@ class GenericSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
         self.Fr         = ports.OpticalPortHolderInOut(self, x = 'Fr')
 
         for name, key in list(self.select_map.items()):
-            pname = 'Bk_{0}'.format(name)
+            ooa_name = 'Bk_{0}'.format(name)
             port = ports.OpticalPortHolderInOut(self, x = pname)
             setattr(self, pname, port)
             self.port_map[name] = (port, key)

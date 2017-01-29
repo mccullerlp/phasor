@@ -1,94 +1,178 @@
 """
 """
 from __future__ import division, print_function
+from .pint import ureg
 
 from declarative.bunch import Bunch
 
-#TODO convert this to yaml
+def units_map(
+    principle,
+    **kwargs
+):
+    umap = dict()
 
-units = [
-    Bunch(
-        short = 'm',
-        names = ['meter', 'meters', ],
-        dim = 'length',
-        scale = 1,
-    ),
-    Bunch(
-        short = 'cm',
-        names = ['centimeter', 'centimeters', ],
-        dim = 'length',
-        scale = 1e-2,
-    ),
-    Bunch(
-        short = 'mm',
-        names = ['millimeter', 'millimeters', ],
-        dim = 'length',
-        scale = 1e-3,
-    ),
-    Bunch(
-        short = 'um',
-        names = ['micron', 'micrometer', 'micrometers'],
-        dim = 'length',
-        scale = 1e-6,
-    ),
-    Bunch(
-        short = 'nm',
-        names = ['nanometer', 'nanometers', ],
-        dim = 'length',
-        scale = 1e-9,
-    ),
-    Bunch(
-        short = 'pm',
-        names = ['picometer', 'picometers', ],
-        dim = 'length',
-        scale = 1e-12,
-    ),
-    Bunch(
-        short = 'fm',
-        names = ['femtometer', 'femtometers', ],
-        dim = 'length',
-        scale = 1e-15,
-    ),
-    Bunch(
-        short = 'am',
-        names = ['attometer', 'attometers', ],
-        dim = 'length',
-        scale = 1e-18,
-    ),
-    Bunch(
-        short = 'zm',
-        names = ['zeptometer', 'zeptometers', ],
-        dim = 'length',
-        scale = 1e-21,
-    ),
-    Bunch(
-        short = 'km',
-        names = ['kilometer', 'kilometers', ],
-        dim = 'length',
-        scale = 1e3,
-    ),
-    Bunch(
-        short = 'in',
-        names = ['inch', 'inches', ],
-        dim = 'length',
-        scale = .0254
-    ),
-    Bunch(
-        short = 'ft',
-        names = ['foot', 'feet', ],
-        dim = 'length',
-        scale = .3048
-    ),
-]
+    for name, to in kwargs.items():
+        if to is None:
+            uobj = ureg[name]
+        else:
+            if isinstance(to, str):
+                uobj = ureg[to]
+            else:
+                uobj = to
+        umap[name] = uobj
+    return Bunch(
+        principle_name = principle,
+        principle_unit = umap[principle],
+        umap           = umap,
+    )
 
-units_lookup_short = dict()
-units_lookup = dict()
-units_lookup_dim = dict()
-units_lookup_dim_short = dict()
-for ubunch in units:
-    units_lookup_short[ubunch.short] = ubunch
-    units_lookup[ubunch.short] = ubunch
-    for name in ubunch.names:
-        units_lookup[name] = ubunch
-    lst = units_lookup_dim.setdefault(ubunch.dim, [])
-    lst.append(ubunch)
+
+lengths_small = units_map(
+    principle = 'm',
+    m  = None,
+    fm = None,
+    pm = None,
+    nm = None,
+    um = None,
+    mm = None,
+    cm = None,
+    km = None,
+    ft = None,
+    **{'in' : None}  #because 'in' is reserved keyword
+    #meter = None,
+    #femtometer = None,
+    #picometer = None,
+    #nanometer = None,
+    #micrometer = None,
+    #millimeter = None,
+    #centimeter = None,
+    #kilometer = None,
+    #inch = None,
+    #foot = None,
+    #feet = None,
+)
+
+mass_small = units_map(
+    principle = 'kg',
+    g  = None,
+    ag = None,
+    fg = None,
+    pg = None,
+    ng = None,
+    ug = None,
+    mg = None,
+    cg = None,
+    kg = None,
+    lb = None,
+    #gram = None,
+    #attogram = None,
+    #femtogram = None,
+    #picogram = None,
+    #nanogram = None,
+    #microgram = None,
+    #milligram = None,
+    #centigram = None,
+    #kilogram = None,
+    #pound = None,
+)
+
+resistance = units_map(
+    principle = 'Ohm',
+    Ohm  = 'ohm',
+    fOhm = 'fohm',
+    pOhm = 'pohm',
+    nOhm = 'nohm',
+    mOhm = 'mohm',
+    uOhm = 'uohm',
+    cOhm = 'cohm',
+    kOhm = 'kohm',
+    MOhm = 'Mohm',
+    GOhm = 'Gohm',
+    #Ohm = None,
+    #attoOhm = None,
+    #femtoOhm = None,
+    #picoOhm = None,
+    #nanoOhm = None,
+    #microOhm = None,
+    #milliOhm = None,
+    #centiOhm = None,
+    #kiloOhm = None,
+    #megaOhm = None,
+    #gigaOhm = None,
+)
+
+capacitance = units_map(
+    principle = "pF",
+    F  = None,
+    fF = None,
+    pF = None,
+    nF = None,
+    uF = None,
+    mF = None,
+    cF = None,
+    #Farad = None,
+    #attoFarad = None,
+    #femtoFarad = None,
+    #picoFarad = None,
+    #nanoFarad = None,
+    #microFarad = None,
+    #milliFarad = None,
+    #centiFarad = None,
+)
+
+inductance = units_map(
+    principle = "uH",
+    H  = None,
+    fH = None,
+    pH = None,
+    nH = None,
+    uH = None,
+    mH = None,
+    cH = None,
+    #Henry = None,
+    #attoHenry = None,
+    #femtoHenry = None,
+    #picoHenry = None,
+    #nanoHenry = None,
+    #microHenry = None,
+    #milliHenry = None,
+    #centiHenry = None,
+)
+
+
+angle = units_map(
+    principle = "rad",
+    rad  = None,
+    mrad  = None,
+    urad  = None,
+    deg = None,
+)
+
+angle_deg = units_map(
+    principle = "deg",
+    rad  = None,
+    mrad  = None,
+    urad  = None,
+    deg = None,
+)
+
+frequency = units_map(
+    principle = "Hz",
+    Hz = None,
+    GHz = None,
+    MHz = None,
+    kHz = None,
+    mHz = None,
+    uHz = None,
+)
+
+
+
+
+
+
+
+
+
+
+    

@@ -9,10 +9,6 @@ from declarative import (
     Bunch,
 )
 
-from ..base.multi_unit_args import (
-    generate_refval_attribute,
-)
-
 from .utils import (
     str_m,
     TargetIdx,
@@ -32,32 +28,14 @@ from .substrates import (
     substrate_environment,
 )
 
+from . import standard_attrs as attrs
 
 class PLCX(CSystemStack):
     substrate_inner = substrate_fused_silica
     substrate_outer = substrate_environment
 
-    @group_dproperty
-    def L_m(desc):
-        return generate_refval_attribute(
-            desc,
-            units = 'length',
-            stems = ['L', 'length'],
-            pname = 'length',
-            preferred_attr = 'L_preferred',
-            prototypes = ['full', 'base'],
-        )
-
-    @group_dproperty
-    def R_m(desc):
-        return generate_refval_attribute(
-            desc,
-            units = 'length',
-            stems = ['R', 'ROC'],
-            pname = 'ROC',
-            preferred_attr = 'ROC_preferred',
-            prototypes = ['full', 'base'],
-        )
+    L_m = attrs.generate_L_m()
+    R_m = attrs.generate_R_m()
 
     @dproperty
     def interface1(self):
@@ -114,38 +92,9 @@ class CXCX(CSystemStack):
     substrate_inner = substrate_fused_silica
     substrate_outer = substrate_environment
 
-    @group_dproperty
-    def L_m(desc):
-        return generate_refval_attribute(
-            desc,
-            units = 'length',
-            stems = ['L', 'length'],
-            pname = 'length',
-            preferred_attr = 'L_preferred',
-            prototypes = ['full', 'base'],
-        )
-
-    @group_dproperty
-    def R1_m(desc):
-        return generate_refval_attribute(
-            desc,
-            units = 'length',
-            stems = ['R1', 'ROC1'],
-            pname = 'ROC1',
-            preferred_attr = 'ROC1_preferred',
-            prototypes = ['full', 'base'],
-        )
-
-    @group_dproperty
-    def R2_m(desc):
-        return generate_refval_attribute(
-            desc,
-            units = 'length',
-            stems = ['R2', 'ROC2'],
-            pname = 'ROC2',
-            preferred_attr = 'ROC2_preferred',
-            prototypes = ['full', 'base'],
-        )
+    L_m = attrs.generate_L_m()
+    R1_m = attrs.generate_R_m(variant = '1')
+    R2_m = attrs.generate_R_m(variant = '2')
 
     @dproperty
     def interface1(self):
