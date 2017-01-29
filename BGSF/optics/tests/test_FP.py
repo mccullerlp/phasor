@@ -27,53 +27,53 @@ def gensys(
     R1 = 1 - T1
     R2 = 1 - T1
 
-    sys = system.OpticalSystem(
+    sys = system.BGSystem(
         freq_order_max_default = 40,
     )
-    sled = sys.sled
-    sled.my.laser = optics.Laser(
+    sys = sys
+    sys.my.laser = optics.Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
     )
 
-    sled.my.itm = optics.Mirror(
+    sys.my.itm = optics.Mirror(
         T_hr=.001,
     )
-    sled.my.etm = optics.Mirror(
+    sys.my.etm = optics.Mirror(
         T_hr=.001,
     )
 
-    sled.my.s1 = optics.Space(
+    sys.my.s1 = optics.Space(
         L_m = L_m,
         L_detune_m = L_detune_m,
     )
 
-    sled.my.reflPD = optics.MagicPD()
-    sled.my.itmPD = optics.MagicPD()
-    sled.my.etmPD = optics.MagicPD()
-    sled.my.transPD = optics.PD()
+    sys.my.reflPD = optics.MagicPD()
+    sys.my.itmPD = optics.MagicPD()
+    sys.my.etmPD = optics.MagicPD()
+    sys.my.transPD = optics.PD()
 
     sys.bond_sequence(
-        sled.laser.Fr,
-        sled.reflPD.Bk,
-        sled.itm.Bk,
-        sled.itmPD.Fr,
-        sled.s1.Fr,
-        sled.etmPD.Bk,
-        sled.etm.Fr,
-        sled.transPD.Fr,
+        sys.laser.Fr,
+        sys.reflPD.Bk,
+        sys.itm.Bk,
+        sys.itmPD.Fr,
+        sys.s1.Fr,
+        sys.etmPD.Bk,
+        sys.etm.Fr,
+        sys.transPD.Fr,
     )
 
-    sled.my.refl_DC     = readouts.DCReadout(port = sled.reflPD.Wpd.o)
-    sled.my.transmon_DC = readouts.DCReadout(port = sled.transPD.Wpd.o)
-    sled.my.etm_DC      = readouts.DCReadout(port = sled.etmPD.Wpd.o)
-    sled.my.itm_DC      = readouts.DCReadout(port = sled.itmPD.Wpd.o)
-    sled.my.itm_ForceZ  = readouts.DCReadout(port = sled.itm.forceZ.o)
-    sled.my.etm_ForceZ  = readouts.DCReadout(port = sled.etm.forceZ.o)
+    sys.my.refl_DC     = readouts.DCReadout(port = sys.reflPD.Wpd.o)
+    sys.my.transmon_DC = readouts.DCReadout(port = sys.transPD.Wpd.o)
+    sys.my.etm_DC      = readouts.DCReadout(port = sys.etmPD.Wpd.o)
+    sys.my.itm_DC      = readouts.DCReadout(port = sys.itmPD.Wpd.o)
+    sys.my.itm_ForceZ  = readouts.DCReadout(port = sys.itm.forceZ.o)
+    sys.my.etm_ForceZ  = readouts.DCReadout(port = sys.etm.forceZ.o)
 
     if not no_ac:
-        sled.my.ETM_Drive = readouts.ACReadout(portD = sled.etm.posZ.i, portN = sled.etmPD.Wpd.o)
-        sled.my.ITM_Drive = readouts.ACReadout(portD = sled.etm.posZ.i, portN = sled.itmPD.Wpd.o)
+        sys.my.ETM_Drive = readouts.ACReadout(portD = sys.etm.posZ.i, portN = sys.etmPD.Wpd.o)
+        sys.my.ITM_Drive = readouts.ACReadout(portD = sys.etm.posZ.i, portN = sys.itmPD.Wpd.o)
 
     #analytic sensitivity calculations
     k          = 2 * np.pi * sys.F_carrier_1064.iwavelen_m
@@ -97,19 +97,19 @@ def test_FP_base():
     #sys.coupling_matrix_print()
     #sys.source_vector_print()
     #sys.solution_vector_print()
-    pprint(sys.sled)
-    print("Detune [m]: ", b.sys.sled.s1.L_detune_m)
-    print("refl_DC",      sys.sled.refl_DC.DC_readout     )
-    print("transmon_DC",  sys.sled.transmon_DC.DC_readout )
-    print("itm_DC",       sys.sled.itm_DC.DC_readout      )
-    print("etm_DC",       sys.sled.etm_DC.DC_readout      )
-    print("etm_Force[N]", sys.sled.etm_ForceZ.DC_readout  )
+    pprint(sys)
+    print("Detune [m]: ", b.sys.s1.L_detune_m)
+    print("refl_DC",      sys.refl_DC.DC_readout     )
+    print("transmon_DC",  sys.transmon_DC.DC_readout )
+    print("itm_DC",       sys.itm_DC.DC_readout      )
+    print("etm_DC",       sys.etm_DC.DC_readout      )
+    print("etm_Force[N]", sys.etm_ForceZ.DC_readout  )
 
-    test.assert_almost_equal(sys.sled.refl_DC.DC_readout    , 0.582198960706    , 7 )
-    test.assert_almost_equal(sys.sled.transmon_DC.DC_readout, 0.417801039293    , 7 )
-    test.assert_almost_equal(sys.sled.itm_DC.DC_readout     , 417.801039293     , 7 )
-    test.assert_almost_equal(sys.sled.etm_DC.DC_readout     , 417.383238254     , 7 )
-    test.assert_almost_equal(sys.sled.etm_ForceZ.DC_readout , -2.78587453006e-06, 7 )
+    test.assert_almost_equal(sys.refl_DC.DC_readout    , 0.582198960706    , 7 )
+    test.assert_almost_equal(sys.transmon_DC.DC_readout, 0.417801039293    , 7 )
+    test.assert_almost_equal(sys.itm_DC.DC_readout     , 417.801039293     , 7 )
+    test.assert_almost_equal(sys.etm_DC.DC_readout     , 417.383238254     , 7 )
+    test.assert_almost_equal(sys.etm_ForceZ.DC_readout , -2.78587453006e-06, 7 )
 
     #sys.coupling_matrix_print(select_from = b.etm.posZ.i, select_to = b.etm.Fr.o)
     #sys.coupling_matrix_print(
@@ -151,7 +151,7 @@ def test_FP_base():
     #print("LSBLU: ", rt_inv.get((b.etm.Fr.o, lsb_keyL), (b.etm.posZ.i, ucl_key), 0))
     #print("LSBRU: ", rt_inv.get((b.etm.Fr.o, lsb_keyR), (b.etm.posZ.i, ucl_key), 0))
 
-    AC = sys.sled.ETM_Drive.AC_sensitivity
+    AC = sys.ETM_Drive.AC_sensitivity
     print("AC:", AC)
 
     #from BGSF.utilities.mpl.autoniceplot import (mplfigB)
@@ -173,17 +173,17 @@ def test_FP_DC():
     #sol.source_vector_print()
     #print()
     #sol.solution_vector_print()
-    print("refl_DC",      sys.sled.refl_DC.DC_readout)
-    print("transmon_DC",  sys.sled.transmon_DC.DC_readout)
-    print("itm_DC",       sys.sled.itm_DC.DC_readout)
-    print("etm_DC",       sys.sled.etm_DC.DC_readout)
-    print("etm_Force[N]", sys.sled.etm_ForceZ.DC_readout)
+    print("refl_DC",      sys.refl_DC.DC_readout)
+    print("transmon_DC",  sys.transmon_DC.DC_readout)
+    print("itm_DC",       sys.itm_DC.DC_readout)
+    print("etm_DC",       sys.etm_DC.DC_readout)
+    print("etm_Force[N]", sys.etm_ForceZ.DC_readout)
 
-    test.assert_almost_equal(sys.sled.refl_DC.DC_readout    , 1.21042817297e-26 , 7 )
-    test.assert_almost_equal(sys.sled.transmon_DC.DC_readout, 1.0               , 7 )
-    test.assert_almost_equal(sys.sled.itm_DC.DC_readout     , 1000.0            , 7 )
-    test.assert_almost_equal(sys.sled.etm_DC.DC_readout     , 999.0             , 7 )
-    test.assert_almost_equal(sys.sled.etm_ForceZ.DC_readout , -6.66794542869e-06, 7 )
+    test.assert_almost_equal(sys.refl_DC.DC_readout    , 1.21042817297e-26 , 7 )
+    test.assert_almost_equal(sys.transmon_DC.DC_readout, 1.0               , 7 )
+    test.assert_almost_equal(sys.itm_DC.DC_readout     , 1000.0            , 7 )
+    test.assert_almost_equal(sys.etm_DC.DC_readout     , 999.0             , 7 )
+    test.assert_almost_equal(sys.etm_ForceZ.DC_readout , -6.66794542869e-06, 7 )
 
 def test_FP_sensitivity():
     print('test_FP_sensitivity')
@@ -194,17 +194,17 @@ def test_FP_sensitivity():
     sys = b.sys
     sol = sys.solve()
 
-    print("refl_DC",      sys.sled.refl_DC.DC_readout)
-    print("transmon_DC",  sys.sled.transmon_DC.DC_readout)
+    print("refl_DC",      sys.refl_DC.DC_readout)
+    print("transmon_DC",  sys.transmon_DC.DC_readout)
     print()
-    print("itm_DC",       sys.sled.itm_DC.DC_readout)
+    print("itm_DC",       sys.itm_DC.DC_readout)
     print("itm_DC_calc",  b.PcavITM)
-    test.assert_almost_equal(sys.sled.itm_DC.DC_readout , b.PcavITM, 7 )
+    test.assert_almost_equal(sys.itm_DC.DC_readout , b.PcavITM, 7 )
     print()
-    print("etm_DC",       sys.sled.etm_DC.DC_readout)
-    print("etm_Force[N]", sys.sled.etm_ForceZ.DC_readout)
+    print("etm_DC",       sys.etm_DC.DC_readout)
+    print("etm_Force[N]", sys.etm_ForceZ.DC_readout)
 
-    AC = sys.sled.ITM_Drive.AC_sensitivity
+    AC = sys.ITM_Drive.AC_sensitivity
     print("AC:", AC)
     print ("AC ratio: ", AC / b.dPcavITMdL)
     test.assert_almost_equal(AC , b.dPcavITMdL, 1 )

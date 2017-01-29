@@ -60,7 +60,7 @@ class Constants(Element):
         super(Constants, self).__build__()
 
 
-class LinearSystem(RootElement, Constants):
+class BGSystem(RootElement, Constants):
 
     _frozen = False
 
@@ -379,3 +379,4 @@ class LinearSystem(RootElement, Constants):
         self.owners_ports_virtual.setdefault(element, []).append(port)
         return
 
+LinearSystem = BGSystem

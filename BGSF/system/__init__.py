@@ -1,5 +1,7 @@
 
-from .base import LinearSystem
-from .optical import OpticalSystem
+from .base import LinearSystem, BGSystem
 
+from ..base import (
+    Frequency,
+)
 

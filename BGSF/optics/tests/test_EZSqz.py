@@ -2,21 +2,11 @@
 """
 from __future__ import (division, print_function)
 
-from BGSF.optics import (
-    Mirror,
-    PD,
-    MagicPD,
-    Space,
-    Laser,
-    EZSqz,
-)
-
-from BGSF.system.optical import (
-    OpticalSystem
-)
+from BGSF import system
+from BGSF import optics
 
 import pytest
-pytestmark = pytest.mark.skip('EZSqz still WIP')
+pytestmark = pytest.mark.skip('optics.EZSqz still WIP')
 #pytest.skip("Want to skip!")
 
 #from BGSF.utilities.np import logspaced
@@ -27,59 +17,59 @@ def gensys(
         loss_EM = 0,
         loss_BS = 0,
 ):
-    sys = OpticalSystem()
-    sled = sys.sled
-    sled.sqz = EZSqz(
+    sys = system.BGSystem()
+    sled = sys
+    sled.sqz = optics.EZSqz(
         rel_variance_1 = .1,
         rel_variance_2 = 12,
     )
-    sled.sqz = EZSqz(
+    sled.sqz = optics.EZSqz(
         nonlinear_power_gain = 10,
         loss = .1,
     )
 
-    sled.laser = Laser(
+    sled.laser = optics.Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
         name = "PSL",
     )
 
-    sled.mX = Mirror(
+    sled.mX = optics.Mirror(
         T_hr = 0,
         L_hr = loss_EM,
         name = 'mX',
         facing_cardinal = 'W',
     )
-    sled.mY = Mirror(
+    sled.mY = optics.Mirror(
         T_hr = 0,
         L_hr = loss_EM,
         name = 'mY',
         facing_cardinal = 'S',
     )
     #T_hr = sys.optical_harmonic_value(.3),
-    sled.mBS = Mirror(
+    sled.mBS = optics.Mirror(
         T_hr = .5,
         L_hr = loss_BS,
         AOI_deg = 45,
         facing_cardinal = 'NW',
     )
 
-    sled.sX = Space(
+    sled.sX = optics.Space(
         1,
         L_detune_m = 1064e-9 / 8,
         name = 'sX',
     )
-    sled.sY = Space(
+    sled.sY = optics.Space(
         1,
         L_detune_m = 0,
         name = 'sY',
     )
 
-    sled.symPD = MagicPD(
+    sled.symPD = optics.MagicPD(
         name = 'symPD',
         facing_cardinal = 'E',
     )
-    sled.asymPD = PD(
+    sled.asymPD = optics.PD(
         name = 'asymPD',
     )
 
