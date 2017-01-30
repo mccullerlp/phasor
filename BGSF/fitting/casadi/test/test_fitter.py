@@ -96,7 +96,7 @@ def test_fitter_jitter(plot):
     sys = buildsys()
     froot = FIT.FitterRoot()
     froot.my.sym = FIT.FitterSymJitterPlacement(
-        shift_mm = 1,
+        shift_val = 1e-3,
     )
     print(froot.targets_recurse('self'))
     froot.systems.alm = sys

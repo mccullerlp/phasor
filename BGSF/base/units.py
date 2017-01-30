@@ -179,6 +179,11 @@ laser_power = units_map(
     GW = None,
 )
 
+dimensionless = units_map(
+    principle = "val",
+    val = "dimensionless",
+)
+
 
 
 

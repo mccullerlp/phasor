@@ -19,6 +19,8 @@ from .base import (
     FitterBase,
 )
 
+from ...base import units
+
 
 class FitterSym(FitterBase):
 
@@ -98,22 +100,23 @@ class FitterSym(FitterBase):
 
 class FitterSymJitterPlacement(FitterSym):
 
-    #@group_dproperty
-    #def shift_m(desc):
-    #    return generate_refval_attribute(
-    #        desc,
-    #        ubunch = ,
-    #        stems = ['shift', ],
-    #        ooa_name = 'shift',
-    #        preferred_attr = 'shift_preferred',
-    #        default_attr = '_shift_default',
-    #        prototypes = ['full'],
-    #    )
+    #TODO: I dont like generate_refval_attribute for dimensionless things here
+    @group_dproperty
+    def shift_val(desc):
+        return generate_refval_attribute(
+            desc,
+            ubunch = units.dimensionless,
+            stems = ['shift', ],
+            ooa_name = 'shift',
+            preferred_attr = 'shift_preferred',
+            default_attr = '_shift_default',
+            prototypes = ['full'],
+        )
 
     def transforms(self, datum):
         return [
-            lambda v : v + self.shift_m,
-            lambda v : v - self.shift_m,
+            lambda v : v + self.shift_val,
+            lambda v : v - self.shift_val,
         ]
 
 class FitterSymJitterRelative(FitterSym):

@@ -14,4 +14,5 @@ def pytest_addoption(parser):
 
 @pytest.fixture
 def plot(request):
-    return request.config.getoption("--plot")
+    #return request.config.getoption("--plot")
+    return False

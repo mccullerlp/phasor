@@ -47,10 +47,8 @@ class SimpleUnitfulGroup(OverridableObject):
 
     def __add__(self, other):
         units_to = self.units
-        type_to = ureg[units_to]
         units_from = other.units
-        type_from = ureg[units_from]
-        rescale = type_from / type_to
+        rescale = units_from / units_to
         assert(rescale.unitless)
         rescale = rescale.m_as(ureg.dimensionless)
         return SimpleUnitfulGroup(
@@ -146,19 +144,20 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
 
     @mproperty
     def fitter_data(self):
+        #TODO: provide real units rather than the str version
         def fitter_inject(ooa, value, ivalue):
             for key in self.fitter_parameter:
                 ooa = ooa[key]
             ooa.val   = value
             ooa.ref   = ivalue
-            ooa.units = self.units
+            ooa.units = str(self.units)
 
         def fitter_reinject(ooa, value):
             for key in self.fitter_parameter:
                 ooa = ooa[key]
             ooa.val = value
             ooa.ref = value
-            ooa.units = self.units
+            ooa.units = str(self.units)
 
         def fitter_initial(ooa):
             for key in self.fitter_parameter:
@@ -170,7 +169,7 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
 
         return [FrozenBunch(
             parameter_key = self.fitter_parameter,
-            units         = self.units,
+            units         = str(self.units),
             name          = self.name_system,
             name_global   = self.name_system,
             initial       = fitter_initial,
@@ -250,14 +249,16 @@ def generate_refval_attribute(
                         "from the registry used by the library")
                         #then it must be a quantity
                 else:
-                    ooa.setdefault("units", ubunch.principle_name)
+                    #TODO not happy with this string conversion
+                    ooa.setdefault("units", str(ubunch.principle_unit))
                     ooa.setdefault("ref", None)
                     ooa.setdefault("val", None)
             else:
-                unit = units[k]
+                #TODO not thrilled about this conversion
+                unit = str(ubunch.umap[units[k]])
                 #setup defaults
                 ooa = self.ooa_params[ooa_name].useidx('immediate')
-                ooa.setdefault("units", unit)
+                ooa.setdefault("units", mag1_units(unit))
                 ooa.setdefault("ref", v)
                 ooa.setdefault("val", ooa.ref)
         return
@@ -285,7 +286,8 @@ def generate_refval_attribute(
     ):
         #could get value with
         #k, v = storage.items().next()
-        print("hmm: " ,self.ooa_params[ooa_name].units)
+        #print("hmm: " ,self.ooa_params[ooa_name].units)
+
         pint_units = ureg[self.ooa_params[ooa_name].units]
         return ElementRefValue(
             ooa_params = self.ooa_params[ooa_name],
