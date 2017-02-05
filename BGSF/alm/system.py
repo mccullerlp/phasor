@@ -6,13 +6,7 @@ import numpy as np
 #import BGSF.numerics.dispatched as dmath
 #import sympy
 
-from declarative import (
-    mproperty,
-    group_dproperty,
-    NOARG,
-    Bunch,
-    PropertyTransforming,
-)
+import declarative
 
 from declarative.substrate import (
     invalidate_auto,
@@ -37,35 +31,35 @@ from . import standard_attrs as attrs
 class CSystem(
     MatrixAtsCompositeBase,
 ):
-    @mproperty
+    @declarative.mproperty
     def _internal(self):
         return Element()
 
     _loc_default = ('loc_m', None)
     loc_m = attrs.generate_loc_m()
 
-    @mproperty(simple_delete = True)
+    @declarative.mproperty(simple_delete = True)
     @invalidate_auto
-    def offset_m(self, arg = NOARG):
+    def offset_m(self, arg = declarative.NOARG):
         return 0
-        if arg is NOARG:
+        if arg is declarative.NOARG:
             if self.component_pos_pairings.any_abs_pos:
                 arg = self.positions_list[0]
             else:
                 arg = None
         return arg
 
-    @mproperty(simple_delete = True)
+    @declarative.mproperty(simple_delete = True)
     @invalidate_auto
     def width_m(self):
         return self.positions_list[-1] - self.positions_list[0]
 
-    @mproperty(simple_delete = True)
+    @declarative.mproperty(simple_delete = True)
     @invalidate_auto
-    def components(self, comp_list = NOARG):
-        if comp_list is not NOARG:
+    def components(self, comp_list = declarative.NOARG):
+        if comp_list is not declarative.NOARG:
             for component in comp_list:
-                if isinstance(component, PropertyTransforming):
+                if isinstance(component, declarative.PropertyTransforming):
                     with self.building:
                         self.insert(component)
                 else:
@@ -84,7 +78,7 @@ class CSystem(
         clist = [ch for loc, ch in loc_ch_list]
         return clist
 
-    @mproperty(simple_delete = True)
+    @declarative.mproperty(simple_delete = True)
     @invalidate_auto
     def component_pos_pairings(self):
         with self.building:
@@ -139,23 +133,23 @@ class CSystem(
                 loc_m_prev = loc_m
             pos_list.append(loc_m)
             pos_list = np.asarray(pos_list) - pos_list[0]
-            return Bunch(
+            return declarative.Bunch(
                 positions   = pos_list,
                 filled      = components_filled,
                 components_pos = components_pos,
             )
 
-    @mproperty(simple_delete = True)
+    @declarative.mproperty(simple_delete = True)
     @invalidate_auto
     def positions_list(self):
         return self.component_pos_pairings.positions
 
-    @mproperty(simple_delete = True)
+    @declarative.mproperty(simple_delete = True)
     @invalidate_auto
     def filled_list(self):
         return self.component_pos_pairings.filled
 
-    @mproperty(simple_delete = True)
+    @declarative.mproperty(simple_delete = True)
     @invalidate_auto
     def component_matrix_list(self):
         mat = np.eye(2)
@@ -165,12 +159,12 @@ class CSystem(
             mat_list.append(mat)
         return mat_list
 
-    @mproperty(simple_delete = True)
+    @declarative.mproperty(simple_delete = True)
     @invalidate_auto
     def matrix(self):
         return self.component_matrix_list[-1]
 
-    @mproperty(simple_delete = True)
+    @declarative.mproperty(simple_delete = True)
     @invalidate_auto
     def matrix_inv(self):
         mat = np.eye(2)
@@ -180,7 +174,7 @@ class CSystem(
             mat = comp.matrix_inv * mat
         return mat
 
-    @mproperty(simple_delete = True)
+    @declarative.mproperty(simple_delete = True)
     @invalidate_auto
     def _matrix_between_memomap(self):
         return {}
@@ -340,7 +334,7 @@ class CSystem(
                 dmap[TargetIdx(tidx + (subidx,))] = dfunc
         return dmap
 
-    @mproperty(simple_delete = True)
+    @declarative.mproperty(simple_delete = True)
     @invalidate_auto
     def constraints(self):
         constraints = []
@@ -354,7 +348,7 @@ class CSystem(
         return constraints
 
 class CSystemStack(CSystem):
-    @mproperty(simple_delete = True)
+    @declarative.mproperty(simple_delete = True)
     def components(self, comp_list):
         components = []
         for component in comp_list:
@@ -367,7 +361,7 @@ class CSystemStack(CSystem):
                         )
                 else:
                     obj = component
-            if isinstance(component, PropertyTransforming):
+            if isinstance(component, declarative.PropertyTransforming):
                 with self.building:
                     obj = self.insert(component)
             #print(obj)
@@ -375,7 +369,7 @@ class CSystemStack(CSystem):
         self.root._complete()
         return components
 
-    @mproperty(simple_delete = True)
+    @declarative.mproperty(simple_delete = True)
     @invalidate_auto
     def component_pos_pairings(self):
         try:
@@ -400,7 +394,7 @@ class CSystemStack(CSystem):
                     loc_m += comp.width_m
                 pos_list.append(loc_m)
                 pos_list = np.asarray(pos_list) - pos_list[0]
-                return Bunch(
+                return declarative.Bunch(
                     positions   = pos_list,
                     filled      = components_filled,
                     components_pos = components_pos,

@@ -1,8 +1,6 @@
 from __future__ import division
 from __future__ import absolute_import
-from declarative import (
-    Bunch,
-)
+import declarative
 from .dictionary_keys import (
     DictKey,
 )
@@ -24,7 +22,7 @@ def sparsity_graph(km):
         active.add(kto)
         seq[kfrom].append(kto)
         req[kto].append(kfrom)
-    return Bunch(
+    return declarative.Bunch(
         active = active,
         seq = seq,
         req = req,

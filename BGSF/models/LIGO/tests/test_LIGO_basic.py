@@ -2,51 +2,23 @@ from __future__ import print_function
 import BGSF.utilities.version as version
 print(version.foundations_version())
 
-from declarative.bunch import (
-    Bunch,
-)
+import declarative
+from BGSF import optics
+from BGSF import base
+from BGSF import signals
+from BGSF import system
+from BGSF import readouts
 
-from BGSF.optics import (
-    OpticalFrequency,
-    Mirror,
-    PD,
-    MagicPD,
-    Space,
-    Laser,
-    VacuumTerminator,
-)
-
-from BGSF.base import (
-    Frequency,
-)
-
-from BGSF.signals import (
-    SignalGenerator,
-    Mixer,
-    #RMSMixer,
-)
-
-from BGSF.system.optical import (
-    OpticalSystem
-)
-
-from BGSF.readouts import (
-    DCReadout,
-    ACReadout,
-    NoiseReadout,
-)
-
-from BGSF.models.LIGO.ligo_sled import (
-    LIGOBasicOperation
-)
+from BGSF.models.LIGO import ligo_sled
 
 
 def test_LIGO_basic():
-    sys = OpticalSystem(
+    sys = system.BGSystem(
         freq_order_max_default = 1,
     )
-    sys.sled.det = LIGOBasicOperation()
-    sol = sys.solve()
+    sys.det = ligo_sled.LIGOBasicOperation()
+    sys.solution
+
 
 if __name__ == '__main__':
     test_LIGO_basic()

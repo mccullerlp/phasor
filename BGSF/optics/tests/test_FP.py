@@ -2,13 +2,9 @@
 """
 from __future__ import (division, print_function)
 import numpy as np
-import numpy.testing as test
+import numpy.testing as np_test
 import pytest
-
-
-from declarative import (
-    Bunch,
-)
+import declarative
 
 from BGSF.utilities.print import pprint
 
@@ -80,7 +76,7 @@ def gensys(
     d          = 1 + R1 * R2 - 2 * (R1 * R2)**.5 * np.cos(2*k*(L_detune_m))
     PcavITM    = 1 * T1/d
     dPcavITMdL = -4*T1*(R1 * R2)**.5 * k * np.sin(2 * k * (L_detune_m)) / d**2
-    return Bunch(locals())
+    return declarative.Bunch(locals())
 
 
 @pytest.mark.optics_fast
@@ -105,11 +101,11 @@ def test_FP_base():
     print("etm_DC",       sys.etm_DC.DC_readout      )
     print("etm_Force[N]", sys.etm_ForceZ.DC_readout  )
 
-    test.assert_almost_equal(sys.refl_DC.DC_readout    , 0.582198960706    , 7 )
-    test.assert_almost_equal(sys.transmon_DC.DC_readout, 0.417801039293    , 7 )
-    test.assert_almost_equal(sys.itm_DC.DC_readout     , 417.801039293     , 7 )
-    test.assert_almost_equal(sys.etm_DC.DC_readout     , 417.383238254     , 7 )
-    test.assert_almost_equal(sys.etm_ForceZ.DC_readout , -2.78587453006e-06, 7 )
+    np_test.assert_almost_equal(sys.refl_DC.DC_readout    , 0.582198960706    , 7 )
+    np_test.assert_almost_equal(sys.transmon_DC.DC_readout, 0.417801039293    , 7 )
+    np_test.assert_almost_equal(sys.itm_DC.DC_readout     , 417.801039293     , 7 )
+    np_test.assert_almost_equal(sys.etm_DC.DC_readout     , 417.383238254     , 7 )
+    np_test.assert_almost_equal(sys.etm_ForceZ.DC_readout , -2.78587453006e-06, 7 )
 
     #sys.coupling_matrix_print(select_from = b.etm.posZ.i, select_to = b.etm.Fr.o)
     #sys.coupling_matrix_print(
@@ -179,11 +175,11 @@ def test_FP_DC():
     print("etm_DC",       sys.etm_DC.DC_readout)
     print("etm_Force[N]", sys.etm_ForceZ.DC_readout)
 
-    test.assert_almost_equal(sys.refl_DC.DC_readout    , 1.21042817297e-26 , 7 )
-    test.assert_almost_equal(sys.transmon_DC.DC_readout, 1.0               , 7 )
-    test.assert_almost_equal(sys.itm_DC.DC_readout     , 1000.0            , 7 )
-    test.assert_almost_equal(sys.etm_DC.DC_readout     , 999.0             , 7 )
-    test.assert_almost_equal(sys.etm_ForceZ.DC_readout , -6.66794542869e-06, 7 )
+    np_test.assert_almost_equal(sys.refl_DC.DC_readout    , 1.21042817297e-26 , 7 )
+    np_test.assert_almost_equal(sys.transmon_DC.DC_readout, 1.0               , 7 )
+    np_test.assert_almost_equal(sys.itm_DC.DC_readout     , 1000.0            , 7 )
+    np_test.assert_almost_equal(sys.etm_DC.DC_readout     , 999.0             , 7 )
+    np_test.assert_almost_equal(sys.etm_ForceZ.DC_readout , -6.66794542869e-06, 7 )
 
 def test_FP_sensitivity():
     print('test_FP_sensitivity')
@@ -199,7 +195,7 @@ def test_FP_sensitivity():
     print()
     print("itm_DC",       sys.itm_DC.DC_readout)
     print("itm_DC_calc",  b.PcavITM)
-    test.assert_almost_equal(sys.itm_DC.DC_readout , b.PcavITM, 7 )
+    np_test.assert_almost_equal(sys.itm_DC.DC_readout , b.PcavITM, 7 )
     print()
     print("etm_DC",       sys.etm_DC.DC_readout)
     print("etm_Force[N]", sys.etm_ForceZ.DC_readout)
@@ -207,7 +203,7 @@ def test_FP_sensitivity():
     AC = sys.ITM_Drive.AC_sensitivity
     print("AC:", AC)
     print ("AC ratio: ", AC / b.dPcavITMdL)
-    test.assert_almost_equal(AC , b.dPcavITMdL, 1 )
+    np_test.assert_almost_equal(AC , b.dPcavITMdL, 1 )
 
 def test_FP_OOA():
     print('test_FP_OOA')

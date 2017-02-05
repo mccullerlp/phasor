@@ -96,7 +96,7 @@ def gensys(
     sys.DC_readout_add('sym_DC', sled.symPD.Wpd.o)
     sys.DC_readout_add('asym_DC', sled.asymPD.Wpd.o)
     sys.AC_sensitivity_add('asym_Drive', sled.mX.posZ.i, sled.asymPD.Wpd.o)
-    return Bunch(locals())
+    return declarative.Bunch(locals())
 
 def test_mich():
     b = gensys(

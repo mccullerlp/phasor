@@ -9,13 +9,7 @@ from builtins import range
 import numpy as np
 from collections import defaultdict
 
-from declarative import (
-    mproperty,
-)
-
-from declarative.bunch import (
-    Bunch,
-)
+import declarative
 
 from ..math.key_matrix import (
     DictKey,

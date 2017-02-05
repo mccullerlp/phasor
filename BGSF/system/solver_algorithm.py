@@ -6,14 +6,9 @@ from builtins import object
 import numpy as np
 import copy
 from collections import defaultdict
+import declarative
 
-from declarative import (
-    mproperty,
-    Bunch,
-    DeepBunch,
-)
-
-from ..utilities.print import pprint
+#from ..utilities.print import pprint
 
 from ..math.key_matrix import (
     KVSpace,
@@ -51,7 +46,7 @@ class SystemSolver(object):
         #each index stores a dict, indexed by the output set
         self.driven_solution_bunches = [
             dict(
-                perturbative = Bunch(
+                perturbative = declarative.Bunch(
                     solution    = dict(),
                     source      = dict(),
                     delta_v     = float('inf'),
@@ -92,9 +87,9 @@ class SystemSolver(object):
         self._setup_views()
         return
 
-    @mproperty
+    @declarative.mproperty
     def views(self):
-        return DeepBunch(vpath = False)
+        return declarative.DeepBunch(vpath = False)
 
     def _setup_views(self):
         views_insert = []
@@ -110,17 +105,17 @@ class SystemSolver(object):
                 )
         #sort this so that shorter name_tups are first
         views_insert.sort()
-        views = DeepBunch()
+        views = declarative.DeepBunch()
         for name_tup, view_obj in views_insert:
             subview = views
             for idx, name in enumerate(name_tup[:-1]):
-                if not isinstance(subview, DeepBunch):
+                if not isinstance(subview, declarative.DeepBunch):
                     #this can't really be called on the first one
                     subview.subview_insert(name_tup[idx - 1:], view_obj)
                     break
                 subview = subview[name]
             else:
-                if not isinstance(subview, DeepBunch):
+                if not isinstance(subview, declarative.DeepBunch):
                     subview.subview_insert(name_tup[-1:], view_obj)
                 else:
                     subview[name_tup[-1]] = view_obj
@@ -249,7 +244,7 @@ class SystemSolver(object):
         for node, val in solution_dict.items():
             solution_vector_kv[node] = val
 
-        solution_bunch = Bunch(
+        solution_bunch = declarative.Bunch(
             source   = source_vector,
             solution = solution_vector_kv,
             delta_v  = self.delta_v_compute(
@@ -360,7 +355,7 @@ class SystemSolver(object):
         for node in outputs_set:
             solution_vector_kv[node] = solution_dict.get(node, 0)
 
-        solution_bunch = Bunch(
+        solution_bunch = declarative.Bunch(
             source   = source_vector,
             solution = solution_vector_kv,
         )
@@ -422,7 +417,7 @@ class SystemSolver(object):
             purge_out     = True,
         )
 
-        solution_bunch = Bunch(
+        solution_bunch = declarative.Bunch(
             inputs_set          = inputs_set,
             outputs_set         = outputs_set,
             seq                 = inverse_bunch.seq,

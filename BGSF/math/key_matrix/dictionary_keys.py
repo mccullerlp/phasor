@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from __future__ import division
-from builtins import str
-from builtins import object
+from __future__ import division, print_function
 from collections import Mapping as MappingABC
+import declarative
 
 
 NOARG = (lambda : ())
@@ -71,7 +70,7 @@ class DictKey(MappingABC):
         return list(self._dict.items())
 
     def kv_contains(self, k, v):
-        v2 = self._dict.get(k, NOARG)
+        v2 = self._dict.get(k, declarative.NOARG)
         return v == v2
 
     def __and__(self, other):

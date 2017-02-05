@@ -12,11 +12,11 @@ import matplotlib.transforms as mpltrans
 import matplotlib.collections as mplcollect
 
 from declarative.bunch import (
-    Bunch,
+    declarative.Bunch,
 )
 from declarative import (
-    OverridableObject,
-    mproperty,
+    declarative.OverridableObject,
+    declarative.mproperty,
 )
 
 from BGSF.utilities.np import logspaced
@@ -73,7 +73,7 @@ def plot_ellipses(
     ax.add_collection(col)
 
 
-class EllipsePlotter(OverridableObject):
+class EllipsePlotter(declarative.OverridableObject):
     use_logellipt = False
     color_signal  = 'black'
     color_noise   = 'blue'
@@ -98,7 +98,7 @@ class EllipsePlotter(OverridableObject):
 
         if self.use_baseline:
             #TODO
-            ebunch = Bunch(
+            ebunch = declarative.Bunch(
                 max = np.ones_like(readout.AC_CSD_ellipse_norm.max),
                 min = np.ones_like(readout.AC_CSD_ellipse_norm.min),
                 deg = readout.AC_CSD_ellipse_norm.deg,

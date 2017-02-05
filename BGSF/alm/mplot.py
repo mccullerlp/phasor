@@ -2,16 +2,11 @@
 """
 """
 from __future__ import division, print_function
-from builtins import str
 import numpy as np
 
 from pprint import pprint
 from matplotlib.text import OffsetFrom
-
-from declarative import (
-    first_non_none,
-    OverridableObject,
-)
+import declarative
 
 from .utils import (
     str_m,
@@ -34,7 +29,7 @@ from BGSF.utilities.mpl.stacked_plots import (
 )
 
 
-class MPlotter(OverridableObject):
+class MPlotter(declarative.OverridableObject):
     sys = None
     z = None
     N_points = 300
@@ -59,9 +54,9 @@ class MPlotter(OverridableObject):
             z_unit = 1
             z_unit_top = 1/.0254
 
-        sys = first_non_none(sys, self.sys)
-        z = first_non_none(z, self.z)
-        overlap_target = first_non_none(overlap_target, self.overlap_target)
+        sys = declarative.first_non_none(sys, self.sys)
+        z = declarative.first_non_none(z, self.z)
+        overlap_target = declarative.first_non_none(overlap_target, self.overlap_target)
 
         if z is None:
             z = np.linspace(-.1, float(sys.layout.width_m) + .1, self.N_points)

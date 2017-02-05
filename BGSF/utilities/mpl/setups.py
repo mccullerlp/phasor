@@ -4,10 +4,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
-from declarative import (
-    OverridableObject, mproperty, dproperty, NOARG,
-    first_non_none, Bunch,
-)
+import declarative
 import collections
 
 
@@ -17,7 +14,7 @@ def figure_callthrough(data, figure):
     return data
 
 
-class MPLSetupAxes(OverridableObject):
+class MPLSetupAxes(declarative.OverridableObject):
     title      = None
     ylim       = None
     yscale     = None
@@ -45,59 +42,59 @@ class MPLSetupAxes(OverridableObject):
         grid       = None,
         aspect     = None,
     ):
-        title      = first_non_none(title, self.title)
+        title      = declarative.first_non_none(title, self.title)
         if title is not None:
             ax.set_title(title)
 
-        grid      = first_non_none(grid, self.grid)
+        grid      = declarative.first_non_none(grid, self.grid)
         if grid is not None:
             ax.grid(b = grid)
 
-        ylim       = first_non_none(ylim, self.ylim)
+        ylim       = declarative.first_non_none(ylim, self.ylim)
         if ylim is not None:
             ax.set_ylim(ylim)
 
-        yscale     = first_non_none(yscale, self.yscale)
+        yscale     = declarative.first_non_none(yscale, self.yscale)
         if yscale is not None:
             ax.set_yscale(yscale)
 
-        ylabel       = first_non_none(ylabel, self.ylabel)
+        ylabel       = declarative.first_non_none(ylabel, self.ylabel)
         if ylabel is not None:
             ax.set_ylabel(ylabel)
 
-        xlim       = first_non_none(xlim, self.xlim)
+        xlim       = declarative.first_non_none(xlim, self.xlim)
         if xlim is not None:
             ax.set_xlim(xlim)
 
-        xscale     = first_non_none(xscale, self.xscale)
+        xscale     = declarative.first_non_none(xscale, self.xscale)
         if xscale is not None:
             ax.set_xscale(xscale)
 
-        xlabel       = first_non_none(xlabel, self.xlabel)
+        xlabel       = declarative.first_non_none(xlabel, self.xlabel)
         if xlabel is not None:
             ax.set_xlabel(xlabel)
 
-        legend     = first_non_none(legend, self.legend)
-        legend_loc = first_non_none(legend_loc, self.legend_loc)
+        legend     = declarative.first_non_none(legend, self.legend)
+        legend_loc = declarative.first_non_none(legend_loc, self.legend_loc)
         if legend:
             leg_kw = dict(loc = legend_loc)
             if isinstance(legend, dict):
                 leg_kw.update(legend)
             ax.legend(**leg_kw)
 
-        aspect      = first_non_none(aspect, self.aspect)
+        aspect      = declarative.first_non_none(aspect, self.aspect)
         if aspect is not None:
             ax.set_aspect(aspect)
 
-        return Bunch(locals())
+        return declarative.Bunch(locals())
 
 
-class MPLLayoutBase(OverridableObject):
+class MPLLayoutBase(declarative.OverridableObject):
     facecolor              = (.9, .9, .9)
 
     @mproperty
-    def fig(self, f = NOARG):
-        if f is NOARG:
+    def fig(self, f = declarative.NOARG):
+        if f is declarative.NOARG:
             f = plt.figure(facecolor = self.facecolor)
         return f
 
@@ -105,8 +102,8 @@ class MPLLayoutBase(OverridableObject):
     size_inches_wh_base = (14, 8)
     size_inches_wh_scaling = (4, 3)
     @mproperty
-    def size_inches(self, si = NOARG):
-        if si is NOARG:
+    def size_inches(self, si = declarative.NOARG):
+        if si is declarative.NOARG:
             si = (
                 self.size_inches_wh_base[0] + self.size_inches_wh_scaling[0] * (self.grid_vh[1]-1),
                 self.size_inches_wh_base[1] + self.size_inches_wh_scaling[1] * (self.grid_vh[0]-1)
@@ -128,7 +125,7 @@ class MPLLayoutBase(OverridableObject):
         return spl_list
 
 
-class MPLAnnotations(OverridableObject):
+class MPLAnnotations(declarative.OverridableObject):
     title                  = None
 
     facecolor              = (.9, .9, .9)
@@ -145,8 +142,8 @@ class MPLAnnotations(OverridableObject):
     layout_kw              = dict()
 
     @mproperty
-    def layout(self, l_out = NOARG):
-        if l_out is NOARG:
+    def layout(self, l_out = declarative.NOARG):
+        if l_out is declarative.NOARG:
             kw = dict(self.layout_kw)
             kw.update(
                 facecolor              = self.facecolor,

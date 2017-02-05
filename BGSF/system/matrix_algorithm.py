@@ -6,18 +6,12 @@ from builtins import object
 from collections import defaultdict
 import copy
 
-from declarative import (
-    NOARG,
-    Bunch,
-    #mproperty,
-    #dproperty, OverridableObject,
-)
+import declarative
 
 from ..base.ports import PostBondKey
 
 from ..math.key_matrix import (
     KVSpace,
-    KeyMatrix,
 )
 
 from .graph_algorithm import (
@@ -124,9 +118,9 @@ class MatrixBuildAlgorithm(object):
 
     def noise_pair_insert(self, p1, k1, p2, k2, genfunc):
         #print('noise pair: ', p1, k2, p2, k2)
-        ptofull1 = self.port_cplgs.get(p1.purge_keys(PostBondKey), NOARG)
+        ptofull1 = self.port_cplgs.get(p1.purge_keys(PostBondKey), declarative.NOARG)
         assert(k1 in ptofull1)
-        ptofull2 = self.port_cplgs.get(p2.purge_keys(PostBondKey), NOARG)
+        ptofull2 = self.port_cplgs.get(p2.purge_keys(PostBondKey), declarative.NOARG)
         assert(k2 in ptofull2)
 
         self.field_space.keys_add((p1, k1))
@@ -185,8 +179,8 @@ class MatrixBuildAlgorithm(object):
         self.all_injections.append(inj_obj)
         for (pkf, pkt), func in list(inj_obj.edges_pkpk_dict.items()):
             pto, kto = pkt
-            ptofull = self.port_cplgs.get(pto, NOARG)
-            if ptofull is NOARG:
+            ptofull = self.port_cplgs.get(pto, declarative.NOARG)
+            if ptofull is declarative.NOARG:
                 print("Missing Connection:", pto, kto)
             else:
                 assert(kto in ptofull)
@@ -202,8 +196,8 @@ class MatrixBuildAlgorithm(object):
             self.field_space.keys_add(pkt)
         for pks, func in list(inj_obj.sources_pk_dict.items()):
             psrc , ksrc = pks
-            ptofull = self.port_cplgs.get(psrc, NOARG)
-            if ptofull is NOARG:
+            ptofull = self.port_cplgs.get(psrc, declarative.NOARG)
+            if ptofull is declarative.NOARG:
                 print("Missing Connection:", psrc)
             else:
                 assert(ksrc in ptofull)
@@ -392,7 +386,7 @@ class MatrixBuildAlgorithm(object):
             req = req_perturb,
         )
 
-        return Bunch(
+        return declarative.Bunch(
             inputs_set = inputs_set,
             outputs_set = outputs_set,
             order = solution_min_order,

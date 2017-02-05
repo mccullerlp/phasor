@@ -8,13 +8,7 @@ from builtins import range
 
 import numpy as np
 
-from declarative import (
-    mproperty,
-)
-
-from declarative.bunch import (
-    Bunch,
-)
+import declarative
 
 from ..math.key_matrix import (
     DictKey,
@@ -247,7 +241,7 @@ class HomodyneACReadoutView(ReadoutViewBase):
         disc[disc < 0] = 0
         ratio = ((NIQ[1, 0] > 0)*2 - 1) * np.sqrt(disc / (max_eig - min_eig))
         ang_rad = np.pi - np.arccos(ratio)
-        return Bunch(
+        return declarative.Bunch(
             min = min_eig,
             max = max_eig,
             rad = ang_rad,
@@ -259,7 +253,7 @@ class HomodyneACReadoutView(ReadoutViewBase):
         ellipse = self.AC_CSD_ellipse
         #TODO, get appropriate wavelength rather than assuming 1064nm
         R = np.sqrt(ellipse.min / ellipse.max)
-        return Bunch(
+        return declarative.Bunch(
             min = R,
             max = 1 / R,
             rad = ellipse.rad,
@@ -271,7 +265,7 @@ class HomodyneACReadoutView(ReadoutViewBase):
         ellipse = self.AC_CSD_ellipse
         #TODO, get appropriate wavelength rather than assuming 1064nm
         qmag = self.system.adjust_PSD * self.symbols.h_Js * self.symbols.c_m_s / 1064e-9  # * iwavelen_m
-        return Bunch(
+        return declarative.Bunch(
             min = ellipse.min / qmag,
             max = ellipse.max / qmag,
             rad = ellipse.rad,
@@ -297,7 +291,7 @@ class HomodyneACReadoutView(ReadoutViewBase):
         max_eig = (SIQ[0, 0] + SIQ[1, 1] + rtDisc)/2
         ratio = ((SIQ[1, 0] > 0)*2 - 1) * np.sqrt((SIQ[0, 0] - min_eig) / (max_eig - min_eig))
         ang_rad = np.pi - np.arccos(ratio)
-        return Bunch(
+        return declarative.Bunch(
             min = min_eig,
             max = max_eig,
             rad = ang_rad,
@@ -312,7 +306,7 @@ class HomodyneACReadoutView(ReadoutViewBase):
         max_eig = (SIQ[0, 0] + SIQ[1, 1] + rtDisc)/2
         ratio = ((SIQ[1, 0] > 0)*2 - 1) * np.sqrt((SIQ[0, 0] - min_eig) / (max_eig - min_eig))
         ang_rad = np.pi - np.arccos(ratio)
-        return Bunch(
+        return declarative.Bunch(
             min = min_eig,
             max = max_eig,
             rad = ang_rad,

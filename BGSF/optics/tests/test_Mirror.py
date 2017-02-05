@@ -3,9 +3,8 @@
 
 from __future__ import (division, print_function)
 import pytest
+import declarative
 
-
-from declarative import Bunch
 
 import BGSF.optics as optics
 import BGSF.readouts as readouts
@@ -33,7 +32,7 @@ def gensys():
 
     sys.my.etm_DC = readouts.DCReadout(port = sys.etmPD.Wpd.o)
     #sys.AC_freq(np.array([1]))
-    return Bunch(locals())
+    return declarative.Bunch(locals())
 
 
 def gensys_full():
@@ -67,7 +66,7 @@ def gensys_full():
         portD = sys.etm.posZ.i,
     )
     #sys.AC_freq(np.array([1]))
-    return Bunch(locals())
+    return declarative.Bunch(locals())
 
 @pytest.mark.optics_trivial
 @pytest.mark.optics_fast

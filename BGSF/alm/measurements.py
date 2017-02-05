@@ -7,12 +7,7 @@ import sys
 
 #from pprint import pprint
 
-from declarative.bunch import Bunch
-
-from declarative import (
-    mproperty,
-    dproperty,
-)
+import declarative
 
 from .utils import (
     TargetLeft,
@@ -46,7 +41,7 @@ class CRootSystem(RootElement, CSystem):
 
     _loc_default = ('loc_m', 0)
 
-    @mproperty
+    @declarative.mproperty
     def env_reversed(self):
         #TODO put this into the environment_query
         arg = bool(self.reversed)
@@ -55,7 +50,7 @@ class CRootSystem(RootElement, CSystem):
         return self.ooa_params.env_reversed
         return arg
 
-    @dproperty
+    @declarative.dproperty
     def measurements(self):
         arg = CMeasurements(
             layout = self,
@@ -82,7 +77,7 @@ class CRootSystem(RootElement, CSystem):
 
 
 class CMeasurements(Element):
-    @dproperty
+    @declarative.dproperty
     def layout(self, sys):
         return sys
 
@@ -122,14 +117,14 @@ class CMeasurements(Element):
             principle_target = self.layout.env_principle_target,
         )
 
-    @mproperty(simple_delete = True)
+    @declarative.mproperty(simple_delete = True)
     @invalidate_auto
     def constraints(self):
         constraints = self.layout.constraints
         additional_constraints = self.q_constraints()
         return constraints + additional_constraints
 
-    @mproperty(simple_delete = True)
+    @declarative.mproperty(simple_delete = True)
     @invalidate_auto
     def target_classifications(self):
         targets_by_type = {}
@@ -148,7 +143,7 @@ class CMeasurements(Element):
                     targets_by_tidx[ttype] = tidxmap
                 keylist = tidxmap.setdefault(tidx, [])
                 keylist.append(tname)
-        return Bunch(
+        return declarative.Bunch(
             targets_by_type = targets_by_type,
             targets_by_tidx = targets_by_tidx,
         )
@@ -313,7 +308,7 @@ class CMeasurements(Element):
         gcossq = abs(gphasor.real)
         return ((1 + gcossq) / (1 - gcossq))**.5
 
-    @mproperty(simple_delete = True)
+    @declarative.mproperty(simple_delete = True)
     @invalidate_auto
     def beam_targets(self):
         namemap = self.layout.system_data_targets('q_target')

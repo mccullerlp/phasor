@@ -8,21 +8,12 @@ import operator
 from . import visitors as VISIT
 import casadi
 
-from declarative import (
-    dproperty,
-    mproperty,
-    NOARG,
-)
-
-from declarative.bunch import (
-    DeepBunch
-)
+import declarative
+from declarative import bunch
 
 from ...base.simple_units import (
     SimpleUnitfulGroup,
 )
-
-from declarative.bunch import Bunch
 
 from .base import (
     FitterBase,
@@ -43,21 +34,21 @@ class FitterExpression(FitterBase):
     def function(self, **kwargs):
         return 1
 
-    @dproperty
-    def expression(self, val = NOARG):
-        if val is NOARG:
+    @declarative.dproperty
+    def expression(self, val = declarative.NOARG):
+        if val is declarative.NOARG:
             val = self.function(**self.root.fit_systems)
         return val
 
-    @mproperty
+    @declarative.mproperty
     def symbol_map(self):
         return self.root.symbol_map
 
-    @mproperty
+    @declarative.mproperty
     def constraints(self):
         return self.root.constraints
 
-    @mproperty
+    @declarative.mproperty
     def expression_remapped(self):
         expr = self.expression
 
@@ -153,7 +144,7 @@ class FitterExpression(FitterBase):
         print("Final Ntotal T1: ", N_expr)
         print("Final Ntotal T2: ", N_total)
         #form the average
-        return Bunch(
+        return declarative.Bunch(
             expr = ((onesA * expr) * onesB) / N_total,
             expr_expanded = expr / N_expr,
         )
@@ -218,15 +209,15 @@ class FitterExpression(FitterBase):
                 sol_val = np.array(sol_val).reshape(sol_val.shape[:idx])
             sol_map[datum] = sol_val
 
-        ooa_meta = Bunch()
+        ooa_meta = declarative.Bunch()
         for sysname in list(self.root.systems.keys()):
-            ooa_meta[sysname] = DeepBunch()
+            ooa_meta[sysname] = bunch.DeepBunch()
 
         injectors = self.root.targets_recurse(VISIT.ooa_reinject)
         for injector in injectors:
             injector(ooa_meta, sol_map)
 
-        systems = Bunch()
+        systems = declarative.Bunch()
         systems_map = dict()
         for obj, sysname in list(self.root.object_roots_inv.items()):
             new_obj = obj.regenerate(
@@ -237,7 +228,7 @@ class FitterExpression(FitterBase):
         return self.root.regenerate(
             _system_map = systems_map
         )
-        return Bunch(
+        return declarative.Bunch(
             ipopt_sol = sols,
             sol_vec = sols['x'],
             val_map = sol_map,

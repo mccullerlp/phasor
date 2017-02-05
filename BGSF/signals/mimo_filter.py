@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
+from __future__ import division, print_function
 #from BGSF.utilities.print import print
-
-import numpy as np
-
-#from numbers import Number
-#import warnings
+import declarative
+from collections import defaultdict
 
 from ..base import (
     CouplerBase,
@@ -24,12 +20,6 @@ from .bases import (
     OOA_ASSIGN,
 )
 
-from declarative.bunch import (
-    Bunch,
-)
-
-from collections import defaultdict
-
 
 class TransferFunctionMIMO(CouplerBase, SystemElementBase):
     def __init__(
@@ -39,8 +29,8 @@ class TransferFunctionMIMO(CouplerBase, SystemElementBase):
             **kwargs
     ):
         super(TransferFunctionMIMO, self).__init__(**kwargs)
-        self.I  = Bunch()
-        self.O  = Bunch()
+        self.I  = declarative.Bunch()
+        self.O  = declarative.Bunch()
 
         OOA_ASSIGN(self).max_freq = max_freq
         OOA_ASSIGN(self).port_pair_xfers = port_pair_xfers

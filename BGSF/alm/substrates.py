@@ -2,20 +2,17 @@
 """
 """
 from __future__ import division, print_function
-
-from declarative import (
-    OverridableObject,
-)
+import declarative
 
 
-class Substrate(OverridableObject):
+class Substrate(declarative.OverridableObject):
     n_by_lambda_nm = {}
 
     def n(self, obj):
         return self.n_by_lambda_nm[obj.root.env_wavelength_nm]
 
 
-class SubstrateEnvironment(OverridableObject):
+class SubstrateEnvironment(declarative.OverridableObject):
     def n(self, obj):
         return obj.root.env_substrate.n(obj)
 

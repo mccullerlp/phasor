@@ -264,7 +264,7 @@ class OpticalSystemSympy(OpticalSystem):
         return expr
 
     def collapse_field_operator(self, PD, key_field_operator, order, simplifications = None):
-        b = Bunch()
+        b = declarative.Bunch()
         b.total = 0
 
         if simplifications is not None:

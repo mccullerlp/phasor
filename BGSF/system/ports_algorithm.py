@@ -4,10 +4,7 @@
 from __future__ import (division, print_function)
 from builtins import object
 from collections import defaultdict
-
-from declarative import (
-    NOARG,
-)
+import declarative
 
 from ..math.key_matrix import (
     DictKey,
@@ -112,9 +109,9 @@ class PortUpdatesAlgorithm(object):
         return update.union(port)
 
     def _coherent_sources_needed(self, pto, kto):
-        ptofull = self.port_cplgs.get(pto, NOARG)
-        ptoupdate = self.port_cplgs_update.get((self._current_element, pto), NOARG)
-        if ptofull is NOARG:
+        ptofull = self.port_cplgs.get(pto, declarative.NOARG)
+        ptoupdate = self.port_cplgs_update.get((self._current_element, pto), declarative.NOARG)
+        if ptofull is declarative.NOARG:
             print("Missing Connection:", kto)
         else:
             if kto not in ptofull and kto not in ptoupdate:
@@ -139,14 +136,14 @@ class PortUpdatesAlgorithm(object):
         self._coherent_sources_needed(pto, kto)
         #TODO: make this dispersal occur during resolve_port_updates
 
-        ptolink_set = self.system.bond_pairs.get(pto, NOARG)
-        if ptolink_set is not NOARG:
+        ptolink_set = self.system.bond_pairs.get(pto, declarative.NOARG)
+        if ptolink_set is not declarative.NOARG:
             for ptolink in ptolink_set:
                 #print('link port: ', ptolink, kto)
                 self._coherent_sources_needed(ptolink, kto)
 
-        ptolink_set = self.link_pairsR.get(pto, NOARG)
-        if ptolink_set is not NOARG:
+        ptolink_set = self.link_pairsR.get(pto, declarative.NOARG)
+        if ptolink_set is not declarative.NOARG:
             for ptolink in ptolink_set:
                 #print('link portR: ', ptolink, kto)
                 self._coherent_sources_needed(ptolink, kto)

@@ -6,12 +6,10 @@ import warnings
 from numbers import Number
 import numpy as np
 from collections import defaultdict
+import declarative
 
 from BGSF.utilities.priority_queue import HeapPriorityQueue
 
-from declarative.bunch import (
-    Bunch,
-)
 from ..math.key_matrix import (
     DictKey,
 )
@@ -212,9 +210,9 @@ def purge_seqless_inplace(
 
 
 def edgedelwarn(
-      edge_map,
-      nfrom,
-      nto,
+        edge_map,
+        nfrom,
+        nto,
 ):
     if edge_map is None:
         return
@@ -309,7 +307,7 @@ def inverse_solve_inplace(
             unwrapped_edge_map[inode, onode] = sourced_edge
             unwrapped_seq_map[inode].add(onode)
             unwrapped_req_map[onode].add(inode)
-    return Bunch(
+    return declarative.Bunch(
         edge_map = unwrapped_edge_map,
         seq      = unwrapped_seq_map,
         req      = unwrapped_req_map,
@@ -404,7 +402,7 @@ def push_solve_inplace(
             unwrapped_req_map[onode].add(inode)
 
     #print("AC edge map: ", unwrapped_edge_map)
-    return Bunch(
+    return declarative.Bunch(
         outputs_map = outputs_map,
         AC_edge_map = unwrapped_edge_map,
         AC_seq      = unwrapped_seq_map,
@@ -422,7 +420,7 @@ def sparsity_graph(km):
         active.add(kto)
         seq[kfrom].append(kto)
         req[kto].append(kfrom)
-    return Bunch(
+    return declarative.Bunch(
         active = active,
         seq = seq,
         req = req,

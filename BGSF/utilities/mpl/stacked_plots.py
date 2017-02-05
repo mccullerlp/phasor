@@ -1,13 +1,9 @@
+"""
+"""
 from matplotlib import gridspec
 import matplotlib.pyplot as plt
-import numpy as np
 
-from BGSF.utilities.np import logspaced, search_local_sorted
-
-from declarative import (
-    OverridableObject,
-    dproperty, mproperty, Bunch, DeepBunch,
-)
+import declarative
 
 from .autoniceplot import asavefig
 
@@ -23,7 +19,7 @@ def attach_finalizer(ax):
 
 
 def generate_ax(ax_group = None):
-    ax = DeepBunch()
+    ax = declarative.DeepBunch()
     attach_finalizer(ax)
     if ax_group is not None:
         ax_group.finalizers.append(ax.finalize)

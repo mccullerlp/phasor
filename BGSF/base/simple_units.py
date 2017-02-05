@@ -2,38 +2,31 @@
 TODO: Add additional data to "ref" for a standard width. Ref can be the center, there can be a width, and val is the true (possibly symbolic) value
 """
 from __future__ import division, print_function
-
-from declarative import (
-    OverridableObject,
-    dproperty,
-    mproperty,
-    FrozenBunch,
-    NOARG,
-)
+import declarative
 
 from declarative.substrate import Element
 
 from . import pint
 
 
-class SimpleUnitfulGroup(OverridableObject):
-    @dproperty
+class SimpleUnitfulGroup(declarative.OverridableObject):
+    @declarative.dproperty
     def units(self, val):
         return val
 
-    @dproperty
+    @declarative.dproperty
     def ref(self, val):
         return val
 
-    @dproperty
+    @declarative.dproperty
     def val(self, val):
         return val
 
-    @mproperty
+    @declarative.mproperty
     def refQ(self, val):
         return val * self.units
 
-    @mproperty
+    @declarative.mproperty
     def valQ(self, val):
         return val * self.units
 
@@ -91,16 +84,16 @@ class SimpleUnitfulGroup(OverridableObject):
 
 
 class ElementRefValue(SimpleUnitfulGroup, Element):
-    @dproperty
+    @declarative.dproperty
     def units(self, val):
         return val
 
     #TODO integrate or name this better
-    @mproperty
+    @declarative.mproperty
     def ooa_name(self, val):
         return val
 
-    @dproperty
+    @declarative.dproperty
     def ooa_units_scale(self):
         units_to = self.units
         units_from = pint.ureg[self.ooa_params.units]
@@ -108,7 +101,7 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
         assert(rescale.unitless)
         return rescale.m_as(pint.ureg.dimensionless)
 
-    @dproperty
+    @declarative.dproperty
     def ref(self):
         val = self.ooa_params.ref
         if val is not None:
@@ -116,7 +109,7 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
         else:
             return None
 
-    @dproperty
+    @declarative.dproperty
     def val(self):
         val = self.ooa_params.val
         if val is not None:
@@ -124,7 +117,7 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
         else:
             return None
 
-    @mproperty
+    @declarative.mproperty
     def fitter_parameter(self):
         root = self.root
         names = [self.ooa_name]
@@ -134,7 +127,7 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
             current = current.parent
         return tuple(names[::-1])
 
-    @mproperty
+    @declarative.mproperty
     def fitter_data(self):
         #TODO: provide real units rather than the str version
         def fitter_inject(ooa, value, ivalue):
@@ -154,12 +147,12 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
         def fitter_initial(ooa):
             for key in self.fitter_parameter:
                 ooa = ooa[key]
-            val = ooa.get('ref', NOARG)
-            if val is NOARG:
+            val = ooa.get('ref', declarative.NOARG)
+            if val is declarative.NOARG:
                 val = ooa.get('val', None)
             return val
 
-        return [FrozenBunch(
+        return [declarative.FrozenBunch(
             parameter_key = self.fitter_parameter,
             units         = str(self.units),
             name          = self.name_system,

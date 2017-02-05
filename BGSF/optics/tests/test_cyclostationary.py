@@ -4,10 +4,7 @@ TODO: isolate the RMS
 from __future__ import (division, print_function)
 
 import numpy.testing as np_test
-
-from declarative.bunch import (
-    Bunch,
-)
+import declarative
 
 from BGSF import system
 from BGSF import optics
@@ -96,7 +93,7 @@ def gensys(
     sled.my.PD1_AC       = readouts.NoiseReadout(portN = sled.PD1.Wpd.o)
     sled.my.PD1_MIX_I_N  = readouts.NoiseReadout(portN = sled.mixer.R_I.o)
     sled.my.PD1_MIX_Q_N  = readouts.NoiseReadout(portN = sled.mixer.R_Q.o)
-    return Bunch(locals())
+    return declarative.Bunch(locals())
 
 def test_cyclostationary():
     b = gensys(

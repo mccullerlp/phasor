@@ -3,11 +3,7 @@
 """
 from __future__ import (division, print_function)
 from collections import defaultdict
-
-
-from declarative import (
-    Bunch,
-)
+import declarative
 
 from ..base import (
     CouplerBase,
@@ -100,8 +96,8 @@ class MatrixAmplifier(CouplerBase, SystemElementBase):
         super(DistributionAmplifier, self).__init__(**kwargs)
         OOA_ASSIGN(self).port_pair_gains = port_pair_gains
 
-        self.I  = Bunch()
-        self.O  = Bunch()
+        self.I  = declarative.Bunch()
+        self.O  = declarative.Bunch()
 
         dd = defaultdict(dict)
         for (iname, oname), xfer in list(self.port_pair_xfers.items()):

@@ -3,7 +3,7 @@
 from __future__ import division, print_function
 from . import pint
 
-from declarative.bunch import Bunch
+import declarative
 
 
 def units_map(
@@ -21,7 +21,7 @@ def units_map(
             else:
                 uobj = to
         umap[name] = uobj
-    return Bunch(
+    return declarative.Bunch(
         principle_name = principle,
         principle_unit = umap[principle],
         umap           = umap,

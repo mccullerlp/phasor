@@ -2,15 +2,7 @@
 """
 from __future__ import (division, print_function)
 import numpy as np
-
-from declarative import (
-    OverridableObject,
-    mproperty,
-    group_dproperty,
-    dproperty,
-    NOARG,
-    Bunch,
-)
+import declarative
 
 from . import standard_attrs as attrs
 
@@ -30,23 +22,23 @@ from .substrates import (
 )
 
 
-class MountBase(MatrixAtsBase, OverridableObject):
+class MountBase(MatrixAtsBase, declarative.OverridableObject):
     loc_m        = None
     _target_type = None
     reverse      = False
 
-    @mproperty
-    def subsystem(self, ssys = NOARG):
-        if ssys is NOARG:
+    @declarative.mproperty
+    def subsystem(self, ssys = declarative.NOARG):
+        if ssys is declarative.NOARG:
             raise RuntimeError("Must Specify")
         return ssys
 
-    @mproperty
+    @declarative.mproperty
     def width_m(self):
         return self.subsystem.width_m
 
     def mount_desc_dfunct(self, z, q, from_target):
-        return Bunch(
+        return declarative.Bunch(
             q = q,
             gouy_phasor = q.gouy_phasor,
             z = z,
@@ -96,11 +88,11 @@ class MountBase(MatrixAtsBase, OverridableObject):
             [0, 1],
         ])
 
-    @mproperty
+    @declarative.mproperty
     def matrix(self):
         return self.matrix_detune_right() * self.subsystem.matrix * self.matrix_detune_left()
 
-    @mproperty
+    @declarative.mproperty
     def matrix_inv(self):
         return self.matrix_detune_left(inverse = True) * self.subsystem.matrix_inv * self.matrix_detune_right(inverse = True)
 
@@ -182,7 +174,7 @@ class MountBase(MatrixAtsBase, OverridableObject):
             else:
                 raise NotImplementedError()
 
-    @mproperty
+    @declarative.mproperty
     def constraints(self):
         return self.subsystem.constraints
 
@@ -256,7 +248,7 @@ class MirrorMount(MountBase):
 class TargetMount(MountBase):
     _target_type = 'target_mount'
 
-    @dproperty
+    @declarative.dproperty
     def subsystem(self):
         return CNoP()
 

@@ -3,15 +3,12 @@
 """
 from __future__ import division, print_function
 from builtins import object
+#import declarative
 
 from .bases import ElementBase
 
-from declarative import (
-    mproperty,
-)
 
 import warnings
-from declarative.properties import PropertyTransforming
 
 
 class OOABridge(object):

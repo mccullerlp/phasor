@@ -3,21 +3,16 @@
 import numpy as np
 import pytest
 
-from BGSF.math.key_matrix.keymatrix import (
-    KVSpace,
-    KeyVector,
-    KeyMatrix
-)
+from BGSF.math.key_matrix import keymatrix
 
 
-
-pytest.mark.skip("Need to revisit")
+@pytest.mark.skip("Need to revisit")
 def test_basic():
-    group = KVSpace()
+    group = keymatrix.KVSpace()
 
-    v_a = KeyVector(group['a'])
-    v_b = KeyVector(group['b'])
-    m_ab = KeyMatrix(group['a'], group['b'])
+    v_a = keymatrix.KeyVector(group['a'])
+    v_b = keymatrix.KeyVector(group['b'])
+    m_ab = keymatrix.KeyMatrix(group['a'], group['b'])
 
     v_a['x'] = 1
     v_a['y'] = 2

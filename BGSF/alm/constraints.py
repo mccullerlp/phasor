@@ -1,7 +1,7 @@
 from __future__ import division
 
 #from declarative import (
-#    dproperty,
+#    declarative.dproperty,
 #)
 
 

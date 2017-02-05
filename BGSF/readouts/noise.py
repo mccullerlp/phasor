@@ -8,10 +8,7 @@ from builtins import object
 import numpy as np
 from collections import defaultdict
 
-from declarative import (
-    mproperty,
-    Bunch
-)
+import declarative
 
 from ..math.key_matrix import (
     DictKey,
@@ -69,15 +66,15 @@ class NoiseReadout(SystemElementBase):
         system.readout_port_needed(self.portN, self.keyN, portsets)
         return
 
-    @mproperty
+    @declarative.mproperty
     def CSD(self):
         return self.CSD_builds.nsums
 
-    @mproperty
+    @declarative.mproperty
     def CSD_by_source(self):
         return self.CSD_builds.ncollect
 
-    @mproperty
+    @declarative.mproperty
     def external_collect(self):
         return None
         #TODO
@@ -87,7 +84,7 @@ class NoiseReadout(SystemElementBase):
                 external_collect[nobj] = sumdict
         return external_collect
 
-    @mproperty
+    @declarative.mproperty
     def CSD_builds(self):
         if self.external_collect is not None:
             nsums    = dict()
@@ -97,7 +94,7 @@ class NoiseReadout(SystemElementBase):
                         nsums[dkey] = np.copy(nsum)
                     else:
                         nsums[dkey] += nsum
-            return Bunch(
+            return declarative.Bunch(
                 nsums = nsums,
                 ncollect = self.external_collect
             )
@@ -154,7 +151,7 @@ class NoiseReadout(SystemElementBase):
                                 nsum += pspec_tot
                                 ncollect[nobj][pnameP, pnameN] = ncollect[nobj][pnameP, pnameN] + pspec_tot
                 nsums[pnameP, pnameN] = nsum
-        return Bunch(
+        return declarative.Bunch(
             ncollect = ncollect,
             nsums    = nsums,
         )

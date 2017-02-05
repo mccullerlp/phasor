@@ -1,19 +1,13 @@
 """
 """
 from __future__ import division, print_function
-from . import visitors as VISIT
 import casadi
+import declarative
 
-from declarative import (
-    mproperty,
-    group_dproperty,
-)
-
+from . import visitors as VISIT
 from ...base.multi_unit_args import (
     generate_refval_attribute,
 )
-
-from declarative.bunch import Bunch
 
 from .base import (
     FitterBase,
@@ -24,14 +18,14 @@ from ...base import units
 
 class FitterSym(FitterBase):
 
-    @mproperty
+    @declarative.mproperty
     def _parameter_symbols(self):
         if self.inst_preincarnation is not None:
             return dict(self.inst_preincarnation._parameter_symbols)
         else:
             return dict()
 
-    @mproperty
+    @declarative.mproperty
     def _parameter_sysnames(self):
         if self.inst_preincarnation is not None:
             return dict(self.inst_preincarnation._parameter_sysnames)
@@ -86,7 +80,7 @@ class FitterSym(FitterBase):
             sysname = self._parameter_sysnames[datum]
             ival = datum.initial(self.root.meta_ooa[sysname])
             symbol_map.append(
-                Bunch(
+                declarative.Bunch(
                     datum         = datum,
                     symbol        = symbol,
                     initial_value = ival,
@@ -101,7 +95,7 @@ class FitterSym(FitterBase):
 class FitterSymJitterPlacement(FitterSym):
 
     #TODO: I dont like generate_refval_attribute for dimensionless things here
-    @group_dproperty
+    @declarative.group_dproperty
     def shift_val(desc):
         return generate_refval_attribute(
             desc,

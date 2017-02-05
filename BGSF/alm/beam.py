@@ -1,22 +1,12 @@
 """
 """
 from __future__ import division, print_function
-from builtins import str
-from builtins import range
 import numpy as np
+import declarative
 
 #import BGSF.numerics.dispatched as dmath
 #import sympy
 
-from declarative import (
-    OverridableObject,
-    mproperty,
-    dproperty,
-    NOARG,
-    Bunch,
-    group_dproperty,
-    #group_mproperty,
-)
 
 from declarative.substrate import (
     Element,
@@ -50,12 +40,12 @@ from . import standard_attrs as attrs
 class MatrixAtsBase(Element):
     #TODO report in ooa_params
 
-    #@dproperty_adv
+    #@declarative.dproperty_adv
     #def reversed(desc):
     #    @desc.construct
-    #    def VALUE(self, arg = NOARG):
+    #    def VALUE(self, arg = declarative.NOARG):
     #        elname = desc.__name__
-    #        if arg is NOARG:
+    #        if arg is declarative.NOARG:
     #            arg = False
 
     #        ooa = self.ooa_params
@@ -68,10 +58,10 @@ class MatrixAtsBase(Element):
     #        return arg
     #    return
 
-    @dproperty
-    def reversed(self, arg = NOARG):
+    @declarative.dproperty
+    def reversed(self, arg = declarative.NOARG):
         elname = "reversed"
-        if arg is NOARG:
+        if arg is declarative.NOARG:
             arg = False
 
         ooa = self.ooa_params
@@ -85,7 +75,7 @@ class MatrixAtsBase(Element):
         #arg = ooa.setdefault(elname, arg)
         return ooa[elname]
 
-    @mproperty
+    @declarative.mproperty
     def env_reversed(self):
         #TODO put this into the environment_query
         #print("PREV: ", self.parent.env_reversed, " ME: ", self.reversed)
@@ -95,7 +85,7 @@ class MatrixAtsBase(Element):
         self.ooa_params.env_reversed = arg
         return self.ooa_params.env_reversed
 
-    @mproperty
+    @declarative.mproperty
     @invalidate_auto
     def matrix_inv(self):
         #print(self.__class__)
@@ -150,7 +140,7 @@ class MatrixAtsBase(Element):
             it.iternext()
         return fill
 
-    @mproperty
+    @declarative.mproperty
     def constraints(self):
         return []
 
@@ -159,7 +149,7 @@ class MatrixAtsBase(Element):
             return self.env_reversed
         return super(MatrixAtsBase, self).environment_query_local(query)
 
-    @dproperty
+    @declarative.dproperty
     def root(self):
         return self.environment_query((MatrixAtsBase, "root"))
 
@@ -168,7 +158,7 @@ class MatrixAtsCompositeBase(MatrixAtsBase):
     pass
 
 
-class CThinBase(MatrixAtsBase, OverridableObject):
+class CThinBase(MatrixAtsBase, declarative.OverridableObject):
     width_m      = 0
 
     _loc_default = ('loc_m', None)
@@ -213,11 +203,11 @@ class CThinBase(MatrixAtsBase, OverridableObject):
 
 
 class CNoP(CThinBase):
-    @mproperty
+    @declarative.mproperty
     def matrix(self):
         return np.matrix([[1, 0], [0, 1]])
 
-    @mproperty
+    @declarative.mproperty
     def matrix_inv(self):
         return np.matrix([[1, 0], [0, 1]])
 
@@ -226,13 +216,13 @@ class BeamTarget(CNoP):
     q_raw = None
     gouy_phasor = 1
 
-    @dproperty
-    def q_system(self, arg = NOARG):
-        if arg is NOARG:
+    @declarative.dproperty
+    def q_system(self, arg = declarative.NOARG):
+        if arg is declarative.NOARG:
             arg = None
         return arg
 
-    @dproperty
+    @declarative.dproperty
     def _check_q(self):
         if self.q_raw is None:
             if self.q_system is None:
@@ -248,7 +238,7 @@ class BeamTarget(CNoP):
                     q_item = q_item.value
                 return q_item
 
-    @mproperty
+    @declarative.mproperty
     def beam_q(self):
         wavelen = self.root.env_wavelength_nm * 1e-9
 
@@ -269,7 +259,7 @@ class BeamTarget(CNoP):
 
     def target_description(self, z):
         beam_q = self.beam_q
-        return Bunch(
+        return declarative.Bunch(
             z = z,
             q = beam_q,
             type = 'target',
@@ -317,18 +307,18 @@ class CThinLens(CThinBase):
 
     f_m = attrs.generate_f_m()
 
-    @mproperty
+    @declarative.mproperty
     def matrix(self):
         mat = matrix_focus(f_m = self.f_m.val)
         return mat
 
-    @mproperty
+    @declarative.mproperty
     def matrix_inv(self):
         mat = matrix_focus(f_m = -self.f_m.val)
         return mat
 
     def lens_description(self, z, from_target):
-        return Bunch(
+        return declarative.Bunch(
             f_m = self.f_m.val,
             z = z,
             type = 'lens',
@@ -342,7 +332,7 @@ class CThinLens(CThinBase):
         return dmap
 
 
-class CSpace(MatrixAtsBase, OverridableObject):
+class CSpace(MatrixAtsBase, declarative.OverridableObject):
     substrate = substrate_environment
 
     L_m = attrs.generate_L_m()
@@ -350,11 +340,11 @@ class CSpace(MatrixAtsBase, OverridableObject):
     _loc_default = ('loc_m', None)
     loc_m = attrs.generate_loc_m()
 
-    @mproperty
+    @declarative.mproperty
     def width_m(self):
         return self.L_m.val
 
-    @mproperty
+    @declarative.mproperty
     def matrix(self):
         n = self.substrate.n(self)
         return np.matrix([
@@ -362,7 +352,7 @@ class CSpace(MatrixAtsBase, OverridableObject):
             [0, 1],
         ])
 
-    @mproperty
+    @declarative.mproperty
     def matrix_inv(self):
         n = self.substrate.n(self)
         return np.matrix([
@@ -422,7 +412,7 @@ class CSpace(MatrixAtsBase, OverridableObject):
         return
 
     min_spacing = 0*2 * .0254
-    @mproperty
+    @declarative.mproperty
     def constraints(self):
         return [(self.L_m.val, self.min_spacing, +float('inf'))]
 
@@ -436,7 +426,7 @@ class CSpace(MatrixAtsBase, OverridableObject):
             if q.Z > -1e-16 and q.Z < self.L_m.val:
                 has_waist = True
         if has_waist:
-            return Bunch(
+            return declarative.Bunch(
                 z = zw,
                 ZR = q.ZR,
                 str = u'waist ZR = {0}, W = {1}'.format(str_m(q.ZR, 2), str_m(q.W0, 2)),
@@ -456,7 +446,7 @@ class CLensInterface(CThinBase):
 
     R_m = attrs.generate_R_m()
 
-    @mproperty
+    @declarative.mproperty
     def matrix(self):
         n_from = self.substrate_from.n(self)
         n_to   = self.substrate_to.n(self)
@@ -484,7 +474,7 @@ class CLensInterface(CThinBase):
                 ])
         return mat
 
-    @mproperty
+    @declarative.mproperty
     def matrix_inv(self):
         n_to = self.substrate_from.n(self)
         n_from = self.substrate_to.n(self)
@@ -516,7 +506,7 @@ class CLensInterface(CThinBase):
 class CMirror(CThinBase):
     R_m = attrs.generate_R_m()
 
-    @mproperty
+    @declarative.mproperty
     def matrix(self):
         if self.R_m.val is not None:
             mat = np.matrix([
@@ -532,7 +522,7 @@ class CMirror(CThinBase):
 
     def mirror_description(self, z, from_target):
         f_m = -1/self.matrix[1, 0]
-        return Bunch(
+        return declarative.Bunch(
             R_m = self.R_m.val,
             f_m = f_m,
             z = z,

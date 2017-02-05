@@ -2,12 +2,7 @@
 """
 from __future__ import division
 
-from declarative import (
-    mproperty,
-    dproperty,
-    group_dproperty,
-    Bunch,
-)
+import declarative
 
 from .utils import (
     str_m,
@@ -37,7 +32,7 @@ class PLCX(CSystemStack):
     L_m = attrs.generate_L_m()
     R_m = attrs.generate_R_m()
 
-    @dproperty
+    @declarative.dproperty
     def interface1(self):
         return CLensInterface(
             ROC_preferred = self.ROC_preferred,
@@ -46,7 +41,7 @@ class PLCX(CSystemStack):
             loc_m = None,
         )
 
-    @dproperty
+    @declarative.dproperty
     def space(self):
         return CSpace(
             L_preferred = self.L_preferred,
@@ -54,7 +49,7 @@ class PLCX(CSystemStack):
             loc_m = None,
         )
 
-    @dproperty
+    @declarative.dproperty
     def interface2(self):
         return CLensInterface(
             ROC_preferred = None,
@@ -63,7 +58,7 @@ class PLCX(CSystemStack):
             loc_m = None,
         )
 
-    @mproperty
+    @declarative.mproperty
     def components(self):
         return [
             self.interface1,
@@ -73,7 +68,7 @@ class PLCX(CSystemStack):
 
     def lens_description(self, z, from_target):
         f_m = -1/self.matrix[1, 0]
-        return Bunch(
+        return declarative.Bunch(
             f_m = f_m,
             width_m = self.width_m,
             z = z,
@@ -96,21 +91,21 @@ class CXCX(CSystemStack):
     R1_m = attrs.generate_R_m(variant = '1')
     R2_m = attrs.generate_R_m(variant = '2')
 
-    @dproperty
+    @declarative.dproperty
     def interface1(self):
         return CLensInterface(
             ROC_preferred = self.ROC1_preferred,
             substrate_from = self.substrate_outer,
             substrate_to   = self.substrate_inner,
         )
-    @dproperty
+    @declarative.dproperty
     def space(self):
         return CSpace(
             L_preferred = self.L_preferred,
             substrate = self.substrate_inner,
         )
 
-    @dproperty
+    @declarative.dproperty
     def interface2(self):
         return CLensInterface(
             ROC_preferred  = -self.ROC2_preferred,
@@ -118,7 +113,7 @@ class CXCX(CSystemStack):
             substrate_to   = self.substrate_outer,
         )
 
-    @mproperty
+    @declarative.mproperty
     def components(self):
         return [
             self.interface1,
@@ -128,7 +123,7 @@ class CXCX(CSystemStack):
 
     def lens_description(self, z, from_target):
         f_m = -1/self.matrix[1, 0]
-        return Bunch(
+        return declarative.Bunch(
             f_m = f_m,
             width_m = self.width_m,
             R1_m = self.R1_m.val,

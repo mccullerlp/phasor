@@ -1,18 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
+from __future__ import division, print_function
 import numpy as np
 import scipy.optimize
-
-from declarative import (
-    #first_non_none,
-    OverridableObject,
-    mproperty,
-    #dproperty,
-    NOARG,
-)
+import declarative
 
 from .beam_param import (
     ComplexBeamParam
@@ -25,38 +17,38 @@ from BGSF.utilities.mpl.autoniceplot import (
 )
 
 
-class QFit(OverridableObject):
+class QFit(declarative.OverridableObject):
     wavelen_nm = 1064
 
-    @mproperty
+    @declarative.mproperty
     def R_um(self, arg):
         arg = np.array(arg)
         return arg
 
-    @mproperty
-    def R_m(self, arg = NOARG):
-        if arg is NOARG:
+    @declarative.mproperty
+    def R_m(self, arg = declarative.NOARG):
+        if arg is declarative.NOARG:
             arg = self.R_um * 1e-6
         else:
             arg = np.array(arg)
         return arg
 
-    @mproperty
+    @declarative.mproperty
     def Z_in(self, arg):
         arg = np.array(arg)
         return arg
 
-    @mproperty
-    def Z_m(self, arg = NOARG):
-        if arg is NOARG:
+    @declarative.mproperty
+    def Z_m(self, arg = declarative.NOARG):
+        if arg is declarative.NOARG:
             arg = self.Z_in * .0254
         else:
             arg = np.array(arg)
         return arg
 
-    @mproperty
-    def Z0_ZR_init(self, arg = NOARG):
-        if arg is NOARG:
+    @declarative.mproperty
+    def Z0_ZR_init(self, arg = declarative.NOARG):
+        if arg is declarative.NOARG:
             Z0 = -(np.max(self.Z_m) + np.min(self.Z_m)) / 2
             ZR = (np.max(self.Z_m) - np.min(self.Z_m)) / 2
             arg = (Z0, ZR)
@@ -68,12 +60,12 @@ class QFit(OverridableObject):
     def waist_func_fit(self, z):
         return self.waist_func(z, *self.Z0_ZR_fit)
 
-    @mproperty
+    @declarative.mproperty
     def Z0_ZR_fit(self):
         (z0, zR), hess = scipy.optimize.curve_fit(self.waist_func, self.Z_m, self.R_m, p0 = self.Z0_ZR_init)
         return (z0, zR)
 
-    @mproperty
+    @declarative.mproperty
     def q_fit(self):
         return ComplexBeamParam.from_Z_ZR(
             self.Z0_ZR_fit[0],
@@ -81,7 +73,7 @@ class QFit(OverridableObject):
             wavelen = self.wavelen_nm * 1e-9,
         )
 
-    @mproperty
+    @declarative.mproperty
     def q_init(self):
         return ComplexBeamParam.from_Z_ZR(
             self.Z0_ZR_init[0],

@@ -4,19 +4,10 @@ from __future__ import division, print_function
 from builtins import zip
 import numpy as np
 
+import declarative
+from declarative import bunch
+
 from . import visitors as VISIT
-
-from declarative import (
-    dproperty,
-    NOARG,
-    mproperty,
-    Bunch,
-)
-
-from declarative.bunch import (
-    DeepBunch,
-    HookBunch,
-)
 
 from declarative.substrate import (
     RootElement,
@@ -30,14 +21,14 @@ from .base import (
 
 class FitterRoot(RootElement, FitterBase):
 
-    @mproperty
-    def _system_map(self, val = NOARG):
-        if val is NOARG:
+    @declarative.mproperty
+    def _system_map(self, val = declarative.NOARG):
+        if val is declarative.NOARG:
             val = None
         return val
 
     #maps names to systems
-    @dproperty
+    @declarative.dproperty
     def systems(self):
         prefill = dict()
         if self.inst_preincarnation is not None:
@@ -45,22 +36,22 @@ class FitterRoot(RootElement, FitterBase):
                 newsys = self._system_map[sysname]
                 prefill[sysname] = self._system_map[sysname]
                 self._root_register(sysname, newsys)
-        return HookBunch(
+        return bunch.HookBunch(
             prefill,
             insert_hook = self._root_register
         )
 
     #maps systems to names
-    @mproperty
+    @declarative.mproperty
     def object_roots_inv(self):
         return dict()
 
     #maps systems to ooas
-    @mproperty
+    @declarative.mproperty
     def meta_ooa(self):
         return dict()
 
-    @mproperty
+    @declarative.mproperty
     def _registry_parameters(self):
         return dict()
 
@@ -83,18 +74,18 @@ class FitterRoot(RootElement, FitterBase):
         self.invalidate()
         return
 
-    @mproperty
+    @declarative.mproperty
     @invalidate_auto
     def fit_systems(self):
-        ooa_meta = Bunch()
+        ooa_meta = declarative.Bunch()
         for sysname in list(self.systems.keys()):
-            ooa_meta[sysname] = DeepBunch(vpath=True)
+            ooa_meta[sysname] = bunch.DeepBunch(vpath=True)
 
         injectors = self.targets_recurse(VISIT.ooa_inject)
         for injector in injectors:
             injector(ooa_meta)
 
-        systems = Bunch()
+        systems = declarative.Bunch()
         for system, name in list(self.object_roots_inv.items()):
             new_obj = system.regenerate(
                 ooa_params = ooa_meta[name],
@@ -102,7 +93,7 @@ class FitterRoot(RootElement, FitterBase):
             systems[name] = new_obj
         return systems
 
-    @mproperty
+    @declarative.mproperty
     @invalidate_auto
     def constraints(self):
         constraints = []
@@ -124,7 +115,7 @@ class FitterRoot(RootElement, FitterBase):
         for remapper in self.targets_recurse(VISIT.constraints_remap):
             constraints_remapped = remapper(constraints_remapped)
 
-        ret = Bunch(
+        ret = declarative.Bunch(
             expr = [],
             lb   = [],
             ub   = [],
@@ -148,7 +139,7 @@ class FitterRoot(RootElement, FitterBase):
         #TODO expression remapping on the constraints
         return ret
 
-    @mproperty
+    @declarative.mproperty
     @invalidate_auto
     def symbol_map(self):
         smappers   = self.targets_recurse(VISIT.symbol_map)
@@ -169,7 +160,7 @@ class FitterRoot(RootElement, FitterBase):
                 lb_list.append(sbunch.get('lower_bound', -float('inf')))
                 transform_list.append(sbunch.setdefault('transforms', []))
                 sbunch_list.append(sbunch)
-        return Bunch(
+        return declarative.Bunch(
             sym_list       = sym_list,
             ival_list      = ival_list,
             datum_list     = datum_list,
