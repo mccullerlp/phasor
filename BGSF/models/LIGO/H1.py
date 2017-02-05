@@ -26,7 +26,7 @@ lasy  = 0.0504;   # Schnupp Asy: lasy = lIX - lIY
 lmean = 4.8298;   # (lIX + lIY) / 2
 #--------------
 
-# Mirror curvatures (all dimensions in meters)
+# optics.Mirror curvatures (all dimensions in meters)
 Ri = 1934;             # radius of curvature of input mirrors (IX and IY)
 Re = 2245;           # radius of curvature of end mirrors (EX and EY)
 Rpr = -10.997;          # radius of curvature of power recycling mirrors
@@ -67,7 +67,7 @@ par.PR2.pos = 0;
 
 
 ################################################################
-# Mirror Parameters
+# optics.Mirror Parameters
 
 # HR Transmissivities 
 par.IX.T = 0.014;     # T = 1.4# for ITMX
@@ -205,14 +205,14 @@ function opt = optH1(par)
 opt = Optickle(par.Laser.vFrf);
 
 # add a source, with RF amplitudes specified
-opt = addSource(opt, 'Laser', par.Laser.vArf);
+opt = addSource(opt, 'optics.Laser', par.Laser.vArf);
 
-# add modulators for Laser amplitude and phase noise
+# add modulators for optics.Laser amplitude and phase noise
 opt = addModulator(opt, 'AM', 1);
 opt = addModulator(opt, 'PM', i);
 
-# link, output of Laser is PM->out
-opt = addLink(opt, 'Laser', 'out', 'AM', 'in', 0);
+# link, output of optics.Laser is PM->out
+opt = addLink(opt, 'optics.Laser', 'out', 'AM', 'in', 0);
 opt = addLink(opt, 'AM', 'out', 'PM', 'in', 0);
 
 ################################################################

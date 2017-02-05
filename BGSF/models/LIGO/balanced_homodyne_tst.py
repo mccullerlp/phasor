@@ -1,94 +1,35 @@
 # -*- coding: utf-8 -*-
 """
 """
+from __future__ import division, print_function
+#import numpy as np
+#import declarative
 
-from __future__ import division
-from __future__ import print_function
-
-import numpy as np
-
-from declarative.bunch import (
-    declarative.Bunch,
-)
-
-from ..optics import (
-    Mirror,
-    PD,
-    MagicPD,
-    Space,
-    Laser,
-)
-
-from ..system.optical import (
-    OpticalSystem,
-)
-
-from ..signals import (
-    SignalGenerator,
-    Mixer,
-    DistributionAmplifier,
-    SummingAmplifier,
-    #TransferFunctionSISO,
-    TransferFunctionSISOMechSingleResonance,
-)
-
-from ..readouts import (
-    DCReadout,
-    ACReadout,
-    ACReadoutCLG,
-)
-
-from ..readouts.homodyne_AC import (
-    HomodyneACReadout,
-)
-
-from ..base import (
-    SystemElementSled,
-    OOA_ASSIGN,
-    Frequency,
-)
-
-from ..optics.modulators import (
-    PM, AM
-)
-
-from ..optics.EZSqz import (
-    EZSqz,
-)
-
-from ..optics.hidden_variable_homodyne import (
-    HiddenVariableHomodynePD,
-)
-
-from ..optics.vacuum import (
-    VacuumTerminator,
-)
-
-from .IFO_modulators import (
-    MZModulator,
-)
-
-from .direct_homodyne import (
-    BalancedHomodyneDetector
-)
+from .. import optics
+#from .. import signals
+from .. import readouts
+from .. import base
+from . import IFO_modulators
+from . import direct_homodyne
 
 #from BGSF.utilities.np import logspaced
 
-class BHDTestSled(SystemElementSled):
+
+class BHDTestSled(base.SystemElementSled):
     def __init__(self, **kwargs):
         super(BHDTestSled, self).__init__(**kwargs)
-        self.PSL = Laser(
+        self.PSL = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = 1,
         )
-        self.LO = Laser(
+        self.LO = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = 1,
         )
 
-        self.MZsensor = MZModulator()
+        self.MZsensor = IFO_modulators.MZModulator()
 
-        self.sqz = EZSqz(
+        self.sqz = optics.EZSqz(
             Fkey_QC_center = self.PSL.fkey,
             #sqzDB = 10,
             #antisqzDB = 13,
@@ -96,7 +37,7 @@ class BHDTestSled(SystemElementSled):
             phi_sqz_deg = 45,
         )
 
-        self.BHD = BalancedHomodyneDetector(
+        self.BHD = direct_homodyne.BalancedHomodyneDetector(
             phase_deg = 90,
         )
 
@@ -114,42 +55,42 @@ class BHDTestSled(SystemElementSled):
             self.BHD.port_LO,
         )
 
-        self.BHD_AC = ACReadout(
+        self.BHD_AC = readouts.ACReadout(
             portN = self.BHD.Wpd_diff.o,
             portD = self.MZsensor.Drv_m.i,
         )
-        self.BHDHD_AC = HomodyneACReadout(
+        self.BHDHD_AC = readouts.HomodyneACReadout(
             portNI = self.BHD.Wpd_diff.o,
             portNQ = self.BHD.Wpd_cmn.o,
             portD = self.MZsensor.Drv_m.i,
         )
-        self.BHDHDC_AC = HomodyneACReadout(
+        self.BHDHDC_AC = readouts.HomodyneACReadout(
             portNI = self.BHD.PD_IQ.rtWpdI.o,
             portNQ = self.BHD.PD_IQ.rtWpdQ.o,
             portD = self.MZsensor.Drv_m.i,
         )
-        self.BHDHDD_AC = HomodyneACReadout(
+        self.BHDHDD_AC = readouts.HomodyneACReadout(
             portNI = self.BHD.PD_IQ_P.rtWpdI.o,
             portNQ = self.BHD.PD_IQ_N.rtWpdI.o,
             portD = self.MZsensor.Drv_m.i,
         )
 
 
-class SBHDTestSled(SystemElementSled):
+class SBHDTestSled(base.SystemElementSled):
     def __init__(self, **kwargs):
         super(SBHDTestSled, self).__init__(**kwargs)
-        self.PSL = Laser(
+        self.PSL = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = 1,
         )
-        self.LO = Laser(
+        self.LO = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = 1,
         )
 
-        self.MZsensor = MZModulator()
+        self.MZsensor = IFO_modulators.MZModulator()
 
-        self.sqz = EZSqz(
+        self.sqz = optics.EZSqz(
             Fkey_QC_center = self.PSL.fkey,
             #sqzDB = 10,
             #antisqzDB = 13,
@@ -157,7 +98,7 @@ class SBHDTestSled(SystemElementSled):
             phi_sqz_deg = 45,
         )
 
-        self.BHD = BalancedHomodyneDetector(
+        self.BHD = direct_homodyne.BalancedHomodyneDetector(
             phase_deg = 90,
             P_link_intermediate = (self.MZsensor.FrB, self.MZsensor.BkA),
         )
@@ -175,21 +116,21 @@ class SBHDTestSled(SystemElementSled):
             self.BHD.port_LO,
         )
 
-        self.BHD_AC = ACReadout(
+        self.BHD_AC = readouts.ACReadout(
             portN = self.BHD.Wpd_diff.o,
             portD = self.MZsensor.Drv_m.i,
         )
-        self.BHDHD_AC = HomodyneACReadout(
+        self.BHDHD_AC = readouts.HomodyneACReadout(
             portNI = self.BHD.Wpd_diff.o,
             portNQ = self.BHD.Wpd_cmn.o,
             portD = self.MZsensor.Drv_m.i,
         )
-        self.BHDHDC_AC = HomodyneACReadout(
+        self.BHDHDC_AC = readouts.HomodyneACReadout(
             portNI = self.BHD.PD_IQ.rtWpdI.o,
             portNQ = self.BHD.PD_IQ.rtWpdQ.o,
             portD = self.MZsensor.Drv_m.i,
         )
-        self.BHDHDD_AC = HomodyneACReadout(
+        self.BHDHDD_AC = readouts.HomodyneACReadout(
             portNI = self.BHD.PD_IQ_P.rtWpdI.o,
             portNQ = self.BHD.PD_IQ_N.rtWpdI.o,
             portD = self.MZsensor.Drv_m.i,

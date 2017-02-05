@@ -233,7 +233,7 @@ ifo.Materials.Substrate.RefractiveIndex = 1.45;        # mevans 25 Apr 2008
 ifo.Materials.MassRadius    = 0.17;            # m; 
 ifo.Materials.MassThickness = 0.200;                  # m; Peter F 8/11/2005
 
-## Laser-------------------------------------------------------------------
+## optics.Laser-------------------------------------------------------------------
 ifo.Laser.Wavelength                   = 1.064e-6;     # m;
 ifo.Laser.Power                        = 23*0.88;    # W;
 

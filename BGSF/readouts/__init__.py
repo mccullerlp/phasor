@@ -18,6 +18,6 @@ from .noise import (
     NoiseReadout,
 )
 
-#from .homodyne_AC import (
-#    HomodyneACReadout,
-#)
+from .homodyne_AC import (
+    HomodyneACReadout,
+)

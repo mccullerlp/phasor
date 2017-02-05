@@ -10,22 +10,18 @@ import numpy as np
 #from numbers import Number
 #import warnings
 
-from ..base import (
-    CouplerBase,
-)
-
 from .ports import (
     SignalPortHolderIn,
     SignalPortHolderOut,
 )
 
 from .bases import (
-    SystemElementBase,
+    SignalElementBase,
     OOA_ASSIGN,
 )
 
 
-class TransferFunctionSISOBase(CouplerBase, SystemElementBase):
+class TransferFunctionSISOBase(SignalElementBase):
     def __init__(
             self,
             max_freq         = None,

@@ -1,97 +1,43 @@
 # -*- coding: utf-8 -*-
 """
 """
+from __future__ import division, print_function
 
-from __future__ import division
-from __future__ import print_function
+#import numpy as np
+#import declarative
 
-import numpy as np
-
-from declarative.bunch import (
-    declarative.Bunch,
-)
-
-from ..optics import (
-    Mirror,
-    PD,
-    MagicPD,
-    Space,
-    Laser,
-)
-
-from ..system.optical import (
-    OpticalSystem,
-)
-
-from ..signals import (
-    SignalGenerator,
-    Mixer,
-    DistributionAmplifier,
-    SummingAmplifier,
-    #TransferFunctionSISO,
-    TransferFunctionSISOMechSingleResonance,
-)
-
-from ..readouts import (
-    DCReadout,
-    ACReadout,
-    ACReadoutCLG,
-)
-
-from ..readouts.homodyne_AC import (
-    HomodyneACReadout,
-)
-
-from ..base import (
-    SystemElementSled,
-    OOA_ASSIGN,
-    Frequency,
-)
-
-from ..optics.modulators import (
-    PM, AM
-)
-
-from ..optics.EZSqz import (
-    EZSqz,
-)
-
-from ..optics.hidden_variable_homodyne import (
-    HiddenVariableHomodynePD,
-)
-
-from ..optics.vacuum import (
-    VacuumTerminator,
-)
+from ..import optics
+from ..import signals
+from ..import base
 
 #from BGSF.utilities.np import logspaced
 
-class MichelsonModulator(SystemElementSled):
+class MichelsonModulator(base.SystemElementSled):
     def __init__(self, **kwargs):
         super(MichelsonModulator, self).__init__(**kwargs)
 
-        self.mX = Mirror(
+        self.mX = optics.Mirror(
             T_hr = 0,
             L_hr = 0,
-            facing_cardinal = 'W',
+            #facing_cardinal = 'W',
         )
-        self.mY = Mirror(
+        self.mY = optics.Mirror(
             T_hr = 0,
             L_hr = 0,
-            facing_cardinal = 'S',
+            #facing_cardinal = 'S',
         )
-        self.mBS = Mirror(
+        self.mBS = optics.Mirror(
             T_hr = .5,
             L_hr = 0,
             AOI_deg = 45,
-            facing_cardinal = 'NW',
+            #facing_cardinal = 'NW',
         )
 
-        self.sX = Space(
+        self.sX = optics.Space(
             L_m = 0,
             L_detune_m = 0,
         )
-        self.sY = Space(
+        self.sY = optics.Space(
             L_m = 0,
             L_detune_m = 0,
         )
@@ -117,49 +63,49 @@ class MichelsonModulator(SystemElementSled):
         return (self.Fr, self.Bk)
 
 
-class MZModulator(SystemElementSled):
+class MZModulator(base.SystemElementSled):
     def __init__(self, **kwargs):
         super(MZModulator, self).__init__(**kwargs)
 
-        self.mX = Mirror(
+        self.mX = optics.Mirror(
             T_hr = 0,
             L_hr = 0,
             AOI_deg = 45,
-            facing_cardinal = 'NW',
+            #facing_cardinal = 'NW',
         )
         #this orientation makes the modulator "dark" on the through pass
-        self.mY = Mirror(
+        self.mY = optics.Mirror(
             T_hr = 0,
             L_hr = 0,
             AOI_deg = 45,
-            facing_cardinal = 'SE',
+            #facing_cardinal = 'SE',
         )
-        self.mBS1 = Mirror(
+        self.mBS1 = optics.Mirror(
             T_hr = .5,
             L_hr = 0,
             AOI_deg = 45,
-            facing_cardinal = 'NW',
+            #facing_cardinal = 'NW',
         )
-        self.mBS2 = Mirror(
+        self.mBS2 = optics.Mirror(
             T_hr = .5,
             L_hr = 0,
             AOI_deg = 45,
-            facing_cardinal = 'NW',
+            #facing_cardinal = 'NW',
         )
 
-        self.sX1 = Space(
+        self.sX1 = optics.Space(
             L_m = 0,
             L_detune_m = 0,
         )
-        self.sX2 = Space(
+        self.sX2 = optics.Space(
             L_m = 0,
             L_detune_m = 0,
         )
-        self.sY1 = Space(
+        self.sY1 = optics.Space(
             L_m = 0,
             L_detune_m = 0,
         )
-        self.sY2 = Space(
+        self.sY2 = optics.Space(
             L_m = 0,
             L_detune_m = 0,
         )
@@ -191,7 +137,7 @@ class MZModulator(SystemElementSled):
         self.FrB = self.mBS1.BkB
         self.BkB = self.mBS2.FrB
 
-        self.actuate_DARM_m = DistributionAmplifier(
+        self.actuate_DARM_m = signals.DistributionAmplifier(
             port_gains = dict(
                 mX = -1 / 2,
                 mY = +1 / 2,

@@ -1,78 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 """
-
-from __future__ import division
-from __future__ import print_function
-
-import numpy as np
-
-from declarative.bunch import (
-    declarative.Bunch,
-)
-
-from ..optics import (
-    Mirror,
-    PD,
-    MagicPD,
-    Space,
-    Laser,
-)
-
-from ..system.optical import (
-    OpticalSystem,
-)
-
-from ..signals import (
-    SignalGenerator,
-    Mixer,
-    DistributionAmplifier,
-    SummingAmplifier,
-    #TransferFunctionSISO,
-    TransferFunctionSISOMechSingleResonance,
-)
-
-from ..readouts import (
-    DCReadout,
-    ACReadout,
-    ACReadoutCLG,
-)
-
-from ..readouts.homodyne_AC import (
-    HomodyneACReadout,
-)
-
-from ..base import (
-    SystemElementSled,
-    OOA_ASSIGN,
-    Frequency,
-)
-
-from ..optics.modulators import (
-    PM, AM
-)
-
-from ..optics.EZSqz import (
-    EZSqz,
-)
-
-from ..optics.hidden_variable_homodyne import (
-    HiddenVariableHomodynePD,
-)
-
-from ..optics.vacuum import (
-    VacuumTerminator,
-)
-
-from ..signals import (
-    SignalGenerator,
-    Mixer,
-    DistributionAmplifier,
-    SummingAmplifier,
-)
+from __future__ import division, print_function
 #from BGSF.utilities.np import logspaced
 
-class BalancedHomodyneDetector(SystemElementSled):
+#import numpy as np
+#import declarative
+
+from .. import optics
+from .. import signals
+#from .. import readouts
+from .. import base
+#from .. import signals
+
+class BalancedHomodyneDetector(base.SystemElementSled):
     def __init__(
             self,
             P_link_intermediate = None,
@@ -80,51 +21,51 @@ class BalancedHomodyneDetector(SystemElementSled):
             **kwargs
     ):
         super(BalancedHomodyneDetector, self).__init__(**kwargs)
-        self.PD_P = PD()
-        self.PD_N = PD()
+        self.PD_P = optics.PD()
+        self.PD_N = optics.PD()
 
-        OOA_ASSIGN(self).QE_CMN_percent = 100
-        OOA_ASSIGN(self).QE_P_percent   = 100
-        OOA_ASSIGN(self).QE_N_percent   = 100
-        OOA_ASSIGN(self).phase_deg      = phase_deg
+        base.OOA_ASSIGN(self).QE_CMN_percent = 100
+        base.OOA_ASSIGN(self).QE_P_percent   = 100
+        base.OOA_ASSIGN(self).QE_N_percent   = 100
+        base.OOA_ASSIGN(self).phase_deg      = phase_deg
 
-        self.CMN_loss_M = Mirror(
+        self.CMN_loss_M = optics.Mirror(
             T_hr = 1,
             L_hr = 0,
             L_t  = 1 - self.QE_CMN_percent * 1e-2,
         )
 
-        self.PD_P_loss_M = Mirror(
+        self.PD_P_loss_M = optics.Mirror(
             T_hr = 1,
             L_hr = 0,
             L_t  = 1 - self.QE_P_percent * 1e-2,
         )
 
-        self.PD_N_loss_M = Mirror(
+        self.PD_N_loss_M = optics.Mirror(
             T_hr = 1,
             L_hr = 0,
             L_t  = 1 - self.QE_N_percent * 1e-2,
         )
 
-        self.BHD_BS = Mirror(
+        self.BHD_BS = optics.Mirror(
             T_hr    = 0.50,
             L_hr    = 0,
             AOI_deg = 45,
         )
 
-        self.LO_phase = Space(
+        self.LO_phase = optics.Space(
             L_m = 0,
             L_detune_m = self.phase_deg / 360 * 1.064e-6,
         )
-        self.PD_IQ = HiddenVariableHomodynePD(
+        self.PD_IQ = optics.HiddenVariableHomodynePD(
             source_port     = self.LO_phase.Bk.o,
             phase_deg       = 00,
         )
-        self.PD_IQ_P = HiddenVariableHomodynePD(
+        self.PD_IQ_P = optics.HiddenVariableHomodynePD(
             source_port     = self.LO_phase.Bk.o,
             phase_deg       = 00,
         )
-        self.PD_IQ_N = HiddenVariableHomodynePD(
+        self.PD_IQ_N = optics.HiddenVariableHomodynePD(
             source_port     = self.LO_phase.Bk.o,
             phase_deg       = 00,
         )
@@ -188,7 +129,7 @@ class BalancedHomodyneDetector(SystemElementSled):
         self.port_LO     = self.LO_phase.Fr
         self.port_signal = self.CMN_loss_M.Fr
 
-        self.amp_Wpd_diff = SummingAmplifier(
+        self.amp_Wpd_diff = signals.SummingAmplifier(
             port_gains = dict(
                 P = +1,
                 N = -1,
@@ -197,7 +138,7 @@ class BalancedHomodyneDetector(SystemElementSled):
         self.system.bond(self.PD_P.Wpd, self.amp_Wpd_diff.P)
         self.system.bond(self.PD_N.Wpd, self.amp_Wpd_diff.N)
 
-        self.amp_Wpd_cmn = SummingAmplifier(
+        self.amp_Wpd_cmn = signals.SummingAmplifier(
             port_gains = dict(
                 P = +1,
                 N = +1,

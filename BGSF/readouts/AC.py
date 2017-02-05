@@ -131,24 +131,23 @@ class ACReadoutCLG(SystemElementBase):
 
     def __init__(
         self,
-        system,
         portN,
         portD,
         include_noise = True,
         **kwargs
     ):
-        super(ACReadoutCLG, self).__init__(system = system, **kwargs)
+        super(ACReadoutCLG, self).__init__(**kwargs)
         self.portD = portD
         self.portN = portN
 
         #TODO: make this adjustable
-        self.F_sep = system.F_AC
+        self.F_sep = self.system.F_AC
 
         self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : 1})})
         self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : -1})})
 
         if include_noise:
-            self.noise = NoiseReadout(
+            self.my.noise = NoiseReadout(
                 portN = self.portN,
             )
         else:

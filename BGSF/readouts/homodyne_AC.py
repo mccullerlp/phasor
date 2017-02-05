@@ -21,9 +21,6 @@ from ..base import (
     ClassicalFreqKey,
 )
 
-from .base import ReadoutViewBase
-from .noise import NoiseMatrixView
-
 
 def np_roll_2D_mat_back(arr_mat, N = 2):
     for idx in range(len(arr_mat.shape) - N):
@@ -40,7 +37,6 @@ def np_roll_2D_mat_front(arr_mat, N = 2):
 class HomodyneACReadout(SystemElementBase):
     def __init__(
         self,
-        system,
         portNI,
         portNQ,
         portD,
@@ -48,7 +44,7 @@ class HomodyneACReadout(SystemElementBase):
         port_set = 'AC',
         **kwargs
     ):
-        super(HomodyneACReadout, self).__init__(system = system, **kwargs)
+        super(HomodyneACReadout, self).__init__(**kwargs)
         if portDrv is None:
             portDrv = portD
 
@@ -60,56 +56,34 @@ class HomodyneACReadout(SystemElementBase):
         OOA_ASSIGN(self).port_set = 'AC'
 
         #TODO: make this adjustable
-        self.F_sep = system.F_AC
+        self.F_sep = self.system.F_AC
 
         self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : 1})})
         self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : -1})})
 
-        self.noise = HomodyneNoiseReadout(
+        self.my.noise = HomodyneNoiseReadout(
             portNI = self.portNI,
             portNQ = self.portNQ,
         )
+
+        self.phase_deg = 0
         return
 
-    def system_setup_ports_initial(self, system):
+    def system_setup_ports_initial(self, ports_algorithm):
         portsets = [self.port_set, 'AC_sensitivitys', 'readouts']
-        system.readout_port_needed(self.portNI, self.keyP, portsets)
-        system.readout_port_needed(self.portNI, self.keyN, portsets)
-        system.readout_port_needed(self.portNQ, self.keyP, portsets)
-        system.readout_port_needed(self.portNQ, self.keyN, portsets)
-        system.readout_port_needed(self.portD, self.keyP, portsets)
-        system.readout_port_needed(self.portD, self.keyN, portsets)
-        system.drive_port_needed(self.portDrv, self.keyP, portsets)
-        system.drive_port_needed(self.portDrv, self.keyN, portsets)
-        return
-
-    def system_associated_readout_view(self, solver):
-        noise_view = self.noise.system_associated_readout_view(solver)
-        return HomodyneACReadoutView(
-            readout    = self,
-            system     = self.system,
-            solver     = solver,
-            noise_view = noise_view,
-            phase_deg  = 0,
-        )
-
-
-class HomodyneACReadoutView(ReadoutViewBase):
-    def __init__(
-            self,
-            noise_view,
-            phase_deg,
-            **kwargs
-    ):
-        super(HomodyneACReadoutView, self).__init__(**kwargs)
-        self.noise     = noise_view
-        self.phase_deg = phase_deg
+        ports_algorithm.readout_port_needed(self.portNI, self.keyP, portsets)
+        ports_algorithm.readout_port_needed(self.portNI, self.keyN, portsets)
+        ports_algorithm.readout_port_needed(self.portNQ, self.keyP, portsets)
+        ports_algorithm.readout_port_needed(self.portNQ, self.keyN, portsets)
+        ports_algorithm.readout_port_needed(self.portD, self.keyP, portsets)
+        ports_algorithm.readout_port_needed(self.portD, self.keyN, portsets)
+        ports_algorithm.drive_port_needed(self.portDrv, self.keyP, portsets)
+        ports_algorithm.drive_port_needed(self.portDrv, self.keyN, portsets)
 
         return
 
     def rotate_deg(self, phase_deg):
         return self.__class__(
-            system     = self.system,
             solver     = self.solver,
             readout    = self.readout,
             noise_view = self.noise,
@@ -119,37 +93,36 @@ class HomodyneACReadoutView(ReadoutViewBase):
     def select_sources(self, nobj_filter_func):
         noise_view = self.noise.select_sources(nobj_filter_func)
         return self.__class__(
-            system     = self.system,
             solver     = self.solver,
             readout    = self.readout,
             noise_view = noise_view,
             phase_deg  = self.phase_deg,
         )
 
-    @mproperty
+    @declarative.mproperty
     def F_Hz(self):
         return self.readout.F_sep.F_Hz
 
-    @mproperty
+    @declarative.mproperty
     def AC_sensitivity(self):
         return self.AC_sensitivity_IQ[0]
 
     def homodyne_SNR(self):
         return self.noise.noise / abs(self.AC_sensitivity)
 
-    @mproperty
+    @declarative.mproperty
     def AC_noise_limited_sensitivity(self):
         return self.AC_ASD / abs(self.AC_sensitivity)
 
-    @mproperty
+    @declarative.mproperty
     def AC_ASD(self):
         return self.AC_PSD**.5
 
-    @mproperty
+    @declarative.mproperty
     def AC_PSD(self):
         return self.AC_CSD_IQ[0, 0]
 
-    @mproperty
+    @declarative.mproperty
     def AC_PSD_by_source(self):
         eachCSD = dict()
         for nobj, subCSD in list(self.noise.CSD_by_source.items()):
@@ -170,7 +143,7 @@ class HomodyneACReadoutView(ReadoutViewBase):
             eachCSD[nobj] = arr[..., 0, 0]
         return eachCSD
 
-    @mproperty
+    @declarative.mproperty
     def rotation_matrix_back(self):
         phase_rad = self.phase_deg * np.pi / 180
         S = np.sin(phase_rad)
@@ -182,7 +155,7 @@ class HomodyneACReadoutView(ReadoutViewBase):
         )
         return ROT
 
-    @mproperty
+    @declarative.mproperty
     def AC_CSD_IQ_back(self):
         II = self.noise.CSD['I', 'I']
         IQ = self.noise.CSD['I', 'Q']
@@ -199,21 +172,21 @@ class HomodyneACReadoutView(ReadoutViewBase):
         arr = np.einsum('...ij,...kj->...ik', arr, self.rotation_matrix_back)
         return arr
 
-    @mproperty
+    @declarative.mproperty
     def AC_CSD_IQ(self):
         return np_roll_2D_mat_front(
             self.AC_CSD_IQ_back
         )
 
-    @mproperty
+    @declarative.mproperty
     def AC_CSD_IQ_re_inv_back(self):
         return np.linalg.inv(np.real(self.AC_CSD_IQ_back))
 
-    @mproperty
+    @declarative.mproperty
     def AC_CSD_IQ_re_inv(self):
         return np_roll_2D_mat_front(self.AC_CSD_IQ_re_inv_back)
 
-    @mproperty
+    @declarative.mproperty
     def AC_noise_limited_sensitivity_optimal(self):
         arr = self.AC_CSD_IQ_re_inv_back
         IQ  = self.AC_sensitivity_IQ_back
@@ -223,15 +196,15 @@ class HomodyneACReadoutView(ReadoutViewBase):
         arr = np.einsum('...i,...i->...', arr, IQ.conjugate())
         return 1/(arr)**.5
 
-    @mproperty
+    @declarative.mproperty
     def AC_CSD_IQ_inv_back(self):
         return np.linalg.inv(self.AC_CSD_IQ_back)
 
-    @mproperty
+    @declarative.mproperty
     def AC_CSD_IQ_inv(self):
         return np_roll_2D_mat_front(self.AC_CSD_IQ_inv_back)
 
-    @mproperty
+    @declarative.mproperty
     def AC_CSD_ellipse(self):
         NIQ = np.real(self.AC_CSD_IQ)
         rtDisc = np.sqrt((NIQ[0, 0] - NIQ[1, 1])**2 + 4*(NIQ[0, 1]*NIQ[1, 0]))
@@ -248,7 +221,7 @@ class HomodyneACReadoutView(ReadoutViewBase):
             deg = 180 * ang_rad / np.pi,
         )
 
-    @mproperty
+    @declarative.mproperty
     def AC_CSD_ellipse_norm(self):
         ellipse = self.AC_CSD_ellipse
         #TODO, get appropriate wavelength rather than assuming 1064nm
@@ -260,7 +233,7 @@ class HomodyneACReadoutView(ReadoutViewBase):
             deg = ellipse.deg,
         )
 
-    @mproperty
+    @declarative.mproperty
     def AC_CSD_ellipse_normSN(self):
         ellipse = self.AC_CSD_ellipse
         #TODO, get appropriate wavelength rather than assuming 1064nm
@@ -272,18 +245,18 @@ class HomodyneACReadoutView(ReadoutViewBase):
             deg = ellipse.deg,
         )
 
-    @mproperty
+    @declarative.mproperty
     def AC_signal_matrix(self):
         SIQ = np.einsum('i...,j...->ji...', self.AC_sensitivity_IQ, self.AC_sensitivity_IQ.conjugate())
         return SIQ
 
-    @mproperty
+    @declarative.mproperty
     def AC_signal_matrix_norm(self):
         SIQ = self.AC_signal_matrix
         SIQ = SIQ / (SIQ[0, 0] + SIQ[1, 1])
         return SIQ
 
-    @mproperty
+    @declarative.mproperty
     def AC_signal_ellipse(self):
         SIQ = np.real(self.AC_signal_matrix)
         rtDisc = np.sqrt((SIQ[0, 0] - SIQ[1, 1])**2 + 4*(SIQ[0, 1]*SIQ[1, 0]))
@@ -298,7 +271,7 @@ class HomodyneACReadoutView(ReadoutViewBase):
             deg = 180 * ang_rad / np.pi,
         )
 
-    @mproperty
+    @declarative.mproperty
     def AC_signal_ellipse_norm(self):
         SIQ = np.real(self.AC_signal_matrix_norm)
         rtDisc = np.sqrt((SIQ[0, 0] - SIQ[1, 1])**2 + 4*(SIQ[0, 1]*SIQ[1, 0]))
@@ -313,7 +286,7 @@ class HomodyneACReadoutView(ReadoutViewBase):
             deg = 180 * ang_rad / np.pi,
         )
 
-    @mproperty
+    @declarative.mproperty
     def AC_optimal_readout_deg(self):
         NIQ = self.AC_CSD_IQ
         SIQ = self.AC_signal_matrix
@@ -339,14 +312,14 @@ class HomodyneACReadoutView(ReadoutViewBase):
         ans[~where_quad] = ang_lin
         return ans * 180 / np.pi
 
-    @mproperty
+    @declarative.mproperty
     def AC_CSD_IQ_norm(self):
         IQ_mat = np.copy(self.AC_CSD_IQ)
         sqrtIIQQ = np.sqrt(IQ_mat[0, 0] * IQ_mat[1, 1])
         IQ_mat  /= sqrtIIQQ
         return IQ_mat
 
-    @mproperty
+    @declarative.mproperty
     def AC_sensitivity_IQ(self):
         phase_rad = self.phase_deg * np.pi / 180
         I = self._AC_sensitivity(self.readout.portNI)
@@ -356,7 +329,7 @@ class HomodyneACReadoutView(ReadoutViewBase):
             -np.sin(phase_rad) * I + np.cos(phase_rad) * Q,
         ])
 
-    @mproperty
+    @declarative.mproperty
     def AC_sensitivity_IQ_back(self):
         return np_roll_2D_mat_back(
             self.AC_sensitivity_IQ, N = 1,
@@ -390,7 +363,6 @@ class HomodyneACReadoutView(ReadoutViewBase):
 class HomodyneNoiseReadout(SystemElementBase):
     def __init__(
             self,
-            system,
             portNI,
             portNQ,
             port_set = None,
@@ -398,7 +370,6 @@ class HomodyneNoiseReadout(SystemElementBase):
             **kwargs
     ):
         super(HomodyneNoiseReadout, self).__init__(
-            system = system,
             **kwargs
         )
 
@@ -414,11 +385,24 @@ class HomodyneNoiseReadout(SystemElementBase):
             self.port_set = port_set
 
         if AC_sidebands_use:
-            self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({system.F_AC : 1})})
-            self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({system.F_AC : -1})})
+            self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({self.system.F_AC : 1})})
+            self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({self.system.F_AC : -1})})
         else:
             self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({})})
             self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({})})
+
+        #return NoiseMatrixView(
+        #    system   = self.system,
+        #    solver   = solver,
+        #    readout  = self,
+        #    port_set = self.port_set,
+        #    port_map = dict(
+        #        I = self.portNI,
+        #        Q = self.portNQ,
+        #    ),
+        #    keyP = self.keyP,
+        #    keyN = self.keyN,
+        #)
         return
 
     def system_setup_ports_initial(self, system):
@@ -429,16 +413,3 @@ class HomodyneNoiseReadout(SystemElementBase):
         system.readout_port_needed(self.portNQ, self.keyN, portsets)
         return
 
-    def system_associated_readout_view(self, solver):
-        return NoiseMatrixView(
-            system   = self.system,
-            solver   = solver,
-            readout  = self,
-            port_set = self.port_set,
-            port_map = dict(
-                I = self.portNI,
-                Q = self.portNQ,
-            ),
-            keyP = self.keyP,
-            keyN = self.keyN,
-        )

@@ -1,31 +1,16 @@
 # -*- coding: utf-8 -*-
 """
 """
-
-from __future__ import division
-from __future__ import print_function
-
+from __future__ import division, print_function
+import declarative
 import numpy as np
-
-import matplotlib.patches as mplpatch
-import matplotlib.transforms as mpltrans
-import matplotlib.collections as mplcollect
-
-from declarative.bunch import (
-    declarative.Bunch,
-)
-from declarative import (
-    declarative.OverridableObject,
-    declarative.mproperty,
-)
 
 from BGSF.utilities.np import logspaced
 
-def first_non_none(*args):
-    for arg in args:
-        if arg is not None:
-            return arg
-    return None
+#import matplotlib.patches as mplpatch
+import matplotlib.transforms as mpltrans
+import matplotlib.collections as mplcollect
+
 
 def plot_ellipses(
     readout,
@@ -107,10 +92,10 @@ class EllipsePlotter(declarative.OverridableObject):
             plot_ellipses(
                 readout       = readout,
                 ellipse_bunch = ebunch,
-                use_logellipt = first_non_none(use_logellipt, self.use_logellipt, False),
+                use_logellipt = declarative.first_non_none(use_logellipt, self.use_logellipt, False),
                 linewidths    = .5,
                 alpha         = 1,
-                vfrac         = first_non_none(vfrac, self.vfrac, .45),
+                vfrac         = declarative.first_non_none(vfrac, self.vfrac, .45),
                 edgecolors    = 'gray',
                 linestyle     = ':',
                 facecolors    = 'none',
@@ -121,11 +106,11 @@ class EllipsePlotter(declarative.OverridableObject):
         plot_ellipses(
             readout       = readout,
             ellipse_bunch = readout.AC_CSD_ellipse_norm,
-            use_logellipt = first_non_none(use_logellipt, self.use_logellipt, False),
-            color         = first_non_none(color_noise, self.color_noise, 'blue'),
+            use_logellipt = declarative.first_non_none(use_logellipt, self.use_logellipt, False),
+            color         = declarative.first_non_none(color_noise, self.color_noise, 'blue'),
             linewidths    = .5,
             alpha         = .3,
-            vfrac         = first_non_none(vfrac, self.vfrac, .45),
+            vfrac         = declarative.first_non_none(vfrac, self.vfrac, .45),
             scale         = self.scale,
             ax            = ax,
         )
@@ -133,9 +118,9 @@ class EllipsePlotter(declarative.OverridableObject):
         plot_ellipses(
             readout       = readout,
             ellipse_bunch = readout.AC_signal_ellipse_norm,
-            color         = first_non_none(color_signal, self.color_signal, 'black'),
+            color         = declarative.first_non_none(color_signal, self.color_signal, 'black'),
             scale         = self.sig_relscale * self.scale,
-            vfrac         = first_non_none(vfrac, self.vfrac, .45),
+            vfrac         = declarative.first_non_none(vfrac, self.vfrac, .45),
             ax            = ax,
         )
 
