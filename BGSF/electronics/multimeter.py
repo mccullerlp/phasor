@@ -95,7 +95,7 @@ class CurrentReadout(readouts.DCReadout, elements.ElectricalElementBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         #TODO, not sure about the 1/2 everywhere
-        _2 = self.math.number(2)
+        _2 = self.symbols.number(2)
         pcplgs = {
             self.terminal.i :  1 / self.Z_termination,
             self.terminal.o : -1 / self.Z_termination,

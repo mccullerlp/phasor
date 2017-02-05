@@ -95,7 +95,7 @@ class TerminatorMatched(SMatrix1PortBase):
         if self.system.include_johnson_noise:
             return noise.VoltageFluctuation(
                 port = self.A,
-                Vsq_Hz_by_freq = lambda F : 4 * self.Z_termination.real * self.system.temp_K * self.system.kB_J_K,
+                Vsq_Hz_by_freq = lambda F : 4 * self.Z_termination.real * self.symbols.temp_K * self.symbols.kB_J_K,
                 sided = 'one-sided',
             )
         return None

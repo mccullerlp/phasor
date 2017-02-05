@@ -24,7 +24,7 @@ class ResistorBase(object):
         if self.system.include_johnson_noise:
             return noise.VoltageFluctuation(
                 port = self.A,
-                Vsq_Hz_by_freq = lambda F : 4 * self.resistance_Ohms * self.system.temp_K * self.system.kB_J_K,
+                Vsq_Hz_by_freq = lambda F : 4 * self.resistance_Ohms * self.symbols.temp_K * self.symbols.kB_J_K,
                 sided = 'one-sided',
             )
         return None
@@ -36,7 +36,7 @@ class CapacitorBase(object):
         return val
 
     def admittance_by_freq(self, F):
-        return (self.math.i2pi * F * self.capacitance_Farads)
+        return (self.symbols.i2pi * F * self.capacitance_Farads)
 
 
 class InductorBase(object):
@@ -49,14 +49,14 @@ class InductorBase(object):
         return val
 
     def impedance_by_freq(self, F):
-        return (self.resistance_Ohms + self.math.i2pi * F * self.inductance_Henries)
+        return (self.resistance_Ohms + self.symbols.i2pi * F * self.inductance_Henries)
 
     @decl.dproperty
     def johnson_noise(self):
         if self.system.include_johnson_noise and self.resistance_Ohms != 0:
             return noise.VoltageFluctuation(
                 port = self.A,
-                Vsq_Hz_by_freq = lambda F : 4 * self.resistance_Ohms * self.system.temp_K * self.system.kB_J_K,
+                Vsq_Hz_by_freq = lambda F : 4 * self.resistance_Ohms * self.symbols.temp_K * self.symbols.kB_J_K,
                 sided = 'one-sided',
             )
         return None
@@ -253,7 +253,7 @@ class Transformer(Z2x2To4Port):
         if self.system.include_johnson_noise and self.L1_resistance_Ohms != 0:
             return noise.VoltageFluctuation(
                 port = self.A,
-                Vsq_Hz_by_freq = lambda F : 4 * self.L1_resistance_Ohms * self.system.temp_K * self.system.kB_J_K,
+                Vsq_Hz_by_freq = lambda F : 4 * self.L1_resistance_Ohms * self.symbols.temp_K * self.symbols.kB_J_K,
                 sided = 'one-sided',
             )
         return None
@@ -267,23 +267,23 @@ class Transformer(Z2x2To4Port):
         if self.system.include_johnson_noise and self.L2_resistance_Ohms != 0:
             return noise.VoltageFluctuation(
                 port = self.C,
-                Vsq_Hz_by_freq = lambda F : 4 * self.L2_resistance_Ohms * self.system.temp_K * self.system.kB_J_K,
+                Vsq_Hz_by_freq = lambda F : 4 * self.L2_resistance_Ohms * self.symbols.temp_K * self.symbols.kB_J_K,
                 sided = 'one-sided',
             )
         return None
 
     def Z11_by_freq(self, F):
-        return (self.L1_resistance_Ohms + self.math.i2pi * F * self.L1_inductance_Henries)
+        return (self.L1_resistance_Ohms + self.symbols.i2pi * F * self.L1_inductance_Henries)
 
     def Z12_by_freq(self, F):
         M = self.transformer_k_by_freq(F) * (self.L1_inductance_Henries * self.L2_inductance_Henries)**.5
-        return (self.math.i2pi * F * M)
+        return (self.symbols.i2pi * F * M)
 
     def Z21_by_freq(self, F):
         return self.Z12_by_freq(F)
 
     def Z22_by_freq(self, F):
-        return (self.L2_resistance_Ohms + self.math.i2pi * F * self.L2_inductance_Henries)
+        return (self.L2_resistance_Ohms + self.symbols.i2pi * F * self.L2_inductance_Henries)
 
 
 

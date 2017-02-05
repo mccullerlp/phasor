@@ -1,9 +1,10 @@
 """
 """
 from __future__ import division, print_function
-from .pint import ureg
+from . import pint
 
 from declarative.bunch import Bunch
+
 
 def units_map(
     principle,
@@ -13,10 +14,10 @@ def units_map(
 
     for name, to in kwargs.items():
         if to is None:
-            uobj = ureg[name]
+            uobj = pint.ureg[name]
         else:
             if isinstance(to, str):
-                uobj = ureg[to]
+                uobj = pint.ureg[to]
             else:
                 uobj = to
         umap[name] = uobj

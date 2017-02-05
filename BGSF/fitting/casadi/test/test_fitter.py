@@ -1,6 +1,7 @@
 """
 """
 from __future__ import print_function, division
+import pytest
 
 from BGSF.utilities.mpl.autoniceplot import (
     #AutoPlotSaver,
@@ -87,11 +88,13 @@ def test_fitter(plot):
     #print(froot.systems.alm.ooa_params)
     ret = froot.overlap.minimize_function()
     print("OLAP: ", ret.systems.alm.measurements.overlap('q1', 'q2'))
+    print(plot)
     if plot:
         mplot.plot('test_post_fit', sys = ret.systems.alm.measurements)
     return
 
 
+@pytest.mark.skip(reason="Need to fix Jitter Placement")
 def test_fitter_jitter(plot):
     sys = buildsys()
     froot = FIT.FitterRoot()

@@ -17,10 +17,6 @@ class ElectricalElementBase(CouplerBase, ElementBase):
     Z_termination = 50
 
     @decl.mproperty
-    def math(self):
-        return self.system
-
-    @decl.mproperty
     def symbols(self):
         return self.system.symbols
 
@@ -133,7 +129,7 @@ class Connection(ElectricalElementBase):
         return
 
     def system_setup_coupling(self, matrix_algorithm):
-        _2 = self.math.number(2)
+        _2 = self.symbols.number(2)
         total_ports = len(self.ports_electrical)
         for port1 in self.ports_electrical:
             for kfrom in matrix_algorithm.port_set_get(port1.i):
@@ -157,7 +153,7 @@ class Cable(Electrical2PortBase):
         return val
 
     def phase_advance(self, F):
-        return self.math.exp(-2 * self.symbols.i * self.symbols.pi * F * self.length_ns)
+        return self.symbols.exp(-2 * self.symbols.i * self.symbols.pi * F * self.length_ns)
 
     def system_setup_ports(self, ports_algorithm):
         #TODO could reduce these with more information about used S-matrix elements

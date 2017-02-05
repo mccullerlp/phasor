@@ -9,8 +9,8 @@ from declarative import Bunch
 import BGSF.electronics as electronics
 import BGSF.readouts as readouts
 
-from BGSF.system.optical import (
-    OpticalSystem
+from BGSF.system import (
+   BGSystem 
 )
 
 import unittest
@@ -19,245 +19,229 @@ assertions = unittest.TestCase('__init__')
 
 def test_V():
     #with explicit terminator
-    sys = OpticalSystem()
-    sled = sys.sled
-    sled.my.V1 = electronics.VoltageSource(V_DC = 1)
-    sled.my.T1 = electronics.TerminatorOpen()
-    sys.bond(sled.V1.A, sled.T1.A)
-    sled.my.R1 = electronics.VoltageReadout(
-        terminal =sled.V1.A,
+    sys = BGSystem()
+    sys.my.V1 = electronics.VoltageSource(V_DC = 1)
+    sys.my.T1 = electronics.TerminatorOpen()
+    sys.bond(sys.V1.A, sys.T1.A)
+    sys.my.R1 = electronics.VoltageReadout(
+        terminal =sys.V1.A,
     )
-    test.assert_almost_equal(sled.R1.DC_readout, 1)
+    test.assert_almost_equal(sys.R1.DC_readout, 1)
 
     #without explicit terminator
-    sys = OpticalSystem()
-    sled = sys.sled
-    sled.my.V1 = electronics.VoltageSource(V_DC = 1)
-    sled.my.R1 = electronics.VoltageReadout(
-        terminal =sled.V1.A,
+    sys = BGSystem()
+    sys.my.V1 = electronics.VoltageSource(V_DC = 1)
+    sys.my.R1 = electronics.VoltageReadout(
+        terminal =sys.V1.A,
     )
-    test.assert_almost_equal(sled.R1.DC_readout, 1)
+    test.assert_almost_equal(sys.R1.DC_readout, 1)
 
     #measure across terminator
-    sys = OpticalSystem()
-    sled = sys.sled
-    sled.my.V1 = electronics.VoltageSource(V_DC = 1)
-    sled.my.T1 = electronics.TerminatorOpen()
-    sys.bond(sled.V1.A, sled.T1.A)
-    sled.my.R1 = electronics.VoltageReadout(
-        terminal =sled.T1.A,
+    sys = BGSystem()
+    sys.my.V1 = electronics.VoltageSource(V_DC = 1)
+    sys.my.T1 = electronics.TerminatorOpen()
+    sys.bond(sys.V1.A, sys.T1.A)
+    sys.my.R1 = electronics.VoltageReadout(
+        terminal =sys.T1.A,
     )
-    test.assert_almost_equal(sled.R1.DC_readout, 1)
+    test.assert_almost_equal(sys.R1.DC_readout, 1)
 
 
 def test_I():
-    sys = OpticalSystem()
-    sled = sys.sled
-    sled.my.I1 = electronics.CurrentSource(I_DC = 1)
-    sled.my.T1 = electronics.TerminatorShorted()
-    sys.bond(sled.I1.A, sled.T1.A)
-    sled.my.R1 = electronics.CurrentReadout(
-        terminal = sled.I1.A,
+    sys = BGSystem()
+    sys.my.I1 = electronics.CurrentSource(I_DC = 1)
+    sys.my.T1 = electronics.TerminatorShorted()
+    sys.bond(sys.I1.A, sys.T1.A)
+    sys.my.R1 = electronics.CurrentReadout(
+        terminal = sys.I1.A,
         direction = 'out',
     )
-    test.assert_almost_equal(sled.R1.DC_readout, 1)
+    test.assert_almost_equal(sys.R1.DC_readout, 1)
 
     #measure across terminator
-    sys = OpticalSystem()
-    sled = sys.sled
-    sled.my.I1 = electronics.CurrentSource(I_DC = 1)
-    sled.my.T1 = electronics.TerminatorShorted()
-    sys.bond(sled.I1.A, sled.T1.A)
-    sled.my.R1 = electronics.CurrentReadout(
-        terminal = sled.T1.A,
+    sys = BGSystem()
+    sys.my.I1 = electronics.CurrentSource(I_DC = 1)
+    sys.my.T1 = electronics.TerminatorShorted()
+    sys.bond(sys.I1.A, sys.T1.A)
+    sys.my.R1 = electronics.CurrentReadout(
+        terminal = sys.T1.A,
         direction = 'in',
     )
-    test.assert_almost_equal(sled.R1.DC_readout, 1)
+    test.assert_almost_equal(sys.R1.DC_readout, 1)
 
 def test_VIR():
-    sys = OpticalSystem()
-    sled = sys.sled
-    sled.my.I1 = electronics.CurrentSource(I_DC = 1)
-    sled.my.T1 = electronics.TerminatorResistor(
+    sys = BGSystem()
+    sys.my.I1 = electronics.CurrentSource(I_DC = 1)
+    sys.my.T1 = electronics.TerminatorResistor(
         resistance_Ohms = 10,
     )
-    sys.bond(sled.I1.A, sled.T1.A)
-    sled.my.R1 = electronics.CurrentReadout(
-        terminal = sled.I1.A,
+    sys.bond(sys.I1.A, sys.T1.A)
+    sys.my.R1 = electronics.CurrentReadout(
+        terminal = sys.I1.A,
         direction = 'out',
     )
-    sled.my.R2 = electronics.VoltageReadout(
-        terminal = sled.I1.A,
+    sys.my.R2 = electronics.VoltageReadout(
+        terminal = sys.I1.A,
     )
-    test.assert_almost_equal(sled.R1.DC_readout, 1)
-    test.assert_almost_equal(sled.R2.DC_readout, 10)
+    test.assert_almost_equal(sys.R1.DC_readout, 1)
+    test.assert_almost_equal(sys.R2.DC_readout, 10)
 
     #2
-    sys = OpticalSystem()
-    sled = sys.sled
-    sled.my.I1 = electronics.CurrentSource(I_DC = 1)
-    sled.my.T1 = electronics.TerminatorResistor(
+    sys = BGSystem()
+    sys.my.I1 = electronics.CurrentSource(I_DC = 1)
+    sys.my.T1 = electronics.TerminatorResistor(
         resistance_Ohms = 50,
     )
-    sys.bond(sled.I1.A, sled.T1.A)
-    sled.my.R1 = electronics.CurrentReadout(
-        terminal = sled.I1.A,
+    sys.bond(sys.I1.A, sys.T1.A)
+    sys.my.R1 = electronics.CurrentReadout(
+        terminal = sys.I1.A,
         direction = 'out',
     )
-    sled.my.R2 = electronics.VoltageReadout(
-        terminal = sled.I1.A,
+    sys.my.R2 = electronics.VoltageReadout(
+        terminal = sys.I1.A,
     )
-    test.assert_almost_equal(sled.R1.DC_readout, 1)
-    test.assert_almost_equal(sled.R2.DC_readout, 50)
+    test.assert_almost_equal(sys.R1.DC_readout, 1)
+    test.assert_almost_equal(sys.R2.DC_readout, 50)
 
 def test_VIR_conn():
-    sys = OpticalSystem()
-    sled = sys.sled
-    sled.my.I1 = electronics.CurrentSource(I_DC = 1)
-    sled.my.Conn1 = electronics.Connection(N_ports = 3)
-    sled.my.T1 = electronics.TerminatorResistor(
+    sys = BGSystem()
+    sys.my.I1 = electronics.CurrentSource(I_DC = 1)
+    sys.my.Conn1 = electronics.Connection(N_ports = 3)
+    sys.my.T1 = electronics.TerminatorResistor(
         resistance_Ohms = 10,
     )
-    sled.my.T2 = electronics.TerminatorResistor(
+    sys.my.T2 = electronics.TerminatorResistor(
         resistance_Ohms = 10,
     )
-    sys.bond(sled.I1.A, sled.Conn1.p0)
-    sys.bond(sled.Conn1.p1, sled.T1.A)
-    sys.bond(sled.Conn1.p2, sled.T2.A)
-    sled.my.R1 = electronics.CurrentReadout(
-        terminal = sled.I1.A,
+    sys.bond(sys.I1.A, sys.Conn1.p0)
+    sys.bond(sys.Conn1.p1, sys.T1.A)
+    sys.bond(sys.Conn1.p2, sys.T2.A)
+    sys.my.R1 = electronics.CurrentReadout(
+        terminal = sys.I1.A,
         direction = 'out',
     )
-    sled.my.R2 = electronics.VoltageReadout(
-        terminal = sled.I1.A,
+    sys.my.R2 = electronics.VoltageReadout(
+        terminal = sys.I1.A,
     )
-    sled.my.R3 = electronics.CurrentReadout(
-        terminal = sled.T1.A,
+    sys.my.R3 = electronics.CurrentReadout(
+        terminal = sys.T1.A,
         direction = 'in',
     )
-    test.assert_almost_equal(sled.R1.DC_readout, 1)
-    test.assert_almost_equal(sled.R2.DC_readout, 5)
-    test.assert_almost_equal(sled.R3.DC_readout, .5)
+    test.assert_almost_equal(sys.R1.DC_readout, 1)
+    test.assert_almost_equal(sys.R2.DC_readout, 5)
+    test.assert_almost_equal(sys.R3.DC_readout, .5)
 
 def test_bdV():
     """
     Test the balanced voltage source with different pairs of terminations. Not allowed to short both sides or have
     both sides open.
     """
-    sys = OpticalSystem()
-    sled = sys.sled
-    sled.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
-    sled.my.T1 = electronics.TerminatorOpen()
-    sys.bond(sled.V1.A, sled.T1.A)
-    sled.my.T2 = electronics.TerminatorShorted()
-    sys.bond(sled.V1.B, sled.T2.A)
-    sled.my.R1 = electronics.VoltageReadout(
-        terminal = sled.V1.A,
+    sys = BGSystem()
+    sys.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
+    sys.my.T1 = electronics.TerminatorOpen()
+    sys.bond(sys.V1.A, sys.T1.A)
+    sys.my.T2 = electronics.TerminatorShorted()
+    sys.bond(sys.V1.B, sys.T2.A)
+    sys.my.R1 = electronics.VoltageReadout(
+        terminal = sys.V1.A,
     )
-    test.assert_almost_equal(sled.R1.DC_readout, 1)
+    test.assert_almost_equal(sys.R1.DC_readout, 1)
 
-    sys = OpticalSystem()
-    sled = sys.sled
-    sled.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
-    #sled.my.T1 = electronics.TerminatorOpen()
-    #sys.bond(sled.V1.A, sled.T1.A)
-    sled.my.T2 = electronics.TerminatorShorted()
-    sys.bond(sled.V1.B, sled.T2.A)
-    sled.my.R1 = electronics.VoltageReadout(
-        terminal = sled.V1.A,
+    sys = BGSystem()
+    sys.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
+    #sys.my.T1 = electronics.TerminatorOpen()
+    #sys.bond(sys.V1.A, sys.T1.A)
+    sys.my.T2 = electronics.TerminatorShorted()
+    sys.bond(sys.V1.B, sys.T2.A)
+    sys.my.R1 = electronics.VoltageReadout(
+        terminal = sys.V1.A,
     )
-    test.assert_almost_equal(sled.R1.DC_readout, 1)
+    test.assert_almost_equal(sys.R1.DC_readout, 1)
 
-    sys = OpticalSystem()
-    sled = sys.sled
-    sled.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
-    sled.my.T2 = electronics.TerminatorMatched()
-    sys.bond(sled.V1.B, sled.T2.A)
-    sled.my.R1 = electronics.VoltageReadout(
-        terminal = sled.V1.A,
+    sys = BGSystem()
+    sys.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
+    sys.my.T2 = electronics.TerminatorMatched()
+    sys.bond(sys.V1.B, sys.T2.A)
+    sys.my.R1 = electronics.VoltageReadout(
+        terminal = sys.V1.A,
     )
-    test.assert_almost_equal(sled.R1.DC_readout, 1)
+    test.assert_almost_equal(sys.R1.DC_readout, 1)
 
-    sys = OpticalSystem()
-    sled = sys.sled
-    sled.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
-    sled.my.T2 = electronics.TerminatorShorted()
-    sys.bond(sled.V1.B, sled.T2.A)
-    sled.my.T1 = electronics.TerminatorMatched()
-    sys.bond(sled.V1.A, sled.T1.A)
-    sled.my.R1 = electronics.VoltageReadout(
-        terminal = sled.V1.A,
-        terminal_N = sled.V1.B,
+    sys = BGSystem()
+    sys.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
+    sys.my.T2 = electronics.TerminatorShorted()
+    sys.bond(sys.V1.B, sys.T2.A)
+    sys.my.T1 = electronics.TerminatorMatched()
+    sys.bond(sys.V1.A, sys.T1.A)
+    sys.my.R1 = electronics.VoltageReadout(
+        terminal = sys.V1.A,
+        terminal_N = sys.V1.B,
     )
-    test.assert_almost_equal(sled.R1.DC_readout, 1)
+    test.assert_almost_equal(sys.R1.DC_readout, 1)
 
-    sys = OpticalSystem()
-    sled = sys.sled
-    sled.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
-    sled.my.T1 = electronics.TerminatorMatched()
-    sys.bond(sled.V1.A, sled.T1.A)
-    sled.my.T2 = electronics.TerminatorMatched()
-    sys.bond(sled.V1.B, sled.T2.A)
-    sled.my.R1 = electronics.VoltageReadout(
-        terminal = sled.V1.A,
-        terminal_N = sled.V1.B,
+    sys = BGSystem()
+    sys.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
+    sys.my.T1 = electronics.TerminatorMatched()
+    sys.bond(sys.V1.A, sys.T1.A)
+    sys.my.T2 = electronics.TerminatorMatched()
+    sys.bond(sys.V1.B, sys.T2.A)
+    sys.my.R1 = electronics.VoltageReadout(
+        terminal = sys.V1.A,
+        terminal_N = sys.V1.B,
     )
-    test.assert_almost_equal(sled.R1.DC_readout, 1)
+    test.assert_almost_equal(sys.R1.DC_readout, 1)
 
 
 def test_bdVIR():
-    sys = OpticalSystem()
-    sled = sys.sled
-    sled.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
-    sled.my.T1 = electronics.TerminatorResistor(
+    sys = BGSystem()
+    sys.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
+    sys.my.T1 = electronics.TerminatorResistor(
         resistance_Ohms = 10,
     )
-    sys.bond(sled.V1.A, sled.T1.A)
-    sled.my.T2 = electronics.TerminatorResistor(
+    sys.bond(sys.V1.A, sys.T1.A)
+    sys.my.T2 = electronics.TerminatorResistor(
         resistance_Ohms = 20,
     )
-    sys.bond(sled.V1.B, sled.T2.A)
-    sled.my.R1 = electronics.CurrentReadout(
-        terminal = sled.T1.A,
+    sys.bond(sys.V1.B, sys.T2.A)
+    sys.my.R1 = electronics.CurrentReadout(
+        terminal = sys.T1.A,
         direction = 'in',
     )
-    test.assert_almost_equal(sled.R1.DC_readout, 1 / 30)
+    test.assert_almost_equal(sys.R1.DC_readout, 1 / 30)
 
 def test_bdVIR_AC():
-    sys = OpticalSystem()
-    sled = sys.sled
-    sled.my.V1 = electronics.VoltageSourceBalanced()
-    sled.my.T1 = electronics.TerminatorResistor(
+    sys = BGSystem()
+    sys.my.V1 = electronics.VoltageSourceBalanced()
+    sys.my.T1 = electronics.TerminatorResistor(
         resistance_Ohms = 10,
     )
-    sys.bond(sled.V1.A, sled.T1.A)
-    sled.my.T2 = electronics.TerminatorResistor(
+    sys.bond(sys.V1.A, sys.T1.A)
+    sys.my.T2 = electronics.TerminatorResistor(
         resistance_Ohms = 20,
     )
-    sys.bond(sled.V1.B, sled.T2.A)
-    sled.my.R1 = electronics.CurrentReadout(
-        terminal = sled.T1.A,
+    sys.bond(sys.V1.B, sys.T2.A)
+    sys.my.R1 = electronics.CurrentReadout(
+        terminal = sys.T1.A,
         direction = 'in',
     )
-    sled.my.RAC1 = readouts.ACReadout(
-        portD = sled.V1.V.i,
-        portN = sled.R1.I.o,
+    sys.my.RAC1 = readouts.ACReadout(
+        portD = sys.V1.V.i,
+        portN = sys.R1.I.o,
     )
-    test.assert_almost_equal(sled.RAC1.AC_sensitivity, 1 / 30)
+    test.assert_almost_equal(sys.RAC1.AC_sensitivity, 1 / 30)
 
 def test_V_AC():
-    sys = OpticalSystem()
-    sled = sys.sled
+    sys = BGSystem()
     sys.F_AC.F_Hz = 1.
-    sled.my.V1 = electronics.VoltageSource()
-    sled.my.R1 = electronics.VoltageReadout(
-        terminal = sled.V1.A,
+    sys.my.V1 = electronics.VoltageSource()
+    sys.my.R1 = electronics.VoltageReadout(
+        terminal = sys.V1.A,
     )
-    sled.my.RAC1 = readouts.ACReadout(
-        portD = sled.V1.V.i,
-        portN = sled.R1.V.o,
+    sys.my.RAC1 = readouts.ACReadout(
+        portD = sys.V1.V.i,
+        portN = sys.R1.V.o,
     )
-    test.assert_almost_equal(sled.RAC1.AC_sensitivity, 1)
+    test.assert_almost_equal(sys.RAC1.AC_sensitivity, 1)
 
 
 

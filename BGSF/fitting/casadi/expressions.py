@@ -18,7 +18,7 @@ from declarative.bunch import (
     DeepBunch
 )
 
-from ...base.multi_unit_args import (
+from ...base.simple_units import (
     SimpleUnitfulGroup,
 )
 

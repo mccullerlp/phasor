@@ -59,7 +59,6 @@ class SystemSymbols(Element):
         OOA_ASSIGN(self).math                  = np
         OOA_ASSIGN(self).temp_K                = 299
         OOA_ASSIGN(self).Z_termination         = 50
-        OOA_ASSIGN(self).include_johnson_noise = True
         super(SystemSymbols, self).__build__()
 
     def number(self, num):
@@ -69,6 +68,11 @@ class SystemSymbols(Element):
 class BGSystem(RootElement):
 
     _frozen = False
+
+    @decl.dproperty
+    def include_johnson_noise(self, val = True):
+        val = self.ooa_params.setdefault('include_johnson_noise', val)
+        return val
 
     @decl.dproperty
     def symbols(self):

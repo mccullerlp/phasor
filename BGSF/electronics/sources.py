@@ -182,7 +182,7 @@ class VoltageSourceBalanced(smatrix.SMatrix2PortBase):
         #TODO setup DC
         super(VoltageSourceBalanced, self).system_setup_coupling(matrix_algorithm)
         #TODO, not sure about the 1/2 everywhere
-        _2 = self.math.number(2)
+        _2 = self.symbols.number(2)
 
         if self.V_DC != 0:
             matrix_algorithm.coherent_sources_insert(
