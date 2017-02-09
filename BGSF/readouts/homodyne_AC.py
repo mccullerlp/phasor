@@ -21,6 +21,8 @@ from ..base import (
     ClassicalFreqKey,
 )
 
+from . import noise
+
 
 def np_roll_2D_mat_back(arr_mat, N = 2):
     for idx in range(len(arr_mat.shape) - N):
@@ -34,74 +36,16 @@ def np_roll_2D_mat_front(arr_mat, N = 2):
     return arr_mat
 
 
-class HomodyneACReadout(SystemElementBase):
-    def __init__(
-        self,
-        portNI,
-        portNQ,
-        portD,
-        portDrv = None,
-        port_set = 'AC',
-        **kwargs
-    ):
-        super(HomodyneACReadout, self).__init__(**kwargs)
-        if portDrv is None:
-            portDrv = portD
-
-        self.portD = portD
-        self.portNI = portNI
-        self.portNQ = portNQ
-        self.portDrv = portDrv
-
-        OOA_ASSIGN(self).port_set = 'AC'
-
-        #TODO: make this adjustable
-        self.F_sep = self.system.F_AC
-
-        self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : 1})})
-        self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : -1})})
-
-        self.my.noise = HomodyneNoiseReadout(
-            portNI = self.portNI,
-            portNQ = self.portNQ,
-        )
-
-        self.phase_deg = 0
-        return
-
-    def system_setup_ports_initial(self, ports_algorithm):
-        portsets = [self.port_set, 'AC_sensitivitys', 'readouts']
-        ports_algorithm.readout_port_needed(self.portNI, self.keyP, portsets)
-        ports_algorithm.readout_port_needed(self.portNI, self.keyN, portsets)
-        ports_algorithm.readout_port_needed(self.portNQ, self.keyP, portsets)
-        ports_algorithm.readout_port_needed(self.portNQ, self.keyN, portsets)
-        ports_algorithm.readout_port_needed(self.portD, self.keyP, portsets)
-        ports_algorithm.readout_port_needed(self.portD, self.keyN, portsets)
-        ports_algorithm.drive_port_needed(self.portDrv, self.keyP, portsets)
-        ports_algorithm.drive_port_needed(self.portDrv, self.keyN, portsets)
-
-        return
-
+class HomodyneACReadoutBase(SystemElementBase):
     def rotate_deg(self, phase_deg):
         return self.__class__(
-            solver     = self.solver,
-            readout    = self.readout,
             noise_view = self.noise,
             phase_deg  = self.phase_deg + phase_deg
         )
 
-    def select_sources(self, nobj_filter_func):
-        noise_view = self.noise.select_sources(nobj_filter_func)
-        return self.__class__(
-            solver     = self.solver,
-            readout    = self.readout,
-            noise_view = noise_view,
-            phase_deg  = self.phase_deg,
-        )
-
     @declarative.mproperty
     def F_Hz(self):
-        return self.readout.F_sep.F_Hz
+        return self.F_sep.F_Hz
 
     @declarative.mproperty
     def AC_sensitivity(self):
@@ -322,8 +266,8 @@ class HomodyneACReadout(SystemElementBase):
     @declarative.mproperty
     def AC_sensitivity_IQ(self):
         phase_rad = self.phase_deg * np.pi / 180
-        I = self._AC_sensitivity(self.readout.portNI)
-        Q = self._AC_sensitivity(self.readout.portNQ)
+        I = self._AC_sensitivity(self.portNI)
+        Q = self._AC_sensitivity(self.portNQ)
         return np.array([
             np.cos(phase_rad) * I + np.sin(phase_rad) * Q,
             -np.sin(phase_rad) * I + np.cos(phase_rad) * Q,
@@ -337,15 +281,15 @@ class HomodyneACReadout(SystemElementBase):
 
     def _AC_sensitivity(self, portN):
 
-        pk_DP = (self.readout.portD, self.readout.keyP)
-        pk_NP = (portN, self.readout.keyP)
+        pk_DP = (self.portD, self.keyP)
+        pk_NP = (portN, self.keyP)
 
-        pk_DrP = (self.readout.portDrv, self.readout.keyP)
-        pk_DrN = (self.readout.portDrv, self.readout.keyN)
+        pk_DrP = (self.portDrv, self.keyP)
+        pk_DrN = (self.portDrv, self.keyN)
 
-        cbunch = self.solver.coupling_solution_get(
-            drive_set = self.readout.port_set,
-            readout_set = self.readout.port_set,
+        cbunch = self.system.solution.coupling_solution_get(
+            drive_set = self.port_set,
+            readout_set = self.port_set,
         )
 
         coupling_matrix_inv = cbunch.coupling_matrix_inv
@@ -360,56 +304,72 @@ class HomodyneACReadout(SystemElementBase):
         return 2 * N_tot / D_tot
 
 
-class HomodyneNoiseReadout(SystemElementBase):
+class HomodyneNoiseReadout(noise.NoiseReadout):
     def __init__(
             self,
             portNI,
             portNQ,
-            port_set = None,
-            AC_sidebands_use = True,
             **kwargs
     ):
-        super(HomodyneNoiseReadout, self).__init__(
-            **kwargs
-        )
-
         self.portNI = portNI
         self.portNQ = portNQ
 
-        if port_set is None:
-            if AC_sidebands_use:
-                OOA_ASSIGN(self).port_set = 'AC noise'
-            else:
-                OOA_ASSIGN(self).port_set = 'DC noise'
-        else:
-            self.port_set = port_set
-
-        if AC_sidebands_use:
-            self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({self.system.F_AC : 1})})
-            self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({self.system.F_AC : -1})})
-        else:
-            self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({})})
-            self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({})})
-
-        #return NoiseMatrixView(
-        #    system   = self.system,
-        #    solver   = solver,
-        #    readout  = self,
-        #    port_set = self.port_set,
-        #    port_map = dict(
-        #        I = self.portNI,
-        #        Q = self.portNQ,
-        #    ),
-        #    keyP = self.keyP,
-        #    keyN = self.keyN,
-        #)
+        super(HomodyneNoiseReadout, self).__init__(
+            port_map = dict(
+                I = self.portNI,
+                Q = self.portNQ,
+            ),
+            **kwargs
+        )
         return
 
-    def system_setup_ports_initial(self, system):
-        portsets = [self.port_set, 'noise']
-        system.readout_port_needed(self.portNI, self.keyP, portsets)
-        system.readout_port_needed(self.portNI, self.keyN, portsets)
-        system.readout_port_needed(self.portNQ, self.keyP, portsets)
-        system.readout_port_needed(self.portNQ, self.keyN, portsets)
+
+class HomodyneACReadout(HomodyneACReadoutBase, SystemElementBase):
+    def __init__(
+        self,
+        portNI,
+        portNQ,
+        portD,
+        portDrv = None,
+        port_set = 'AC',
+        **kwargs
+    ):
+        super(HomodyneACReadout, self).__init__(**kwargs)
+        if portDrv is None:
+            portDrv = portD
+
+        self.portD = portD
+        self.portNI = portNI
+        self.portNQ = portNQ
+        self.portDrv = portDrv
+
+        OOA_ASSIGN(self).port_set = 'AC'
+
+        #TODO: make this adjustable
+        self.F_sep = self.system.F_AC
+
+        self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : 1})})
+        self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : -1})})
+
+        self.my.noise = HomodyneNoiseReadout(
+            portNI = self.portNI,
+            portNQ = self.portNQ,
+        )
+
+        self.phase_deg = 0
         return
 
+    def system_setup_ports_initial(self, ports_algorithm):
+        portsets = [self.port_set, 'AC_sensitivitys', 'readouts']
+        ports_algorithm.readout_port_needed(self.portNI, self.keyP, portsets)
+        ports_algorithm.readout_port_needed(self.portNI, self.keyN, portsets)
+        ports_algorithm.readout_port_needed(self.portNQ, self.keyP, portsets)
+        ports_algorithm.readout_port_needed(self.portNQ, self.keyN, portsets)
+        ports_algorithm.readout_port_needed(self.portD, self.keyP, portsets)
+        ports_algorithm.readout_port_needed(self.portD, self.keyN, portsets)
+        ports_algorithm.drive_port_needed(self.portDrv, self.keyP, portsets)
+        ports_algorithm.drive_port_needed(self.portDrv, self.keyN, portsets)
+        return
+
+class HomodyneACReadoutSub(SystemElementBase):
+    pass

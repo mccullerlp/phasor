@@ -25,7 +25,7 @@ from ..base import (
 class NoiseReadout(SystemElementBase):
     def __init__(
             self,
-            portN,
+            portN = None,
             port_set = None,
             AC_sidebands_use = True,
             port_map = None,
@@ -62,8 +62,9 @@ class NoiseReadout(SystemElementBase):
 
     def system_setup_ports_initial(self, system):
         portsets = [self.port_set, 'noise']
-        system.readout_port_needed(self.portN, self.keyP, portsets)
-        system.readout_port_needed(self.portN, self.keyN, portsets)
+        for pname, port in self.port_map.items():
+            system.readout_port_needed(port, self.keyP, portsets)
+            system.readout_port_needed(port, self.keyN, portsets)
         return
 
     @declarative.mproperty
@@ -162,8 +163,6 @@ class NoiseReadout(SystemElementBase):
             if nobj_filter_func(nobj):
                 external_collect[nobj] = sumdict
         return self.__class__(
-            system           = self.system,
-            solver           = self.system.solution,
             port_set         = self.port_set,
             port_map         = self.port_map,
             keyP             = self.keyP,
