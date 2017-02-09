@@ -113,20 +113,42 @@ class LIGODetector(base.SystemElementSled):
             #facing_cardinal = 'NW',
         )
         self.my.IX = QuadMirrorBasic(
-            T_hr = 14e-3,
+            T_hr = 30e-3,
             L_hr = 0 if not self.lossless else 0,
             #facing_cardinal = 'E',
         )
+        self.my.IX2 = QuadMirrorBasic(
+            T_hr = 30e-3,
+            L_hr = 0 if not self.lossless else 0,
+            #facing_cardinal = 'E',
+        )
+        self.my.EX2 = QuadMirrorBasic(
+            T_hr = 30e-3,
+            L_hr = 0e-6 if not self.lossless else 0,
+            #facing_cardinal = 'W',
+            AOI_deg = (1 if self.misalign_EX else 0),
+        )
         self.my.EX = QuadMirrorBasic(
             T_hr = 5e-6,
-            L_hr = 100e-6 if not self.lossless else 0,
+            L_hr = 0e-6 if not self.lossless else 0,
             #facing_cardinal = 'W',
             AOI_deg = (1 if self.misalign_EX else 0),
         )
         self.my.IY = QuadMirrorBasic(
-            T_hr = 14e-3,
+            T_hr = 30e-3,
             L_hr = 0 if not self.lossless else 0,
             #facing_cardinal = 'N',
+        )
+        self.my.IY2 = QuadMirrorBasic(
+            T_hr = 30e-3,
+            L_hr = 0 if not self.lossless else 0,
+            #facing_cardinal = 'N',
+        )
+        self.my.EY2 = QuadMirrorBasic(
+            T_hr = 30e-3,
+            L_hr = 100e-6 if not self.lossless else 0,
+            #facing_cardinal = 'S',
+            AOI_deg = (1 if self.misalign_EY else 0),
         )
         self.my.EY = QuadMirrorBasic(
             T_hr = 5e-6,
@@ -191,7 +213,7 @@ class LIGODetector(base.SystemElementSled):
 
         self.system.bond_sequence(
             self.REFLPD.Fr,
-            self.PR.Fr,
+            self.PR.Bk,
             self.POPTruePD.Bk,
             self.S_PR_PR2.Fr,
             self.PR2.BkA,
@@ -199,8 +221,10 @@ class LIGODetector(base.SystemElementSled):
             self.BS.mirror.FrA,
             self.S_BS_IX.Fr,
             self.IX.mirror.Fr,
+            self.IX2.mirror.Fr,
             self.XarmPD.Bk,
             self.S_IX_EX.Fr,
+            self.EX2.mirror.Fr,
             self.EX.mirror.Bk,
             self.XtransPD.Fr,
         )
@@ -210,8 +234,10 @@ class LIGODetector(base.SystemElementSled):
             self.BS.mirror.BkB,
             self.S_BS_IY.Fr,
             self.IY.mirror.Fr,
+            self.IY2.mirror.Fr,
             self.YarmPD.Fr,
             self.S_IY_EY.Fr,
+            self.EY2.mirror.Fr,
             self.EY.mirror.Bk,
             self.YtransPD.Fr,
         )
@@ -248,11 +274,15 @@ class LIGODetector(base.SystemElementSled):
         self.my.actuate_DARM_m = signals.DistributionAmplifier(
             port_gains = dict(
                 EX = -1 / 2,
+                EX2 = -1 / 2,
                 EY = +1 / 2,
+                EY2 = +1 / 2,
             )
         )
         self.system.bond(self.actuate_DARM_m.EX, self.EX.actuate_pos_m)
         self.system.bond(self.actuate_DARM_m.EY, self.EY.actuate_pos_m)
+        self.system.bond(self.actuate_DARM_m.EX2, self.EX2.actuate_pos_m)
+        self.system.bond(self.actuate_DARM_m.EY2, self.EY2.actuate_pos_m)
 
         self.my.actuate_DARM_N = signals.DistributionAmplifier(
             port_gains = dict(
@@ -284,11 +314,15 @@ class LIGODetector(base.SystemElementSled):
         self.my.testpoint_DARM_pos_m = signals.SummingAmplifier(
             port_gains = dict(
                 EX = -1,
+                EX2 = -1,
                 EY = +1,
+                EY2 = +1,
             )
         )
         self.system.bond(self.EX.testpoint_pos_m, self.testpoint_DARM_pos_m.EX)
+        self.system.bond(self.EX2.testpoint_pos_m, self.testpoint_DARM_pos_m.EX2)
         self.system.bond(self.EY.testpoint_pos_m, self.testpoint_DARM_pos_m.EY)
+        self.system.bond(self.EY2.testpoint_pos_m, self.testpoint_DARM_pos_m.EY2)
 
         self.my.testpoint_CARM_pos_m = signals.SummingAmplifier(
             port_gains = dict(

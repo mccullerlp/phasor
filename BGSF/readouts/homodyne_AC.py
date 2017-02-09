@@ -38,10 +38,21 @@ def np_roll_2D_mat_front(arr_mat, N = 2):
 
 class HomodyneACReadoutBase(SystemElementBase):
     def rotate_deg(self, phase_deg):
-        return self.__class__(
-            noise_view = self.noise,
-            phase_deg  = self.phase_deg + phase_deg
+        #TODO: FIX THESE SEMANTICS
+
+        name = "ROTATOR{0}".format(int(np.random.uniform(0, 1000000)))
+        obj = self.insert(
+            self.__class__(
+                portNI     = self.portNI,
+                portNQ     = self.portNQ,
+                portD      = self.portD,
+                portDrv    = self.portDrv,
+                port_set   = self.port_set,
+                phase_deg  = self.phase_deg + phase_deg,
+            ),
+            name
         )
+        return obj
 
     @declarative.mproperty
     def F_Hz(self):
@@ -332,6 +343,7 @@ class HomodyneACReadout(HomodyneACReadoutBase, SystemElementBase):
         portD,
         portDrv = None,
         port_set = 'AC',
+        phase_deg = 0,
         **kwargs
     ):
         super(HomodyneACReadout, self).__init__(**kwargs)
@@ -356,7 +368,7 @@ class HomodyneACReadout(HomodyneACReadoutBase, SystemElementBase):
             portNQ = self.portNQ,
         )
 
-        self.phase_deg = 0
+        self.phase_deg = phase_deg
         return
 
     def system_setup_ports_initial(self, ports_algorithm):
