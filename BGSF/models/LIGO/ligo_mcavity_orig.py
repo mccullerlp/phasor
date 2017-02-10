@@ -113,13 +113,18 @@ class LIGODetector(base.SystemElementSled):
             #facing_cardinal = 'NW',
         )
         self.my.IX = QuadMirrorBasic(
-            T_hr = 100e-3,
+            T_hr = 200e-3,
+            L_hr = 0 if not self.lossless else 0,
+            #facing_cardinal = 'E',
+        )
+        self.my.IX2 = QuadMirrorBasic(
+            T_hr = 200e-3,
             L_hr = 0 if not self.lossless else 0,
             #facing_cardinal = 'E',
         )
         self.my.EX2 = QuadMirrorBasic(
-            T_hr = 100e-3,
-            L_hr = 100e-6 if not self.lossless else 0,
+            T_hr = 200e-3,
+            L_hr = 0e-6 if not self.lossless else 0,
             #facing_cardinal = 'W',
             AOI_deg = (1 if self.misalign_EX else 0),
         )
@@ -130,13 +135,18 @@ class LIGODetector(base.SystemElementSled):
             AOI_deg = (1 if self.misalign_EX else 0),
         )
         self.my.IY = QuadMirrorBasic(
-            T_hr = 100e-3,
+            T_hr = 200e-3,
+            L_hr = 0 if not self.lossless else 0,
+            #facing_cardinal = 'N',
+        )
+        self.my.IY2 = QuadMirrorBasic(
+            T_hr = 200e-3,
             L_hr = 0 if not self.lossless else 0,
             #facing_cardinal = 'N',
         )
         self.my.EY2 = QuadMirrorBasic(
-            T_hr = 100e-3,
-            L_hr = 100e-6 if not self.lossless else 0,
+            T_hr = 200e-3,
+            L_hr = 0e-6 if not self.lossless else 0,
             #facing_cardinal = 'S',
             AOI_deg = (1 if self.misalign_EY else 0),
         )
@@ -180,8 +190,6 @@ class LIGODetector(base.SystemElementSled):
         self.my.S_BS_IY  = optics.Space(L_m = self.lBS_IY_m )
         self.my.S_IX_EX  = optics.Space(L_m = self.lIX_EX_m )
         self.my.S_IY_EY  = optics.Space(L_m = self.lIY_EY_m )
-        self.my.S_EX2_EX  = optics.Space(L_m = .1)
-        self.my.S_EY2_EY  = optics.Space(L_m = .1)
         self.my.S_BS_SR  = optics.Space(L_m = self.lBS_SR_m )
         self.my.S_PR_PR2 = optics.Space(L_m = self.lPR_PR2_m)
         self.my.S_PR2_BS = optics.Space(L_m = self.lPR2_BS_m)
@@ -191,8 +199,10 @@ class LIGODetector(base.SystemElementSled):
         self.my.POPPD = optics.PD()
         self.my.XarmPD = optics.MagicPD()
         self.my.XE2armPD = optics.MagicPD()
+        self.my.XI2armPD = optics.MagicPD()
         self.my.XtransPD = optics.PD()
         self.my.YE2armPD = optics.MagicPD()
+        self.my.YI2armPD = optics.MagicPD()
         self.my.YarmPD = optics.MagicPD()
         self.my.YtransPD = optics.PD()
         self.my.asymPD = optics.PD()
@@ -207,10 +217,11 @@ class LIGODetector(base.SystemElementSled):
             self.BS.mirror.FrA,
             self.S_BS_IX.Fr,
             self.IX.mirror.Fr,
+            self.XI2armPD.Bk,
+            self.IX2.mirror.Fr,
             self.XarmPD.Bk,
-            self.S_EX2_EX.Fr,
-            self.EX2.mirror.Fr,
             self.S_IX_EX.Fr,
+            self.EX2.mirror.Fr,
             self.XE2armPD.Bk,
             self.EX.mirror.Bk,
             self.XtransPD.Fr,
@@ -221,10 +232,11 @@ class LIGODetector(base.SystemElementSled):
             self.BS.mirror.BkB,
             self.S_BS_IY.Fr,
             self.IY.mirror.Fr,
+            self.YI2armPD.Bk,
+            self.IY2.mirror.Fr,
             self.YarmPD.Bk,
-            self.S_EY2_EY.Fr,
-            self.EY2.mirror.Fr,
             self.S_IY_EY.Fr,
+            self.EY2.mirror.Fr,
             self.YE2armPD.Bk,
             self.EY.mirror.Bk,
             self.YtransPD.Fr,
@@ -246,6 +258,9 @@ class LIGODetector(base.SystemElementSled):
         self.my.XE2armDC = readouts.DCReadout(
             port = self.XE2armPD.Wpd.o,
         )
+        self.my.XI2armDC = readouts.DCReadout(
+            port = self.XI2armPD.Wpd.o,
+        )
         self.my.YtransDC = readouts.DCReadout(
             port = self.YtransPD.Wpd.o,
         )
@@ -254,6 +269,9 @@ class LIGODetector(base.SystemElementSled):
         )
         self.my.YE2armDC = readouts.DCReadout(
             port = self.YE2armPD.Wpd.o,
+        )
+        self.my.YI2armDC = readouts.DCReadout(
+            port = self.YI2armPD.Wpd.o,
         )
         self.my.REFLDC = readouts.DCReadout(
             port = self.REFLPD.Wpd.o,
@@ -268,15 +286,15 @@ class LIGODetector(base.SystemElementSled):
         self.my.actuate_DARM_m = signals.DistributionAmplifier(
             port_gains = dict(
                 EX = -1 / 2,
-                #EX2 = -1 / 2,
+                EX2 = -1 / 2,
                 EY = +1 / 2,
-                #EY2 = +1 / 2,
+                EY2 = +1 / 2,
             )
         )
         self.system.bond(self.actuate_DARM_m.EX, self.EX.actuate_pos_m)
         self.system.bond(self.actuate_DARM_m.EY, self.EY.actuate_pos_m)
-        #self.system.bond(self.actuate_DARM_m.EX2, self.EX2.actuate_pos_m)
-        #self.system.bond(self.actuate_DARM_m.EY2, self.EY2.actuate_pos_m)
+        self.system.bond(self.actuate_DARM_m.EX2, self.EX2.actuate_pos_m)
+        self.system.bond(self.actuate_DARM_m.EY2, self.EY2.actuate_pos_m)
 
         self.my.actuate_DARM_N = signals.DistributionAmplifier(
             port_gains = dict(
