@@ -12,6 +12,8 @@ from . import pint
 class SimpleUnitfulGroup(declarative.OverridableObject):
     @declarative.dproperty
     def units(self, val):
+        if isinstance(val, str):
+            val = pint.ureg[val]
         return val
 
     @declarative.dproperty
@@ -33,6 +35,8 @@ class SimpleUnitfulGroup(declarative.OverridableObject):
     def __add__(self, other):
         units_to = self.units
         units_from = other.units
+        print(self, other)
+        print(units_to, units_from)
         rescale = units_from / units_to
         assert(rescale.unitless)
         rescale = rescale.m_as(pint.ureg.dimensionless)
@@ -84,9 +88,11 @@ class SimpleUnitfulGroup(declarative.OverridableObject):
 
 
 class ElementRefValue(SimpleUnitfulGroup, Element):
-    @declarative.dproperty
-    def units(self, val):
-        return val
+    ##Inherited from SimpleUnitfulGroup
+    #@declarative.dproperty
+    #def units(self, val):
+    #    print(self, " units: ", val, type(val))
+    #    return val
 
     #TODO integrate or name this better
     @declarative.mproperty

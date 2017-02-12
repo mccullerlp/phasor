@@ -94,12 +94,12 @@ def test_fitter(plot):
     return
 
 
-@pytest.mark.skip(reason="Need to fix Jitter Placement")
+#@pytest.mark.skip(reason="Need to fix Jitter Placement")
 def test_fitter_jitter(plot):
     sys = buildsys()
     froot = FIT.FitterRoot()
     froot.my.sym = FIT.FitterSymJitterPlacement(
-        shift_val = 1e-3,
+        shift = '1e-3in',
     )
     print(froot.targets_recurse('self'))
     froot.systems.alm = sys

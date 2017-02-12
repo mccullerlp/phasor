@@ -6,7 +6,7 @@ import declarative
 
 from . import visitors as VISIT
 from ...base.multi_unit_args import (
-    generate_refval_attribute,
+    arbunit_refval_attribute,
 )
 
 from .base import (
@@ -95,22 +95,17 @@ class FitterSym(FitterBase):
 class FitterSymJitterPlacement(FitterSym):
 
     #TODO: I dont like generate_refval_attribute for dimensionless things here
-    @declarative.group_dproperty
-    def shift_val(desc):
-        return generate_refval_attribute(
+    @declarative.dproperty_adv
+    def shift(desc):
+        return arbunit_refval_attribute(
             desc,
-            ubunch = units.dimensionless,
-            stems = ['shift', ],
-            ooa_name = 'shift',
-            preferred_attr = 'shift_preferred',
-            default_attr = '_shift_default',
             prototypes = ['full'],
         )
 
     def transforms(self, datum):
         return [
-            lambda v : v + self.shift_val,
-            lambda v : v - self.shift_val,
+            lambda v : v + self.shift,
+            lambda v : v - self.shift,
         ]
 
 class FitterSymJitterRelative(FitterSym):

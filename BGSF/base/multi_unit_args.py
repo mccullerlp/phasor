@@ -15,6 +15,9 @@ def generate_refval_attribute(
     ubunch,
     default_attr = None,
 ):
+    """
+    For use inside of a dproperty_adv_group
+    """
     desc.stems(*stems)
     prototypes = frozenset(prototypes)
 
@@ -32,10 +35,10 @@ def generate_refval_attribute(
         group,
         units,
     ):
+        ooa = self.ooa_params[ooa_name]
         if self.inst_prototype_t in prototypes:
             #TODO make this do the correct thing
             oattr = getattr(self.inst_prototype, preferred_attr[0])
-            ooa = self.ooa_params[ooa_name]
             ooa.ref   = oattr.ref
             ooa.val   = oattr.val
             ooa.units = str(oattr.units)
@@ -57,7 +60,7 @@ def generate_refval_attribute(
                 k, v = sources.popitem()
 
             if k in preferred_attr:
-                ooa = self.ooa_params[ooa_name].useidx('immediate')
+                ooa = ooa.useidx('immediate')
                 if v is not None:
                     if isinstance(v, simple_units.SimpleUnitfulGroup):
                         ooa.setdefault("ref",   v.ref)
@@ -87,7 +90,7 @@ def generate_refval_attribute(
                 #TODO not thrilled about this conversion
                 unit = str(ubunch.umap[units[k]])
                 #setup defaults
-                ooa = self.ooa_params[ooa_name].useidx('immediate')
+                ooa = ooa.useidx('immediate')
                 ooa.setdefault("units", pint.mag1_units(unit))
                 ooa.setdefault("ref", v)
                 ooa.setdefault("val", ooa.ref)
@@ -129,3 +132,113 @@ def generate_refval_attribute(
         desc.mproperty(VALUE, stem = '{stem}_{units}', units = unitname)
     return
 
+
+def unitless_refval_attribute(
+    desc,
+    prototypes,
+    ooa_name = None,
+    default_attr = None,
+):
+    """
+    for dproperty_adv
+    """
+    prototypes = frozenset(prototypes)
+    if ooa_name is None:
+        ooa_name = desc.__name__
+
+    @desc.construct
+    def CONSTRUCT(
+            self,
+            arg,
+    ):
+        ooa = self.ooa_params[ooa_name]
+        if self.inst_prototype_t in prototypes:
+            #TODO make this do the correct thing
+            oattr = getattr(self.inst_prototype, desc.__name__)
+            ooa.ref   = oattr.ref
+            ooa.val   = oattr.val
+            ooa.units = str(oattr.units)
+            #self.ooa_params[ooa_name]["from"] = self.inst_prototype.name_system + "." + preferred_attr
+        else:
+            ooa = ooa.useidx('immediate')
+            if isinstance(arg, simple_units.SimpleUnitfulGroup):
+                #TODO check that it is unitless
+                ooa.setdefault("ref",   arg.ref)
+                ooa.setdefault("val",   arg.val)
+                ooa.setdefault("units", pint.mag1_units(arg.units))
+            elif isinstance(arg, pint.ureg.Quantity):
+                #TODO check that it is unitless
+                ooa.setdefault("ref",   arg.magnitude)
+                ooa.setdefault("val",   arg.magnitude)
+                ooa.setdefault("units", pint.mag1_units(arg.units))
+            elif isinstance(arg, pint.ureg.Unit):
+                #TODO check that it is unitless
+                ooa.setdefault("units", pint.mag1_units(arg))
+                ooa.setdefault("ref",  1)
+                ooa.setdefault("val",  1)
+            else:
+                ooa.setdefault("units", 1)
+                ooa.setdefault("ref", arg)
+                ooa.setdefault("val", ooa.ref)
+
+        pint_units = pint.ureg[ooa.units]
+        return simple_units.ElementRefValue(
+            ooa_params = ooa,
+            units      = pint_units,
+            ooa_name   = ooa_name,
+        )
+
+def arbunit_refval_attribute(
+    desc,
+    prototypes,
+    ooa_name = None,
+    default_attr = None,
+):
+    """
+    For use inside of a dproperty_adv
+    """
+    prototypes = frozenset(prototypes)
+    if ooa_name is None:
+        ooa_name = desc.__name__
+
+    @desc.construct
+    def CONSTRUCT(
+            self,
+            arg,
+    ):
+        ooa = self.ooa_params[ooa_name]
+        if self.inst_prototype_t in prototypes:
+            #TODO make this do the correct thing
+            oattr = getattr(self.inst_prototype, desc.__name__)
+            ooa.ref   = oattr.ref
+            ooa.val   = oattr.val
+            ooa.units = str(oattr.units)
+            #self.ooa_params[ooa_name]["from"] = self.inst_prototype.name_system + "." + preferred_attr
+        else:
+            ooa = ooa.useidx('immediate')
+            if isinstance(arg, str):
+                #string convert to quantity
+                print('arg', arg)
+                arg = pint.ureg[arg]
+                print('arg', arg)
+            if isinstance(arg, simple_units.SimpleUnitfulGroup):
+                ooa.setdefault("ref",   arg.ref)
+                ooa.setdefault("val",   arg.val)
+                ooa.setdefault("units", pint.mag1_units(arg.units))
+            elif isinstance(arg, pint.ureg.Quantity):
+                ooa.setdefault("ref",   arg.magnitude)
+                ooa.setdefault("val",   arg.magnitude)
+                ooa.setdefault("units", pint.mag1_units(arg.units))
+            elif isinstance(arg, pint.ureg.Unit):
+                ooa.setdefault("units", pint.mag1_units(arg))
+                ooa.setdefault("ref",  1)
+                ooa.setdefault("val",  1)
+            else:
+                raise RuntimeError("Argument must contain units as a py-pint quantity or SimpleUnitfulGroup")
+
+        pint_units = pint.ureg[ooa.units]
+        return simple_units.ElementRefValue(
+            ooa_params = self.ooa_params[ooa_name],
+            units      = pint_units,
+            ooa_name   = ooa_name,
+        )
