@@ -32,9 +32,9 @@ class PortUpdatesAlgorithm(object):
                 self.link_pairsR[v].add(k)
 
         for port, owner in list(system.port_owners.items()):
-            self.port_cplgs[port]         = set()
-            self.port_cplgs_update[owner, port]  = set()
-            self.port_cplgs_updateX[port] = set()
+            self.port_cplgs[port]               = set()
+            self.port_cplgs_update[owner, port] = set()
+            self.port_cplgs_updateX[port]       = set()
 
         for port, owners in list(system.port_owners_virtual.items()):
             for owner in owners:

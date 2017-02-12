@@ -34,13 +34,6 @@ PolP = DictKey({PolKEY: 'P'})
 OpticalFreqKey = u'F⇝'
 
 
-class OpticalPortHolderInOut(PortHolderInOutBase):
-    def autoterminations(self, port_map):
-        #I don't like having to import from here, but what can you do...
-        from .vacuum import VacuumTerminator
-        port_map[self.i] = (self, VacuumTerminator)
-
-
 class OpticalDegenerate4PortMixin(object):
 
     @decl.dproperty
@@ -55,3 +48,55 @@ class OpticalDegenerate4PortMixin(object):
         else:
             val = True
         return val
+
+
+class OpticalPortHolderInOut(decl.OverridableObject):
+    def __init__(
+            self,
+            element,
+            x,
+            **kwargs
+    ):
+        super(OpticalPortHolderInOut, self).__init__(**kwargs)
+        self.element = element
+        self._x = x
+        self.i = DictKey({
+            ElementKey: self.element,
+            self._port_key: x + u'⥳',
+        })
+        self.o = DictKey({
+            ElementKey: self.element,
+            self._port_key: x + u'⥲',
+        })
+        self.element.owned_ports[self.i] = self
+        self.element.owned_ports[self.o] = self
+        okey = self.element.owned_port_keys.setdefault(self.key, self)
+        assert(okey is self)
+
+    def autoterminations(self, port_map):
+        #I don't like having to import from here, but what can you do...
+        from .vacuum import VacuumTerminator
+        port_map[self.i] = (self, VacuumTerminator)
+
+    @decl.mproperty
+    def key(self):
+        return self._x
+
+    def __repr__(self):
+        return u"{0}.{1}".format(self.element, self._x)
+    _port_key = PortKey
+
+    multiple_attach = False
+
+    pchain = None
+
+    @decl.mproperty
+    def chain_next(self):
+        if self.pchain is not None:
+            if isinstance(self.pchain, str):
+                return getattr(self.element, self.pchain)
+            else:
+                return self.pchain
+        else:
+            return None
+

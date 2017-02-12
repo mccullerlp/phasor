@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
+from __future__ import division, print_function
 
 import declarative as decl
 from declarative.utilities import SuperBase
 import declarative.substrate as dsubstrate
+from . import visitors as VISIT
 
 
 class Element(dsubstrate.Element):
@@ -17,6 +18,20 @@ class Element(dsubstrate.Element):
     def __build__(self):
         return
 
+    def targets_recurse(self, typename):
+        dmap = []
+        for cname, cobj in list(self._registry_children.items()):
+            if isinstance(cobj, Element):
+                dmap.extend(cobj.targets_recurse(typename))
+        target_ret = self.targets_list(typename)
+        if target_ret is not None:
+            dmap.append(target_ret)
+        return dmap
+
+    def targets_list(self, typename):
+        if typename == VISIT.self:
+            return self
+        return None
     #def insert(self, obj, name = None, invalidate = True):
     #    print("INSERT", obj, name, invalidate)
     #    super(Element, self).insert(obj, name = name, invalidate = invalidate)

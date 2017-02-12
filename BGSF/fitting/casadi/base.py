@@ -1,14 +1,11 @@
 """
 """
 from __future__ import division, print_function
-from . import visitors as VISIT
 import casadi
 
-from declarative.substrate import (
-    Element,
-)
-
 from ...math.dispatch_casadi import *
+
+from ... import base
 
 
 def casadi_sparsity_ravel(sym_vec):
@@ -38,20 +35,5 @@ def casadi_sparsity_slice(sym_vec):
     return retvv
 
 
-class FitterBase(Element):
-
-    def targets_recurse(self, typename):
-        dmap = []
-        for cname, cobj in list(self._registry_children.items()):
-            if isinstance(cobj, FitterBase):
-                dmap.extend(cobj.targets_recurse(typename))
-        target_ret = self.targets_list(typename)
-        if target_ret is not None:
-            dmap.append(target_ret)
-        return dmap
-
-    def targets_list(self, typename):
-        if typename == VISIT.self:
-            return self
-        return None
-
+class FitterBase(base.Element):
+    pass
