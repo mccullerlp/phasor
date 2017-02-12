@@ -11,7 +11,10 @@ from .mirror import Mirror
 from .selective_mirrors import PolarizingMirror
 
 
-class BaseRotator(bases.OpticalCouplerBase, bases.SystemElementBase):
+class BaseRotator(
+        bases.OpticalCouplerBase,
+        bases.SystemElementBase
+):
     @decl.dproperty
     def Fr(self):
         return ports.OpticalPortHolderInOut(self, x = 'Fr' , pchain = 'Bk')
@@ -147,7 +150,6 @@ class BaseRotator(bases.OpticalCouplerBase, bases.SystemElementBase):
 
 
 class PolarizationRotator(
-        ports.OpticalOriented2PortMixin,
         BaseRotator
 ):
     def system_setup_coupling(self, matrix_algorithm):
@@ -228,7 +230,9 @@ class PolarizationRotator(
         return
 
 
-class FaradayRotator(ports.OpticalSymmetric2PortMixin, BaseRotator):
+class FaradayRotator(
+        BaseRotator
+):
     def system_setup_coupling(self, matrix_algorithm):
         if self.rotate_deg in (0, 180, -180):
             if self.rotate_deg == 0:
@@ -298,7 +302,10 @@ class FaradayRotator(ports.OpticalSymmetric2PortMixin, BaseRotator):
                         )
         return
 
-class WavePlate(ports.OpticalSymmetric2PortMixin, bases.OpticalCouplerBase, bases.SystemElementBase):
+class WavePlate(
+        bases.OpticalCouplerBase,
+        bases.SystemElementBase
+):
     def __init__(
             self,
             cplgP  = 1,
@@ -392,7 +399,10 @@ class UnmountedHalfWavePlate(WavePlate):
             **kwargs
         )
 
-class WavePlateMount(ports.OpticalOriented2PortMixin, bases.OpticalCouplerBase, bases.SystemElementBase):
+class WavePlateMount(
+        bases.OpticalCouplerBase,
+        bases.SystemElementBase,
+):
     def __init__(
         self,
         plate,

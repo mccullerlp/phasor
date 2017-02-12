@@ -15,7 +15,6 @@ from . import nonlinear_utilities
 
 
 class Optical2PortModulator(
-    ports.OpticalSymmetric2PortMixin,
     bases.OpticalCouplerBase,
     bases.SystemElementBase,
 ):

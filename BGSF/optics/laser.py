@@ -19,11 +19,11 @@ from . import frequency
 from . import vacuum
 
 
-class Laser(ports.OpticalNonOriented1PortMixin, bases.OpticalCouplerBase, bases.SystemElementBase):
+class Laser(bases.OpticalCouplerBase, bases.SystemElementBase):
 
     @decl.dproperty
     def Fr(self):
-        return ports.OpticalPortHolderOut(self, x = 'Fr')
+        return ports.OpticalPortHolderInOut(self, x = 'Fr')
 
     @decl.dproperty
     def polarization(self, val = 'S'):

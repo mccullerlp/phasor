@@ -158,6 +158,7 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
                 val = ooa.get('val', None)
             return val
 
+        #TODO: fix name vs. name_global
         return [declarative.FrozenBunch(
             parameter_key = self.fitter_parameter,
             units         = str(self.units),

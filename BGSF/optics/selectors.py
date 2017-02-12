@@ -10,7 +10,10 @@ from . import bases
 from . import ports
 
 
-class PolSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
+class PolSelector(
+        bases.OpticalCouplerBase,
+        bases.SystemElementBase
+):
     def __build__(self):
         self.Fr   = ports.OpticalPortHolderInOut(self, x = 'Fr')
         self.Bk_P = ports.OpticalPortHolderInOut(self, x = 'Bk_P')
@@ -145,8 +148,6 @@ class OpticalSelectionStack(
                 for pname, port in list(celement.owned_port_keys.items()):
                     if isinstance(port, (
                             ports.OpticalPortHolderInOut,
-                            ports.OpticalPortHolderIn,
-                            ports.OpticalPortHolderOut
                     )):
                         optical_ports[pname] += 1
 

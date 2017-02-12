@@ -12,11 +12,11 @@ from . import ports
 
 #TODO - bases.SystemElementBase,
 # need system sled
-class VacuumTerminator(ports.OpticalNonOriented1PortMixin, bases.OpticalCouplerBase, bases.SystemElementBase):
+class VacuumTerminator(bases.OpticalCouplerBase, bases.SystemElementBase):
 
     @decl.dproperty
     def Fr(self):
-        return ports.OpticalPortHolderOut(self, x = 'Fr')
+        return ports.OpticalPortHolderInOut(self, x = 'Fr')
 
     @decl.dproperty
     def _fluct(self):

@@ -6,6 +6,7 @@ from __future__ import division, print_function
 from . import simple_units
 from . import pint
 
+
 def generate_refval_attribute(
     desc,
     stems,
@@ -187,6 +188,7 @@ def unitless_refval_attribute(
             units      = pint_units,
             ooa_name   = ooa_name,
         )
+
 
 def arbunit_refval_attribute(
     desc,

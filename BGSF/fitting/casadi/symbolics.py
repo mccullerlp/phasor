@@ -13,7 +13,7 @@ from .base import (
     FitterBase,
 )
 
-from ...base import units
+#from ...base import units
 
 
 class FitterSym(FitterBase):
@@ -65,7 +65,6 @@ class FitterSym(FitterBase):
         return
 
     def ooa_reinject(self, meta_ooa, param_map):
-        print("REINJECT")
         for datum, sysname in list(self._parameter_sysnames.items()):
             nval = param_map[datum]
             datum.reinject(meta_ooa[sysname], nval)
@@ -79,6 +78,7 @@ class FitterSym(FitterBase):
         for datum, symbol in list(self._parameter_symbols.items()):
             sysname = self._parameter_sysnames[datum]
             ival = datum.initial(self.root.meta_ooa[sysname])
+            #TODO: document or describe what this bunch type should hold
             symbol_map.append(
                 declarative.Bunch(
                     datum         = datum,

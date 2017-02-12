@@ -10,7 +10,10 @@ from . import ports
 from . import bases
 
 
-class EZSqz(ports.OpticalSymmetric2PortMixin, bases.OpticalCouplerBase, bases.SystemElementBase):
+class EZSqz(
+        bases.OpticalCouplerBase,
+        bases.SystemElementBase,
+):
     """
     Defaults to squeezing amplitude quadrature, the two_photon matrix is chosen to be
     [nonlinear_field_gain_1 -nonlinear_field_gain_2]

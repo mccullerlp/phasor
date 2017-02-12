@@ -12,7 +12,6 @@ from . import nonlinear_utilities
 
 
 class PD(
-        ports.OpticalNonOriented1PortMixin,
         bases.OpticalCouplerBase,
         bases.SystemElementBase
 ):
@@ -99,7 +98,6 @@ class PD(
 
 
 class MagicPD(
-        ports.OpticalOriented2PortMixin,
         bases.OpticalCouplerBase,
         bases.SystemElementBase
 ):

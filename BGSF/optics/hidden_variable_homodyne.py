@@ -56,8 +56,6 @@ class HomodyneCoupling(FactorCouplingBase):
 
 
 class HiddenVariableHomodynePD(
-        #ports.OpticalNonOriented1PortMixin,
-        ports.OpticalOriented2PortMixin,
         bases.OpticalCouplerBase,
         bases.SystemElementBase,
 ):
@@ -125,9 +123,11 @@ class HiddenVariableHomodynePD(
                         kfrom1_sm = kfrom1_sm | ports.RAISE
                     group = setdict.setdefault(kfrom1_sm, [])
                     group.append(kfrom2)
+
                 def subset_func(kfrom1):
                     kfrom1_sm = kfrom1.without_keys(ports.ClassicalFreqKey)
                     return setdict.get(kfrom1_sm, [])
+
                 return subset_func
             for kfrom1, kfrom2 in ports_algorithm.symmetric_update(
                     self.source_port,
@@ -324,7 +324,6 @@ class HiddenVariableHomodynePD(
 
 
 class TotalDCPowerPD(
-        ports.OpticalNonOriented1PortMixin,
         bases.OpticalCouplerBase,
         bases.SystemElementBase
 ):
@@ -402,9 +401,11 @@ def ports_fill_2optical_2classical_hdyne(
                     kfrom1_sm = kfrom1_sm | ports.RAISE
                 group = setdict.setdefault(kfrom1_sm, [])
                 group.append(kfrom2)
+
             def subset_func(kfrom1):
                 kfrom1_sm = kfrom1.without_keys(ports.ClassicalFreqKey)
                 return setdict.get(kfrom1_sm, [])
+
             return subset_func
         for kfrom1, kfrom2 in ports_algorithm.symmetric_update(
                 pfrom,

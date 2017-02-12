@@ -11,7 +11,10 @@ from . import bases
 from . import ports
 
 
-class Space(ports.OpticalSymmetric2PortMixin, bases.OpticalCouplerBase, bases.SystemElementBase):
+class Space(
+        bases.OpticalCouplerBase,
+        bases.SystemElementBase,
+):
     @decl.dproperty
     def Fr(self):
         return ports.OpticalPortHolderInOut(self, x = 'Fr', pchain = 'Bk')
