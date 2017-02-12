@@ -15,7 +15,7 @@ from . import direct_homodyne
 #from BGSF.utilities.np import logspaced
 
 
-class BHDTestSled(base.SystemElementSled):
+class BHDTestSled(base.SystemElementBase):
     def __build__(self):
         #super(BHDTestSled, self).__build__()
         self.my.PSL = optics.Laser(
@@ -78,7 +78,7 @@ class BHDTestSled(base.SystemElementSled):
         )
 
 
-class SBHDTestSled(base.SystemElementSled):
+class SBHDTestSled(base.SystemElementBase):
     def __build__(self):
         #super(SBHDTestSled, self).__build__()
         self.my.PSL = optics.Laser(

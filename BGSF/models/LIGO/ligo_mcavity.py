@@ -9,7 +9,7 @@ from ... import readouts
 from ... import base
 
 
-class QuadMirrorBasic(base.SystemElementSled):
+class QuadMirrorBasic(base.SystemElementBase):
     def __init__(
             self,
             T_hr,
@@ -71,7 +71,7 @@ class QuadMirrorBasic(base.SystemElementSled):
         )
 
 
-class LIGODetector(base.SystemElementSled):
+class LIGODetector(base.SystemElementBase):
     def __init__(self, **kwargs):
         super(LIGODetector, self).__init__(**kwargs)
 
@@ -334,7 +334,7 @@ class LIGODetector(base.SystemElementSled):
         return
 
 
-class LIGOInputBasic(base.SystemElementSled):
+class LIGOInputBasic(base.SystemElementBase):
     def __init__(self, **kwargs):
         super(LIGOInputBasic, self).__init__(**kwargs)
         self.my.F9 = base.Frequency(
@@ -376,7 +376,7 @@ class LIGOInputBasic(base.SystemElementSled):
         self.INPUT_ATTACH_POINT = self.EOM.Bk
 
 
-class LIGOOutputBasic(base.SystemElementSled):
+class LIGOOutputBasic(base.SystemElementBase):
     def __init__(self, LIGO_obj, **kwargs):
         super(LIGOOutputBasic, self).__init__(**kwargs)
         self.my.ASPD = optics.PD()
@@ -392,7 +392,7 @@ class LIGOOutputBasic(base.SystemElementSled):
         self.OUTPUT_ATTACH_POINT = self.ASPD.Fr
 
 
-class LIGOOutputHomodyne(base.SystemElementSled):
+class LIGOOutputHomodyne(base.SystemElementBase):
     def __init__(
             self,
             input_obj,
@@ -471,7 +471,7 @@ class LIGOOutputHomodyne(base.SystemElementSled):
         self.OUTPUT_ATTACH_POINT = self.ASPD.Fr
 
 
-class LIGOBasicOperation(base.SystemElementSled):
+class LIGOBasicOperation(base.SystemElementBase):
     def __init__(self, **kwargs):
         super(LIGOBasicOperation, self).__init__(**kwargs)
         self.my.LIGO = LIGODetector()

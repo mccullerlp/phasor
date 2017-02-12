@@ -7,6 +7,7 @@ import declarative as decl
 from declarative.utilities import SuperBase
 import declarative.substrate as dsubstrate
 from . import visitors as VISIT
+import warnings
 
 
 class Element(dsubstrate.Element):
@@ -42,14 +43,16 @@ class RootElement(Element, dsubstrate.RootElement):
     pass
 
 
-class ElementBase(Element, SuperBase):
+#TODO: clean up semantic of the Element vs. ElementBase name
+class SystemElementBase(Element, SuperBase):
     def __init__(
         self,
         **kwargs
     ):
+        #TODO, eventually remove this
         self.owned_ports = dict()
         self.owned_port_keys = dict()
-        super(ElementBase, self).__init__(**kwargs)
+        super(SystemElementBase, self).__init__(**kwargs)
 
     def __repr__(self):
         if self.name is not None:
@@ -77,7 +80,7 @@ class ElementBase(Element, SuperBase):
         return ptup
 
 
-class CouplerBase(ElementBase):
+class CouplerBase(SystemElementBase):
     def system_setup_coupling(self, system):
         return
     def system_setup_ports(self, system):
@@ -86,11 +89,11 @@ class CouplerBase(ElementBase):
         return
 
 
-class NoiseBase(ElementBase):
+class NoiseBase(SystemElementBase):
     pass
 
 
-class FrequencyBase(ElementBase):
+class FrequencyBase(SystemElementBase):
     def __lt__(self, other):
         if not isinstance(other, self.__class__):
             return False
@@ -98,3 +101,27 @@ class FrequencyBase(ElementBase):
     pass
 
 
+class OOABridge(object):
+    __slots__ = ('_dict', '_obj',)
+
+    def __init__(self, obj, mydict):
+        self._obj = obj
+        self._dict = mydict
+
+    def __setitem__(self, key, item):
+        try:
+            item = self._dict.setdefault(key, item)
+            setattr(self._obj, key, item)
+            return item
+        except TypeError:
+            raise TypeError("Can't insert {0} into {1} at key {2}".format(item, self._dict, key))
+
+    def __setattr__(self, key, item):
+        if key in self.__slots__:
+            return super(OOABridge, self).__setattr__(key, item)
+        return self.__setitem__(key, item)
+
+
+def OOA_ASSIGN(obj):
+    warnings.warn("OOA_ASSIGN", DeprecationWarning)
+    return OOABridge(obj, obj.ooa_params)

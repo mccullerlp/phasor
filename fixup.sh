@@ -31,7 +31,7 @@ FIXUP=(
         readouts.ACReadout \
         readouts.ACReadoutCLG \
         readouts.HomodyneACReadout \
-        base.SystemElementSled \
+        base.SystemElementBase \
         base.OOA_ASSIGN \
         base.Frequency \
 )

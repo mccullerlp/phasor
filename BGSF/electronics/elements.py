@@ -3,7 +3,7 @@
 from __future__ import (division, print_function)
 
 from ..base.bases import (
-    ElementBase,
+    SystemElementBase,
     NoiseBase,
     CouplerBase,
 )
@@ -13,7 +13,7 @@ import declarative as decl
 from . import ports
 
 
-class ElectricalElementBase(CouplerBase, ElementBase):
+class ElectricalElementBase(CouplerBase, SystemElementBase):
     Z_termination = 50
 
     @decl.mproperty

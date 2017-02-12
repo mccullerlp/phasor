@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division, print_function
-from builtins import object
 #from BGSF.utilities.print import print
-
-from .elements import SystemElementBase
 
 from ..math.key_matrix import DictKey
 

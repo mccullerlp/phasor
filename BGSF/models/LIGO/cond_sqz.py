@@ -43,7 +43,7 @@ from ..readouts.homodyne_AC import (
 )
 
 from ..base import (
-    base.SystemElementSled,
+    base.SystemElementBase,
     base.OOA_ASSIGN,
     base.Frequency,
 )
@@ -71,7 +71,7 @@ from .IFO_modulators import (
 #from BGSF.utilities.np import logspaced
 
 
-class CondSqueezeSetup(base.SystemElementSled):
+class CondSqueezeSetup(base.SystemElementBase):
     def __init__(self, **kwargs):
         super(CondSqueezeSetup, self).__init__(**kwargs)
         #self.PSL = optics.Laser(

@@ -5,10 +5,9 @@ from __future__ import division, print_function
 import numpy as np
 
 from . import bases
-from . import elements
 
 
-class Frequency(bases.FrequencyBase, elements.SystemElementBase):
+class Frequency(bases.FrequencyBase, bases.SystemElementBase):
     def __init__(
             self,
             F_Hz,
@@ -20,19 +19,19 @@ class Frequency(bases.FrequencyBase, elements.SystemElementBase):
     ):
         super(Frequency, self).__init__(**kwargs)
 
-        elements.OOA_ASSIGN(self).F_Hz = F_Hz
+        bases.OOA_ASSIGN(self).F_Hz = F_Hz
 
         if F_center_Hz is None:
             F_center_Hz = (np.max(self.F_Hz) + np.min(self.F_Hz)) / 2
 
-        elements.OOA_ASSIGN(self).F_center_Hz = F_center_Hz
+        bases.OOA_ASSIGN(self).F_center_Hz = F_center_Hz
 
         if F_width_Hz is None:
             F_center_Hz = (np.max(self.F_Hz) - np.min(self.F_Hz)) / 2
 
-        elements.OOA_ASSIGN(self).F_width_Hz  = F_width_Hz
+        bases.OOA_ASSIGN(self).F_width_Hz  = F_width_Hz
 
-        elements.OOA_ASSIGN(self).order = order
+        bases.OOA_ASSIGN(self).order = order
 
         for group, b_incl in list(groups.items()):
             self.ooa_params.groups[group] = b_incl

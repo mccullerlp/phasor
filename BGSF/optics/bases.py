@@ -1,28 +1,21 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
+from __future__ import division, print_function
 
 import declarative as decl
 
 from ..base.bases import (
-    ElementBase,
     NoiseBase,
     CouplerBase,
-)
-
-from ..base.elements import (
     SystemElementBase,
     OOA_ASSIGN,
 )
 
-class OpticalElementBase(ElementBase):
-
+class OpticalElementBase(SystemElementBase):
     @decl.mproperty
     def symbols(self):
         return self.system.symbols
-
-    pass
 
 
 class OpticalNoiseBase(NoiseBase, OpticalElementBase):

@@ -12,7 +12,7 @@ from ...import base
 
 #from BGSF.utilities.np import logspaced
 
-class MichelsonModulator(base.SystemElementSled):
+class MichelsonModulator(base.SystemElementBase):
     def __init__(self, **kwargs):
         super(MichelsonModulator, self).__init__(**kwargs)
 
@@ -63,7 +63,7 @@ class MichelsonModulator(base.SystemElementSled):
         return (self.Fr, self.Bk)
 
 
-class MZModulator(base.SystemElementSled):
+class MZModulator(base.SystemElementBase):
     def __init__(self, **kwargs):
         super(MZModulator, self).__init__(**kwargs)
 

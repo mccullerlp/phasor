@@ -6,13 +6,12 @@ from __future__ import division, print_function
 import declarative as decl
 
 from ..base import (
-    ElementBase,
     CouplerBase,
     SystemElementBase,
     OOA_ASSIGN,
 )
 
-class SignalElementBase(CouplerBase, ElementBase):
+class SignalElementBase(CouplerBase, SystemElementBase):
     @decl.mproperty
     def symbols(self):
         return self.system.symbols

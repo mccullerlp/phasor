@@ -13,7 +13,7 @@ from ... import signals
 from ... import base
 #from ... import signals
 
-class BalancedHomodyneDetector(base.SystemElementSled):
+class BalancedHomodyneDetector(base.SystemElementBase):
     def __init__(
             self,
             P_link_intermediate = None,

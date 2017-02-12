@@ -15,7 +15,7 @@ from . import IFO_modulators
 
 #from BGSF.utilities.np import logspaced
 
-class EasySqueezeSetup(base.SystemElementSled):
+class EasySqueezeSetup(base.SystemElementBase):
     def __init__(self, **kwargs):
         super(EasySqueezeSetup, self).__init__(**kwargs)
         self.my.PSL = optics.Laser(
@@ -95,7 +95,7 @@ class EasySqueezeSetup(base.SystemElementSled):
         )
 
 
-class EasySqueezeSetupSplit(base.SystemElementSled):
+class EasySqueezeSetupSplit(base.SystemElementBase):
     def __init__(self, **kwargs):
         super(EasySqueezeSetupSplit, self).__init__(**kwargs)
         self.my.PSL = optics.Laser(
@@ -224,7 +224,7 @@ class EasySqueezeSetupSplit(base.SystemElementSled):
         )
 
 
-class EasySqueezeSetupFP(base.SystemElementSled):
+class EasySqueezeSetupFP(base.SystemElementBase):
     def __init__(self, **kwargs):
         super(EasySqueezeSetupFP, self).__init__(**kwargs)
         self.my.PSL = optics.Laser(

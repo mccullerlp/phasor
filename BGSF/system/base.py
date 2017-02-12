@@ -22,7 +22,7 @@ from ..math.key_matrix.dictionary_keys import (
 
 from ..base import (
     Frequency,
-    SystemElementSled,
+    SystemElementBase,
     ClassicalFreqKey,
     OOA_ASSIGN,
 )
@@ -162,7 +162,7 @@ class BGSystem(RootElement):
         return defaultdict(set)
 
     def __build__(self):
-        self.my.environment = SystemElementSled()
+        self.my.environment = SystemElementBase()
         self.environment = self.environment
 
         self.environment.my.F_AC = Frequency(
@@ -309,7 +309,7 @@ class BGSystem(RootElement):
         registered_ports = set(self.port_owners.keys())
         unterminated_ports = registered_ports - terminated_ports
         if unterminated_ports and not hasattr(self, 'autoterminate'):
-            self.my.autoterminate = SystemElementSled()
+            self.my.autoterminate = SystemElementBase()
         for port in unterminated_ports:
             #print("UNTERMINATED: ", port)
             aterm = self.port_autoterminate.get(port, None)
