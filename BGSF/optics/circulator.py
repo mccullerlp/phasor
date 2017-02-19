@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
+from __future__ import division, print_function
 #from BGSF.utilities.print import print
 
 import declarative as decl
@@ -25,7 +24,7 @@ class OpticalCirculator(bases.OpticalCouplerBase, bases.SystemElementBase):
         for idx in range(0, self.N_ports):
             pname = "P{0}".format(idx)
             port = ports.OpticalPortHolderInOut(self, x = pname)
-            setattr(self, pname, port)
+            port = self.insert(port, pname)
             self.port_list.append(port)
         return
 

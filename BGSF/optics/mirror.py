@@ -170,6 +170,17 @@ class Mirror(
             self.system.bond(self._LBkB, self._LBkB_vac.Fr)
 
     @decl.mproperty
+    def ports_select(self):
+        return [
+            self.Fr,
+            self.Bk,
+            self.FrA,
+            self.BkA,
+            self.FrB,
+            self.BkB,
+        ]
+
+    @decl.mproperty
     def ports_optical(self):
         return set([
             self.FrA,

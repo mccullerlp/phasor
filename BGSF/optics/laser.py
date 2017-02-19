@@ -12,9 +12,13 @@ from . import bases
 from . import ports
 from . import frequency
 from . import vacuum
+from . import standard_attrs
 
 
-class Laser(bases.OpticalCouplerBase, bases.SystemElementBase):
+class Laser(
+        bases.OpticalCouplerBase,
+        bases.SystemElementBase
+):
 
     @decl.dproperty
     def Fr(self):
@@ -57,10 +61,7 @@ class Laser(bases.OpticalCouplerBase, bases.SystemElementBase):
             ports.ClassicalFreqKey: ports.FrequencyKey(self.classical_fdict),
         })
 
-    @decl.dproperty
-    def power_W(self, val):
-        val = self.ooa_params.setdefault('power_W', val)
-        return val
+    power = standard_attrs.generate_power()
 
     @decl.dproperty
     def F(self, val):
@@ -76,7 +77,7 @@ class Laser(bases.OpticalCouplerBase, bases.SystemElementBase):
         return
 
     def system_setup_coupling(self, matrix_algorithm):
-        field_rtW = self.symbols.math.sqrt(self.power_W)
+        field_rtW = self.symbols.math.sqrt(self.power_W.val)
         if self.phased:
             matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.LOWER, field_rtW * self.symbols.i)
             matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.RAISE, -field_rtW * self.symbols.i)

@@ -23,6 +23,8 @@ from ..signals.ports import(
     SignalPortHolderOut,
 )
 
+from . import bases
+
 QuantumKey = u'Ψ'
 RAISE = DictKey({QuantumKey: u'↑'})
 LOWER = DictKey({QuantumKey: u'↓'})
@@ -50,15 +52,16 @@ class OpticalDegenerate4PortMixin(object):
         return val
 
 
-class OpticalPortHolderInOut(decl.OverridableObject):
+class OpticalPortHolderInOut(bases.SystemElementBase):
     def __init__(
             self,
             element,
             x,
+            parent,
             **kwargs
     ):
-        super(OpticalPortHolderInOut, self).__init__(**kwargs)
-        self.element = element
+        super(OpticalPortHolderInOut, self).__init__(parent = parent, **kwargs)
+        self.element = parent
         self._x = x
         self.i = DictKey({
             ElementKey: self.element,

@@ -1,0 +1,10 @@
+make generic coupling attributes for:
+
+RTL transmission coefficients
+    dict(R = a, T = b, L = c) RSPEC dictionaries as fast alternatives (choose 2 of three). Need storage mechanism like SimpleUnitfulGroup
+
+complex couplings
+
+polarization specification
+    allow single 'S', 'P' strings or dict(S = a, P = b) POLSPEC dictionaries as fast alternatives
+

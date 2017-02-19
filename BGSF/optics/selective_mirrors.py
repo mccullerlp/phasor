@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
+from __future__ import division, print_function
 #from BGSF.utilities.print import print
 
 from . import ports
-from .selectors import OpticalSelectionStack
+from . import selectors
 
 
 class MirrorSelectionStack(
     ports.OpticalDegenerate4PortMixin,
-    OpticalSelectionStack,
+    selectors.OpticalSelectionStack,
 ):
     def __init__(
         self,
@@ -24,6 +23,8 @@ class MirrorSelectionStack(
             port_set = set(['Fr', 'Fr'])
         else:
             port_set = set(['FrA', 'FrB', 'BkA', 'BkB'])
+
+        #TODO make these use the ooa mechanism rather than kwargs propagation
 
         #TODO make better error messages
         for mname, mconstr in list(sub_element_map.items()):

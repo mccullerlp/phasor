@@ -9,6 +9,7 @@ from . import ports
 
 from .mirror import Mirror
 from .selective_mirrors import PolarizingMirror
+from . import standard_attrs
 
 
 class BaseRotator(
@@ -23,10 +24,8 @@ class BaseRotator(
     def Bk(self):
         return ports.OpticalPortHolderInOut(self, x = 'Bk' , pchain = 'Fr')
 
-    @decl.dproperty
-    def rotate_deg(self, val):
-        val = self.ooa_params.setdefault('rotate_deg', val)
-        return val
+    _rotate_default = ('rotate_deg', 0)
+    rotate = standard_attrs.generate_rotate()
 
     @decl.mproperty
     def ports_optical(self):
@@ -43,13 +42,13 @@ class BaseRotator(
         }
 
     def system_setup_ports(self, ports_algorithm):
-        if self.rotate_deg in (0, 180, -180):
+        if self.rotate_deg.val in (0, 180, -180):
             for port in self.ports_optical:
                 for kfrom in ports_algorithm.port_update_get(port.i):
                     ports_algorithm.port_coupling_needed(self.pmap[port].o, kfrom)
                 for kto in ports_algorithm.port_update_get(port.o):
                     ports_algorithm.port_coupling_needed(self.pmap[port].i, kto)
-        elif self.rotate_deg in (90, -90, 270, -270):
+        elif self.rotate_deg.val in (90, -90, 270, -270):
             for port in self.ports_optical:
                 for kfrom in ports_algorithm.port_update_get(port.i):
                     if kfrom & ports.PolS:
@@ -72,18 +71,18 @@ class BaseRotator(
         return
 
     def system_setup_coupling(self, matrix_algorithm):
-        if self.rotate_deg in (0, 180, -180):
-            if self.rotate_deg == 0:
+        if self.rotate_deg.val in (0, 180, -180):
+            if self.rotate_deg.val == 0:
                 cplg = 1
-            elif self.rotate_deg in (180, -180):
+            elif self.rotate_deg.val in (180, -180):
                 cplg = -1
             for port in self.ports_optical:
                 for kfrom in matrix_algorithm.port_set_get(port.i):
                     matrix_algorithm.port_coupling_insert(port.i, kfrom, self.pmap[port].o, kfrom, cplg)
-        elif self.rotate_deg in (90, -90, 270, -270):
-            if self.rotate_deg in (90, -270):
+        elif self.rotate_deg.val in (90, -90, 270, -270):
+            if self.rotate_deg.val in (90, -270):
                 cplg_O = 1
-            elif self.rotate_deg in (-90, 270):
+            elif self.rotate_deg.val in (-90, 270):
                 cplg_O = -1
             for port in self.ports_optical:
                 if port is self.Fr:
@@ -108,8 +107,8 @@ class BaseRotator(
                             -cplg,
                         )
         else:
-            cplgC = self.symbols.math.cos(self.rotate_deg / 180 * self.symbols.pi)
-            cplgS_O = self.symbols.math.sin(self.rotate_deg / 180 * self.symbols.pi)
+            cplgC = self.symbols.math.cos(self.rotate_deg.val / 180 * self.symbols.pi)
+            cplgS_O = self.symbols.math.sin(self.rotate_deg.val / 180 * self.symbols.pi)
             for port in self.ports_optical:
                 if port is self.Fr:
                     cplgS = cplgS_O
@@ -153,18 +152,18 @@ class PolarizationRotator(
         BaseRotator
 ):
     def system_setup_coupling(self, matrix_algorithm):
-        if self.rotate_deg in (0, 180, -180):
-            if self.rotate_deg == 0:
+        if self.rotate_deg.val in (0, 180, -180):
+            if self.rotate_deg.val == 0:
                 cplg = 1
-            elif self.rotate_deg in (180, -180):
+            elif self.rotate_deg.val in (180, -180):
                 cplg = -1
             for port in self.ports_optical:
                 for kfrom in matrix_algorithm.port_set_get(port.i):
                     matrix_algorithm.port_coupling_insert(port.i, kfrom, self.pmap[port].o, kfrom, cplg)
-        elif self.rotate_deg in (90, -90, 270, -270):
-            if self.rotate_deg in (90, -270):
+        elif self.rotate_deg.val in (90, -90, 270, -270):
+            if self.rotate_deg.val in (90, -270):
                 cplg_O = 1
-            elif self.rotate_deg in (-90, 270):
+            elif self.rotate_deg.val in (-90, 270):
                 cplg_O = -1
             for port in self.ports_optical:
                 if port is self.Fr:
@@ -189,8 +188,8 @@ class PolarizationRotator(
                             -cplg,
                         )
         else:
-            cplgC = self.symbols.math.cos(self.rotate_deg / 180 * self.symbols.pi)
-            cplgS_O = self.symbols.math.sin(self.rotate_deg / 180 * self.symbols.pi)
+            cplgC = self.symbols.math.cos(self.rotate_deg.val / 180 * self.symbols.pi)
+            cplgS_O = self.symbols.math.sin(self.rotate_deg.val / 180 * self.symbols.pi)
             for port in self.ports_optical:
                 if port is self.Fr:
                     cplgS = cplgS_O
@@ -234,18 +233,18 @@ class FaradayRotator(
         BaseRotator
 ):
     def system_setup_coupling(self, matrix_algorithm):
-        if self.rotate_deg in (0, 180, -180):
-            if self.rotate_deg == 0:
+        if self.rotate_deg.val in (0, 180, -180):
+            if self.rotate_deg.val == 0:
                 cplg = 1
-            elif self.rotate_deg in (180, -180):
+            elif self.rotate_deg.val in (180, -180):
                 cplg = -1
             for port in self.ports_optical:
                 for kfrom in matrix_algorithm.port_set_get(port.i):
                     matrix_algorithm.port_coupling_insert(port.i, kfrom, self.pmap[port].o, kfrom, cplg)
-        elif self.rotate_deg in (90, -90, 270, -270):
-            if self.rotate_deg in (90, -270):
+        elif self.rotate_deg.val in (90, -90, 270, -270):
+            if self.rotate_deg.val in (90, -270):
                 cplg = 1
-            elif self.rotate_deg in (-90, 270):
+            elif self.rotate_deg.val in (-90, 270):
                 cplg = -1
             for port in self.ports_optical:
                 for kfrom in matrix_algorithm.port_set_get(port.i):
@@ -266,8 +265,8 @@ class FaradayRotator(
                             -cplg,
                         )
         else:
-            cplgC = self.symbols.math.cos(self.rotate_deg / 180 * self.symbols.pi)
-            cplgS = self.symbols.math.sin(self.rotate_deg / 180 * self.symbols.pi)
+            cplgC = self.symbols.math.cos(self.rotate_deg.val / 180 * self.symbols.pi)
+            cplgS = self.symbols.math.sin(self.rotate_deg.val / 180 * self.symbols.pi)
             for port in self.ports_optical:
                 for kfrom in matrix_algorithm.port_set_get(port.i):
                     if kfrom & ports.PolS:
@@ -314,6 +313,7 @@ class WavePlate(
             cplgSC = None,
             **kwargs
     ):
+        #TODO Make these generic properties
         super(WavePlate, self).__init__(**kwargs)
 
         bases.OOA_ASSIGN(self).cplgP  = cplgP
@@ -325,10 +325,13 @@ class WavePlate(
             cplgSC = self.cplgS.conjugate()
         bases.OOA_ASSIGN(self).cplgSC = cplgSC
 
-    def __build__(self):
-        self.Fr = ports.OpticalPortHolderInOut(self, x = 'Fr')
-        self.Bk = ports.OpticalPortHolderInOut(self, x = 'Bk')
-        return
+    @decl.dproperty
+    def Fr(self):
+        return ports.OpticalPortHolderInOut(self, x = 'Fr')
+
+    @decl.dproperty
+    def Bk(self):
+        return ports.OpticalPortHolderInOut(self, x = 'Bk')
 
     @decl.mproperty
     def ports_optical(self):
@@ -403,18 +406,21 @@ class WavePlateMount(
         bases.OpticalCouplerBase,
         bases.SystemElementBase,
 ):
+    _rotate_default = ('rotate_deg', 0)
+    rotate = standard_attrs.generate_rotate()
+
+    @decl.dproperty
+    def plate(self, sled):
+        return sled
+
     def __init__(
         self,
-        plate,
-        rotate_deg = 0,
         **kwargs
     ):
         super(WavePlateMount, self).__init__(**kwargs)
 
-        self.my.plate = plate
-        bases.OOA_ASSIGN(self).rotate_deg = rotate_deg
-        self.my.coord_Fr = PolarizationRotator(rotate_deg = self.rotate_deg)
-        self.my.coord_Bk = PolarizationRotator(rotate_deg = -self.rotate_deg)
+        self.my.coord_Fr = PolarizationRotator(rotate =  self.rotate)
+        self.my.coord_Bk = PolarizationRotator(rotate = -self.rotate)
 
         self.system.bond(self.coord_Fr.Bk, self.plate.Fr)
         self.system.bond(self.plate.Bk, self.coord_Bk.Fr)

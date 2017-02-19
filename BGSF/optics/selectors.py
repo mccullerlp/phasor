@@ -14,10 +14,11 @@ class PolSelector(
         bases.OpticalCouplerBase,
         bases.SystemElementBase
 ):
+
     def __build__(self):
-        self.Fr   = ports.OpticalPortHolderInOut(self, x = 'Fr')
-        self.Bk_P = ports.OpticalPortHolderInOut(self, x = 'Bk_P')
-        self.Bk_S = ports.OpticalPortHolderInOut(self, x = 'Bk_S')
+        self.my.Fr   = ports.OpticalPortHolderInOut(self, x = 'Fr')
+        self.my.Bk_P = ports.OpticalPortHolderInOut(self, x = 'Bk_P')
+        self.my.Bk_S = ports.OpticalPortHolderInOut(self, x = 'Bk_S')
         return
 
     def system_setup_ports(self, ports_algorithm):
@@ -67,15 +68,18 @@ class GenericSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
     def select_map(self, val):
         return val
 
+    @decl.dproperty
+    def Fr(self):
+        return ports.OpticalPortHolderInOut(self, x = 'Fr')
+
     def __build__(self):
         self.check      = True
         self.port_map   = {}
-        self.Fr         = ports.OpticalPortHolderInOut(self, x = 'Fr')
 
         for name, key in list(self.select_map.items()):
             pname = 'Bk_{0}'.format(name)
             port = ports.OpticalPortHolderInOut(self, x = pname)
-            setattr(self, pname, port)
+            port = self.insert(port, pname)
             self.port_map[name] = (port, key)
         return
 
@@ -144,12 +148,17 @@ class OpticalSelectionStack(
             setattr(self.my, ename, element)
             #separate these as the setattr "constructs" the element through the sled mechanism
             celement = getattr(self, ename)
+            #used to check that ports are not redundant (due to aliasing)
+            ports_already = set()
             if optical_ports is not None:
-                for pname, port in list(celement.owned_port_keys.items()):
-                    if isinstance(port, (
-                            ports.OpticalPortHolderInOut,
-                    )):
-                        optical_ports[pname] += 1
+                for port in celement.ports_select:
+                    if port in ports_already:
+                        continue
+                    ports_already.add(port)
+                    if isinstance(port, (ports.OpticalPortHolderInOut,)):
+                        optical_ports[port.name_child] += 1
+                    else:
+                        raise RuntimeError("HMMM")
 
         if optical_ports is not None:
             pnum_cmn = None

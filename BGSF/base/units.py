@@ -149,6 +149,8 @@ angle = units_map(
     deg = None,
 )
 
+rotation = angle
+
 angle_deg = units_map(
     principle = "deg",
     rad  = None,
@@ -156,6 +158,8 @@ angle_deg = units_map(
     urad  = None,
     deg = None,
 )
+
+rotation_deg = angle_deg
 
 frequency = units_map(
     principle = "Hz",

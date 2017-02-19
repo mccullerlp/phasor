@@ -226,7 +226,7 @@ class TestPolarizations(TestCase):
         pprint(sys.ooa_params.test.waveplate)
 
         db = DeepBunch()
-        db.test.waveplate.rotate_deg = 90
+        db.test.waveplate.rotate.val = 90
         sys = system.BGSystem(
             ooa_params = db,
         )
@@ -235,7 +235,7 @@ class TestPolarizations(TestCase):
         self.assertAlmostEqual(sys.test.DC_P.DC_readout, 0)
 
         db = DeepBunch()
-        db.test.waveplate.rotate_deg = 45
+        db.test.waveplate.rotate.val = 45
         sys = system.BGSystem(
             ooa_params = db,
         )
@@ -247,20 +247,20 @@ class TestPolarizations(TestCase):
         db = DeepBunch()
         db.test.waveplate_type = 'quarter'
 
-        db.test.waveplate.rotate_deg = 0
+        db.test.waveplate.rotate.val = 0
         sys = system.BGSystem()
         sys.my.test = WavePlateTester()
         self.assertAlmostEqual(sys.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sys.test.DC_P.DC_readout, 0)
         pprint(sys.ooa_params.test.waveplate)
 
-        db.test.waveplate.rotate_deg = 90
+        db.test.waveplate.rotate.val = 90
         sys = system.BGSystem(ooa_params = db)
         sys.my.test = WavePlateTester()
         self.assertAlmostEqual(sys.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sys.test.DC_P.DC_readout, 0)
 
-        db.test.waveplate.rotate_deg = 45
+        db.test.waveplate.rotate.val = 45
         sys = system.BGSystem(ooa_params = db)
         sys.my.test = WavePlateTester()
         self.assertAlmostEqual(sys.test.DC_S.DC_readout, .5)
@@ -270,20 +270,20 @@ class TestPolarizations(TestCase):
         db = DeepBunch()
         db.test.waveplate_type = 'faraday'
 
-        db.test.waveplate.rotate_deg = 0
+        db.test.waveplate.rotate.val = 0
         sys = system.BGSystem()
         sys.my.test = WavePlateTester()
         self.assertAlmostEqual(sys.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sys.test.DC_P.DC_readout, 0)
         pprint(sys.ooa_params.test.waveplate)
 
-        db.test.waveplate.rotate_deg = 90
+        db.test.waveplate.rotate.val = 90
         sys = system.BGSystem(ooa_params = db)
         sys.my.test = WavePlateTester()
         self.assertAlmostEqual(sys.test.DC_S.DC_readout, 0)
         self.assertAlmostEqual(sys.test.DC_P.DC_readout, 1)
 
-        db.test.waveplate.rotate_deg = 45
+        db.test.waveplate.rotate.val = 45
         sys = system.BGSystem(ooa_params = db)
         sys.my.test = WavePlateTester()
         self.assertAlmostEqual(sys.test.DC_S.DC_readout, .5)
@@ -297,7 +297,7 @@ class TestPolarizations(TestCase):
         pprint(sys.ooa_params.test.waveplate)
 
         db = DeepBunch()
-        db.test.waveplate.rotate_deg = 90
+        db.test.waveplate.rotate.val = 90
         sys = system.BGSystem(
             ooa_params = db,
         )
@@ -306,7 +306,7 @@ class TestPolarizations(TestCase):
         self.assertAlmostEqual(sys.test.DC_P.DC_readout, 0)
 
         db = DeepBunch()
-        db.test.waveplate.rotate_deg = 45
+        db.test.waveplate.rotate.val = 45
         sys = system.BGSystem(
             ooa_params = db,
         )
@@ -315,7 +315,7 @@ class TestPolarizations(TestCase):
         self.assertAlmostEqual(sys.test.DC_P.DC_readout, 0)
 
         db = DeepBunch()
-        db.test.waveplate.rotate_deg = 11
+        db.test.waveplate.rotate.val = 11
         sys = system.BGSystem(
             ooa_params = db,
         )
@@ -324,7 +324,7 @@ class TestPolarizations(TestCase):
         self.assertAlmostEqual(sys.test.DC_P.DC_readout, 0)
 
         db = DeepBunch()
-        db.test.waveplate.rotate_deg = 232
+        db.test.waveplate.rotate.val = 232
         sys = system.BGSystem(
             ooa_params = db,
         )
@@ -342,19 +342,19 @@ class TestPolarizations(TestCase):
         self.assertAlmostEqual(sys.test.DC_P.DC_readout, 0)
         pprint(sys.ooa_params.test.waveplate)
 
-        db.test.waveplate.rotate_deg = 90
+        db.test.waveplate.rotate.val = 90
         sys = system.BGSystem(ooa_params = db)
         sys.my.test = WavePlateTesterRetro()
         self.assertAlmostEqual(sys.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sys.test.DC_P.DC_readout, 0)
 
-        db.test.waveplate.rotate_deg = 45
+        db.test.waveplate.rotate.val = 45
         sys = system.BGSystem(ooa_params = db)
         sys.my.test = WavePlateTesterRetro()
         self.assertAlmostEqual(sys.test.DC_S.DC_readout, 0)
         self.assertAlmostEqual(sys.test.DC_P.DC_readout, 1)
 
-        db.test.waveplate.rotate_deg = -45
+        db.test.waveplate.rotate.val = -45
         sys = system.BGSystem(ooa_params = db)
         sys.my.test = WavePlateTesterRetro()
         self.assertAlmostEqual(sys.test.DC_S.DC_readout, 0)
@@ -370,25 +370,25 @@ class TestPolarizations(TestCase):
         self.assertAlmostEqual(sys.test.DC_P.DC_readout, 0)
         pprint(sys.ooa_params.test.waveplate)
 
-        db.test.waveplate.rotate_deg = 90
+        db.test.waveplate.rotate.val = 90
         sys = system.BGSystem(ooa_params = db)
         sys.my.test = WavePlateTesterRetro()
         self.assertAlmostEqual(sys.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sys.test.DC_P.DC_readout, 0)
 
-        db.test.waveplate.rotate_deg = 45
+        db.test.waveplate.rotate.val = 45
         sys = system.BGSystem(ooa_params = db)
         sys.my.test = WavePlateTesterRetro()
         self.assertAlmostEqual(sys.test.DC_S.DC_readout, 0)
         self.assertAlmostEqual(sys.test.DC_P.DC_readout, 1)
 
-        db.test.waveplate.rotate_deg = -45
+        db.test.waveplate.rotate.val = -45
         sys = system.BGSystem(ooa_params = db)
         sys.my.test = WavePlateTesterRetro()
         self.assertAlmostEqual(sys.test.DC_S.DC_readout, 0)
         self.assertAlmostEqual(sys.test.DC_P.DC_readout, 1)
 
-        db.test.waveplate.rotate_deg = 45/2
+        db.test.waveplate.rotate.val = 45/2
         sys = system.BGSystem(ooa_params = db)
         sys.my.test = WavePlateTesterRetro()
         self.assertAlmostEqual(sys.test.DC_S.DC_readout, .5)

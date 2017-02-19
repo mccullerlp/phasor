@@ -7,49 +7,57 @@ from ..base.multi_unit_args import (
     generate_refval_attribute,
 )
 
-from ..base.units import (
-    lengths_small,
-)
+from ..base import units
 
 
-def generate_power_W():
+def generate_power(name = 'power'):
     @decl.group_dproperty
-    def power_W(desc):
+    def power(desc):
         return generate_refval_attribute(
             desc,
-            ubunch = lengths_small,
-            stems = ['power', ],
-            ooa_name = 'power',
-            preferred_attr = 'power',
-            default_attr = '_power_default',
+            ubunch = units.laser_power,
+            stems = [name, ],
+            ooa_name = name,
+            preferred_attr = name,
+            default_attr = '_{0}_default'.format(name),
             prototypes = ['full', 'base'],
         )
-    return power_W
+    power.__name__ = name
+    return power
 
 
-def generate_L_detune_m():
+def generate_L_detune(name = 'L_detune'):
     @decl.group_dproperty
-    def L_detune_m(desc):
+    def L_detune(desc):
         return generate_refval_attribute(
             desc,
-            ubunch = lengths_small,
-            stems = ['L_detune', ],
-            ooa_name = 'L_detune',
-            preferred_attr = 'L_detune',
+            ubunch = units.lengths_small,
+            stems = [name, ],
+            ooa_name = name,
+            preferred_attr = name,
+            default_attr = '_{0}_default'.format(name),
             prototypes = ['full', 'base'],
         )
-    return L_detune_m
+    L_detune.__name__ = name
+    return L_detune
 
 
-def generate_length_m():
+def generate_length(name = 'length'):
+    return generate_L_detune(name = name)
+
+
+def generate_rotate(name = 'rotate'):
     @decl.group_dproperty
-    def length_m(desc):
+    def rotate(desc):
         return generate_refval_attribute(
             desc,
-            ubunch = lengths_small,
-            stems = ['length', 'L'],
-            ooa_name = 'length',
-            preferred_attr = ('length', 'L'),
+            ubunch = units.rotation_deg,
+            stems = [name, ],
+            ooa_name = name,
+            preferred_attr = name,
+            default_attr = '_{0}_default'.format(name),
             prototypes = ['full', 'base'],
         )
-    return length_m
+    rotate.__name__ = name
+    return rotate
+
