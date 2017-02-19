@@ -9,20 +9,12 @@ from __future__ import print_function
 
 import declarative as decl
 
-from ..math.key_matrix import (
-    DictKey,
-    FrequencyKey,
-)
-
-from ..base import (
-    SystemElementBase,
-    ClassicalFreqKey,
-)
+from .. import base
 
 from .noise import NoiseReadout
 
 
-class ACReadout(SystemElementBase):
+class ACReadout(base.SystemElementBase):
 
     @decl.dproperty
     def port_set(self, val = 'AC'):
@@ -48,8 +40,8 @@ class ACReadout(SystemElementBase):
         #TODO: make this adjustable
         self.F_sep = self.system.F_AC
 
-        self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : 1})})
-        self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : -1})})
+        self.keyP = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({self.F_sep : 1})})
+        self.keyN = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({self.F_sep : -1})})
 
         if include_noise:
             self.my.noise = NoiseReadout(
@@ -122,7 +114,7 @@ class ACReadout(SystemElementBase):
         return eachCSD
 
 
-class ACReadoutCLG(SystemElementBase):
+class ACReadoutCLG(base.SystemElementBase):
 
     @decl.dproperty
     def port_set(self, val = 'AC'):
@@ -143,8 +135,8 @@ class ACReadoutCLG(SystemElementBase):
         #TODO: make this adjustable
         self.F_sep = self.system.F_AC
 
-        self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : 1})})
-        self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : -1})})
+        self.keyP = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({self.F_sep : 1})})
+        self.keyN = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({self.F_sep : -1})})
 
         if include_noise:
             self.my.noise = NoiseReadout(

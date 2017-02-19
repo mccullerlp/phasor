@@ -4,11 +4,6 @@
 from __future__ import (division, print_function)
 import numpy as np
 
-from ..math.key_matrix import (
-    DictKey,
-    FrequencyKey,
-)
-
 from ..system.matrix_injections import (
     FactorCouplingBase,
 )
@@ -110,7 +105,7 @@ class HiddenVariableHomodynePD(
                     qKey = ports.LOWER
                 if self.system.reject_classical_frequency_order(fnew):
                     continue
-                kfrom2 = kfrom.without_keys(ports.QuantumKey, ports.ClassicalFreqKey) | DictKey({ports.ClassicalFreqKey: fnew}) | qKey
+                kfrom2 = kfrom.without_keys(ports.QuantumKey, ports.ClassicalFreqKey) | ports.DictKey({ports.ClassicalFreqKey: fnew}) | qKey
                 ports_algorithm.port_coupling_needed(pfrom, kfrom2)
 
             def subset_second(pool2):
@@ -142,7 +137,7 @@ class HiddenVariableHomodynePD(
                     continue
                 ports_algorithm.port_coupling_needed(
                     out_port_classical.o,
-                    DictKey({ports.ClassicalFreqKey: fdiff})
+                    ports.DictKey({ports.ClassicalFreqKey: fdiff})
                 )
         referred_ports_fill(
             out_port_classical = self.rtWpdI,
@@ -204,9 +199,9 @@ class HiddenVariableHomodynePD(
                     if lkto in lkto_completed:
                         continue
                     lk_freq = lkto[ports.ClassicalFreqKey]
-                    assert(not lkto - DictKey({ports.ClassicalFreqKey: lk_freq}))
+                    assert(not lkto - ports.DictKey({ports.ClassicalFreqKey: lk_freq}))
                     lk_freqN = -lk_freq
-                    lktoN = DictKey({ports.ClassicalFreqKey: lk_freqN})
+                    lktoN = ports.DictKey({ports.ClassicalFreqKey: lk_freqN})
                     assert(lktoN in lktos)
                     lkto_completed.add(lkto)
                     lkto_completed.add(lktoN)
@@ -223,12 +218,12 @@ class HiddenVariableHomodynePD(
                     ftoOptN = kfrom[ports.ClassicalFreqKey] + lktoN[ports.ClassicalFreqKey]
 
                     if not self.system.reject_classical_frequency_order(ftoOptP):
-                        ktoOptP = kfrom.without_keys(ports.ClassicalFreqKey) | DictKey({ports.ClassicalFreqKey: ftoOptP})
+                        ktoOptP = kfrom.without_keys(ports.ClassicalFreqKey) | ports.DictKey({ports.ClassicalFreqKey: ftoOptP})
                     else:
                         ktoOptP = None
 
                     if not self.system.reject_classical_frequency_order(ftoOptN):
-                        ktoOptN = kfrom.without_keys(ports.ClassicalFreqKey) | DictKey({ports.ClassicalFreqKey: ftoOptN})
+                        ktoOptN = kfrom.without_keys(ports.ClassicalFreqKey) | ports.DictKey({ports.ClassicalFreqKey: ftoOptN})
                     else:
                         ktoOptN = None
                     #Both raising and lowering use optCplgC because it is always the conjugate to the other, so it always matches ports.LOWER with the classical field of ports.RAISE
@@ -337,7 +332,7 @@ class TotalDCPowerPD(
         self.port  = port
         self.system.own_port_virtual(self, self.port)
         self.WpdDC = ports.SignalPortHolderOut(self, x = 'WpdDC')
-        self.fdkey  = DictKey({ports.ClassicalFreqKey: FrequencyKey({})})
+        self.fdkey  = ports.DictKey({ports.ClassicalFreqKey: ports.FrequencyKey({})})
         self.pk_WpdDC = (self.WpdDC.o, self.fdkey)
         return
 
@@ -388,7 +383,7 @@ def ports_fill_2optical_2classical_hdyne(
                     qKey = ports.LOWER
                 if system.reject_classical_frequency_order(fnew):
                     continue
-                kfrom2 = kfrom.without_keys(ports.QuantumKey, ports.ClassicalFreqKey) | DictKey({ports.ClassicalFreqKey: fnew}) | qKey
+                kfrom2 = kfrom.without_keys(ports.QuantumKey, ports.ClassicalFreqKey) | ports.DictKey({ports.ClassicalFreqKey: fnew}) | qKey
                 ports_algorithm.port_coupling_needed(pfrom, kfrom2)
 
         def subset_second(pool2):
@@ -420,7 +415,7 @@ def ports_fill_2optical_2classical_hdyne(
                 continue
             ports_algorithm.port_coupling_needed(
                 out_port_classical.o,
-                DictKey({ports.ClassicalFreqKey: fdiff})
+                ports.DictKey({ports.ClassicalFreqKey: fdiff})
             )
 
 
@@ -443,9 +438,9 @@ def modulations_fill_2optical_2classical_hdyne(
         if lkto in lkto_completed:
             continue
         lk_freq = lkto[ports.ClassicalFreqKey]
-        assert(not lkto - DictKey({ports.ClassicalFreqKey: lk_freq}))
+        assert(not lkto - ports.DictKey({ports.ClassicalFreqKey: lk_freq}))
         lk_freqN = -lk_freq
-        lktoN = DictKey({ports.ClassicalFreqKey: lk_freqN})
+        lktoN = ports.DictKey({ports.ClassicalFreqKey: lk_freqN})
         assert(lktoN in lktos)
         lkto_completed.add(lkto)
         lkto_completed.add(lktoN)
@@ -462,12 +457,12 @@ def modulations_fill_2optical_2classical_hdyne(
         ftoOptN = kfrom[ports.ClassicalFreqKey] + lktoN[ports.ClassicalFreqKey]
 
         if not system.reject_classical_frequency_order(ftoOptP):
-            ktoOptP = kfrom.without_keys(ports.ClassicalFreqKey) | DictKey({ports.ClassicalFreqKey: ftoOptP})
+            ktoOptP = kfrom.without_keys(ports.ClassicalFreqKey) | ports.DictKey({ports.ClassicalFreqKey: ftoOptP})
         else:
             ktoOptP = None
 
         if not system.reject_classical_frequency_order(ftoOptN):
-            ktoOptN = kfrom.without_keys(ports.ClassicalFreqKey) | DictKey({ports.ClassicalFreqKey: ftoOptN})
+            ktoOptN = kfrom.without_keys(ports.ClassicalFreqKey) | ports.DictKey({ports.ClassicalFreqKey: ftoOptN})
         else:
             ktoOptN = None
         #Both raising and lowering use optCplgC because it is always the conjugate to the other, so it always matches ports.LOWER with the classical field of ports.RAISE

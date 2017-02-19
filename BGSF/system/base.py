@@ -16,11 +16,8 @@ import warnings
 
 import declarative as decl
 
-from ..math.key_matrix.dictionary_keys import (
-    DictKey,
-)
-
 from ..base import (
+    DictKey,
     Frequency,
     SystemElementBase,
     ClassicalFreqKey,
@@ -186,7 +183,7 @@ class BGSystem(RootElement):
         iwavelen_m = 0
         freq_Hz = 0
         for F, n in list(key[ClassicalFreqKey].F_dict.items()):
-            freq_Hz += n * F.F_Hz
+            freq_Hz += n * F.F_Hz.val
         for F, n in list(key[OpticalFreqKey].F_dict.items()):
             iwavelen_m += n * F.iwavelen_m
         return iwavelen_m, freq_Hz
@@ -205,8 +202,9 @@ class BGSystem(RootElement):
             Na = abs(N)
             if Na > N_limit:
                 return True
-            for group in F.groups:
-                group_N[group] += Na
+            #TODO revisit max frequency groups
+            #for group in F.groups:
+            #    group_N[group] += Na
 
         for group, N in list(group_N.items()):
             Nmax = self.groups_max_N.get(group, None)
@@ -218,7 +216,7 @@ class BGSystem(RootElement):
         #TODO put this logic in a subobject
         freq_Hz = 0
         for F, n in list(key[ClassicalFreqKey].F_dict.items()):
-            freq_Hz += n * F.F_Hz
+            freq_Hz += n * F.F_Hz.val
         return freq_Hz
 
     def classical_frequency_test_max(self, key, max_freq):

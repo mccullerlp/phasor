@@ -1,30 +1,20 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
+from __future__ import division, print_function
 from builtins import range
 #from BGSF.utilities.print import print
 
 import numpy as np
-from collections import defaultdict
-
 import declarative
 
 from ..math.key_matrix import (
-    DictKey,
-    FrequencyKey,
     KeyMatrix,
-    KeyVector,
+    #KeyVector,
     KVSpace,
 )
 
-from ..base import (
-    SystemElementBase,
-    OOA_ASSIGN,
-    ClassicalFreqKey,
-)
-
+from .. import base
 from .base import ReadoutViewBase
 from .noise import NoiseMatrixView
 
@@ -41,7 +31,7 @@ def np_roll_2D_mat_front(arr_mat, N = 2):
     return arr_mat
 
 
-class MultiACReadout(SystemElementBase):
+class MultiACReadout(base.SystemElementBase):
     def __init__(
         self,
         system,
@@ -59,13 +49,13 @@ class MultiACReadout(SystemElementBase):
         self.port_map = port_map
         self.portDrv = portDrv
 
-        OOA_ASSIGN(self).port_set = 'AC'
+        base.OOA_ASSIGN(self).port_set = 'AC'
 
         #TODO: make this adjustable
         self.F_sep = system.F_AC
 
-        self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : 1})})
-        self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : -1})})
+        self.keyP = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({self.F_sep : 1})})
+        self.keyN = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({self.F_sep : -1})})
 
         self.noise = MultiNoiseReadout(
             port_map = self.port_map,
@@ -117,41 +107,41 @@ class MultiACReadoutView(ReadoutViewBase):
             phase_deg  = self.phase_deg,
         )
 
-    @mproperty
+    @declarative.mproperty
     def F_Hz(self):
         return self.readout.F_sep.F_Hz
 
-    @mproperty
+    @declarative.mproperty
     def AC_sensitivity(self):
         return self.AC_sensitivity_vec[0]
 
     def homodyne_SNR(self):
         return self.noise.noise / abs(self.AC_sensitivity)
 
-    @mproperty
+    @declarative.mproperty
     def AC_noise_limited_sensitivity(self):
         return self.AC_ASD / abs(self.AC_sensitivity)
 
-    @mproperty
+    @declarative.mproperty
     def AC_ASD(self):
         return self.AC_PSD**.5
 
-    @mproperty
+    @declarative.mproperty
     def AC_PSD(self):
         return self.AC_CSD_vec[0, 0]
 
-    @mproperty
+    @declarative.mproperty
     def AC_PSD_by_source(self):
         raise NotImplementedError()
 
-    @mproperty
+    @declarative.mproperty
     def vspace(self):
         kv = KVSpace(dtype = np.complex128)
         kv.keys_add(list(self.port_map.keys()))
         kv.freeze()
         return kv
 
-    @mproperty
+    @declarative.mproperty
     def AC_CSD_KV(self):
         km = KeyMatrix(
             vspace_from = self.vspace,
@@ -161,7 +151,7 @@ class MultiACReadoutView(ReadoutViewBase):
             km[portA, portB] = cplg
         return km
 
-    @mproperty
+    @declarative.mproperty
     def AC_CSD_re_KV(self):
         km = KeyMatrix(
             vspace_from = self.vspace,
@@ -171,21 +161,21 @@ class MultiACReadoutView(ReadoutViewBase):
             km[portA, portB] = np.real(cplg)
         return km
 
-    @mproperty
+    @declarative.mproperty
     def AC_CSD_vec(self):
         return np_roll_2D_mat_front(
             self.AC_CSD_vec_back
         )
 
-    @mproperty
+    @declarative.mproperty
     def AC_CSD_vec_re_inv_back(self):
         return np.linalg.inv(np.real(self.AC_CSD_vec_back))
 
-    @mproperty
+    @declarative.mproperty
     def AC_CSD_vec_re_inv(self):
         return np_roll_2D_mat_front(self.AC_CSD_vec_re_inv_back)
 
-    @mproperty
+    @declarative.mproperty
     def AC_noise_limited_sensitivity_optimal(self):
         arr = self.AC_CSD_vec_re_inv_back
         vec  = self.AC_sensitivity_vec_back
@@ -195,33 +185,33 @@ class MultiACReadoutView(ReadoutViewBase):
         arr = np.einsum('...i,...i->...', arr, vec.conjugate())
         return 1/(arr)**.5
 
-    @mproperty
+    @declarative.mproperty
     def AC_CSD_vec_inv_back(self):
         return np.linalg.inv(self.AC_CSD_vec_back)
 
-    @mproperty
+    @declarative.mproperty
     def AC_CSD_vec_inv(self):
         return np_roll_2D_mat_front(self.AC_CSD_vec_inv_back)
 
-    @mproperty
+    @declarative.mproperty
     def AC_signal_matrix(self):
         Svec = np.einsum('i...,j...->ji...', self.AC_sensitivity_vec, self.AC_sensitivity_vec.conjugate())
         return Svec
 
-    @mproperty
+    @declarative.mproperty
     def AC_signal_matrix_norm(self):
         Svec = self.AC_signal_matrix
         Svec = Svec / (Svec[0, 0] + Svec[1, 1])
         return Svec
 
-    @mproperty
+    @declarative.mproperty
     def AC_CSD_vec_norm(self):
         vec_mat = np.copy(self.AC_CSD_vec)
         sqrtIvecQ = np.sqrt(vec_mat[0, 0] * vec_mat[1, 1])
         vec_mat  /= sqrtIvecQ
         return vec_mat
 
-    @mproperty
+    @declarative.mproperty
     def AC_sensitivity_vec(self):
         phase_rad = self.phase_deg * np.pi / 180
         I = self._AC_sensitivity(self.readout.portNI)
@@ -255,7 +245,7 @@ class MultiACReadoutView(ReadoutViewBase):
         return 2 * N_tot / D_tot
 
 
-class MultiNoiseReadout(SystemElementBase):
+class MultiNoiseReadout(base.SystemElementBase):
     def __init__(
             self,
             system,
@@ -273,18 +263,18 @@ class MultiNoiseReadout(SystemElementBase):
 
         if port_set is None:
             if AC_sidebands_use:
-                OOA_ASSIGN(self).port_set = 'AC noise'
+                base.OOA_ASSIGN(self).port_set = 'AC noise'
             else:
-                OOA_ASSIGN(self).port_set = 'DC noise'
+                base.OOA_ASSIGN(self).port_set = 'DC noise'
         else:
             self.port_set = port_set
 
         if AC_sidebands_use:
-            self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({system.F_AC : 1})})
-            self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({system.F_AC : -1})})
+            self.keyP = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({system.F_AC : 1})})
+            self.keyN = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({system.F_AC : -1})})
         else:
-            self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({})})
-            self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({})})
+            self.keyP = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({})})
+            self.keyN = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({})})
         return
 
     def system_setup_ports_initial(self, system):

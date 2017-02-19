@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
+from __future__ import division, print_function
 #from BGSF.utilities.print import print
 
 #import numpy as np
@@ -10,56 +9,40 @@ from __future__ import print_function
 #from numbers import Number
 #import warnings
 
-from ..math.key_matrix import (
-    DictKey,
-    FrequencyKey,
-)
-
-from ..base import (
-    CouplerBase,
-)
-
-from .bases import (
-    SystemElementBase,
-)
-
-from .ports import (
-    SignalPortHolderIn,
-    SignalPortHolderOut,
-    ClassicalFreqKey,
-)
+from . import bases
+from . import ports
 
 
-class MeanSquareMixer(CouplerBase, SystemElementBase):
+class MeanSquareMixer(bases.CouplerBase, bases.SystemElementBase):
     def __init__(
             self,
             **kwargs
     ):
         super(MeanSquareMixer, self).__init__(**kwargs)
-        self.I   = SignalPortHolderIn(self,  x = 'I')
-        self.MS = SignalPortHolderOut(self, x = 'MS')
+        self.I   = ports.SignalPortHolderIn(self,  x = 'I')
+        self.MS = ports.SignalPortHolderOut(self, x = 'MS')
         return
 
     def system_setup_ports(self, system):
         for kfrom in system.port_update_get(self.I.i):
-            f_key = kfrom[ClassicalFreqKey]
-            kfromN = kfrom.replace_keys({ClassicalFreqKey: -f_key})
+            f_key = kfrom[ports.ClassicalFreqKey]
+            kfromN = kfrom.replace_keys({ports.ClassicalFreqKey: -f_key})
             if system.reject_classical_frequency_order(-f_key):
                 continue
             system.port_coupling_needed(self.I.i, kfromN)
         #only outputs the total MS at DC
-        kto = DictKey({ClassicalFreqKey : FrequencyKey({})})
+        kto = ports.DictKey({ports.ClassicalFreqKey : ports.FrequencyKey({})})
         system.port_coupling_needed(self.MS.o, kto)
         return
 
     def system_setup_coupling(self, system):
-        kto = DictKey({ClassicalFreqKey : FrequencyKey({})})
+        kto = ports.DictKey({ports.ClassicalFreqKey : ports.FrequencyKey({})})
         already_keys = set()
         for kfromP in system.port_set_get(self.I.i):
             if kfromP in already_keys:
                 continue
             already_keys.add(kfromP)
-            f_key = kfromP[ClassicalFreqKey]
+            f_key = kfromP[ports.ClassicalFreqKey]
             if f_key.DC_is():
                 system.port_coupling_insert(
                     self.I.i, kfromP,
@@ -67,7 +50,7 @@ class MeanSquareMixer(CouplerBase, SystemElementBase):
                     1, (self.I.i, kfromP),
                 )
             else:
-                kfromN = kfromP.replace_keys({ClassicalFreqKey: -f_key})
+                kfromN = kfromP.replace_keys({ports.ClassicalFreqKey: -f_key})
                 already_keys.add(kfromN)
                 if system.reject_classical_frequency_order(-f_key):
                     continue
@@ -80,36 +63,36 @@ class MeanSquareMixer(CouplerBase, SystemElementBase):
         return
 
 
-class SquareRootFunction(CouplerBase, SystemElementBase):
+class SquareRootFunction(bases.CouplerBase, bases.SystemElementBase):
     def __init__(
             self,
             **kwargs
     ):
         super(SquareRootFunction, self).__init__(**kwargs)
-        self.I   = SignalPortHolderIn(self,  x = 'I')
+        self.I   = ports.SignalPortHolderIn(self,  x = 'I')
         self.sqroot = SignalPortHolderOut(self, x = 'sqroot')
         return
 
     def system_setup_ports(self, system):
         for kfrom in system.port_update_get(self.I.i):
-            f_key = kfrom[ClassicalFreqKey]
-            kfromN = kfrom.replace_keys({ClassicalFreqKey: -f_key})
+            f_key = kfrom[ports.ClassicalFreqKey]
+            kfromN = kfrom.replace_keys({ports.ClassicalFreqKey: -f_key})
             if system.reject_classical_frequency_order(-f_key):
                 continue
             system.port_coupling_needed(self.I.i, kfromN)
         #only outputs the total RMS at DC
-        kto = DictKey({ClassicalFreqKey : FrequencyKey({})})
+        kto = ports.DictKey({ports.ClassicalFreqKey : ports.FrequencyKey({})})
         system.port_coupling_needed(self.RMS.o, kto)
         return
 
     def system_setup_coupling(self, system):
-        kto = DictKey({ClassicalFreqKey : FrequencyKey({})})
+        kto = ports.DictKey({ports.ClassicalFreqKey : ports.FrequencyKey({})})
         already_keys = set()
         for kfromP in system.port_set_get(self.I.i):
             if kfromP in already_keys:
                 continue
             already_keys.add(kfromP)
-            f_key = kfromP[ClassicalFreqKey]
+            f_key = kfromP[ports.ClassicalFreqKey]
             if f_key.DC_is():
                 system.port_coupling_insert(
                     self.I.i, kfromP,
@@ -117,7 +100,7 @@ class SquareRootFunction(CouplerBase, SystemElementBase):
                     1, (self.I.i, kfromP),
                 )
             else:
-                kfromN = kfromP.replace_keys({ClassicalFreqKey: -f_key})
+                kfromN = kfromP.replace_keys({ports.ClassicalFreqKey: -f_key})
                 already_keys.add(kfromN)
                 if system.reject_classical_frequency_order(-f_key):
                     continue
@@ -129,14 +112,14 @@ class SquareRootFunction(CouplerBase, SystemElementBase):
                 )
         return
 
-class RMSMixer(CouplerBase, SystemElementBase):
+class RMSMixer(bases.CouplerBase, bases.SystemElementBase):
     #TODO
     def __init__(
             self,
             **kwargs
     ):
         super(RMSMixer, self).__init__(**kwargs)
-        self.I   = SignalPortHolderIn(self,  x = 'I')
+        self.I   = ports.SignalPortHolderIn(self,  x = 'I')
         self.RMS = SignalPortHolderOut(self, x = 'RMS')
         self.system.virtual_link
         raise NotImplementedError()
@@ -144,24 +127,24 @@ class RMSMixer(CouplerBase, SystemElementBase):
 
     def system_setup_ports(self, system):
         for kfrom in system.port_update_get(self.I.i):
-            f_key = kfrom[ClassicalFreqKey]
-            kfromN = kfrom.replace_keys({ClassicalFreqKey: -f_key})
+            f_key = kfrom[ports.ClassicalFreqKey]
+            kfromN = kfrom.replace_keys({ports.ClassicalFreqKey: -f_key})
             if system.reject_classical_frequency_order(-f_key):
                 continue
             system.port_coupling_needed(self.I.i, kfromN)
         #only outputs the total RMS at DC
-        kto = DictKey({ClassicalFreqKey : FrequencyKey({})})
+        kto = ports.DictKey({ports.ClassicalFreqKey : ports.FrequencyKey({})})
         system.port_coupling_needed(self.RMS.o, kto)
         return
 
     def system_setup_coupling(self, system):
-        kto = DictKey({ClassicalFreqKey : FrequencyKey({})})
+        kto = ports.DictKey({ports.ClassicalFreqKey : ports.FrequencyKey({})})
         already_keys = set()
         for kfromP in system.port_set_get(self.I.i):
             if kfromP in already_keys:
                 continue
             already_keys.add(kfromP)
-            f_key = kfromP[ClassicalFreqKey]
+            f_key = kfromP[ports.ClassicalFreqKey]
             if f_key.DC_is():
                 system.port_coupling_insert(
                     self.I.i, kfromP,
@@ -169,7 +152,7 @@ class RMSMixer(CouplerBase, SystemElementBase):
                     1, (self.I.i, kfromP),
                 )
             else:
-                kfromN = kfromP.replace_keys({ClassicalFreqKey: -f_key})
+                kfromN = kfromP.replace_keys({ports.ClassicalFreqKey: -f_key})
                 already_keys.add(kfromN)
                 if system.reject_classical_frequency_order(-f_key):
                     continue

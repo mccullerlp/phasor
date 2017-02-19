@@ -9,11 +9,10 @@ import declarative as decl
 
 from ..base import (
     FrequencyBase,
-    SystemElementBase,
 )
 
 
-class OpticalFrequency(SystemElementBase, FrequencyBase):
+class OpticalFrequency(FrequencyBase):
 
     @decl.dproperty
     def wavelen_m(self, val):

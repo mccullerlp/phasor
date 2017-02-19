@@ -8,11 +8,6 @@ from ..base.utilities import (
     type_test
 )
 
-from ..math.key_matrix.dictionary_keys import (
-    DictKey,
-    FrequencyKey,
-)
-
 from . import bases
 from . import ports
 from . import frequency
@@ -57,9 +52,9 @@ class Laser(bases.OpticalCouplerBase, bases.SystemElementBase):
 
     @decl.mproperty
     def fkey(self):
-        return DictKey({
-            ports.OpticalFreqKey: FrequencyKey(self.optical_fdict),
-            ports.ClassicalFreqKey: FrequencyKey(self.classical_fdict),
+        return ports.DictKey({
+            ports.OpticalFreqKey: ports.FrequencyKey(self.optical_fdict),
+            ports.ClassicalFreqKey: ports.FrequencyKey(self.classical_fdict),
         })
 
     @decl.dproperty

@@ -10,11 +10,14 @@ import declarative
 
 #from ..utilities.print import pprint
 
+from ..base import (
+    DictKey,
+)
+
 from ..math.key_matrix import (
     KVSpace,
     KeyVector,
     KeyMatrix,
-    DictKey,
 )
 
 from .graph_algorithm import (

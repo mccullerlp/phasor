@@ -4,11 +4,6 @@ from __future__ import division
 
 import declarative as decl
 
-from ..math.key_matrix.dictionary_keys import (
-    DictKey,
-    FrequencyKey,
-)
-
 from . import ports
 from . import elements
 
@@ -83,7 +78,7 @@ class VoltageFluctuation(elements.ElectricalNoiseBase, elements.ElectricalElemen
     def system_setup_noise(self, matrix_algorithm):
         for k1 in matrix_algorithm.port_set_get(self.p_virt.o):
             freq = k1[ports.ClassicalFreqKey]
-            k2 = k1.without_keys(ports.ClassicalFreqKey) | DictKey({ports.ClassicalFreqKey : -freq})
+            k2 = k1.without_keys(ports.ClassicalFreqKey) | ports.DictKey({ports.ClassicalFreqKey : -freq})
             matrix_algorithm.noise_pair_insert(
                 self.p_virt.o, k1, self.p_virt.o, k2, self
             )
@@ -152,7 +147,7 @@ class CurrentFluctuation(elements.ElectricalNoiseBase, elements.ElectricalElemen
     def system_setup_noise(self, matrix_algorithm):
         for k1 in matrix_algorithm.port_set_get(self.p_virt.o):
             freq = k1[ports.ClassicalFreqKey]
-            k2 = k1.without_keys(ports.ClassicalFreqKey) | DictKey({ports.ClassicalFreqKey : -freq})
+            k2 = k1.without_keys(ports.ClassicalFreqKey) | ports.DictKey({ports.ClassicalFreqKey : -freq})
             matrix_algorithm.noise_pair_insert(
                 self.p_virt.o, k1, self.p_virt.o, k2, self
             )
@@ -186,7 +181,7 @@ class VoltageFluctuation2(elements.ElectricalNoiseBase):
         porto_use = self.system.ports_post_get(self.port.o)
         for k1 in matrix_algorithm.port_set_get(self.port.o):
             freq = k1[ports.ClassicalFreqKey]
-            k2 = k1.without_keys(ports.ClassicalFreqKey) | DictKey({ports.ClassicalFreqKey : -freq})
+            k2 = k1.without_keys(ports.ClassicalFreqKey) | ports.DictKey({ports.ClassicalFreqKey : -freq})
 
             matrix_algorithm.noise_pair_insert(
                 porto_use, k1, porto_use, k2, self
@@ -234,7 +229,7 @@ class CurrentFluctuation2(elements.ElectricalNoiseBase):
         porto_use = self.system.ports_post_get(self.port.o)
         for k1 in matrix_algorithm.port_set_get(self.port.o):
             freq = k1[ports.ClassicalFreqKey]
-            k2 = k1.without_keys(ports.ClassicalFreqKey) | DictKey({ports.ClassicalFreqKey : -freq})
+            k2 = k1.without_keys(ports.ClassicalFreqKey) | ports.DictKey({ports.ClassicalFreqKey : -freq})
 
             matrix_algorithm.noise_pair_insert(
                 porto_use, k1, porto_use, k2, self

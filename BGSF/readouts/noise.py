@@ -2,27 +2,17 @@
 """
 """
 from __future__ import (division, print_function)
-from ..utilities.print import pprint
-from builtins import object
+#from ..utilities.print import pprint
 
 import numpy as np
 from collections import defaultdict
 
 import declarative
 
-from ..math.key_matrix import (
-    DictKey,
-    FrequencyKey,
-)
-
-from ..base import (
-    SystemElementBase,
-    OOA_ASSIGN,
-    ClassicalFreqKey,
-)
+from .. import base
 
 
-class NoiseReadout(SystemElementBase):
+class NoiseReadout(base.SystemElementBase):
     def __init__(
             self,
             portN = None,
@@ -39,18 +29,18 @@ class NoiseReadout(SystemElementBase):
 
         if port_set is None:
             if AC_sidebands_use:
-                OOA_ASSIGN(self).port_set = 'AC noise'
+                base.OOA_ASSIGN(self).port_set = 'AC noise'
             else:
-                OOA_ASSIGN(self).port_set = 'DC noise'
+                base.OOA_ASSIGN(self).port_set = 'DC noise'
         else:
             self.port_set = port_set
 
         if AC_sidebands_use:
-            self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({self.system.F_AC : 1})})
-            self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({self.system.F_AC : -1})})
+            self.keyP = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({self.system.F_AC : 1})})
+            self.keyN = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({self.system.F_AC : -1})})
         else:
-            self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({})})
-            self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({})})
+            self.keyP = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({})})
+            self.keyN = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({})})
 
         if port_map is None:
             self.port_map = dict(

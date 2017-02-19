@@ -4,9 +4,6 @@ from collections import Mapping as MappingABC
 import declarative
 
 
-NOARG = (lambda : ())
-
-
 class DictKey(MappingABC):
     __slots__ = ('_dict', 'prev_hash')
     def __init__(self, *args, **kwargs):
@@ -179,7 +176,8 @@ class FrequencyKey(object):
         F_sum = 0
         for F, n in list(self.F_dict.items()):
             if n != 0:
-                F_sum += F.F_Hz * n
+                #TODO maybe move the .val somewhere else
+                F_sum += F.F_Hz.val * n
         return F_sum
 
     def __repr__(self):

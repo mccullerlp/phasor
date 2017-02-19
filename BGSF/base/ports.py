@@ -2,7 +2,10 @@
 from __future__ import division, print_function
 #from BGSF.utilities.print import print
 
-from ..math.key_matrix import DictKey
+from .dictionary_keys import (
+    DictKey,
+    FrequencyKey,
+)
 
 import declarative as decl
 

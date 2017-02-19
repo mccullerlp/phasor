@@ -6,7 +6,7 @@ from builtins import object
 from collections import defaultdict
 import declarative
 
-from ..math.key_matrix import (
+from ..base import (
     DictKey,
 )
 

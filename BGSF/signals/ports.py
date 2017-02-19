@@ -6,10 +6,8 @@ from ..base.ports import (
     PortHolderInBase,
     PortHolderOutBase,
     ClassicalFreqKey,
-)
-
-from ..math.key_matrix import (
     DictKey,
+    FrequencyKey,
 )
 
 

@@ -10,7 +10,7 @@ import declarative
 
 from BGSF.utilities.priority_queue import HeapPriorityQueue
 
-from ..math.key_matrix import (
+from ..base import (
     DictKey,
 )
 

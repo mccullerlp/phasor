@@ -5,33 +5,23 @@ from __future__ import (division, print_function)
 from collections import defaultdict
 import declarative
 
-from ..base import (
-    CouplerBase,
-)
+from . import bases
+from . import ports
 
-from .bases import (
-    SystemElementBase,
-    OOA_ASSIGN,
-)
 
-from .ports import (
-    SignalPortHolderIn,
-    SignalPortHolderOut,
-)
-
-class DistributionAmplifier(CouplerBase, SystemElementBase):
+class DistributionAmplifier(bases.CouplerBase, bases.SystemElementBase):
     def __init__(
             self,
             port_gains,
             **kwargs
     ):
         super(DistributionAmplifier, self).__init__(**kwargs)
-        OOA_ASSIGN(self).port_gains = port_gains
+        bases.OOA_ASSIGN(self).port_gains = port_gains
 
-        self.I  = SignalPortHolderIn(self,  x = 'LO')
+        self.I  = ports.SignalPortHolderIn(self,  x = 'LO')
 
         for pname in self.port_gains:
-            setattr(self, pname, SignalPortHolderOut(self, x = pname))
+            setattr(self, pname, ports.SignalPortHolderOut(self, x = pname))
         return
 
     def system_setup_ports(self, ports_algorithm):
@@ -53,19 +43,19 @@ class DistributionAmplifier(CouplerBase, SystemElementBase):
         return
 
 
-class SummingAmplifier(CouplerBase, SystemElementBase):
+class SummingAmplifier(bases.CouplerBase, bases.SystemElementBase):
     def __init__(
             self,
             port_gains,
             **kwargs
     ):
         super(SummingAmplifier, self).__init__(**kwargs)
-        OOA_ASSIGN(self).port_gains = port_gains
+        bases.OOA_ASSIGN(self).port_gains = port_gains
 
-        self.O  = SignalPortHolderOut(self,  x = 'LO')
+        self.O  = ports.SignalPortHolderOut(self,  x = 'LO')
 
         for pname in self.port_gains:
-            setattr(self, pname, SignalPortHolderIn(self, x = pname))
+            setattr(self, pname, ports.SignalPortHolderIn(self, x = pname))
         return
 
     def system_setup_ports(self, ports_algorithm):
@@ -87,14 +77,14 @@ class SummingAmplifier(CouplerBase, SystemElementBase):
         return
 
 
-class MatrixAmplifier(CouplerBase, SystemElementBase):
+class MatrixAmplifier(bases.CouplerBase, bases.SystemElementBase):
     def __init__(
             self,
             port_pair_gains,
             **kwargs
     ):
         super(DistributionAmplifier, self).__init__(**kwargs)
-        OOA_ASSIGN(self).port_pair_gains = port_pair_gains
+        bases.OOA_ASSIGN(self).port_pair_gains = port_pair_gains
 
         self.I  = declarative.Bunch()
         self.O  = declarative.Bunch()
@@ -106,9 +96,9 @@ class MatrixAmplifier(CouplerBase, SystemElementBase):
 
         for (iname, oname), xfer in list(self.port_pair_gains.items()):
             if iname not in self.I:
-                self.I[iname] = SignalPortHolderIn(self,  x = iname)
+                self.I[iname] = ports.SignalPortHolderIn(self,  x = iname)
             if oname not in self.O:
-                self.O[iname] = SignalPortHolderOut(self, x = oname)
+                self.O[iname] = ports.SignalPortHolderOut(self, x = oname)
         return
 
     def system_setup_ports(self, ports_algorithm):

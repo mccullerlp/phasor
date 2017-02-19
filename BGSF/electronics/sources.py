@@ -4,13 +4,7 @@ from __future__ import division
 
 import declarative as decl
 
-from ..math.key_matrix.dictionary_keys import (
-    DictKey,
-    FrequencyKey,
-)
-
 from . import ports
-from . import elements
 from . import smatrix
 
 
@@ -28,8 +22,8 @@ class VoltageSource(smatrix.SMatrix1PortBase):
 
     @decl.mproperty
     def fkey(self):
-        return DictKey({
-            ports.ClassicalFreqKey: FrequencyKey({}),
+        return ports.DictKey({
+            ports.ClassicalFreqKey: ports.FrequencyKey({}),
         })
 
     def system_setup_ports_initial(self, ports_algorithm):
@@ -82,8 +76,8 @@ class CurrentSource(smatrix.SMatrix1PortBase):
 
     @decl.mproperty
     def fkey(self):
-        return DictKey({
-            ports.ClassicalFreqKey: FrequencyKey({}),
+        return ports.DictKey({
+            ports.ClassicalFreqKey: ports.FrequencyKey({}),
         })
 
     def system_setup_ports_initial(self, ports_algorithm):
@@ -155,8 +149,8 @@ class VoltageSourceBalanced(smatrix.SMatrix2PortBase):
 
     @decl.mproperty
     def fkey(self):
-        return DictKey({
-            ports.ClassicalFreqKey: FrequencyKey({}),
+        return ports.DictKey({
+            ports.ClassicalFreqKey: ports.FrequencyKey({}),
         })
 
     def system_setup_ports_initial(self, ports_algorithm):
@@ -265,8 +259,8 @@ class CurrentSourceBalanced(smatrix.SMatrix2PortBase):
 
     @decl.mproperty
     def fkey(self):
-        return DictKey({
-            ports.ClassicalFreqKey: FrequencyKey({}),
+        return ports.DictKey({
+            ports.ClassicalFreqKey: ports.FrequencyKey({}),
         })
 
     def system_setup_ports_initial(self, ports_algorithm):

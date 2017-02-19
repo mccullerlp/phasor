@@ -1,25 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
-from builtins import range
+from __future__ import division, print_function
 #from BGSF.utilities.print import print
 
 import numpy as np
-
 import declarative
 
-from ..math.key_matrix import (
-    DictKey,
-    FrequencyKey,
-)
-
-from ..base import (
-    SystemElementBase,
-    OOA_ASSIGN,
-    ClassicalFreqKey,
-)
+from .. import base
 
 from . import noise
 
@@ -36,7 +24,7 @@ def np_roll_2D_mat_front(arr_mat, N = 2):
     return arr_mat
 
 
-class HomodyneACReadoutBase(SystemElementBase):
+class HomodyneACReadoutBase(base.SystemElementBase):
     def rotate_deg(self, phase_deg):
         #TODO: FIX THESE SEMANTICS
 
@@ -335,7 +323,7 @@ class HomodyneNoiseReadout(noise.NoiseReadout):
         return
 
 
-class HomodyneACReadout(HomodyneACReadoutBase, SystemElementBase):
+class HomodyneACReadout(HomodyneACReadoutBase, base.SystemElementBase):
     def __init__(
         self,
         portNI,
@@ -355,13 +343,13 @@ class HomodyneACReadout(HomodyneACReadoutBase, SystemElementBase):
         self.portNQ = portNQ
         self.portDrv = portDrv
 
-        OOA_ASSIGN(self).port_set = 'AC'
+        base.OOA_ASSIGN(self).port_set = 'AC'
 
         #TODO: make this adjustable
         self.F_sep = self.system.F_AC
 
-        self.keyP = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : 1})})
-        self.keyN = DictKey({ClassicalFreqKey: FrequencyKey({self.F_sep : -1})})
+        self.keyP = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({self.F_sep : 1})})
+        self.keyN = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({self.F_sep : -1})})
 
         self.my.noise = HomodyneNoiseReadout(
             portNI = self.portNI,
@@ -383,5 +371,5 @@ class HomodyneACReadout(HomodyneACReadoutBase, SystemElementBase):
         ports_algorithm.drive_port_needed(self.portDrv, self.keyN, portsets)
         return
 
-class HomodyneACReadoutSub(SystemElementBase):
+class HomodyneACReadoutSub(base.SystemElementBase):
     pass
