@@ -1,25 +1,18 @@
 """
 """
 from __future__ import (division, print_function)
-import pytest
+#import pytest
 import numpy.testing as test
-
-from declarative import Bunch
 
 import BGSF.electronics as electronics
 import BGSF.readouts as readouts
 
-from BGSF.system import (
-   BGSystem 
-)
-
-import unittest
-assertions = unittest.TestCase('__init__')
+import BGSF.system as system
 
 
 def test_V():
     #with explicit terminator
-    sys = BGSystem()
+    sys = system.BGSystem()
     sys.my.V1 = electronics.VoltageSource(V_DC = 1)
     sys.my.T1 = electronics.TerminatorOpen()
     sys.bond(sys.V1.A, sys.T1.A)
@@ -29,7 +22,7 @@ def test_V():
     test.assert_almost_equal(sys.R1.DC_readout, 1)
 
     #without explicit terminator
-    sys = BGSystem()
+    sys = system.BGSystem()
     sys.my.V1 = electronics.VoltageSource(V_DC = 1)
     sys.my.R1 = electronics.VoltageReadout(
         terminal =sys.V1.A,
@@ -37,7 +30,7 @@ def test_V():
     test.assert_almost_equal(sys.R1.DC_readout, 1)
 
     #measure across terminator
-    sys = BGSystem()
+    sys = system.BGSystem()
     sys.my.V1 = electronics.VoltageSource(V_DC = 1)
     sys.my.T1 = electronics.TerminatorOpen()
     sys.bond(sys.V1.A, sys.T1.A)
@@ -48,7 +41,7 @@ def test_V():
 
 
 def test_I():
-    sys = BGSystem()
+    sys = system.BGSystem()
     sys.my.I1 = electronics.CurrentSource(I_DC = 1)
     sys.my.T1 = electronics.TerminatorShorted()
     sys.bond(sys.I1.A, sys.T1.A)
@@ -59,7 +52,7 @@ def test_I():
     test.assert_almost_equal(sys.R1.DC_readout, 1)
 
     #measure across terminator
-    sys = BGSystem()
+    sys = system.BGSystem()
     sys.my.I1 = electronics.CurrentSource(I_DC = 1)
     sys.my.T1 = electronics.TerminatorShorted()
     sys.bond(sys.I1.A, sys.T1.A)
@@ -70,7 +63,7 @@ def test_I():
     test.assert_almost_equal(sys.R1.DC_readout, 1)
 
 def test_VIR():
-    sys = BGSystem()
+    sys = system.BGSystem()
     sys.my.I1 = electronics.CurrentSource(I_DC = 1)
     sys.my.T1 = electronics.TerminatorResistor(
         resistance_Ohms = 10,
@@ -87,7 +80,7 @@ def test_VIR():
     test.assert_almost_equal(sys.R2.DC_readout, 10)
 
     #2
-    sys = BGSystem()
+    sys = system.BGSystem()
     sys.my.I1 = electronics.CurrentSource(I_DC = 1)
     sys.my.T1 = electronics.TerminatorResistor(
         resistance_Ohms = 50,
@@ -104,7 +97,7 @@ def test_VIR():
     test.assert_almost_equal(sys.R2.DC_readout, 50)
 
 def test_VIR_conn():
-    sys = BGSystem()
+    sys = system.BGSystem()
     sys.my.I1 = electronics.CurrentSource(I_DC = 1)
     sys.my.Conn1 = electronics.Connection(N_ports = 3)
     sys.my.T1 = electronics.TerminatorResistor(
@@ -136,7 +129,7 @@ def test_bdV():
     Test the balanced voltage source with different pairs of terminations. Not allowed to short both sides or have
     both sides open.
     """
-    sys = BGSystem()
+    sys = system.BGSystem()
     sys.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
     sys.my.T1 = electronics.TerminatorOpen()
     sys.bond(sys.V1.A, sys.T1.A)
@@ -147,7 +140,7 @@ def test_bdV():
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1)
 
-    sys = BGSystem()
+    sys = system.BGSystem()
     sys.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
     #sys.my.T1 = electronics.TerminatorOpen()
     #sys.bond(sys.V1.A, sys.T1.A)
@@ -158,7 +151,7 @@ def test_bdV():
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1)
 
-    sys = BGSystem()
+    sys = system.BGSystem()
     sys.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
     sys.my.T2 = electronics.TerminatorMatched()
     sys.bond(sys.V1.B, sys.T2.A)
@@ -167,7 +160,7 @@ def test_bdV():
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1)
 
-    sys = BGSystem()
+    sys = system.BGSystem()
     sys.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
     sys.my.T2 = electronics.TerminatorShorted()
     sys.bond(sys.V1.B, sys.T2.A)
@@ -179,7 +172,7 @@ def test_bdV():
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1)
 
-    sys = BGSystem()
+    sys = system.BGSystem()
     sys.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
     sys.my.T1 = electronics.TerminatorMatched()
     sys.bond(sys.V1.A, sys.T1.A)
@@ -193,7 +186,7 @@ def test_bdV():
 
 
 def test_bdVIR():
-    sys = BGSystem()
+    sys = system.BGSystem()
     sys.my.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
     sys.my.T1 = electronics.TerminatorResistor(
         resistance_Ohms = 10,
@@ -210,7 +203,7 @@ def test_bdVIR():
     test.assert_almost_equal(sys.R1.DC_readout, 1 / 30)
 
 def test_bdVIR_AC():
-    sys = BGSystem()
+    sys = system.BGSystem()
     sys.my.V1 = electronics.VoltageSourceBalanced()
     sys.my.T1 = electronics.TerminatorResistor(
         resistance_Ohms = 10,
@@ -231,8 +224,9 @@ def test_bdVIR_AC():
     test.assert_almost_equal(sys.RAC1.AC_sensitivity, 1 / 30)
 
 def test_V_AC():
-    sys = BGSystem()
-    sys.F_AC.F_Hz = 1.
+    sys = system.system.BGSystem(
+        F_AC = 100.,
+    )
     sys.my.V1 = electronics.VoltageSource()
     sys.my.R1 = electronics.VoltageReadout(
         terminal = sys.V1.A,

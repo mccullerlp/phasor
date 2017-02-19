@@ -9,18 +9,13 @@ from declarative import Bunch
 
 import BGSF.electronics as electronics
 import BGSF.readouts as readouts
-
-from BGSF.system import (
-    BGSystem
-)
-
-import unittest
-assertions = unittest.TestCase('__init__')
+import BGSF.system as system
 
 
 def test_transformer():
-    sys = BGSystem()
-    sys.F_AC.F_Hz = 100.
+    sys = system.BGSystem(
+        F_AC = 100,
+    )
     sys.my.V1 = electronics.VoltageSource()
     sys.my.Tr1 = electronics.Transformer(
         L1_inductance_Henries = 1e-6,
@@ -53,8 +48,9 @@ def test_transformer():
     test.assert_almost_equal(abs(sys.RAC2.AC_sensitivity), 10)
 
 def test_transformer2():
-    sys = BGSystem()
-    sys.F_AC.F_Hz = 100.
+    sys = system.BGSystem(
+        F_AC = 100.,
+    )
     sys.my.V1 = electronics.VoltageSource()
     sys.my.Tr1 = electronics.Transformer(
         L1_inductance_Henries = 1e-6,
@@ -92,8 +88,9 @@ def test_transformer2():
 
 
 def test_transformer_stepdown():
-    sys = BGSystem()
-    sys.F_AC.F_Hz = 100.
+    sys = system.BGSystem(
+        F_AC = 100.,
+    )
     sys.my.V1 = electronics.VoltageSource()
     sys.my.Tr1 = electronics.Transformer(
         L1_inductance_Henries = 100e-6,

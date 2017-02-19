@@ -158,26 +158,27 @@ class BGSystem(RootElement):
     def port_owners_virtual(self):
         return defaultdict(set)
 
-    def __build__(self):
-        self.my.environment = SystemElementBase()
-        self.environment = self.environment
-
+    @decl.dproperty
+    def F_AC(self, val = 0):
+        #TODO make this detect a PropertyTransforming or injected frequency object
         self.environment.my.F_AC = Frequency(
-            F_Hz  = 0,
+            F_Hz  = val,
             name  = 'AC',
             order = 1,
         )
-        self.F_AC = self.environment.F_AC
+        return self.environment.my.F_AC
 
-        #Maybe refactor this
+    @decl.dproperty
+    def F_carrier_1064(self):
         self.environment.my.F_carrier_1064 = OpticalFrequency(
             wavelen_m = 1064e-9,
             name = u'λIR',
         )
-        self.F_carrier_1064 = self.environment.F_carrier_1064
+        return self.environment.my.F_carrier_1064
 
-        super(LinearSystem, self).__build__()
-        return
+    @decl.dproperty
+    def environment(self):
+        return SystemElementBase()
 
     def optical_frequency_extract(self, key):
         iwavelen_m = 0
