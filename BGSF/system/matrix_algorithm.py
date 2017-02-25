@@ -240,36 +240,36 @@ class MatrixBuildAlgorithm(object):
         edge_sourcing_order = dict()
         seq = defaultdict(set)
         req = defaultdict(set)
-        self.bonds_trivial = defaultdict(set)
+        self.bonds_trivial = defaultdict(dict)
 
-        def bond_trivial(pkfrom, pkto):
+        def bond_trivial(pkfrom, pkto, val):
             edge_sourcing_order[pkfrom, pkto] = []
             seq[pkfrom].add(pkto)
             req[pkto].add(pkfrom)
             #pkfrom = (pfrom, kkey)
             #pkto = (pto, kkey)
-            self.bonds_trivial[pkfrom].add(pkto)
+            self.bonds_trivial[pkfrom][pkto] = val
 
         #Setup all of the bond linkages first
-        for pfrom, pto_set in list(self.system.bond_pairs.items()):
+        for pfrom, pto_dict in list(self.system.bond_pairs.items()):
             pfrom_orig = pfrom
-            for pto in pto_set:
+            for pto, val in pto_dict.items():
                 while True:
                     pfrom_post = self.system.ports_post.get(pfrom, None)
                     if pfrom_post is None:
                         break
                     for kkey in self.port_set_get(pfrom_orig):
-                        bond_trivial((pfrom, kkey), (pfrom_post, kkey))
+                        bond_trivial((pfrom, kkey), (pfrom_post, kkey), val)
                     pfrom = pfrom_post
                 while True:
                     pto_pre = self.system.ports_pre.get(pto, None)
                     if pto_pre is None:
                         break
                     for kkey in self.port_set_get(pfrom_orig):
-                        bond_trivial((pto_pre, kkey), (pto, kkey))
+                        bond_trivial((pto_pre, kkey), (pto, kkey), val)
                     pto = pto_pre
                 for kkey in self.port_set_get(pfrom_orig):
-                    bond_trivial((pfrom, kkey), (pto, kkey))
+                    bond_trivial((pfrom, kkey), (pto, kkey), val)
 
         #begin the linkage algorithm
         source_invlist = defaultdict(list)

@@ -9,87 +9,49 @@ from declarative.substrate import Element
 from . import pint
 
 
-class SimpleUnitfulGroup(declarative.OverridableObject):
+class PolarizationCPLG(declarative.OverridableObject):
     @declarative.dproperty
-    def units(self, val):
-        if isinstance(val, str):
-            val = pint.ureg[val]
+    def Scplg(self, val):
         return val
 
     @declarative.dproperty
-    def ref(self, val):
+    def ScplgC(self):
+        return self.Scplg.conjugate()
+
+    @declarative.dproperty
+    def Pcplg(self, val):
         return val
 
     @declarative.dproperty
-    def val(self, val):
+    def PcplgC(self):
+        return self.Pcplg.conjugate()
+
+
+class ComplexCplg(declarative.OverridableObject):
+    @declarative.dproperty
+    def cplg(self, val):
         return val
 
-    @declarative.mproperty
-    def refQ(self, val):
-        return val * self.units
-
-    @declarative.mproperty
-    def valQ(self, val):
-        return val * self.units
-
-    def __add__(self, other):
-        units_to = self.units
-        units_from = other.units
-        print(self, other)
-        print(units_to, units_from)
-        rescale = units_from / units_to
-        assert(rescale.unitless)
-        rescale = rescale.to(pint.ureg.dimensionless).magnitude
-        #rescale = rescale.m_as(pint.ureg.dimensionless)
-        return SimpleUnitfulGroup(
-            val = self.val + other.val * rescale,
-            ref = self.ref + other.ref * rescale,
-            units = self.units,
-        )
-
-    def __sub__(self, other):
-        units_to = self.units
-        units_from = other.units
-        rescale = units_from / units_to
-        assert(rescale.unitless)
-        rescale = rescale.to(pint.ureg.dimensionless).magnitude
-        #rescale = rescale.m_as(pint.ureg.dimensionless)
-        return SimpleUnitfulGroup(
-            val = self.val - other.val * rescale,
-            ref = self.ref - other.ref * rescale,
-            units = self.units,
-        )
-
-    def __mul__(self, other):
-        return SimpleUnitfulGroup(
-            val = self.val * other,
-            ref = self.ref * other,
-            units = self.units,
-        )
-
-    def __neg__(self):
-        return SimpleUnitfulGroup(
-            val = -self.val,
-            ref = -self.ref,
-            units = self.units,
-        )
-
-    def __rmul__(self, other):
-        return SimpleUnitfulGroup(
-            val = other * self.val,
-            ref = other * self.ref,
-            units = self.units,
-        )
-
-    def __div__(self, other):
-        return SimpleUnitfulGroup(
-            val = self.val / other,
-            ref = self.ref / other,
-            units = self.units,
-        )
+    @declarative.dproperty
+    def cplgC(self):
+        return self.cplg.conjugate()
 
 
-class ElementRefValue(SimpleUnitfulGroup, Element):
+class TransLRT(declarative.OverridableObject):
+    @declarative.dproperty
+    def L(self, val):
+        return val
+
+    @declarative.dproperty
+    def R(self, val):
+        return val
+
+    @declarative.dproperty
+    def T(self, val):
+        return val
+
+
+class TransLRTInner(Element):
     ##Inherited from SimpleUnitfulGroup
     #@declarative.dproperty
     #def units(self, val):
@@ -100,16 +62,6 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
     @declarative.mproperty
     def ooa_name(self, val):
         return val
-
-    @declarative.dproperty
-    def ooa_units_scale(self):
-        units_to = self.units
-        units_from = pint.ureg[self.ooa_params.units]
-        rescale = units_from / units_to
-        assert(rescale.unitless)
-        #TODO check these methods (only seem present on newer pint)
-        #return rescale.m_as(pint.ureg.dimensionless)
-        return rescale.to(pint.ureg.dimensionless).magnitude
 
     @declarative.dproperty
     def ref(self):

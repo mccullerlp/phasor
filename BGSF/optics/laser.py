@@ -22,11 +22,18 @@ class Laser(
 
     @decl.dproperty
     def Fr(self):
-        return ports.OpticalPortHolderInOut(self, x = 'Fr')
+        return ports.OpticalPortHolderInOut(sname = 'Fr')
 
     @decl.dproperty
     def polarization(self, val = 'S'):
         val = self.ooa_params.setdefault('polarization', val)
+        return val
+
+    power = standard_attrs.generate_power()
+
+    @decl.dproperty
+    def F(self, val):
+        type_test(val, frequency.OpticalFrequency)
         return val
 
     @decl.dproperty
@@ -39,6 +46,7 @@ class Laser(
 
     @decl.dproperty
     def _fluct(self):
+        #TODO add realistic laser noise
         return vacuum.OpticalVacuumFluctuation(port = self.Fr)
 
     phased = False
@@ -60,13 +68,6 @@ class Laser(
             ports.OpticalFreqKey: ports.FrequencyKey(self.optical_fdict),
             ports.ClassicalFreqKey: ports.FrequencyKey(self.classical_fdict),
         })
-
-    power = standard_attrs.generate_power()
-
-    @decl.dproperty
-    def F(self, val):
-        type_test(val, frequency.OpticalFrequency)
-        return val
 
     def system_setup_ports_initial(self, ports_algorithm):
         ports_algorithm.coherent_sources_needed(self.Fr.o, self.fkey | self.polk | ports.LOWER)

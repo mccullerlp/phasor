@@ -40,10 +40,10 @@ class PPKTP(ports.OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementB
         self.Qheat = ports.MechanicalPortHolderOut(self, x = 'Q')
 
         self.is_4_port = False
-        self.Fr   = ports.OpticalPortHolderInOut(self, x = 'Fr' )
-        self.Bk   = ports.OpticalPortHolderInOut(self, x = 'Bk' )
-        self._LFr = ports.OpticalPortHolderInOut(self, x = 'LFr')
-        self._LBk = ports.OpticalPortHolderInOut(self, x = 'LBk')
+        self.Fr   = ports.OpticalPortHolderInOut(sname = 'Fr' )
+        self.Bk   = ports.OpticalPortHolderInOut(sname = 'Bk' )
+        self._LFr = ports.OpticalPortHolderInOut(sname = 'LFr')
+        self._LBk = ports.OpticalPortHolderInOut(sname = 'LBk')
         return
 
     def phase_mismatch(self):

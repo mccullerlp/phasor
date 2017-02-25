@@ -99,7 +99,7 @@ def test_mich():
 
     AC = sys.asym_drive.AC_sensitivity
     print("AC mag rel expect:", abs(AC) / sense)
-    np_test.assert_almost_equal(abs(AC), sense, 5)
+    np_test.assert_almost_equal(abs(AC) / sense, 1, 5)
     print("AC phase :", np.angle(AC, deg = True))
 
     E1064_J = 1.2398 / 1.064 / 6.24e18
@@ -107,7 +107,7 @@ def test_mich():
     AC_noise = sys.asym_drive.AC_ASD
     print("ACnoise", AC_noise)
     print("ACnoise_rel", (N_expect / AC_noise)**2)
-    np_test.assert_almost_equal(N_expect, AC_noise, 5)
+    np_test.assert_almost_equal(N_expect / AC_noise, 1, 3)
 
     print("ACnoise m_rtHz", sys.asym_drive.AC_noise_limited_sensitivity)
     #sys.port_set_print(b.mBS.BkB.i)
@@ -123,9 +123,9 @@ def test_mich():
 def test_mich_lossy():
     b = gensys(
         #F_AC_Hz = logspaced(.001, 1e6, 10),
-        F_AC_Hz = np.array([0]),
-        #loss_EM = .2,
-        loss_BS = .2,
+        F_AC_Hz = np.array([0, 10, 100]),
+        loss_EM = .2,
+        #loss_BS = .2,
     )
     sys = b.sys
     #sys.coupling_matrix_print()
@@ -146,11 +146,11 @@ def test_mich_lossy():
     print("AC phase :", np.angle(AC, deg = True))
 
     E1064_J = 1.2398 / 1.064 / 6.24e18
-    N_expect = (sys.asym_DC.DC_readout * E1064_J)**.5
+    N_expect = (2 * sys.asym_DC.DC_readout * E1064_J)**.5
     AC_noise = sys.asym_drive.AC_ASD
     print("ACnoise", AC_noise)
     print("ACnoise_rel", (N_expect / AC_noise)**2)
-    np_test.assert_almost_equal(N_expect, AC_noise, 5)
+    np_test.assert_almost_equal(N_expect / AC_noise, 1, 3)
 
     print("ACnoise m_rtHz", sys.asym_drive.AC_noise_limited_sensitivity)
     #sys.port_set_print(b.mBS.BkB.i)

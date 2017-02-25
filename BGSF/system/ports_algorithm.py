@@ -16,6 +16,7 @@ class PortUpdatesAlgorithm(object):
         self,
         system,
     ):
+        #TODO split the forward and back filling of ports
         self.system             = system
         self.port_cplgs         = dict()
         self.port_cplgs_update  = dict()
@@ -26,17 +27,18 @@ class PortUpdatesAlgorithm(object):
         self.drive_pk_sets      = defaultdict(set)
         self.readout_pk_sets    = defaultdict(set)
 
-        self.link_pairsR = defaultdict(set)
-        for k, v_set in list(self.system.bond_pairs.items()):
-            for v in v_set:
-                self.link_pairsR[v].add(k)
+        #holds the reverse of the bond pairs so that the backfilling of ports works
+        self.bond_pairsR = defaultdict(set)
+        for k, v_dict in self.system.bond_pairs.items():
+            for v in v_dict:
+                self.bond_pairsR[v].add(k)
 
-        for port, owner in list(system.port_owners.items()):
+        for port, owner in system.port_owners.items():
             self.port_cplgs[port]               = set()
             self.port_cplgs_update[owner, port] = set()
             self.port_cplgs_updateX[port]       = set()
 
-        for port, owners in list(system.port_owners_virtual.items()):
+        for port, owners in system.port_owners_virtual.items():
             for owner in owners:
                 #print((owner, port))
                 self.port_cplgs_update.setdefault((owner, port), set())
@@ -136,13 +138,13 @@ class PortUpdatesAlgorithm(object):
         self._coherent_sources_needed(pto, kto)
         #TODO: make this dispersal occur during resolve_port_updates
 
-        ptolink_set = self.system.bond_pairs.get(pto, declarative.NOARG)
-        if ptolink_set is not declarative.NOARG:
-            for ptolink in ptolink_set:
+        ptolink_dict = self.system.bond_pairs.get(pto, declarative.NOARG)
+        if ptolink_dict is not declarative.NOARG:
+            for ptolink in ptolink_dict:
                 #print('link port: ', ptolink, kto)
                 self._coherent_sources_needed(ptolink, kto)
 
-        ptolink_set = self.link_pairsR.get(pto, declarative.NOARG)
+        ptolink_set = self.bond_pairsR.get(pto, declarative.NOARG)
         if ptolink_set is not declarative.NOARG:
             for ptolink in ptolink_set:
                 #print('link portR: ', ptolink, kto)
@@ -163,7 +165,7 @@ class PortUpdatesAlgorithm(object):
 
     def port_set_print(self, select_port = None):
         if select_port is None:
-            for port, kset in list(self.port_cplgs.items()):
+            for port, kset in self.port_cplgs.items():
                 print("Portset: ", port)
                 print(kset)
         else:

@@ -124,12 +124,12 @@ determine the phasing for the homodyne
 #            port = self.source_port,
 #        )
 #
-#        self.Fr    = ports.OpticalPortHolderInOut(self, x = 'Fr')
+#        self.Fr    = ports.OpticalPortHolderInOut(sname = 'Fr')
 #        OOA_ASSIGN(self).phase_deg = phase_deg
 #
 #        self.magic = magic
 #        if magic:
-#            self.Bk = ports.OpticalPortHolderInOut(self, x = 'Bk')
+#            self.Bk = ports.OpticalPortHolderInOut(sname = 'Bk')
 #
 #        self.rtWpdI = ports.SignalPortHolderOut(self, x = 'rtWpdI')
 #        self.rtWpdQ = ports.SignalPortHolderOut(self, x = 'rtWpdQ')

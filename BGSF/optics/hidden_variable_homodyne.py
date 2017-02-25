@@ -64,10 +64,10 @@ class HiddenVariableHomodynePD(
         #TODO make optional, requires adjusting the ports.OpticalNonOriented1PortMixin base to be adjustable
         super(HiddenVariableHomodynePD, self).__init__(**kwargs)
 
-        self.Fr    = ports.OpticalPortHolderInOut(self, x = 'Fr', pchain = 'Bk')
+        self.my.Fr    = ports.OpticalPortHolderInOut(sname = 'Fr', pchain = 'Bk')
         bases.OOA_ASSIGN(self).phase_deg = phase_deg
 
-        self.Bk = ports.OpticalPortHolderInOut(self, x = 'Bk', pchain = 'Fr')
+        self.my.Bk = ports.OpticalPortHolderInOut(sname = 'Bk', pchain = 'Fr')
         ##Only required if Bk isn't used (not a MagicPD)
         #self._fluct = vacuum.OpticalVacuumFluctuation(port = self.Fr)
 

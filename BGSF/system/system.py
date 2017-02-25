@@ -33,6 +33,8 @@ from . import solver_algorithm
 
 from ..base import Element, RootElement
 from ..base.ports import PostBondKey
+from ..base import ports
+from ..base import visitors as VISIT
 
 from ..optics import (
     OpticalFrequency,
@@ -128,7 +130,7 @@ class BGSystem(RootElement):
 
     @decl.mproperty
     def bond_pairs(self):
-        return defaultdict(set)
+        return defaultdict(dict)
 
     @decl.mproperty
     def ports_post(self):
@@ -275,6 +277,12 @@ class BGSystem(RootElement):
             el = self._include_lst.pop()
             self._include(el)
 
+    def port_add(self, owner, pkey):
+        self.port_owners[pkey] = owner
+        self.owners_ports.setdefault(owner, []).append(pkey)
+        self.owners_ports_virtual.setdefault(owner, [])
+        return
+
     def _include(self, element):
         if self._frozen:
             raise RuntimeError("Cannot include elements or bond after solution requested")
@@ -288,9 +296,7 @@ class BGSystem(RootElement):
             pass
         else:
             for port, pobj in list(op.items()):
-                self.port_owners[port] = element
-                self.owners_ports.setdefault(element, []).append(port)
-                self.owners_ports_virtual.setdefault(element, [])
+                self.port_add(element, port)
                 #have the port objects autoterminate
                 pobj.autoterminations(self.port_autoterminate)
         if element.name_system in self.elements_named:
@@ -313,19 +319,39 @@ class BGSystem(RootElement):
             #print("UNTERMINATED: ", port)
             aterm = self.port_autoterminate.get(port, None)
             if aterm is None:
-                #print("unterminated port", port)
+                print("unterminated port", port)
                 pass
             else:
-                #print("Autoterminating port:", port)
                 pobj, tclass = aterm
                 #have to build within include to get the sled connection
                 #TODO: make this a sane naming scheme
                 #TODO GOTTA GOTTA FIX
                 name = '{0}({2}-<{1}>)'.format(tclass.__name__, port, pobj.element.name_system).replace('.', '_')
                 tinst = self.autoterminate.insert(tclass(), name)
+                #print("Autoterminating port:", port)
+                #print("with ", tinst)
                 self.bond(pobj, tinst.Fr)
 
+            for port, obj in self.targets_recurse(VISIT.auto_terminate):
+                #print("Autoterminating port:", port)
+                #print("with ", obj)
+                pass
+
     def bond(self, port_A, port_B):
+        #TODO ptypes testing is only for the transition to local bond scheme
+        ptypes = (
+            ports.PortHolderInBase,
+            ports.PortHolderOutBase,
+            ports.PortHolderInOutBase,
+        )
+        if not isinstance(port_A, ptypes):
+            port_A.bond(port_B)
+        if not isinstance(port_B, ptypes):
+            port_B.bond(port_A)
+        return self.bond_old(port_A, port_B)
+
+    def bond_old(self, port_A, port_B):
+        #TODO, phase this out
         self.include(port_A.element)
         self.include(port_B.element)
 
@@ -343,7 +369,7 @@ class BGSystem(RootElement):
                 assert(port_A.o not in self.bonded_set)
             self.bonded_set.add(port_A.o)
             self.bonded_set.add(port_B.i)
-            self.bond_pairs[port_A.o].add(port_B.i)
+            self.bond_pairs[port_A.o][port_B.i] = 1
 
         #also attach the duals
         try:
@@ -359,7 +385,7 @@ class BGSystem(RootElement):
                 assert(port_B.o not in self.bonded_set)
             self.bonded_set.add(port_B.o)
             self.bonded_set.add(port_A.i)
-            self.bond_pairs[port_B.o].add(port_A.i)
+            self.bond_pairs[port_B.o][port_A.i] = 1
 
         if not either_included:
             raise RuntimeError("Trying to bond, but the pair is not in-out compatible")

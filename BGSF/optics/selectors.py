@@ -16,9 +16,9 @@ class PolSelector(
 ):
 
     def __build__(self):
-        self.my.Fr   = ports.OpticalPortHolderInOut(self, x = 'Fr')
-        self.my.Bk_P = ports.OpticalPortHolderInOut(self, x = 'Bk_P')
-        self.my.Bk_S = ports.OpticalPortHolderInOut(self, x = 'Bk_S')
+        self.my.Fr   = ports.OpticalPortHolderInOut(sname = 'Fr')
+        self.my.Bk_P = ports.OpticalPortHolderInOut(sname = 'Bk_P')
+        self.my.Bk_S = ports.OpticalPortHolderInOut(sname = 'Bk_S')
         return
 
     def system_setup_ports(self, ports_algorithm):
@@ -70,7 +70,7 @@ class GenericSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
 
     @decl.dproperty
     def Fr(self):
-        return ports.OpticalPortHolderInOut(self, x = 'Fr')
+        return ports.OpticalPortHolderInOut(sname = 'Fr')
 
     def __build__(self):
         self.check      = True
@@ -78,7 +78,7 @@ class GenericSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
 
         for name, key in list(self.select_map.items()):
             pname = 'Bk_{0}'.format(name)
-            port = ports.OpticalPortHolderInOut(self, x = pname)
+            port = ports.OpticalPortHolderInOut(sname = pname)
             port = self.insert(port, pname)
             self.port_map[name] = (port, key)
         return

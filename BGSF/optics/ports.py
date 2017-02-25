@@ -4,6 +4,8 @@ from builtins import object
 
 import declarative as decl
 
+from ..base import visitors as VISIT
+
 from ..base.ports import(
     DictKey,
     FrequencyKey,
@@ -53,40 +55,57 @@ class OpticalDegenerate4PortMixin(object):
 
 
 class OpticalPortHolderInOut(bases.SystemElementBase):
-    def __init__(
-            self,
-            element,
-            x,
-            parent,
-            **kwargs
-    ):
-        super(OpticalPortHolderInOut, self).__init__(parent = parent, **kwargs)
-        self.element = parent
-        self._x = x
-        self.i = DictKey({
+    @decl.dproperty
+    def sname(self, val = decl.NOARG):
+        if val is decl.NOARG:
+            val = self.name_child
+        return val
+
+    @decl.dproperty
+    def element(self):
+        return self.parent
+
+    @decl.dproperty
+    def i(self):
+        pkey = DictKey({
             ElementKey: self.element,
-            self._port_key: x + u'⥳',
+            self._port_key: self.sname + u'⥳',
         })
-        self.o = DictKey({
+        self.system.port_add(self.element, pkey)
+        return pkey
+
+    @decl.dproperty
+    def o(self):
+        pkey = DictKey({
             ElementKey: self.element,
-            self._port_key: x + u'⥲',
+            self._port_key: self.sname + u'⥲',
         })
-        self.element.owned_ports[self.i] = self
-        self.element.owned_ports[self.o] = self
-        okey = self.element.owned_port_keys.setdefault(self.key, self)
-        assert(okey is self)
+        self.system.port_add(self.element, pkey)
+        return pkey
 
-    def autoterminations(self, port_map):
-        #I don't like having to import from here, but what can you do...
-        from .vacuum import VacuumTerminator
-        port_map[self.i] = (self, VacuumTerminator)
+    _bond_partner = None
 
-    @decl.mproperty
-    def key(self):
-        return self._x
+    def bond(self, other):
+        #TODO make this smarter
+        if self._bond_partner is not None:
+            raise RuntimeError("Multiple Bond Partners not Allowed")
+        else:
+            self._bond_partner = other
 
-    def __repr__(self):
-        return u"{0}.{1}".format(self.element, self._x)
+    def targets_list(self, typename):
+        if typename == VISIT.ports_list:
+            return [self.i, self.o]
+        if typename == VISIT.ports_bond:
+            #TODO do something about termination
+            return [self.i, self.o]
+        elif typename == VISIT.auto_terminate:
+            if self._bond_partner is None:
+                from .vacuum import VacuumTerminator
+                self.my.terminator = VacuumTerminator()
+                self.system.bond(self, self.terminator.Fr)
+                return (self, self.terminator)
+        return super(OpticalPortHolderInOut, self).targets_list(typename)
+
     _port_key = PortKey
 
     multiple_attach = False
