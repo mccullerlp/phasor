@@ -16,7 +16,7 @@ class VacuumTerminator(bases.OpticalCouplerBase, bases.SystemElementBase):
 
     @decl.dproperty
     def Fr(self):
-        return ports.OpticalPortHolderInOut(sname = 'Fr')
+        return ports.OpticalPort(sname = 'Fr')
 
     @decl.dproperty
     def _fluct(self):

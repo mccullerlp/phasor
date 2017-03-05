@@ -345,10 +345,9 @@ class BGSystem(RootElement):
             ports.PortHolderInOutBase,
         )
         if not isinstance(port_A, ptypes):
-            port_A.bond(port_B)
-        if not isinstance(port_B, ptypes):
-            port_B.bond(port_A)
-        return self.bond_old(port_A, port_B)
+            return port_A.bond(port_B)
+        else:
+            return self.bond_old(port_A, port_B)
 
     def bond_old(self, port_A, port_B):
         #TODO, phase this out

@@ -162,10 +162,10 @@ class EZSqz(
 
         self.Fkey_QC_center = Fkey_QC_center
 
-        self.Fr   = ports.OpticalPortHolderInOut(sname = 'Fr' )
-        self.Bk   = ports.OpticalPortHolderInOut(sname = 'Bk' )
-        self._LFr = ports.OpticalPortHolderInOut(sname = 'LFr')
-        self._LBk = ports.OpticalPortHolderInOut(sname = 'LBk')
+        self.Fr   = ports.OpticalPort(sname = 'Fr' )
+        self.Bk   = ports.OpticalPort(sname = 'Bk' )
+        self._LFr = ports.OpticalPort(sname = 'LFr')
+        self._LBk = ports.OpticalPort(sname = 'LBk')
         return
 
     @decl.mproperty

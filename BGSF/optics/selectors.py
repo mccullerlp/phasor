@@ -16,9 +16,9 @@ class PolSelector(
 ):
 
     def __build__(self):
-        self.my.Fr   = ports.OpticalPortHolderInOut(sname = 'Fr')
-        self.my.Bk_P = ports.OpticalPortHolderInOut(sname = 'Bk_P')
-        self.my.Bk_S = ports.OpticalPortHolderInOut(sname = 'Bk_S')
+        self.my.Fr   = ports.OpticalPort(sname = 'Fr')
+        self.my.Bk_P = ports.OpticalPort(sname = 'Bk_P')
+        self.my.Bk_S = ports.OpticalPort(sname = 'Bk_S')
         return
 
     def system_setup_ports(self, ports_algorithm):
@@ -70,7 +70,7 @@ class GenericSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
 
     @decl.dproperty
     def Fr(self):
-        return ports.OpticalPortHolderInOut(sname = 'Fr')
+        return ports.OpticalPort(sname = 'Fr')
 
     def __build__(self):
         self.check      = True
@@ -78,7 +78,7 @@ class GenericSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
 
         for name, key in list(self.select_map.items()):
             pname = 'Bk_{0}'.format(name)
-            port = ports.OpticalPortHolderInOut(sname = pname)
+            port = ports.OpticalPort(sname = pname)
             port = self.insert(port, pname)
             self.port_map[name] = (port, key)
         return
@@ -155,7 +155,7 @@ class OpticalSelectionStack(
                     if port in ports_already:
                         continue
                     ports_already.add(port)
-                    if isinstance(port, (ports.OpticalPortHolderInOut,)):
+                    if isinstance(port, (ports.OpticalPort,)):
                         optical_ports[port.name_child] += 1
                     else:
                         raise RuntimeError("HMMM")

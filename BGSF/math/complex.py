@@ -1,7 +1,6 @@
 """
 """
 from __future__ import division
-from builtins import str, range
 import sys
 
 from collections import namedtuple

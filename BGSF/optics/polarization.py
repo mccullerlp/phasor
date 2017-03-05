@@ -18,11 +18,11 @@ class BaseRotator(
 ):
     @decl.dproperty
     def Fr(self):
-        return ports.OpticalPortHolderInOut(sname = 'Fr' , pchain = 'Bk')
+        return ports.OpticalPort(sname = 'Fr' , pchain = 'Bk')
 
     @decl.dproperty
     def Bk(self):
-        return ports.OpticalPortHolderInOut(sname = 'Bk' , pchain = 'Fr')
+        return ports.OpticalPort(sname = 'Bk' , pchain = 'Fr')
 
     _rotate_default = ('rotate_deg', 0)
     rotate = standard_attrs.generate_rotate()
@@ -327,11 +327,11 @@ class WavePlate(
 
     @decl.dproperty
     def Fr(self):
-        return ports.OpticalPortHolderInOut(sname = 'Fr')
+        return ports.OpticalPort(sname = 'Fr')
 
     @decl.dproperty
     def Bk(self):
-        return ports.OpticalPortHolderInOut(sname = 'Bk')
+        return ports.OpticalPort(sname = 'Bk')
 
     @decl.mproperty
     def ports_optical(self):

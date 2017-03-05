@@ -22,7 +22,7 @@ class Laser(
 
     @decl.dproperty
     def Fr(self):
-        return ports.OpticalPortHolderInOut(sname = 'Fr')
+        return ports.OpticalPort(sname = 'Fr')
 
     @decl.dproperty
     def polarization(self, val = 'S'):

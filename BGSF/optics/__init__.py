@@ -41,7 +41,7 @@ from .EZSqz import (
 
 from .ports import (
     OpticalFreqKey,
-    OpticalPortHolderInOut,
+    OpticalPort,
     ClassicalFreqKey,
 )
 

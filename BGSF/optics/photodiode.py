@@ -41,7 +41,7 @@ class PD(
 
     @decl.dproperty
     def Fr(self):
-        return ports.OpticalPortHolderInOut(sname = 'Fr')
+        return ports.OpticalPort(sname = 'Fr')
 
     @decl.dproperty
     def Wpd(self):
@@ -57,7 +57,7 @@ class PD(
     @decl.dproperty
     def Bk(self):
         if self.magic:
-            return ports.OpticalPortHolderInOut(sname = 'Bk')
+            return ports.OpticalPort(sname = 'Bk')
 
     def system_setup_ports(self, ports_algorithm):
         pmap = {
@@ -104,7 +104,7 @@ class MagicPD(
 
     @decl.dproperty
     def Fr(self):
-        return ports.OpticalPortHolderInOut(sname = 'Fr', pchain = 'Bk')
+        return ports.OpticalPort(sname = 'Fr', pchain = 'Bk')
 
     @decl.dproperty
     def Wpd(self):
@@ -112,7 +112,7 @@ class MagicPD(
 
     @decl.dproperty
     def Bk(self):
-        return ports.OpticalPortHolderInOut(sname = 'Bk', pchain = 'Fr')
+        return ports.OpticalPort(sname = 'Bk', pchain = 'Fr')
 
     @decl.dproperty
     def include_readouts(self, val = False):

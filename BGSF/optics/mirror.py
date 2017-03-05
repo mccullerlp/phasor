@@ -66,26 +66,26 @@ class Mirror(
     @decl.dproperty
     def Fr(self):
         if not self.is_4_port:
-            return ports.OpticalPortHolderInOut(sname = 'Fr', pchain = 'Bk')
+            return ports.OpticalPort(sname = 'Fr', pchain = 'Bk')
         else:
             return None
 
     @decl.dproperty
     def Bk(self):
         if not self.is_4_port:
-            return ports.OpticalPortHolderInOut(sname = 'Bk', pchain = 'Fr')
+            return ports.OpticalPort(sname = 'Bk', pchain = 'Fr')
         else:
             return None
 
     @decl.dproperty
     def _LFr(self):
         if not self.is_4_port:
-            return ports.OpticalPortHolderInOut(sname = 'LFr')
+            return ports.OpticalPort(sname = 'LFr')
 
     @decl.dproperty
     def _LBk(self):
         if not self.is_4_port:
-            return ports.OpticalPortHolderInOut(sname = 'LBk')
+            return ports.OpticalPort(sname = 'LBk')
 
     @decl.dproperty
     def _LFrA_vac(self):
@@ -108,56 +108,56 @@ class Mirror(
     @decl.dproperty
     def FrA(self):
         if self.is_4_port:
-            return ports.OpticalPortHolderInOut(sname = 'FrA', pchain = 'BkA')
+            return ports.OpticalPort(sname = 'FrA', pchain = 'BkA')
         else:
             return self.Fr
 
     @decl.dproperty
     def FrB(self):
         if self.is_4_port:
-            return ports.OpticalPortHolderInOut(sname = 'FrB', pchain = 'BkB')
+            return ports.OpticalPort(sname = 'FrB', pchain = 'BkB')
         else:
             return self.Fr
 
     @decl.dproperty
     def BkA(self):
         if self.is_4_port:
-            return ports.OpticalPortHolderInOut(sname = 'BkA', pchain = 'FrA')
+            return ports.OpticalPort(sname = 'BkA', pchain = 'FrA')
         else:
             return self.Bk
 
     @decl.dproperty
     def BkB(self):
         if self.is_4_port:
-            return ports.OpticalPortHolderInOut(sname = 'BkB', pchain = 'FrB')
+            return ports.OpticalPort(sname = 'BkB', pchain = 'FrB')
         else:
             return self.Bk
 
     @decl.dproperty
     def _LFrA(self):
         if self.is_4_port:
-            return ports.OpticalPortHolderInOut(sname = 'LFrA' )
+            return ports.OpticalPort(sname = 'LFrA' )
         else:
             return self._LFr
 
     @decl.dproperty
     def _LFrB(self):
         if self.is_4_port:
-            return ports.OpticalPortHolderInOut(sname = 'LFrB' )
+            return ports.OpticalPort(sname = 'LFrB' )
         else:
             return self._LFr
 
     @decl.dproperty
     def _LBkA(self):
         if self.is_4_port:
-            return ports.OpticalPortHolderInOut(sname = 'LBkA' )
+            return ports.OpticalPort(sname = 'LBkA' )
         else:
             return self._LBk
 
     @decl.dproperty
     def _LBkB(self):
         if self.is_4_port:
-            return ports.OpticalPortHolderInOut(sname = 'LBkB' )
+            return ports.OpticalPort(sname = 'LBkB' )
         else:
             return self._LBk
 

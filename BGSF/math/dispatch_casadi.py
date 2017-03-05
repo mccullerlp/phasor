@@ -1,6 +1,4 @@
-from __future__ import division
-from __future__ import print_function
-from past.utils import old_div
+from __future__ import division, print_function
 from . import dispatched
 import functools
 import numpy as np
@@ -51,8 +49,8 @@ def fix_many(otype):
         return self
     fix_custom_complex(otype, '__mul__'  , lambda s, o: s * o)
     fix_custom_complex(otype, '__rmul__' , lambda s, o: o * s)
-    fix_custom_complex(otype, '__div__'  , lambda s, o: old_div(s, o))
-    fix_custom_complex(otype, '__rdiv__' , lambda s, o: old_div(o, s))
+    fix_custom_complex(otype, '__div__'  , lambda s, o: s / o)
+    fix_custom_complex(otype, '__rdiv__' , lambda s, o: o / s)
     fix_custom_complex(otype, '__truediv__'  , operator.truediv)
     fix_custom_complex(otype, '__rtruediv__' , lambda s, o: operator.truediv(o, s))
     fix_custom_complex(otype, '__add__'  , lambda s, o: s + o)
@@ -67,4 +65,3 @@ fix_many(casadi.SX)
 #fix_many(casadi.DVector)
 
 casadi.abs = abs
-
