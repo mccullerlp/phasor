@@ -15,10 +15,6 @@ from .bases import (
 )
 
 from .ports import (
-    PortHolderBase,
-    PortHolderInBase,
-    PortHolderOutBase,
-    PortHolderInOutBase,
     ElementKey,
     ClassicalFreqKey,
 )

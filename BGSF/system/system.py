@@ -369,15 +369,7 @@ class BGSystem(RootElement):
 
     def bond(self, port_A, port_B):
         #TODO ptypes testing is only for the transition to local bond scheme
-        ptypes = (
-            ports.PortHolderInBase,
-            ports.PortHolderOutBase,
-            ports.PortHolderInOutBase,
-        )
-        if not isinstance(port_A, ptypes):
-            return port_A.bond(port_B)
-        else:
-            return self.bond_old(port_A, port_B)
+        return port_A.bond(port_B)
 
     def bond_old(self, port_A, port_B):
         #TODO, phase this out
