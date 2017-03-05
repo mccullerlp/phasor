@@ -18,10 +18,10 @@ class DistributionAmplifier(bases.CouplerBase, bases.SystemElementBase):
         super(DistributionAmplifier, self).__init__(**kwargs)
         bases.OOA_ASSIGN(self).port_gains = port_gains
 
-        self.I  = ports.SignalPortHolderIn(self,  x = 'LO')
+        self.my.I  = ports.SignalInPort(sname = 'LO')
 
         for pname in self.port_gains:
-            setattr(self, pname, ports.SignalPortHolderOut(self, x = pname))
+            self.insert(ports.SignalOutPort(sname = pname), pname)
         return
 
     def system_setup_ports(self, ports_algorithm):
@@ -52,10 +52,10 @@ class SummingAmplifier(bases.CouplerBase, bases.SystemElementBase):
         super(SummingAmplifier, self).__init__(**kwargs)
         bases.OOA_ASSIGN(self).port_gains = port_gains
 
-        self.O  = ports.SignalPortHolderOut(self,  x = 'LO')
+        self.my.O  = ports.SignalOutPort(sname = 'LO')
 
         for pname in self.port_gains:
-            setattr(self, pname, ports.SignalPortHolderIn(self, x = pname))
+            self.insert(ports.SignalInPort(sname = pname), pname)
         return
 
     def system_setup_ports(self, ports_algorithm):
@@ -96,9 +96,9 @@ class MatrixAmplifier(bases.CouplerBase, bases.SystemElementBase):
 
         for (iname, oname), xfer in list(self.port_pair_gains.items()):
             if iname not in self.I:
-                self.I[iname] = ports.SignalPortHolderIn(self,  x = iname)
+                self.I[iname] = ports.SignalInPort(sname = iname)
             if oname not in self.O:
-                self.O[iname] = ports.SignalPortHolderOut(self, x = oname)
+                self.O[iname] = ports.SignalOutPort(sname = oname)
         return
 
     def system_setup_ports(self, ports_algorithm):

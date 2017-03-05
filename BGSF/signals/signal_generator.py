@@ -35,17 +35,15 @@ class SignalGenerator(bases.CouplerBase, bases.SystemElementBase):
         self.classical_f_dict = {self.F : self.multiple}
         self.f_key = ports.FrequencyKey(self.classical_f_dict)
 
-        self.Out = ports.SignalPortHolderOut(self, x = 'Out')
+        self.my.Out = ports.SignalOutPort(sname = 'Out')
 
         self.harmonic_gains = harmonic_gains
         for Hidx, gain in list(self.harmonic_gains.items()):
             #just to check that it is a number
             Hidx + 1
-            port = ports.SignalPortHolderOut(self, x = 'OutH{0}'.format(Hidx))
-            setattr(
-                self,
+            port = self.insert(
+                ports.SignalOutPort(sname = 'OutH{0}'.format(Hidx)),
                 'OutH{0}'.format(Hidx),
-                port
             )
         return
 

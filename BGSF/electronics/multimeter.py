@@ -25,7 +25,7 @@ class VoltageReadout(readouts.DCReadout, elements.ElectricalElementBase):
 
     @decl.dproperty
     def V(self):
-        return ports.SignalPortHolderOut(self, x = 'V')
+        return ports.SignalOutPort(sname = 'V')
 
     @decl.dproperty
     def port(self):
@@ -76,7 +76,7 @@ class CurrentReadout(readouts.DCReadout, elements.ElectricalElementBase):
 
     @decl.dproperty
     def I(self):
-        return ports.SignalPortHolderOut(self, x = 'I')
+        return ports.SignalOutPort(sname = 'I')
 
     @decl.dproperty
     def port(self):

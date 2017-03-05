@@ -18,7 +18,7 @@ class VoltageSource(smatrix.SMatrix1PortBase):
 
     @decl.dproperty
     def V(self):
-        return ports.SignalPortHolderIn(self, x = 'V')
+        return ports.SignalInPort(sname = 'V')
 
     @decl.mproperty
     def fkey(self):
@@ -72,7 +72,7 @@ class CurrentSource(smatrix.SMatrix1PortBase):
 
     @decl.dproperty
     def I(self):
-        return ports.SignalPortHolderIn(self, x = 'I')
+        return ports.SignalInPort(sname = 'I')
 
     @decl.mproperty
     def fkey(self):
@@ -137,7 +137,7 @@ class VoltageSourceBalanced(smatrix.SMatrix2PortBase):
 
     @decl.dproperty
     def V(self):
-        return ports.SignalPortHolderIn(self, x = 'V')
+        return ports.SignalInPort(sname = 'V')
 
     @decl.mproperty
     def I_DC(self, val = 0):
@@ -145,7 +145,7 @@ class VoltageSourceBalanced(smatrix.SMatrix2PortBase):
 
     @decl.dproperty
     def I(self):
-        return ports.SignalPortHolderIn(self, x = 'I')
+        return ports.SignalInPort(sname = 'I')
 
     @decl.mproperty
     def fkey(self):
@@ -255,7 +255,7 @@ class CurrentSourceBalanced(smatrix.SMatrix2PortBase):
 
     @decl.dproperty
     def I(self):
-        return ports.SignalPortHolderIn(self, x = 'I')
+        return ports.SignalInPort(sname = 'I')
 
     @decl.mproperty
     def fkey(self):

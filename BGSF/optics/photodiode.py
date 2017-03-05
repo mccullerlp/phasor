@@ -45,14 +45,14 @@ class PD(
 
     @decl.dproperty
     def Wpd(self):
-        return ports.SignalPortHolderOut(self, x    = 'Wpd')
+        return ports.SignalOutPort(sname = 'Wpd')
 
     @decl.dproperty
     def BA(self):
         if self.magic:
-            self.BA = None
+            return None
         else:
-            self.BA  = ports.SignalPortHolderIn(self,  x = 'BA')
+            return ports.SignalInPort(sname = 'BA')
 
     @decl.dproperty
     def Bk(self):
@@ -108,7 +108,7 @@ class MagicPD(
 
     @decl.dproperty
     def Wpd(self):
-        return ports.SignalPortHolderOut(self, x = 'Wpd')
+        return ports.SignalOutPort(sname = 'Wpd')
 
     @decl.dproperty
     def Bk(self):

@@ -20,7 +20,7 @@ class MeanSquareMixer(bases.CouplerBase, bases.SystemElementBase):
     ):
         super(MeanSquareMixer, self).__init__(**kwargs)
         self.I   = ports.SignalPortHolderIn(self,  x = 'I')
-        self.MS = ports.SignalPortHolderOut(self, x = 'MS')
+        self.MS = ports.SignalOutPort(sname = 'MS')
         return
 
     def system_setup_ports(self, system):
@@ -70,7 +70,7 @@ class SquareRootFunction(bases.CouplerBase, bases.SystemElementBase):
     ):
         super(SquareRootFunction, self).__init__(**kwargs)
         self.I   = ports.SignalPortHolderIn(self,  x = 'I')
-        self.sqroot = SignalPortHolderOut(self, x = 'sqroot')
+        self.sqroot = SignalOutPort(sname = 'sqroot')
         return
 
     def system_setup_ports(self, system):
@@ -120,7 +120,7 @@ class RMSMixer(bases.CouplerBase, bases.SystemElementBase):
     ):
         super(RMSMixer, self).__init__(**kwargs)
         self.I   = ports.SignalPortHolderIn(self,  x = 'I')
-        self.RMS = SignalPortHolderOut(self, x = 'RMS')
+        self.RMS = SignalOutPort(sname = 'RMS')
         self.system.virtual_link
         raise NotImplementedError()
         return

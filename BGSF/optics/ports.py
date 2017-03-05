@@ -17,8 +17,8 @@ from ..base.ports import(
 )
 
 from ..signals.ports import(
-    SignalPortHolderIn,
-    SignalPortHolderOut,
+    SignalInPort,
+    SignalOutPort,
 )
 
 from . import bases

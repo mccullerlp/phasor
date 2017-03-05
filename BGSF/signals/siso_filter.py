@@ -10,10 +10,7 @@ import numpy as np
 #from numbers import Number
 #import warnings
 
-from .ports import (
-    SignalPortHolderIn,
-    SignalPortHolderOut,
-)
+from . import ports
 
 from .bases import (
     SignalElementBase,
@@ -33,8 +30,8 @@ class TransferFunctionSISOBase(SignalElementBase):
         OOA_ASSIGN(self).max_freq = max_freq
         OOA_ASSIGN(self).no_DC       = no_DC
 
-        self.In  = SignalPortHolderIn(self, x = 'In')
-        self.Out = SignalPortHolderOut(self, x = 'Out')
+        self.my.In  = ports.SignalInPort(sname = 'In')
+        self.my.Out = ports.SignalOutPort(sname = 'Out')
 
         return
 

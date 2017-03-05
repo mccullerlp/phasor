@@ -71,9 +71,9 @@ class HiddenVariableHomodynePD(
         ##Only required if Bk isn't used (not a MagicPD)
         #self._fluct = vacuum.OpticalVacuumFluctuation(port = self.Fr)
 
-        self.rtWpdI = ports.SignalPortHolderOut(self, x = 'rtWpdI')
-        self.rtWpdQ = ports.SignalPortHolderOut(self, x = 'rtWpdQ')
-        self.rtWpdCmn = ports.SignalPortHolderOut(self, x = 'rtWpdCmn')
+        self.my.rtWpdI = ports.SignalOutPort(sname = 'rtWpdI')
+        self.my.rtWpdQ = ports.SignalOutPort(sname = 'rtWpdQ')
+        self.my.rtWpdCmn = ports.SignalOutPort(sname = 'rtWpdCmn')
 
         if source_port is None:
             self.source_port = self.Fr.i
@@ -331,7 +331,7 @@ class TotalDCPowerPD(
         super(TotalDCPowerPD, self).__init__(**kwargs)
         self.port  = port
         self.system.own_port_virtual(self, self.port)
-        self.WpdDC = ports.SignalPortHolderOut(self, x = 'WpdDC')
+        self.my.WpdDC = ports.SignalOutPort(sname = 'WpdDC')
         self.fdkey  = ports.DictKey({ports.ClassicalFreqKey: ports.FrequencyKey({})})
         self.pk_WpdDC = (self.WpdDC.o, self.fdkey)
         return

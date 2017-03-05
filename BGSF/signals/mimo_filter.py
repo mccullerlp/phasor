@@ -10,10 +10,7 @@ from ..base import (
     CouplerBase,
 )
 
-from .ports import (
-    SignalPortHolderIn,
-    SignalPortHolderOut,
-)
+from . import ports
 
 from .bases import (
     SystemElementBase,
@@ -37,9 +34,9 @@ class TransferFunctionMIMO(CouplerBase, SystemElementBase):
 
         for (iname, oname), xfer in list(self.port_pair_xfers.items()):
             if iname not in self.I:
-                self.I[iname] = SignalPortHolderIn(self,  x = iname)
+                self.I[iname] = ports.SignalInPort(sname = iname)
             if oname not in self.O:
-                self.O[iname] = SignalPortHolderOut(self, x = oname)
+                self.O[iname] = ports.SignalOutPort(sname = oname)
         return
 
     def system_setup_ports(self, ports_algorithm):

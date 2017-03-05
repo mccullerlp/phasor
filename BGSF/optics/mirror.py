@@ -58,12 +58,12 @@ class Mirror(
     @decl.dproperty
     def posZ(self):
         #TODO Should really be a mechanical port
-        return ports.SignalPortHolderIn(self, x = 'pZ')
+        return ports.SignalInPort(sname = 'pZ')
 
     @decl.dproperty
     def forceZ(self):
         #TODO Should really be a mechanical port
-        return ports.SignalPortHolderOut(self, x = 'fZ')
+        return ports.SignalOutPort(sname = 'fZ')
 
     @decl.dproperty
     def Fr(self):

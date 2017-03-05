@@ -11,28 +11,17 @@ from ..base.ports import (
     PortKey,
     MechKey,
     ClassicalFreqKey,
-    PortHolderInBase,
-    PortHolderOutBase,
-    PortHolderInOutBase,
     PortInOutRaw,
     PortIndirect,
 )  # NOQA
 
 from ..signals.ports import (
-    SignalPortHolderIn,
-    SignalPortHolderOut,
+    SignalInPort,
+    SignalOutPort,
 )
 
 from ..base import visitors as VISIT
 from ..base import bases
-
-
-class ElectricalPort(PortHolderInOutBase):
-    def autoterminations(self, port_map):
-        #I don't like having to import from here, but what can you do...
-        from . import TerminatorOpen
-        #TODO revisit, should maybe register "self" rather than "self.i"
-        port_map[self.i] = (self, TerminatorOpen)
 
 
 class ElectricalPortRaw(PortInOutRaw):

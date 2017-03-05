@@ -131,8 +131,8 @@ determine the phasing for the homodyne
 #        if magic:
 #            self.Bk = ports.OpticalPort(sname = 'Bk')
 #
-#        self.rtWpdI = ports.SignalPortHolderOut(self, x = 'rtWpdI')
-#        self.rtWpdQ = ports.SignalPortHolderOut(self, x = 'rtWpdQ')
+#        self.rtWpdI = ports.SignalOutPort(sname = 'rtWpdI')
+#        self.rtWpdQ = ports.SignalOutPort(sname = 'rtWpdQ')
 #
 #        self.source_port            = source_port
 #        self.phase_reference_port   = phase_reference_port
@@ -350,7 +350,7 @@ determine the phasing for the homodyne
 #        super(TotalDCPowerPD, self).__init__(**kwargs)
 #        self.port  = port
 #        self.system.own_port_virtual(self, self.port)
-#        self.WpdDC = ports.SignalPortHolderOut(self, x = 'WpdDC')
+#        self.WpdDC = ports.SignalOutPort(sname = 'WpdDC')
 #        return
 #
 #    def system_setup_ports(self, ports_algorithm):
