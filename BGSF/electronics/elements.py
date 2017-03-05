@@ -28,7 +28,7 @@ class ElectricalNoiseBase(NoiseBase, ElectricalElementBase):
 class Electrical1PortBase(ElectricalElementBase):
     @decl.dproperty
     def A(self):
-        return ports.ElectricalPortHolderInOut(self, 'A')
+        return ports.ElectricalPort(sname = 'A')
 
     @decl.mproperty
     def Fr(self):
@@ -45,11 +45,11 @@ class Electrical1PortBase(ElectricalElementBase):
 class Electrical2PortBase(ElectricalElementBase):
     @decl.dproperty
     def A(self):
-        return ports.ElectricalPortHolderInOut(self, 'A', pchain = 'B')
+        return ports.ElectricalPort(sname = 'A', pchain = 'B')
 
     @decl.dproperty
     def B(self):
-        return ports.ElectricalPortHolderInOut(self, 'B', pchain = 'A')
+        return ports.ElectricalPort(sname = 'B', pchain = 'A')
 
     @decl.mproperty
     def Fr(self):
@@ -62,19 +62,19 @@ class Electrical2PortBase(ElectricalElementBase):
 class Electrical4PortBase(ElectricalElementBase):
     @decl.dproperty
     def A(self):
-        return ports.ElectricalPortHolderInOut(self, 'A')
+        return ports.ElectricalPort(sname = 'A')
 
     @decl.dproperty
     def B(self):
-        return ports.ElectricalPortHolderInOut(self, 'B')
+        return ports.ElectricalPort(sname = 'B')
 
     @decl.dproperty
     def C(self):
-        return ports.ElectricalPortHolderInOut(self, 'C')
+        return ports.ElectricalPort(sname = 'C')
 
     @decl.dproperty
     def D(self):
-        return ports.ElectricalPortHolderInOut(self, 'D')
+        return ports.ElectricalPort(sname = 'D')
 
     @decl.mproperty
     def FrA(self):
@@ -109,8 +109,8 @@ class Connection(ElectricalElementBase):
         ports_electrical = []
         for idx in range(total_ports):
             name = 'p{0}'.format(idx)
-            pobj = ports.ElectricalPortHolderInOut(self, x = name)
-            setattr(self, name, pobj)
+            pobj = ports.ElectricalPort(sname = name)
+            pobj = self.insert(pobj, name)
             ports_electrical.append(pobj)
         self.ports_electrical = ports_electrical
         for idx in range(len(self.connect)):

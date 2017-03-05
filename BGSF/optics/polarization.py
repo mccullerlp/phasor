@@ -425,12 +425,8 @@ class WavePlateMount(
         self.system.bond(self.coord_Fr.Bk, self.plate.Fr)
         self.system.bond(self.plate.Bk, self.coord_Bk.Fr)
 
-        self.Fr = self.coord_Fr.Fr
-        self.Bk = self.coord_Bk.Bk
-
-        #TODO, HACK
-        self.Fr.pchain = self.Bk
-        self.Bk.pchain = self.Fr
+        self.my.Fr = ports.PortIndirect(inner_port = self.coord_Fr.Fr, pchain = lambda : self.Bk)
+        self.my.Bk = ports.PortIndirect(inner_port = self.coord_Bk.Bk, pchain = lambda : self.Fr)
 
 
 class HalfWavePlate(WavePlateMount):

@@ -12,10 +12,9 @@ from ..base.ports import(
     ElementKey,
     PortKey,
     ClassicalFreqKey,
-    PortHolderInBase,
-    PortHolderOutBase,
-    PortHolderInOutBase,
-)  # NOQA
+    PortInOutRaw,
+    PortIndirect,
+)
 
 from ..signals.ports import(
     SignalPortHolderIn,
@@ -51,38 +50,13 @@ class OpticalDegenerate4PortMixin(object):
         return val
 
 
-class OpticalRawPortHolder(bases.SystemElementBase):
-    @declarative.dproperty
-    def sname(self, val = declarative.NOARG):
-        if val is declarative.NOARG:
-            val = self.name_child
-        return val
-
-    @declarative.dproperty
-    def element(self):
-        return self.parent
-
-    @declarative.dproperty
-    def i(self):
-        pkey = DictKey({
-            ElementKey : self.element,
-            PortKey    : self.sname + u'⥳',
-        })
-        self.system.port_add(self.element, pkey)
-        return pkey
-
-    @declarative.dproperty
-    def o(self):
-        pkey = DictKey({
-            ElementKey: self.element,
-            PortKey   : self.sname + u'⥲',
-        })
-        self.system.port_add(self.element, pkey)
-        return pkey
+class OpticalPortRaw(PortInOutRaw):
+    typename = 'optical'
 
 
-class OpticalPort(OpticalRawPortHolder, bases.SystemElementBase):
+class OpticalPort(OpticalPortRaw, bases.SystemElementBase):
     _bond_partner = None
+    typename = 'optical'
 
     @declarative.mproperty
     def bond_key(self):
@@ -140,46 +114,5 @@ class OpticalPort(OpticalRawPortHolder, bases.SystemElementBase):
                 return self.pchain
         else:
             return None
-
-
-class PortIndirect(bases.SystemElementBase):
-    """
-    Holds an inner port and forwards bonding calls to it.
-    Contains its own chain_next reference though.
-    Used to expose inner ports in composite objects.
-    """
-    #Decide how this should remember port connection data for displaying
-
-    @declarative.dproperty
-    def inner_port(self, port):
-        return port
-
-    def bond(self, other):
-        self.inner_port.bond(other)
-
-    def bond_inform(self, other_key):
-        self.inner_port.bond_inform(other_key)
-
-    def bond_completion(self):
-        return self.inner_port.bond_completion()
-
-    pchain = None
-
-    @declarative.mproperty
-    def chain_next(self):
-        if self.pchain is not None:
-            if isinstance(self.pchain, str):
-                return getattr(self.element, self.pchain)
-            elif callable(self.pchain):
-                return self.pchain()
-            else:
-                return self.pchain
-        else:
-            return None
-
-
-
-
-
 
 

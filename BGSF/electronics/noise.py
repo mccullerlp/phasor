@@ -32,7 +32,7 @@ class VoltageFluctuation(elements.ElectricalNoiseBase, elements.ElectricalElemen
 
     @decl.dproperty
     def p_virt(self):
-        return ports.ElectricalPortHolderOut(self, 'virtual')
+        return ports.ElectricalPort(sname = 'virtual')
 
     @decl.dproperty
     def sided(self, val):
@@ -100,7 +100,7 @@ class CurrentFluctuation(elements.ElectricalNoiseBase, elements.ElectricalElemen
 
     @decl.dproperty
     def p_virt(self):
-        return ports.ElectricalPortHolderOut(self, 'virtual')
+        return ports.ElectricalPort(sname = 'virtual')
 
     @decl.dproperty
     def sided(self, val):
@@ -127,7 +127,7 @@ class CurrentFluctuation(elements.ElectricalNoiseBase, elements.ElectricalElemen
     def system_setup_coupling(self, matrix_algorithm):
         #TODO: double check that porto needs to be used
         #porto_use = self.system.ports_post_get(self.port.o)
-        porto_use = self.port.o #  self.system.ports_post_get(self.port.o)
+        porto_use = self.port.o  # self.system.ports_post_get(self.port.o)
         for kfrom in matrix_algorithm.port_set_get(self.p_virt.o):
             matrix_algorithm.port_coupling_insert(
                 self.p_virt.o,
@@ -225,7 +225,7 @@ class CurrentFluctuation2(elements.ElectricalNoiseBase):
 
     def system_setup_noise(self, matrix_algorithm):
         #print ("SETUP NOISE: ", self)
-        porti_use = self.port.i
+        #porti_use = self.port.i
         porto_use = self.system.ports_post_get(self.port.o)
         for k1 in matrix_algorithm.port_set_get(self.port.o):
             freq = k1[ports.ClassicalFreqKey]

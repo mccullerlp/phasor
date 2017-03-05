@@ -11,15 +11,15 @@ class OpAmp(elements.ElectricalElementBase):
 
     @decl.dproperty
     def in_p(self):
-        return ports.ElectricalPortHolderInOut(self, 'in_p')
+        return ports.ElectricalPort(sname = 'in_p')
 
     @decl.dproperty
     def in_n(self):
-        return ports.ElectricalPortHolderInOut(self, 'in_n')
+        return ports.ElectricalPort(sname = 'in_n')
 
     @decl.dproperty
     def out(self):
-        return ports.ElectricalPortHolderInOut(self, 'out')
+        return ports.ElectricalPort(sname = 'out')
 
     def gain_by_freq(self, F):
         return 1
@@ -98,11 +98,11 @@ class VAmp(elements.ElectricalElementBase):
 
     @decl.dproperty
     def in_n(self):
-        return ports.ElectricalPortHolderInOut(self, 'in_n')
+        return ports.ElectricalPort(sname = 'in_n')
 
     @decl.dproperty
     def out(self):
-        return ports.ElectricalPortHolderInOut(self, 'out')
+        return ports.ElectricalPort(sname = 'out')
 
     def gain_by_freq(self, F):
         return 1

@@ -129,6 +129,62 @@ class PortHolderInOutBase(PortHolderBase):
         return u"{0}.{1}".format(self.element, self._x)
 
 
+class PortRawBase(bases.SystemElementBase):
+    typename = None
+
+    @declarative.dproperty
+    def sname(self, val = declarative.NOARG):
+        if val is declarative.NOARG:
+            val = self.name_child
+        return val
+
+    @declarative.dproperty
+    def element(self):
+        return self.parent
+
+
+class PortInRaw(PortRawBase):
+    @declarative.dproperty
+    def i(self):
+        pkey = DictKey({
+            ElementKey : self.element,
+            PortKey    : self.sname + u'⥳',
+        })
+        self.system.port_add(self.element, pkey)
+        return pkey
+
+
+class PortOutRaw(PortRawBase):
+    @declarative.dproperty
+    def o(self):
+        pkey = DictKey({
+            ElementKey: self.element,
+            PortKey   : self.sname + u'⥲',
+        })
+        self.system.port_add(self.element, pkey)
+        return pkey
+
+
+class PortInOutRaw(PortRawBase):
+    @declarative.dproperty
+    def i(self):
+        pkey = DictKey({
+            ElementKey : self.element,
+            PortKey    : self.sname + u'⥳',
+        })
+        self.system.port_add(self.element, pkey)
+        return pkey
+
+    @declarative.dproperty
+    def o(self):
+        pkey = DictKey({
+            ElementKey: self.element,
+            PortKey   : self.sname + u'⥲',
+        })
+        self.system.port_add(self.element, pkey)
+        return pkey
+
+
 class PortIndirect(bases.SystemElementBase):
     """
     Holds an inner port and forwards bonding calls to it.
@@ -140,6 +196,10 @@ class PortIndirect(bases.SystemElementBase):
     @declarative.dproperty
     def inner_port(self, port):
         return port
+
+    @declarative.mproperty
+    def bond_key(self):
+        return self.inner_port.bond_key
 
     def bond(self, other):
         self.inner_port.bond(other)

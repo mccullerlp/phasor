@@ -96,6 +96,7 @@ def gensys(
     return declarative.Bunch(locals())
 
 def test_cyclostationary():
+    #TODO speed this up!
     b = gensys(
         #F_AC_Hz = logspaced(.001, 1e6, 10),
         #F_AC_Hz = np.array([10]),
