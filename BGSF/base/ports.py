@@ -2,12 +2,15 @@
 from __future__ import division, print_function
 #from BGSF.utilities.print import print
 
+import declarative
+
 from .dictionary_keys import (
     DictKey,
     FrequencyKey,
 )
 
-import declarative as decl
+
+from . import bases
 
 
 ElementKey = u'▲'
@@ -18,7 +21,7 @@ PostBondKey = u'№'
 ClassicalFreqKey = u'𝓕'
 
 
-class PortHolderBase(decl.OverridableObject):
+class PortHolderBase(declarative.OverridableObject):
     _port_key = PortKey
 
     multiple_attach = False
@@ -26,13 +29,13 @@ class PortHolderBase(decl.OverridableObject):
     def autoterminations(self, port_map):
         return
 
-    @decl.mproperty
+    @declarative.mproperty
     def key(self):
         return self._x
 
     pchain = None
 
-    @decl.mproperty
+    @declarative.mproperty
     def chain_next(self):
         if self.pchain is not None:
             if isinstance(self.pchain, str):
@@ -61,7 +64,7 @@ class PortHolderInBase(PortHolderBase):
         okey = self.element.owned_port_keys.setdefault(self.key, self)
         assert(okey is self)
 
-    @decl.mproperty
+    @declarative.mproperty
     def key(self):
         return self._x
 
@@ -87,7 +90,7 @@ class PortHolderOutBase(PortHolderBase):
         okey = self.element.owned_port_keys.setdefault(self.key, self)
         assert(okey is self)
 
-    @decl.mproperty
+    @declarative.mproperty
     def key(self):
         return self._x
 
@@ -118,7 +121,7 @@ class PortHolderInOutBase(PortHolderBase):
         okey = self.element.owned_port_keys.setdefault(self.key, self)
         assert(okey is self)
 
-    @decl.mproperty
+    @declarative.mproperty
     def key(self):
         return self._x
 
@@ -126,9 +129,38 @@ class PortHolderInOutBase(PortHolderBase):
         return u"{0}.{1}".format(self.element, self._x)
 
 
-class MechanicalPortHolderIn(PortHolderInBase):
-    pass
+class PortIndirect(bases.SystemElementBase):
+    """
+    Holds an inner port and forwards bonding calls to it.
+    Contains its own chain_next reference though.
+    Used to expose inner ports in composite objects.
+    """
+    #Decide how this should remember port connection data for displaying
 
+    @declarative.dproperty
+    def inner_port(self, port):
+        return port
 
-class MechanicalPortHolderOut(PortHolderOutBase):
-    pass
+    def bond(self, other):
+        self.inner_port.bond(other)
+
+    def bond_inform(self, other_key):
+        self.inner_port.bond_inform(other_key)
+
+    def bond_completion(self):
+        return self.inner_port.bond_completion()
+
+    pchain = None
+
+    @declarative.mproperty
+    def chain_next(self):
+        if self.pchain is not None:
+            if isinstance(self.pchain, str):
+                return getattr(self.element, self.pchain)
+            elif callable(self.pchain):
+                return self.pchain()
+            else:
+                return self.pchain
+        else:
+            return None
+

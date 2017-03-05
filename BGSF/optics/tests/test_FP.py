@@ -89,7 +89,6 @@ def test_FP_base():
     sys = b.sys
     #sys.solve_to_order(1)
     #print("BUILDING THE REST")
-    sol = sys.solve()
     #sys.coupling_matrix_print()
     #sys.source_vector_print()
     #sys.solution_vector_print()
@@ -164,7 +163,6 @@ def test_FP_DC():
         no_ac = True,
     )
     sys = b.sys
-    sol = sys.solve()
     #sol.coupling_matrix_print()
     #sol.source_vector_print()
     #print()
@@ -188,7 +186,6 @@ def test_FP_sensitivity():
         L_detune_m = np.linspace(-1e-9, 1e-9, 1),
     )
     sys = b.sys
-    sol = sys.solve()
 
     print("refl_DC",      sys.refl_DC.DC_readout)
     print("transmon_DC",  sys.transmon_DC.DC_readout)

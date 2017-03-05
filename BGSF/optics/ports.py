@@ -11,13 +11,10 @@ from ..base.ports import(
     FrequencyKey,
     ElementKey,
     PortKey,
-    MechKey,
     ClassicalFreqKey,
     PortHolderInBase,
     PortHolderOutBase,
     PortHolderInOutBase,
-    MechanicalPortHolderIn,
-    MechanicalPortHolderOut,
 )  # NOQA
 
 from ..signals.ports import(
@@ -107,8 +104,17 @@ class OpticalPort(OpticalRawPortHolder, bases.SystemElementBase):
         assert(self._bond_partner is not None)
 
         #TODO make a system algorithm object for this
-        self.system.bond_completion_raw((self, self._bond_partner), self)
+        self.system.bond_completion_raw(self, self._bond_partner, self)
         return
+
+    def auto_terminate(self):
+        """
+        Only call if this port has not been bonded
+        """
+        from .vacuum import VacuumTerminator
+        self.my.terminator = VacuumTerminator()
+        self.system.bond(self, self.terminator.Fr)
+        return (self, self.terminator)
 
     def targets_list(self, typename):
         if typename == VISIT.bond_completion:
@@ -117,10 +123,7 @@ class OpticalPort(OpticalRawPortHolder, bases.SystemElementBase):
             return self
         elif typename == VISIT.auto_terminate:
             if self._bond_partner is None:
-                from .vacuum import VacuumTerminator
-                self.my.terminator = VacuumTerminator()
-                self.system.bond(self, self.terminator.Fr)
-                return (self, self.terminator)
+                return self.auto_terminate()
         else:
             return super(OpticalPort, self).targets_list(typename)
 
@@ -139,7 +142,15 @@ class OpticalPort(OpticalRawPortHolder, bases.SystemElementBase):
             return None
 
 
-class OpticalPortHolderCarrier(bases.SystemElementBase):
+class PortIndirect(bases.SystemElementBase):
+    """
+    Holds an inner port and forwards bonding calls to it.
+    Contains its own chain_next reference though.
+    Used to expose inner ports in composite objects.
+    """
+    #Decide how this should remember port connection data for displaying
+
+    @declarative.dproperty
     def inner_port(self, port):
         return port
 

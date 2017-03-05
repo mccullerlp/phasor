@@ -14,7 +14,7 @@ from collections import defaultdict
 import numpy as np
 import warnings
 
-import declarative as decl
+import declarative as declarative
 
 from ..base import (
     DictKey,
@@ -68,24 +68,24 @@ class BGSystem(RootElement):
 
     _frozen = False
 
-    @decl.dproperty
+    @declarative.dproperty
     def include_johnson_noise(self, val = True):
         val = self.ooa_params.setdefault('include_johnson_noise', val)
         return val
 
-    @decl.dproperty
+    @declarative.dproperty
     def symbols(self):
         return SystemSymbols()
 
-    @decl.mproperty
+    @declarative.mproperty
     def field_space(self, FS = None):
         return FS
 
-    @decl.mproperty
+    @declarative.mproperty
     def freq_order_max_default(self, val = 2):
         return val
 
-    @decl.dproperty
+    @declarative.dproperty
     def adjust_PSD(self):
         if self.sided_spectra == 1:
             val = 2
@@ -94,45 +94,45 @@ class BGSystem(RootElement):
         val = self.ooa_params.setdefault('adjust_PSD', val)
         return val
 
-    @decl.dproperty
+    @declarative.dproperty
     def sided_spectra(self, val = 1):
         val = self.ooa_params.setdefault('sided_spectra', val)
         return val
 
-    @decl.dproperty
+    @declarative.dproperty
     def system(self):
         #should use environment_query instead
         return self
 
-    @decl.mproperty
+    @declarative.mproperty
     def elements_named(self):
         return dict()
 
-    @decl.mproperty
+    @declarative.mproperty
     def elements(self):
         return set()
 
-    @decl.mproperty
+    @declarative.mproperty
     def port_owners(self):
         return dict()
 
-    @decl.mproperty
+    @declarative.mproperty
     def owners_ports(self):
         return dict()
 
-    @decl.mproperty
+    @declarative.mproperty
     def owners_ports_virtual(self):
         return dict()
 
-    @decl.mproperty
+    @declarative.mproperty
     def port_autoterminate(self):
         return dict()
 
-    @decl.mproperty
+    @declarative.mproperty
     def bond_pairs(self):
         return defaultdict(dict)
 
-    @decl.mproperty
+    @declarative.mproperty
     def ports_post(self):
         return dict()
 
@@ -142,7 +142,7 @@ class BGSystem(RootElement):
         self.ports_post[port] = nport
         return nport
 
-    @decl.mproperty
+    @declarative.mproperty
     def ports_pre(self):
         return dict()
 
@@ -152,15 +152,15 @@ class BGSystem(RootElement):
         self.ports_pre[port] = nport
         return nport
 
-    @decl.mproperty
+    @declarative.mproperty
     def bonded_set(self):
         return set()
 
-    @decl.mproperty
+    @declarative.mproperty
     def port_owners_virtual(self):
         return defaultdict(set)
 
-    @decl.dproperty
+    @declarative.dproperty
     def F_AC(self, val = 0):
         #TODO make this detect a PropertyTransforming or injected frequency object
         self.environment.my.F_AC = Frequency(
@@ -170,7 +170,7 @@ class BGSystem(RootElement):
         )
         return self.environment.my.F_AC
 
-    @decl.dproperty
+    @declarative.dproperty
     def F_carrier_1064(self):
         self.environment.my.F_carrier_1064 = OpticalFrequency(
             wavelen_m = 1064e-9,
@@ -178,7 +178,7 @@ class BGSystem(RootElement):
         )
         return self.environment.my.F_carrier_1064
 
-    @decl.dproperty
+    @declarative.dproperty
     def environment(self):
         return SystemElementBase()
 
@@ -191,7 +191,7 @@ class BGSystem(RootElement):
             iwavelen_m += n * F.iwavelen_m
         return iwavelen_m, freq_Hz
 
-    @decl.mproperty
+    @declarative.mproperty
     def fully_resolved_name_tuple(self):
         return ()
 
@@ -234,10 +234,27 @@ class BGSystem(RootElement):
         return True
 
     def _setup_sequence(self):
+        assert(not self._frozen)
         while self._include_lst:
             self.do_includes()
             #print("INCLUDE LST: ", self._include_lst)
             self._autoterminate()
+
+        for element in self.targets_recurse(VISIT.bond_completion):
+            #print("Bond Completion", element)
+            pass
+
+        bad_completions = dict()
+        while self._bond_completions_raw:
+            (p1, p2), raw_port1 = self._bond_completions_raw.popitem()
+            raw_port2 = self._bond_completions_raw.pop((p2, p1), None)
+            if raw_port2 is None:
+                bad_completions[(p1, p2)] = raw_port1
+            self.bond_old(raw_port1, raw_port2)
+        if bad_completions:
+            raise RuntimeError("Incomplete port pairings: {0}".format(bad_completions))
+
+        assert(not self._frozen)
         self._frozen = True
 
         self.port_algo = ports_algorithm.PortUpdatesAlgorithm(
@@ -254,16 +271,28 @@ class BGSystem(RootElement):
         )
         return
 
-    def solve(self):
+    def bond_completion_raw_pair(self, p1, p2, raw_port1, raw_port2):
+        self.bond_completion_raw(p1, p2, raw_port1)
+        self.bond_completion_raw(p2, p1, raw_port2)
+
+    @declarative.mproperty
+    def _bond_completions_raw(self):
+        return dict()
+
+    def bond_completion_raw(self, p1, p2, raw_port):
+        self._bond_completions_raw[(p1, p2)] = raw_port
+        return
+
+    def _solve(self):
         self._setup_sequence()
         self.solver.solve()
         return self.solver
 
-    @decl.mproperty
+    @declarative.mproperty
     def solution(self):
-        return self.solve()
+        return self._solve()
 
-    @decl.mproperty
+    @declarative.mproperty
     def _include_lst(self):
         return []
 
@@ -319,7 +348,7 @@ class BGSystem(RootElement):
             #print("UNTERMINATED: ", port)
             aterm = self.port_autoterminate.get(port, None)
             if aterm is None:
-                print("unterminated port", port)
+                #print("unterminated port", port)
                 pass
             else:
                 pobj, tclass = aterm
@@ -332,10 +361,11 @@ class BGSystem(RootElement):
                 #print("with ", tinst)
                 self.bond(pobj, tinst.Fr)
 
-            for port, obj in self.targets_recurse(VISIT.auto_terminate):
-                #print("Autoterminating port:", port)
-                #print("with ", obj)
-                pass
+        for port, obj in self.targets_recurse(VISIT.auto_terminate):
+            #print("Autoterminating port:", port)
+            #print("with ", obj)
+            pass
+        return
 
     def bond(self, port_A, port_B):
         #TODO ptypes testing is only for the transition to local bond scheme
@@ -362,10 +392,10 @@ class BGSystem(RootElement):
             pass
         else:
             either_included = True
-            if (not port_B.multiple_attach):
-                assert(port_B.i not in self.bonded_set)
-            if not (port_A.multiple_attach):
-                assert(port_A.o not in self.bonded_set)
+            if (port_B.i in self.bonded_set):
+                assert(port_B.multiple_attach)
+            if (port_A.o in self.bonded_set):
+                assert(port_A.multiple_attach)
             self.bonded_set.add(port_A.o)
             self.bonded_set.add(port_B.i)
             self.bond_pairs[port_A.o][port_B.i] = 1
@@ -378,10 +408,10 @@ class BGSystem(RootElement):
             pass
         else:
             either_included = True
-            if (not port_A.multiple_attach):
-                assert(port_A.i not in self.bonded_set)
-            if (not port_B.multiple_attach):
-                assert(port_B.o not in self.bonded_set)
+            if (port_A.i in self.bonded_set):
+                assert(port_A.multiple_attach)
+            if (port_B.o in self.bonded_set):
+                assert(port_B.multiple_attach)
             self.bonded_set.add(port_B.o)
             self.bonded_set.add(port_A.i)
             self.bond_pairs[port_B.o][port_A.i] = 1

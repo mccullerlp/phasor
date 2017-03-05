@@ -103,7 +103,6 @@ def test_cyclostationary():
     )
     sys = b.sys
     print()
-    sol = sys.solve()
     #sys.coupling_matrix_print()
     #sys.source_vector_print()
     #sys.solution_vector_print()
@@ -129,8 +128,8 @@ def test_cyclostationary():
     np_test.assert_almost_equal(sys.PD1_MIX_Q_N.CSD['R', 'R'] / N_expect, 1, 2)
     #print("DC1_MIX_Q_RMS",  sys.PD1_MIX_QRMS.DC_readout)
     #sol.coupling_matrix_print(select_to = b.sled.mixerIRMS.RMS.o)
-    sol.solution_vector_print(select_to = b.sled.mixer.R_I.o)
-    sol.solution_vector_print(select_to = b.sled.mixer.R_Q.o)
+    sys.solution.solution_vector_print(select_to = b.sled.mixer.R_I.o)
+    sys.solution.solution_vector_print(select_to = b.sled.mixer.R_Q.o)
 
     #TODO isolate this test
     #from BGSF.system_graphs import (
