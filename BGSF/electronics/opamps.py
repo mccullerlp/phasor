@@ -5,6 +5,7 @@ from __future__ import (division, print_function)
 import declarative as decl
 from . import ports
 from . import elements
+from . import noise
 
 
 class OpAmp(elements.ElectricalElementBase):
@@ -174,6 +175,56 @@ class VAmp(elements.ElectricalElementBase):
                     pgain,
                 )
 
+
+class ImperfectOpAmp(OpAmp):
+    def V_spectrum_one_sided(self, F):
+        raise NotImplementedError()
+
+    def I_spectrum_one_sided(self, F):
+        raise NotImplementedError()
+
+    def gain_by_freq(self, F):
+        raise NotImplementedError()
+
+    @decl.dproperty
+    def V_noise(self):
+        return noise.VoltageFluctuation(
+            port = self.in_n,
+            Vsq_Hz_by_freq = self.V_spectrum_one_sided,
+            sided = 'one-sided',
+        )
+
+    @decl.dproperty
+    def I_noise_n(self):
+        return noise.CurrentFluctuation(
+            port = self.in_n,
+            Isq_Hz_by_freq = self.I_spectrum_one_sided,
+            sided = 'one-sided',
+        )
+
+    @decl.dproperty
+    def I_noise_p(self):
+        return noise.CurrentFluctuation(
+            port = self.in_p,
+            Isq_Hz_by_freq = self.I_spectrum_one_sided,
+            sided = 'one-sided',
+        )
+
+
+class ImperfectInAmp(ImperfectOpAmp):
+    def Vout_spectrum_one_sided(self, F):
+        raise 0
+
+    def gain_by_freq(self, F):
+        raise NotImplementedError()
+
+    @decl.dproperty
+    def Vout_noise(self):
+        return noise.VoltageFluctuation(
+            port = self.out,
+            Vsq_Hz_by_freq = self.Vout_spectrum_one_sided,
+            sided = 'one-sided',
+        )
 
 
 

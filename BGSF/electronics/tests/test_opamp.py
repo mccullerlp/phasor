@@ -13,9 +13,6 @@ from BGSF.system import (
     BGSystem
 )
 
-import unittest
-assertions = unittest.TestCase('__init__')
-
 
 pytest.mark.parametrize('gain', [(1), (10), (100)])
 def test_open_loop_opamp(gain = 10):

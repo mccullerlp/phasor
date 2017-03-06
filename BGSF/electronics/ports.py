@@ -29,12 +29,15 @@ class ElectricalPortRaw(PortInOutRaw):
 
 
 class ElectricalPort(ElectricalPortRaw, bases.SystemElementBase):
-    _bond_partner = None
     typename = 'Electrical'
 
     @declarative.mproperty
     def bond_key(self):
         return self
+
+    @declarative.mproperty
+    def _bond_partners(self):
+        return []
 
     def bond(self, other):
         self.bond_inform(other.bond_key)
@@ -42,25 +45,42 @@ class ElectricalPort(ElectricalPortRaw, bases.SystemElementBase):
 
     def bond_inform(self, other_key):
         #TODO make this smarter
-        if self._bond_partner is not None:
-            raise RuntimeError("Multiple Bond Partners not Allowed")
-        else:
-            self._bond_partner = other_key
+        self._bond_partners.append(other_key)
 
     def bond_completion(self):
-        #it should have been autoterminated if anything
-        assert(self._bond_partner is not None)
-
-        #TODO make a system algorithm object for this
-        self.system.bond_completion_raw(self, self._bond_partner, self)
+        if len(self._bond_partners) == 1:
+            self.system.bond_completion_raw(self, self._bond_partners[0], self)
+        elif len(self._bond_partners) == 0:
+            raise RuntimeError("Must be Terminated")
+        else:
+            from .elements import Connection
+            self.my.connection = Connection(
+                N_ports = 1 + len(self._bond_partners)
+            )
+            self.system._include(self.connection)
+            self.connection.p0.bond_inform(self)
+            self.system.bond_completion_raw(self, self.connection.p0, self)
+            self.connection.p0.bond_completion()
+            for idx, partner in enumerate(self._bond_partners):
+                #TODO not sure if I like the connection object not knowing who it is bound to
+                #maybe make a more explicit notification for the raw bonding
+                port = self.connection.ports_electrical[idx + 1]
+                print("PORTSSS", port)
+                self.system.bond_completion_raw(self, partner, port)
         return
+
+    @declarative.mproperty
+    def t_terminator(self, val = declarative.NOARG):
+        if val is declarative.NOARG:
+            from . import TerminatorOpen
+            val = TerminatorOpen
+        return val
 
     def auto_terminate(self):
         """
         Only call if this port has not been bonded
         """
-        from . import TerminatorOpen
-        self.my.terminator = TerminatorOpen()
+        self.my.terminator = self.t_terminator()
         self.system.bond(self, self.terminator.Fr)
         return (self, self.terminator)
 
@@ -70,7 +90,7 @@ class ElectricalPort(ElectricalPortRaw, bases.SystemElementBase):
             self.bond_completion()
             return self
         elif typename == VISIT.auto_terminate:
-            if self._bond_partner is None:
+            if not self._bond_partners:
                 return self.auto_terminate()
         else:
             return super(ElectricalPort, self).targets_list(typename)

@@ -250,7 +250,8 @@ class BGSystem(RootElement):
             raw_port2 = self._bond_completions_raw.pop((p2, p1), None)
             if raw_port2 is None:
                 bad_completions[(p1, p2)] = raw_port1
-            self.bond_old(raw_port1, raw_port2)
+            else:
+                self.bond_old(raw_port1, raw_port2)
         if bad_completions:
             raise RuntimeError("Incomplete port pairings: {0}".format(bad_completions))
 
@@ -307,6 +308,7 @@ class BGSystem(RootElement):
             self._include(el)
 
     def port_add(self, owner, pkey):
+        #TODO phase out
         self.port_owners[pkey] = owner
         self.owners_ports.setdefault(owner, []).append(pkey)
         self.owners_ports_virtual.setdefault(owner, [])
@@ -326,8 +328,6 @@ class BGSystem(RootElement):
         else:
             for port, pobj in list(op.items()):
                 self.port_add(element, port)
-                #have the port objects autoterminate
-                pobj.autoterminations(self.port_autoterminate)
         if element.name_system in self.elements_named:
             warnings.warn((
                 "Multiple elements added with name {0}"

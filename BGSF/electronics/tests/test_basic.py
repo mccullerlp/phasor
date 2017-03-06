@@ -6,7 +6,6 @@ import numpy.testing as test
 
 import BGSF.electronics as electronics
 import BGSF.readouts as readouts
-
 import BGSF.system as system
 
 
