@@ -106,7 +106,8 @@ class MPlotter(declarative.OverridableObject):
             ncol = 2,
             fontsize='medium',
         )
-        legend.get_frame().set_alpha(.9)
+        if legend is not None:
+            legend.get_frame().set_alpha(.9)
 
         fB.iROC.set_ylabel('iROC [1/m]')
         fB.Gouy.set_ylabel("Gouy Phase [deg]")
@@ -224,8 +225,9 @@ class MPlotter(declarative.OverridableObject):
                 ),
             ))
 
+        none_to_zero = lambda v : v if v is not None else 0
+        all_desc_by_z.sort(key = lambda v: tuple(none_to_zero(x) for x in v[:2]))
 
-        all_desc_by_z.sort()
         zs = np.array([tup[0] for tup in all_desc_by_z])
         xlow, xhigh = F.ax_top.get_xlim()
         xmid = (xlow + xhigh)/2

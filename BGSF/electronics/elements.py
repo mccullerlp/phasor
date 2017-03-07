@@ -59,6 +59,14 @@ class Electrical2PortBase(ElectricalElementBase):
     def Bk(self):
         return self.B
 
+    def bond_series(self, other):
+        """
+        Takes two 2-port objects and bonds them to form a series connection. With multibonding,
+        this can be done and the original can still be connected.
+        """
+        self.A.bond(other.A)
+        self.B.bond(other.B)
+
 class Electrical4PortBase(ElectricalElementBase):
     @decl.dproperty
     def A(self):

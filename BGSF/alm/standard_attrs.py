@@ -58,6 +58,7 @@ def generate_L_m():
 def generate_R_m(variant = ''):
     @decl.group_dproperty
     def R_m(desc):
+        desc.name_change('R{0}_m'.format(variant))
         return generate_refval_attribute(
             desc,
             ubunch = lengths_small,

@@ -65,7 +65,7 @@ class ElectricalPort(ElectricalPortRaw, bases.SystemElementBase):
                 #TODO not sure if I like the connection object not knowing who it is bound to
                 #maybe make a more explicit notification for the raw bonding
                 port = self.connection.ports_electrical[idx + 1]
-                print("PORTSSS", port)
+                #print("PORTSSS", port)
                 self.system.bond_completion_raw(self, partner, port)
         return
 

@@ -122,7 +122,7 @@ def generate_refval_attribute(
         #k, v = storage.items().next()
         #print("hmm: " ,self.ooa_params[ooa_name].units)
 
-        pint_units = pint.ureg[self.ooa_params[ooa_name].units]
+        pint_units = pint.ureg[units]
         return simple_units.ElementRefValue(
             ooa_params = self.ooa_params[ooa_name],
             units      = pint_units,
@@ -220,9 +220,9 @@ def arbunit_refval_attribute(
             ooa = ooa.useidx('immediate')
             if isinstance(arg, str):
                 #string convert to quantity
-                print('arg', arg)
+                #print('arg', arg)
                 arg = pint.ureg[arg]
-                print('arg', arg)
+                #print('arg', arg)
             if isinstance(arg, simple_units.SimpleUnitfulGroup):
                 ooa.setdefault("ref",   arg.ref)
                 ooa.setdefault("val",   arg.val)

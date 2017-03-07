@@ -35,8 +35,6 @@ class SimpleUnitfulGroup(declarative.OverridableObject):
     def __add__(self, other):
         units_to = self.units
         units_from = other.units
-        print(self, other)
-        print(units_to, units_from)
         rescale = units_from / units_to
         assert(rescale.unitless)
         rescale = rescale.to(pint.ureg.dimensionless).magnitude
@@ -109,6 +107,7 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
         assert(rescale.unitless)
         #TODO check these methods (only seem present on newer pint)
         #return rescale.m_as(pint.ureg.dimensionless)
+        rescale.to(pint.ureg.dimensionless).magnitude
         return rescale.to(pint.ureg.dimensionless).magnitude
 
     @declarative.dproperty
