@@ -215,6 +215,27 @@ class BGSystem(RootElement):
                 return True
         return False
 
+    def reject_optical_frequency_order(self, fkey):
+        #TODO put this logic in a subobject
+        group_N = defaultdict(lambda: 0)
+        for F, N in list(fkey.F_dict.items()):
+            N_limit = F.order
+            if N_limit is None:
+                N_limit = 2
+            if N > N_limit:
+                return True
+            if N < 1:
+                return True
+            #TODO revisit max frequency groups
+            #for group in F.groups:
+            #    group_N[group] += Na
+
+        for group, N in list(group_N.items()):
+            Nmax = self.groups_max_N.get(group, None)
+            if Nmax is not None and N > Nmax:
+                return True
+        return False
+
     def classical_frequency_extract(self, key):
         #TODO put this logic in a subobject
         freq_Hz = 0

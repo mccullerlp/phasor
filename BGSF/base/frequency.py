@@ -28,7 +28,6 @@ def generate_F_Hz():
     return F_Hz
 
 
-
 class Frequency(
         bases.FrequencyBase,
         bases.SystemElementBase
@@ -44,9 +43,6 @@ class Frequency(
             **kwargs
     ):
         super(Frequency, self).__init__(**kwargs)
-
-        if F_width_Hz is None:
-            F_center_Hz = (np.max(self.F_Hz) - np.min(self.F_Hz)) / 2
 
         bases.OOA_ASSIGN(self).F_width_Hz  = F_width_Hz
 
