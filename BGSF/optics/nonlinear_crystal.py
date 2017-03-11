@@ -9,6 +9,7 @@ import declarative
 
 from . import ports
 from . import bases
+from ..utilities.print import pprint
 
 from ..system.matrix_injections import (
     FactorCouplingBase,
@@ -36,29 +37,117 @@ class ExpMatCoupling(FactorCouplingBase):
     #    'sources_NZ_pkset_dict',
     #)
 
+    #must redefine since it was a property
+    edges_req_pkset_dict = None
     def __init__(
         self,
         ddlt,
         N_ode = 1,
         order = 2,
     ):
-        self.ddlt       = ddlt
-        #all edges are generated immediately 
-        self.edges_NZ_pkset_dict = {
-            (self.pkfrom1, self.pkto) : frozenset(),
-        }
-        #all edges are generated using the same memoized algorithm
-        self.edges_pkpk_dict = {
-            (self.pkfrom1, self.pkto) : self.edge_func,
-        }
+        self.N_ode = N_ode
+        self.order = order
+        self.ddlt = ddlt
+
+        self.all_ins = set()
+        self.all_outs = set()
+        for out, din in self.ddlt.items():
+            self.all_outs.add(out)
+            for pk_in, lt in din.items():
+                self.all_ins.add(pk_in)
+
+        #all edges are generated immediately. Currently assumes full density
+        self.edges_NZ_pkset_dict = {}
+        self.edges_pkpk_dict = {}
+        self.edges_req_pkset_dict = {}
+        def gen_edge_func(pk_in, pk_out):
+            return lambda sV, sB: self.edge_func(pk_in, pk_out, sV, sB)
+        for pk_out in self.all_outs:
+            for pk_in in self.all_ins:
+                self.edges_NZ_pkset_dict[(pk_in, pk_out)] = frozenset()
+                self.edges_pkpk_dict[(pk_in, pk_out)] = gen_edge_func(pk_in, pk_out)
+                self.edges_req_pkset_dict[(pk_in, pk_out)] = frozenset(self.all_ins)
 
         #Currently, nonlinear doesn't need to make any sources. It may in the future as that may be a more stable way to converge
         self.sources_pk_dict = {}
         self.sources_NZ_pkset_dict = {}
 
-    def edge_func(self, sol_vector, sB):
-        val = self.cplg * sol_vector.get(self.pkfrom2, 0)
-        return val
+    _prev_sol_vector = None
+
+    def edge_func(self, pk_in, pk_out, sol_vector, sB):
+        if sol_vector != self._prev_sol_vector:
+            self._prev_sol_vector = sol_vector
+            self.generate_solution(sol_vector)
+        return self.solution.get((pk_in, pk_out), 0)
+
+    def generate_solution(self, sol_vector):
+        solution = dict()
+        ins = set(pk[1] for pk in self.all_ins)
+        outs = set(pk[1] for pk in self.all_outs)
+        ins_p = set(pk[0] for pk in self.all_ins)
+        outs_p = set(pk[0] for pk in self.all_outs)
+        assert(len(ins_p) == 1)
+        assert(len(outs_p) == 1)
+        ins_p = list(ins_p)[0]
+        outs_p = list(outs_p)[0]
+        #print(ins_p, sol_vector)
+        pks = list(ins.union(outs))
+        pks.sort()
+        pks_inv = dict()
+        pkv = []
+        #print("SOL:")
+        for idx, pk in enumerate(pks):
+            pks_inv[pk] = idx
+            #print("PK_G: ", (ins_p, pk))
+            pkv.append(sol_vector.get((ins_p, pk), 0))
+        #print("PKV: ", pkv)
+        pkv = np.array(pkv)
+
+        def lt_val(lt):
+            if isinstance(lt, list):
+                val = 0
+                for sublt in lt:
+                    val += lt_val(sublt)
+            elif isinstance(lt, tuple):
+                val = lt[0]
+                for pk in lt[1:]:
+                    val *= pkv[pks_inv[pk[1]]]  # sol_vector.get(pk, 0)
+            else:
+                raise RuntimeError("BOO")
+            return val
+
+        eye = np.eye(len(pks))
+        Mexp_tot = np.matrix(eye)
+        for idx_N in range(self.N_ode):
+            m1 = np.matrix(np.zeros([len(pks), len(pks)], dtype = object))
+            for pk_out, din in self.ddlt.items():
+                for pk_in, lt in din.items():
+                    val = lt_val(lt)
+                    #print(pk_in, pk_out, val)
+                    idx_in = pks_inv[pk_in[1]]
+                    idx_out = pks_inv[pk_out[1]]
+                    m1[idx_out, idx_in] = val
+            m1 = m1 / self.N_ode
+            Mexp = eye + m1
+            mmem = m1
+            for idx in range(1, self.order):
+                mmem = (1 / (idx + 1)) * m1 * mmem
+                Mexp = Mexp + mmem
+            Mexp_tot = Mexp * Mexp_tot
+            print(pkv)
+            pkv = np.array(Mexp * np.matrix(pkv).T)[:,0]
+            print(pkv)
+
+        #print(m1)
+        #print(Mexp)
+
+        for idx_in in range(len(pks)):
+            for idx_out in range(len(pks)):
+                solution[(ins_p, pks[idx_in]), (outs_p, pks[idx_out])] = Mexp_tot[idx_out, idx_in]
+
+        pprint(pks)
+
+        self.solution = solution
 
 
 class NonlinearCrystal(
@@ -97,8 +186,8 @@ class NonlinearCrystal(
 
     def __build__(self):
         super(NonlinearCrystal, self).__build__()
-        self.Fr   = ports.OpticalPort(sname = 'Fr' )
-        self.Bk   = ports.OpticalPort(sname = 'Bk' )
+        self.my.Fr   = ports.OpticalPort(sname = 'Fr', pchain = lambda : self.Bk)
+        self.my.Bk   = ports.OpticalPort(sname = 'Bk', pchain = lambda : self.Fr)
         return
 
     @declarative.mproperty
@@ -129,9 +218,9 @@ class NonlinearCrystal(
                     if barekey != barekey2:
                         continue
 
-                    okey2 = kfrom[ports.OpticalFreqKey]
-                    ckey2 = kfrom[ports.ClassicalFreqKey]
-                    qkey2 = kfrom[ports.QuantumKey]
+                    okey2 = kfrom2[ports.OpticalFreqKey]
+                    ckey2 = kfrom2[ports.ClassicalFreqKey]
+                    qkey2 = kfrom2[ports.QuantumKey]
 
                     if qkey2 == qkey:
                         #similar quantum keys means sum generation
@@ -166,23 +255,31 @@ class NonlinearCrystal(
             self.Fr: self.Bk,
             self.Bk: self.Fr,
         }
-        ddlt = collections.defaultdict(lambda : collections.defaultdict(list))
 
         for port in self.ports_optical:
+            ddlt = collections.defaultdict(lambda : collections.defaultdict(list))
+            portO = tmap[port]
             for kfrom in matrix_algorithm.port_set_get(port.i):
+                #print("KFR: ", kfrom)
                 okey = kfrom[ports.OpticalFreqKey]
                 ckey = kfrom[ports.ClassicalFreqKey]
                 qkey = kfrom[ports.QuantumKey]
                 barekey = kfrom.without_keys(ports.OpticalFreqKey, ports.ClassicalFreqKey, ports.QuantumKey)
 
-                for kfrom2 in matrix_algorithm.port_full_get(port.i):
+                if qkey == ports.LOWER[ports.QuantumKey]:
+                    G = +self.symbols.i * self.nlg * self.length_mm
+                else:
+                    G = -self.symbols.i * self.nlg * self.length_mm
+
+                for kfrom2 in matrix_algorithm.port_set_get(port.i):
+                    #TODO could halve the number of ops here between these loops
                     barekey2 = kfrom2.without_keys(ports.OpticalFreqKey, ports.ClassicalFreqKey, ports.QuantumKey)
                     if barekey != barekey2:
                         continue
 
-                    okey2 = kfrom[ports.OpticalFreqKey]
-                    ckey2 = kfrom[ports.ClassicalFreqKey]
-                    qkey2 = kfrom[ports.QuantumKey]
+                    okey2 = kfrom2[ports.OpticalFreqKey]
+                    ckey2 = kfrom2[ports.ClassicalFreqKey]
+                    qkey2 = kfrom2[ports.QuantumKey]
 
                     if qkey2 == qkey:
                         #similar quantum keys means sum generation
@@ -193,20 +290,33 @@ class NonlinearCrystal(
                         okeyO = okey - okey2
                         ckeyO = ckey - ckey2
 
-                    if (
-                        not self.system.reject_optical_frequency_order(okeyO)
-                        and
-                        not self.system.reject_classical_frequency_order(ckeyO)
-                    ):
-                        ports_algorithm.port_coupling_needed(
-                            tmap[port].o,
-                            barekey | ports.DictKey({
-                                ports.OpticalFreqKey   : okeyO,
-                                ports.ClassicalFreqKey : ckeyO,
-                                ports.QuantumKey       : qkey
-                            })
+                    kto = barekey | ports.DictKey({
+                        ports.OpticalFreqKey   : okeyO,
+                        ports.ClassicalFreqKey : ckeyO,
+                        ports.QuantumKey       : qkey,
+                    })
+
+                    #print("KFR2: ", kfrom2)
+                    #print("KTO: ", kto)
+                    if kto in matrix_algorithm.port_set_get(portO.o):
+                        ddlt[(portO.o, kto)][(port.i, kfrom)].append(
+                            (G, (port.i, kfrom2))
                         )
-        pprint(ddlt)
+                        print("JOIN: ", kfrom, kfrom2, kto)
+            ddlt2 = dict()
+            for k, v in ddlt.items():
+                v_ = dict()
+                for k2, v2 in v.items():
+                    v_[k2] = v2
+                ddlt2[k] = v_
+            #pprint(ddlt2)
+            matrix_algorithm.injection_insert(
+                ExpMatCoupling(
+                    ddlt = ddlt2,
+                    N_ode = 10,
+                    order = 3,
+                )
+            )
         return
 
 

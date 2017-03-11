@@ -222,6 +222,10 @@ class BGSystem(RootElement):
     def reject_optical_frequency_order(self, fkey):
         #TODO put this logic in a subobject
         group_N = defaultdict(lambda: 0)
+        if len(fkey.F_dict) == 0:
+            #if it is truely DC then reject
+            #TODO optical rectification
+            return True
         for F, N in list(fkey.F_dict.items()):
             N_limit = F.order
             if N_limit is None:

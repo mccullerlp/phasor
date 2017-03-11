@@ -258,12 +258,12 @@ class SystemSolver(object):
             AC_seq      = solution_bunch.AC_seq,
             AC_req      = solution_bunch.AC_req,
         )
-        #print(
-        #    "DELTA V MAX: ",
-        #    solution_bunch.delta_v,
-        #    " AT ORDER: ",
-        #    len(self.driven_solution_bunches)
-        #)
+        print(
+            "DELTA V MAX: ",
+            solution_bunch.delta_v,
+            " AT ORDER: ",
+            len(self.driven_solution_bunches)
+        )
         self.driven_solution_bunches[N]['perturbative'] = solution_bunch
         return solution_bunch
 

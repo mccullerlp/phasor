@@ -86,8 +86,12 @@ class GenericSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
     def system_setup_ports(self, ports_algorithm):
         for kfrom in ports_algorithm.port_update_get(self.Fr.i):
             N_selections = 0
+            #print("KFROM: ", kfrom)
             for pname, (port, key) in list(self.port_map.items()):
+                #print("PORT: ", pname, port, key)
+                #print(key & kfrom)
                 if key & kfrom:
+                    #print("SEL: ", key, kfrom)
                     N_selections += 1
                     ports_algorithm.port_coupling_needed(port.o, kfrom)
                     if not self.check:
