@@ -61,6 +61,10 @@ from .polarization import (
     PolarizingMirror,
 )
 
+from .selective_mirrors import (
+    HarmonicMirror,
+)
+
 from .modulators import (
     AM,
     PM,

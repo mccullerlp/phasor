@@ -4,7 +4,7 @@
 from __future__ import (division, print_function)
 from collections import defaultdict
 
-import declarative as decl
+import declarative
 
 from . import bases
 from . import ports
@@ -64,11 +64,11 @@ class PolSelector(
 
 class GenericSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
 
-    @decl.dproperty
+    @declarative.dproperty
     def select_map(self, val):
         return val
 
-    @decl.dproperty
+    @declarative.dproperty
     def Fr(self):
         return ports.OpticalPort(sname = 'Fr')
 
@@ -130,24 +130,28 @@ class OpticalSelectionStack(
     bases.OpticalCouplerBase,
     bases.SystemElementBase,
 ):
-    def __init__(
-        self,
-        sub_element_map,
-        select_map,
-        port_set = None,
-        **kwargs
-    ):
-        super(OpticalSelectionStack, self).__init__(**kwargs)
+    @declarative.dproperty
+    def sub_element_map(self, val):
+        return val
 
-        if port_set is None:
+    @declarative.dproperty
+    def select_map(self, val):
+        return val
+
+    @declarative.dproperty
+    def port_set(self, val = None):
+        return val
+
+    def __build__(self):
+        super(OpticalSelectionStack, self).__build__()
+
+        if self.port_set is None:
             optical_ports = defaultdict(lambda : 0)
         else:
             optical_ports = None
 
-        for ename, element in list(sub_element_map.items()):
-            setattr(self.my, ename, element)
-            #separate these as the setattr "constructs" the element through the sled mechanism
-            celement = getattr(self, ename)
+        for ename, element in self.sub_element_map.items():
+            celement = self.insert(element, ename)
             #used to check that ports are not redundant (due to aliasing)
             ports_already = set()
             if optical_ports is not None:
@@ -160,6 +164,7 @@ class OpticalSelectionStack(
                     else:
                         raise RuntimeError("HMMM")
 
+        #check that all of the subobjects carry the same optical ports
         if optical_ports is not None:
             pnum_cmn = None
             for pname, pnum in list(optical_ports.items()):
@@ -168,19 +173,16 @@ class OpticalSelectionStack(
                         pnum_cmn == pnum
                     else:
                         assert(False)
-            port_set = set(optical_ports.keys())
+            self.port_set = set(optical_ports.keys())
 
         self.split_ports = {}
-        for pname in port_set:
+        for pname in self.port_set:
             sname = "psel_{0}".format(pname)
-            setattr(self.my, sname, GenericSelector(
-                select_map = select_map,
-            ))
-            psel = getattr(self, sname)
+            psel = self.insert(GenericSelector(select_map = self.select_map), sname)
             self.split_ports[pname] = psel
             setattr(self, pname, psel.Fr)
 
-            for ename, element in list(sub_element_map.items()):
+            for ename, element in self.sub_element_map.items():
                 celement = getattr(self, ename)
                 port = getattr(celement, pname)
                 self.system.bond(psel.port_map[ename][0], port)

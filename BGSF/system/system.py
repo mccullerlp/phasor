@@ -179,6 +179,10 @@ class BGSystem(RootElement):
         return self.environment.my.F_carrier_1064
 
     @declarative.dproperty
+    def FD_carrier_1064(self):
+        return ports.FrequencyKey({self.F_carrier_1064 : 1})
+
+    @declarative.dproperty
     def environment(self):
         return SystemElementBase()
 
