@@ -71,8 +71,8 @@ class HiddenVariableHomodynePD(
         ##Only required if Bk isn't used (not a MagicPD)
         #self._fluct = vacuum.OpticalVacuumFluctuation(port = self.Fr)
 
-        self.my.rtWpdI = ports.SignalOutPort(sname = 'rtWpdI')
-        self.my.rtWpdQ = ports.SignalOutPort(sname = 'rtWpdQ')
+        self.my.rtWpdI   = ports.SignalOutPort(sname = 'rtWpdI')
+        self.my.rtWpdQ   = ports.SignalOutPort(sname = 'rtWpdQ')
         self.my.rtWpdCmn = ports.SignalOutPort(sname = 'rtWpdCmn')
 
         if source_port is None:
@@ -286,34 +286,52 @@ class HiddenVariableHomodynePD(
         for kfrom in matrix_algorithm.port_set_get(self.Bk.i):
             matrix_algorithm.port_coupling_insert(self.Bk.i, kfrom, self.Fr.o, kfrom, 1)
 
-        for kfrom in matrix_algorithm.port_set_get(self.Fr.i):
-            matrix_algorithm.port_coupling_insert(self.Fr.i, kfrom, self.Bk.o, kfrom, 1)
+        if self.source_port != self.Fr.i:
+            for kfrom in matrix_algorithm.port_set_get(self.Fr.i):
+                matrix_algorithm.port_coupling_insert(self.Fr.i, kfrom, self.Bk.o, kfrom, 1)
 
-            modulations_fill_2optical_2classical_hdyne(
-                system             = self.system,
-                matrix_algorithm   = matrix_algorithm,
-                pfrom             = self.Fr.i,
-                kfrom              = kfrom,
-                out_port_classical = self.rtWpdCmn,
-                Stdcplg            = 1,
-                StdcplgC           = 1,
-                BAcplg             = 1,
-                BAcplgC            = 1,
-                pknorm             = self.PWR_tot.pk_WpdDC,
-            )
-        for kfrom in matrix_algorithm.port_set_get(self.source_port):
-            modulations_fill_2optical_2classical_hdyne(
-                system             = self.system,
-                matrix_algorithm   = matrix_algorithm,
-                pfrom             = self.source_port,
-                kfrom              = kfrom,
-                out_port_classical = self.rtWpdCmn,
-                Stdcplg            = 1,
-                StdcplgC           = 1,
-                BAcplg             = 1,
-                BAcplgC            = 1,
-                pknorm             = self.PWR_tot.pk_WpdDC,
-            )
+                modulations_fill_2optical_2classical_hdyne(
+                    system             = self.system,
+                    matrix_algorithm   = matrix_algorithm,
+                    pfrom             = self.Fr.i,
+                    kfrom              = kfrom,
+                    out_port_classical = self.rtWpdCmn,
+                    Stdcplg            = 1,
+                    StdcplgC           = 1,
+                    BAcplg             = 1,
+                    BAcplgC            = 1,
+                    pknorm             = self.PWR_tot.pk_WpdDC,
+                )
+            for kfrom in matrix_algorithm.port_set_get(self.source_port):
+                modulations_fill_2optical_2classical_hdyne(
+                    system             = self.system,
+                    matrix_algorithm   = matrix_algorithm,
+                    pfrom             = self.source_port,
+                    kfrom              = kfrom,
+                    out_port_classical = self.rtWpdCmn,
+                    Stdcplg            = 1,
+                    StdcplgC           = 1,
+                    BAcplg             = 1,
+                    BAcplgC            = 1,
+                    pknorm             = self.PWR_tot.pk_WpdDC,
+                )
+        else:
+            #TODO: double check the constants for this case, may (probably) need factor of 2
+            for kfrom in matrix_algorithm.port_set_get(self.Fr.i):
+                matrix_algorithm.port_coupling_insert(self.Fr.i, kfrom, self.Bk.o, kfrom, 1)
+
+                modulations_fill_2optical_2classical_hdyne(
+                    system             = self.system,
+                    matrix_algorithm   = matrix_algorithm,
+                    pfrom             = self.Fr.i,
+                    kfrom              = kfrom,
+                    out_port_classical = self.rtWpdCmn,
+                    Stdcplg            = 1,
+                    StdcplgC           = 1,
+                    BAcplg             = 1,
+                    BAcplgC            = 1,
+                    pknorm             = self.PWR_tot.pk_WpdDC,
+                )
 
         return
 

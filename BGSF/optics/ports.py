@@ -66,6 +66,9 @@ class OpticalPort(OpticalPortRaw, bases.SystemElementBase):
         self.bond_inform(other.bond_key)
         other.bond_inform(self)
 
+    def bond_sequence(self, *others):
+        return self.system.bond_sequence(self, *others)
+
     def bond_inform(self, other_key):
         #TODO make this smarter
         if self._bond_partner is not None:

@@ -101,51 +101,61 @@ class ExpMatCoupling(FactorCouplingBase):
             #print("PK_G: ", (ins_p, pk))
             pkv.append(sol_vector.get((ins_p, pk), 0))
         #print("PKV: ", pkv)
-        pkv = np.array(pkv)
+        pkv = np.array(pkv, dtype=object)
 
         def lt_val(lt):
             if isinstance(lt, list):
                 val = 0
                 for sublt in lt:
-                    val += lt_val(sublt)
+                    val = lt_val(sublt) + val
             elif isinstance(lt, tuple):
                 val = lt[0]
+                #print("LT0: ", val)
                 for pk in lt[1:]:
-                    val *= pkv[pks_inv[pk[1]]]  # sol_vector.get(pk, 0)
+                    val = val * pkv[pks_inv[pk[1]]]  # sol_vector.get(pk, 0)
             else:
                 raise RuntimeError("BOO")
             return val
 
         eye = np.eye(len(pks))
-        Mexp_tot = np.matrix(eye)
+        Mexp_tot = eye
         for idx_N in range(self.N_ode):
-            m1 = np.matrix(np.zeros([len(pks), len(pks)], dtype = object))
+            m1 = np.zeros([len(pks), len(pks)], dtype = object)
             for pk_out, din in self.ddlt.items():
                 for pk_in, lt in din.items():
                     val = lt_val(lt)
-                    #print(pk_in, pk_out, val)
                     idx_in = pks_inv[pk_in[1]]
                     idx_out = pks_inv[pk_out[1]]
                     m1[idx_out, idx_in] = val
+            #print("M1: ", m1)
             m1 = m1 / self.N_ode
             Mexp = eye + m1
             mmem = m1
             for idx in range(1, self.order):
-                mmem = (1 / (idx + 1)) * m1 * mmem
+                mmem = (1 / (idx + 1)) * np.dot(m1, mmem)
                 Mexp = Mexp + mmem
-            Mexp_tot = Mexp * Mexp_tot
-            print(pkv)
-            pkv = np.array(Mexp * np.matrix(pkv).T)[:,0]
-            print(pkv)
+            Mexp_tot = np.dot(Mexp, Mexp_tot)
+            #print(Mexp.shape, pkv.shape)
+            pkv = np.dot(Mexp, pkv.reshape(-1, 1)).reshape(-1)
+            #print("pkv2:", type(pkv), pkv.shape)
+            #print(pkv)
 
         #print(m1)
         #print(Mexp)
 
         for idx_in in range(len(pks)):
             for idx_out in range(len(pks)):
-                solution[(ins_p, pks[idx_in]), (outs_p, pks[idx_out])] = Mexp_tot[idx_out, idx_in]
+                edge = Mexp_tot[idx_out, idx_in]
+                if np.any(edge != 0):
+                    pk_in = pks[idx_in]
+                    pk_out = pks[idx_out]
+                    #if pk_in[ports.QuantumKey] != pk_out[ports.QuantumKey]:
+                    #    print("SQZY: ", pk_in, pk_out, edge)
+                    #else:
+                    #    print(pk_in, pk_out, edge)
+                solution[(ins_p, pks[idx_in]), (outs_p, pks[idx_out])] = edge
 
-        pprint(pks)
+        #pprint(pks)
 
         self.solution = solution
 
@@ -156,6 +166,19 @@ class NonlinearCrystal(
 ):
     """
     """
+    @declarative.dproperty
+    def N_ode(self, val = 10):
+        """
+        Number of iterations to use in the ODE solution
+        """
+        return val
+
+    @declarative.dproperty
+    def solution_order(self, val = 3):
+        """
+        Taylor expansion order used for the expM in the ODE solution
+        """
+        return val
 
     @declarative.dproperty
     def nlg(self, val):
@@ -245,6 +268,26 @@ class NonlinearCrystal(
                             })
                         )
 
+                    #in the difference case there can also be conjugate generation, so try the other difference as well
+                    if qkey2 != qkey:
+                        #different keys implies difference generation
+                        okeyO = okey2 - okey
+                        ckeyO = ckey2 - ckey
+                        if (
+                            not self.system.reject_optical_frequency_order(okeyO)
+                            and
+                            not self.system.reject_classical_frequency_order(ckeyO)
+                        ):
+                            #note using qkey2
+                            ports_algorithm.port_coupling_needed(
+                                tmap[port].o,
+                                barekey | ports.DictKey({
+                                    ports.OpticalFreqKey   : okeyO,
+                                    ports.ClassicalFreqKey : ckeyO,
+                                    ports.QuantumKey       : qkey2
+                                })
+                            )
+
             for kto in ports_algorithm.port_update_get(port.o):
                 #just pass these to the input and it will deal with them
                 ports_algorithm.port_coupling_needed(tmap[port].i, kto)
@@ -299,10 +342,37 @@ class NonlinearCrystal(
                     #print("KFR2: ", kfrom2)
                     #print("KTO: ", kto)
                     if kto in matrix_algorithm.port_set_get(portO.o):
+                        F_list = list(okeyO.F_dict.items())
+                        if len(F_list) > 1:
+                            raise RuntimeError("Can't Currently do nonlinear optics on multiply composite wavelengths")
+                        F, n = F_list[0]
                         ddlt[(portO.o, kto)][(port.i, kfrom)].append(
-                            (G, (port.i, kfrom2))
+                            (n * G, (port.i, kfrom2))
                         )
-                        print("JOIN: ", kfrom, kfrom2, kto)
+                        #print("JOIN: ", kfrom, kfrom2, kto)
+
+                    #in the difference case there can also be conjugate generation, so try the other difference as well
+                    if qkey2 != qkey:
+                        #note the reversal from above
+                        okeyO = okey2 - okey
+                        ckeyO = ckey2 - ckey
+                        #note using qkey2 and negating the gain for the alternate out conjugation
+                        kto = barekey | ports.DictKey({
+                            ports.OpticalFreqKey   : okeyO,
+                            ports.ClassicalFreqKey : ckeyO,
+                            ports.QuantumKey       : qkey2,
+                        })
+
+                        if kto in matrix_algorithm.port_set_get(portO.o):
+                            F_list = list(okeyO.F_dict.items())
+                            if len(F_list) > 1:
+                                raise RuntimeError("Can't Currently do nonlinear optics on multiply composite wavelengths")
+                            F, n = F_list[0]
+
+                            ddlt[(portO.o, kto)][(port.i, kfrom)].append(
+                                (-n * G, (port.i, kfrom2))
+                            )
+
             ddlt2 = dict()
             for k, v in ddlt.items():
                 v_ = dict()
@@ -313,8 +383,8 @@ class NonlinearCrystal(
             matrix_algorithm.injection_insert(
                 ExpMatCoupling(
                     ddlt = ddlt2,
-                    N_ode = 10,
-                    order = 3,
+                    N_ode = self.N_ode,
+                    order = self.solution_order,
                 )
             )
         return

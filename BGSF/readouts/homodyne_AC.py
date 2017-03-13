@@ -153,7 +153,7 @@ class HomodyneACReadoutBase(base.SystemElementBase):
         rtDisc = np.sqrt((NIQ[0, 0] - NIQ[1, 1])**2 + 4*(NIQ[0, 1]*NIQ[1, 0]))
         min_eig = (NIQ[0, 0] + NIQ[1, 1] - rtDisc)/2
         max_eig = (NIQ[0, 0] + NIQ[1, 1] + rtDisc)/2
-        disc = NIQ[0, 0] - min_eig
+        disc = np.asarray(NIQ[0, 0] - min_eig)
         disc[disc < 0] = 0
         ratio = ((NIQ[1, 0] > 0)*2 - 1) * np.sqrt(disc / (max_eig - min_eig))
         ang_rad = np.pi - np.arccos(ratio)

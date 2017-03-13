@@ -12,6 +12,8 @@ class FactorCouplingBase(object):
     edges_pkpk_dict = {}
     edges_NZ_pkset_dict = {}
 
+    #this is a dict from (pkfrom, pkto) edges into collections of pk nodes that need to be included in the
+    #solution vector
     @property
     def edges_req_pkset_dict(self):
         return self.edges_NZ_pkset_dict
@@ -20,6 +22,8 @@ class FactorCouplingBase(object):
     sources_pk_dict = {}
     sources_NZ_pkset_dict = {}
 
+    #this is a (pk) source nodes into collections of pk nodes that need to be included in the
+    #solution vector
     @property
     def sources_req_pkset_dict(self):
         return self.sources_NZ_pkset_dict

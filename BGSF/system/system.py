@@ -166,7 +166,7 @@ class BGSystem(RootElement):
         self.environment.my.F_AC = Frequency(
             F_Hz  = val,
             name  = 'AC',
-            order = 1,
+            order = 2,
         )
         return self.environment.my.F_AC
 
