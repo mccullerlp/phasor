@@ -81,8 +81,8 @@ class Laser(
     def system_setup_coupling(self, matrix_algorithm):
         field_rtW = self.symbols.math.sqrt(self.power_W.val)
         if self.phase_rad.val is not 0:
-            cplg = self.symbols.math.exp(self.symbols.i2pi * self.phase_rad.val)
-            cplgC = self.symbols.math.exp(-self.symbols.i2pi * self.phase_rad.val)
+            cplg = self.symbols.math.exp(self.symbols.i * self.phase_rad.val)
+            cplgC = self.symbols.math.exp(-self.symbols.i * self.phase_rad.val)
             matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.LOWER, field_rtW * cplg)
             matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.RAISE, field_rtW * cplgC)
         else:

@@ -14,6 +14,7 @@ class KTPTestStand(optics.OpticalCouplerBase):
             F = self.system.F_carrier_1064,
             power_W = 0.,
             multiple = 2,
+            phase_deg = 90,
         )
         self.my.PSLR = optics.Laser(
             F = self.system.F_carrier_1064,
@@ -24,6 +25,7 @@ class KTPTestStand(optics.OpticalCouplerBase):
             F = self.system.F_carrier_1064,
             power_W = 1.,
             multiple = 2,
+            phase_deg = 90,
         )
         self.my.PSLRs = optics.Laser(
             F = self.system.F_carrier_1064,
@@ -64,7 +66,7 @@ class KTPTestStand(optics.OpticalCouplerBase):
             include_quanta = True,
         )
         self.my.hPD_G = optics.HiddenVariableHomodynePD(
-            #source_port = self.PSLGs.Fr.o,
+            source_port = self.PSLGs.Fr.o,
             include_quanta = True,
         )
 
@@ -90,35 +92,38 @@ class KTPTestStand(optics.OpticalCouplerBase):
         self.my.DC_G = readouts.DCReadout(
             port = self.PD_G.Wpd.o,
         )
-        self.my.AC_G = readouts.HomodyneACReadout(
-            portNI = self.hPD_G.rtQuantumI.o,
-            portNQ = self.hPD_G.rtQuantumQ.o,
-            portD  = self.ditherAM.Drv.i,
-        )
-        self.my.AC_R = readouts.HomodyneACReadout(
-            portNI = self.hPD_R.rtQuantumI.o,
-            portNQ = self.hPD_R.rtQuantumQ.o,
-            portD  = self.ditherAM.Drv.i,
-        )
-        self.my.AC_RGI = readouts.HomodyneACReadout(
-            portNI = self.hPD_R.rtQuantumI.o,
-            portNQ = self.hPD_G.rtQuantumI.o,
-            portD  = self.ditherAM.Drv.i,
-        )
-        self.my.AC_N = readouts.NoiseReadout(
-            port_map = dict(
-                RI = self.hPD_R.rtQuantumI.o,
-                RQ = self.hPD_R.rtQuantumQ.o,
-                GI = self.hPD_G.rtQuantumI.o,
-                GQ = self.hPD_G.rtQuantumQ.o,
+        if self.ooa_params.setdefault('include_AC', True):
+            self.my.AC_G = readouts.HomodyneACReadout(
+                portNI = self.hPD_G.rtQuantumI.o,
+                portNQ = self.hPD_G.rtQuantumQ.o,
+                portD  = self.ditherAM.Drv.i,
             )
-        )
+            self.my.AC_R = readouts.HomodyneACReadout(
+                portNI = self.hPD_R.rtQuantumI.o,
+                portNQ = self.hPD_R.rtQuantumQ.o,
+                portD  = self.ditherAM.Drv.i,
+            )
+            self.my.AC_RGI = readouts.HomodyneACReadout(
+                portNI = self.hPD_R.rtQuantumI.o,
+                portNQ = self.hPD_G.rtQuantumI.o,
+                portD  = self.ditherAM.Drv.i,
+            )
+            self.my.AC_N = readouts.NoiseReadout(
+                port_map = dict(
+                    RI = self.hPD_R.rtQuantumI.o,
+                    RQ = self.hPD_R.rtQuantumQ.o,
+                    GI = self.hPD_G.rtQuantumI.o,
+                    GQ = self.hPD_G.rtQuantumQ.o,
+                )
+            )
 
     def full_noise_matrix(self, lst = ['RI', 'RQ', 'GI', 'GQ'], display = True):
         arr = np.zeros((len(lst), len(lst)))
         for idx_L, NL in enumerate(lst):
             for idx_R, NR in enumerate(lst):
                 arr[idx_L, idx_R] = self.AC_N.CSD[(NL, NR)].real
+        #clean up the presentation
+        arr[arr < 1e-10] = 0
         if display:
             try:
                 import tabulate

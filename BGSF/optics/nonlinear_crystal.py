@@ -172,6 +172,7 @@ class NonlinearCrystal(
         """
         Number of iterations to use in the ODE solution
         """
+        val = self.ooa_params.setdefault('N_ode', val)
         return val
 
     @declarative.dproperty
@@ -179,6 +180,7 @@ class NonlinearCrystal(
         """
         Taylor expansion order used for the expM in the ODE solution
         """
+        val = self.ooa_params.setdefault('solution_order', val)
         return val
 
     @declarative.dproperty
