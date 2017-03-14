@@ -112,7 +112,9 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
 
     @declarative.dproperty
     def ref(self):
-        val = self.ooa_params.ref
+        val = self.ooa_params.get('ref', declarative.NOARG)
+        if val is declarative.NOARG:
+            return self.val
         if val is not None:
             return val * self.ooa_units_scale
         else:

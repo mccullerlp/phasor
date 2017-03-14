@@ -5,6 +5,7 @@ from __future__ import division, print_function
 
 import declarative as decl
 from declarative.utilities import SuperBase
+from declarative import bunch
 import declarative.substrate as dsubstrate
 from . import visitors as VISIT
 import warnings
@@ -33,6 +34,13 @@ class Element(dsubstrate.Element):
         if typename == VISIT.self:
             return self
         return None
+
+    def ooa_as_yaml(self):
+        import yaml
+        db = bunch.DeepBunchSingleAssign()
+        db.update_recursive(self.ooa_params)
+        return yaml.dump(db._mydict_resolved)
+
     #def insert(self, obj, name = None, invalidate = True):
     #    print("INSERT", obj, name, invalidate)
     #    super(Element, self).insert(obj, name = name, invalidate = invalidate)

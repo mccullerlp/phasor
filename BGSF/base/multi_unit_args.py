@@ -40,8 +40,9 @@ def generate_refval_attribute(
         if self.inst_prototype_t in prototypes:
             #TODO make this do the correct thing
             oattr = getattr(self.inst_prototype, preferred_attr[0])
-            ooa.ref   = oattr.ref
             ooa.val   = oattr.val
+            if ooa.ref is not ooa.val:
+                ooa.ref   = oattr.ref
             ooa.units = str(oattr.units)
             #self.ooa_params[ooa_name]["from"] = self.inst_prototype.name_system + "." + preferred_attr
             sources.clear()
@@ -65,17 +66,19 @@ def generate_refval_attribute(
                 ooa = ooa.useidx('immediate')
                 if v is not None:
                     if isinstance(v, simple_units.SimpleUnitfulGroup):
-                        ooa.setdefault("ref",   v.ref)
                         ooa.setdefault("val",   v.val)
+                        if v.val is not v.ref:
+                            ooa.setdefault("ref",   v.ref)
                         ooa.setdefault("units", pint.mag1_units(v.units))
                     elif isinstance(v, pint.ureg.Quantity):
-                        ooa.setdefault("ref",   v.magnitude)
                         ooa.setdefault("val",   v.magnitude)
+                        if v.val is not v.ref:
+                            ooa.setdefault("ref",   v.ref)
                         ooa.setdefault("units", pint.mag1_units(v.units))
                     elif isinstance(v, pint.ureg.Unit):
                         ooa.setdefault("units", pint.mag1_units(v))
-                        ooa.setdefault("ref",  1)
                         ooa.setdefault("val",  1)
+                        #ooa.setdefault("ref",  1)
                     else:
                         raise RuntimeError(
                             "Must be either a unitfulgroup, or a pint.Quantity"
@@ -86,16 +89,16 @@ def generate_refval_attribute(
                 else:
                     #TODO not happy with this string conversion
                     ooa.setdefault("units", str(ubunch.principle_unit))
-                    ooa.setdefault("ref", None)
                     ooa.setdefault("val", None)
+                    #ooa.setdefault("ref", None)
             else:
                 #TODO not thrilled about this conversion
-                unit = str(ubunch.umap[units[k]])
+                unit = ubunch.umap[units[k]]
                 #setup defaults
                 ooa = ooa.useidx('immediate')
                 ooa.setdefault("units", pint.mag1_units(unit))
-                ooa.setdefault("ref", v)
-                ooa.setdefault("val", ooa.ref)
+                ooa.setdefault("val", v)
+                #ooa.setdefault("ref", ooa.val)
         return
 
     if preferred_attr:
@@ -158,8 +161,9 @@ def unitless_refval_attribute(
         if self.inst_prototype_t in prototypes:
             #TODO make this do the correct thing
             oattr = getattr(self.inst_prototype, desc.__name__)
-            ooa.ref   = oattr.ref
             ooa.val   = oattr.val
+            if ooa.ref is not ooa.val:
+                ooa.ref   = oattr.ref
             ooa.units = str(oattr.units)
             #self.ooa_params[ooa_name]["from"] = self.inst_prototype.name_system + "." + preferred_attr
         else:
@@ -214,8 +218,9 @@ def arbunit_refval_attribute(
         if self.inst_prototype_t in prototypes:
             #TODO make this do the correct thing
             oattr = getattr(self.inst_prototype, desc.__name__)
-            ooa.ref   = oattr.ref
             ooa.val   = oattr.val
+            if ooa.ref is not ooa.val:
+                ooa.ref   = oattr.ref
             ooa.units = str(oattr.units)
             #self.ooa_params[ooa_name]["from"] = self.inst_prototype.name_system + "." + preferred_attr
         else:

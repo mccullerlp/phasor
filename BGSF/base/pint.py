@@ -10,5 +10,7 @@ def mag1_units(pint_quantity):
         #TODO make this a real float check with an epsilon
         if pint_quantity.magnitude == 1:
             return str(pint_quantity.units)
+    if isinstance(pint_quantity, str):
+        assert(False)
     return str(pint_quantity)
 

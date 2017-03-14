@@ -24,12 +24,14 @@ class Laser(
     def Fr(self):
         return ports.OpticalPort(sname = 'Fr')
 
+    power = standard_attrs.generate_power()
+    phase = standard_attrs.generate_rotate(name = 'phase')
+    _phase_default = ('phase_rad', 0)
+
     @decl.dproperty
     def polarization(self, val = 'S'):
         val = self.ooa_params.setdefault('polarization', val)
         return val
-
-    power = standard_attrs.generate_power()
 
     @decl.dproperty
     def F(self, val):
@@ -49,7 +51,6 @@ class Laser(
         #TODO add realistic laser noise
         return vacuum.OpticalVacuumFluctuation(port = self.Fr)
 
-    phased = False
     multiple = 1
 
     @decl.dproperty
@@ -79,9 +80,11 @@ class Laser(
 
     def system_setup_coupling(self, matrix_algorithm):
         field_rtW = self.symbols.math.sqrt(self.power_W.val)
-        if self.phased:
-            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.LOWER, field_rtW * self.symbols.i)
-            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.RAISE, -field_rtW * self.symbols.i)
+        if self.phase_rad.val is not 0:
+            cplg = self.symbols.math.exp(self.symbols.i2pi * self.phase_rad.val)
+            cplgC = self.symbols.math.exp(-self.symbols.i2pi * self.phase_rad.val)
+            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.LOWER, field_rtW * cplg)
+            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.RAISE, field_rtW * cplgC)
         else:
             matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.LOWER, field_rtW)
             matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.RAISE, field_rtW)

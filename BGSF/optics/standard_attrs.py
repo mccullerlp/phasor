@@ -46,7 +46,7 @@ def generate_length(name = 'length'):
     return generate_L_detune(name = name)
 
 
-def generate_rotate(name = 'rotate'):
+def generate_rotate(name = 'rotate', default = True):
     @decl.group_dproperty
     def rotate(desc):
         return generate_refval_attribute(
@@ -55,7 +55,7 @@ def generate_rotate(name = 'rotate'):
             stems = [name, ],
             ooa_name = name,
             preferred_attr = name,
-            default_attr = '_{0}_default'.format(name),
+            default_attr = '_{0}_default'.format(name) if default else None,
             prototypes = ['full', 'base'],
         )
     rotate.__name__ = name

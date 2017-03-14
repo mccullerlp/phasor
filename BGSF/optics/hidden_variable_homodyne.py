@@ -59,10 +59,12 @@ class HiddenVariableHomodynePD(
         source_port      = None,
         phase_deg        = 0,
         include_readouts = False,
+        include_quanta   = False,
         **kwargs
     ):
         #TODO make optional, requires adjusting the ports.OpticalNonOriented1PortMixin base to be adjustable
         super(HiddenVariableHomodynePD, self).__init__(**kwargs)
+        self.include_quanta = include_quanta
 
         self.my.Fr    = ports.OpticalPort(sname = 'Fr', pchain = 'Bk')
         bases.OOA_ASSIGN(self).phase_deg = phase_deg
@@ -75,6 +77,11 @@ class HiddenVariableHomodynePD(
         self.my.rtWpdQ   = ports.SignalOutPort(sname = 'rtWpdQ')
         self.my.rtWpdCmn = ports.SignalOutPort(sname = 'rtWpdCmn')
 
+        if self.include_quanta:
+            self.my.rtQuantumI   = ports.SignalOutPort(sname = 'rtQuantumI')
+            self.my.rtQuantumQ   = ports.SignalOutPort(sname = 'rtQuantumQ')
+            self.my.rtQuantumCmn = ports.SignalOutPort(sname = 'rtQuantumCmn')
+
         if source_port is None:
             self.source_port = self.Fr.i
         else:
@@ -82,13 +89,17 @@ class HiddenVariableHomodynePD(
             self.system.own_port_virtual(self, self.source_port)
 
         self.my.PWR_tot = TotalDCPowerPD(
-            port = self.source_port,
+            port           = self.source_port,
+            #include_quanta = self.include_quanta,
         )
 
         bases.OOA_ASSIGN(self).include_readouts = include_readouts
         if self.include_readouts:
             self.my.I_DC    = readouts.DCReadout(port = self.rtWpdI.o)
             self.my.Q_DC    = readouts.DCReadout(port = self.rtWpdQ.o)
+            if self.include_quanta:
+                self.my.qI_DC    = readouts.DCReadout(port = self.rtQuantumI.o)
+                self.my.qQ_DC    = readouts.DCReadout(port = self.rtQuantumQ.o)
         return
 
     def system_setup_ports(self, ports_algorithm):
@@ -105,7 +116,11 @@ class HiddenVariableHomodynePD(
                     qKey = ports.LOWER
                 if self.system.reject_classical_frequency_order(fnew):
                     continue
-                kfrom2 = kfrom.without_keys(ports.QuantumKey, ports.ClassicalFreqKey) | ports.DictKey({ports.ClassicalFreqKey: fnew}) | qKey
+                kfrom2 = (
+                    kfrom.without_keys(ports.QuantumKey, ports.ClassicalFreqKey)
+                    | ports.DictKey({ports.ClassicalFreqKey: fnew})
+                    | qKey
+                )
                 ports_algorithm.port_coupling_needed(pfrom, kfrom2)
 
             def subset_second(pool2):
@@ -145,6 +160,13 @@ class HiddenVariableHomodynePD(
         referred_ports_fill(
             out_port_classical = self.rtWpdQ,
         )
+        if self.include_quanta:
+            referred_ports_fill(
+                out_port_classical = self.rtQuantumI,
+            )
+            referred_ports_fill(
+                out_port_classical = self.rtQuantumQ,
+            )
 
         ports_fill_2optical_2classical_hdyne(
             system = self.system,
@@ -152,6 +174,13 @@ class HiddenVariableHomodynePD(
             ports_in_optical = [self.Fr.i, self.source_port],
             out_port_classical = self.rtWpdCmn,
         )
+        if self.include_quanta:
+            ports_fill_2optical_2classical_hdyne(
+                system = self.system,
+                ports_algorithm = ports_algorithm,
+                ports_in_optical = [self.Fr.i, self.source_port],
+                out_port_classical = self.rtQuantumCmn,
+            )
 
         pmap = {
             self.Fr.i : self.Bk.o,
@@ -191,6 +220,8 @@ class HiddenVariableHomodynePD(
             def insert_coupling(
                     out_port_classical,
                     Stdcplg, StdcplgC,
+                    norm_port,
+                    as_quanta,
             ):
                 lktos = matrix_algorithm.port_set_get(out_port_classical.o)
                 lkto_completed = set()
@@ -226,6 +257,13 @@ class HiddenVariableHomodynePD(
                         ktoOptN = kfrom.without_keys(ports.ClassicalFreqKey) | ports.DictKey({ports.ClassicalFreqKey: ftoOptN})
                     else:
                         ktoOptN = None
+
+                    if not as_quanta:
+                        cplg_adjust = 1
+                    else:
+                        iwavelen_m, freq_Hz = self.system.optical_frequency_extract(kfrom)
+                        cplg_adjust = 1/(self.symbols.h_Js * self.symbols.c_m_s * iwavelen_m / 2)**.5
+
                     #Both raising and lowering use optCplgC because it is always the conjugate to the other, so it always matches ports.LOWER with the classical field of ports.RAISE
                     #and vice-versa
                     if kfrom.contains(ports.LOWER):
@@ -235,8 +273,8 @@ class HiddenVariableHomodynePD(
                                 pkfrom      = (self.Fr.i,            ktoOptP),
                                 pkto        = (out_port_classical.o, lkto),
                                 pksrc       = optCplgC,
-                                pknorm      = self.PWR_tot.pk_WpdDC,
-                                cplg        = Stdcplg / 2,
+                                pknorm      = norm_port,
+                                cplg        = Stdcplg / 2 * cplg_adjust,
                             )
                             matrix_algorithm.injection_insert(inj)
                         if lktoN != lkto and ktoOptN is not None:
@@ -244,8 +282,8 @@ class HiddenVariableHomodynePD(
                                 pkfrom      = (self.Fr.i, ktoOptN),
                                 pkto        = (out_port_classical.o, lktoN),
                                 pksrc       = optCplgC,
-                                pknorm      = self.PWR_tot.pk_WpdDC,
-                                cplg        = Stdcplg / 2,
+                                pknorm      = norm_port,
+                                cplg        = Stdcplg / 2 * cplg_adjust,
                             )
                             matrix_algorithm.injection_insert(inj)
                     elif kfrom.contains(ports.RAISE):
@@ -256,8 +294,8 @@ class HiddenVariableHomodynePD(
                                 pkfrom      = (self.Fr.i, ktoOptP),
                                 pkto        = (out_port_classical.o, lktoN),
                                 pksrc       = optCplgC,
-                                pknorm      = self.PWR_tot.pk_WpdDC,
-                                cplg        = StdcplgC / 2,
+                                pknorm      = norm_port,
+                                cplg        = StdcplgC / 2 * cplg_adjust,
                             )
                             matrix_algorithm.injection_insert(inj)
                         if lktoN != lkto and ktoOptN is not None:
@@ -265,8 +303,8 @@ class HiddenVariableHomodynePD(
                                 pkfrom      = (self.Fr.i, ktoOptN),
                                 pkto        = (out_port_classical.o, lkto),
                                 pksrc       = optCplgC,
-                                pknorm      = self.PWR_tot.pk_WpdDC,
-                                cplg        = StdcplgC / 2,
+                                pknorm      = norm_port,
+                                cplg        = StdcplgC / 2 * cplg_adjust,
                             )
                             matrix_algorithm.injection_insert(inj)
                     else:
@@ -276,12 +314,31 @@ class HiddenVariableHomodynePD(
                 self.rtWpdI,
                 Stdcplg,
                 StdcplgC,
+                norm_port = self.PWR_tot.pk_WpdDC,
+                as_quanta = False,
             )
             insert_coupling(
                 self.rtWpdQ,
                 self.symbols.i * Stdcplg,
                 -self.symbols.i * StdcplgC,
+                norm_port = self.PWR_tot.pk_WpdDC,
+                as_quanta = False,
             )
+            if self.include_quanta:
+                insert_coupling(
+                    self.rtQuantumI,
+                    Stdcplg,
+                    StdcplgC,
+                    norm_port = self.PWR_tot.pk_WpdDC,
+                    as_quanta = True,
+                )
+                insert_coupling(
+                    self.rtQuantumQ,
+                    self.symbols.i * Stdcplg,
+                    -self.symbols.i * StdcplgC,
+                    norm_port = self.PWR_tot.pk_WpdDC,
+                    as_quanta = True,
+                )
 
         for kfrom in matrix_algorithm.port_set_get(self.Bk.i):
             matrix_algorithm.port_coupling_insert(self.Bk.i, kfrom, self.Fr.o, kfrom, 1)
@@ -343,15 +400,24 @@ class TotalDCPowerPD(
     def __init__(
             self,
             port,
+            include_quanta = False,
             **kwargs
     ):
         #TODO make magic optional
         super(TotalDCPowerPD, self).__init__(**kwargs)
-        self.port  = port
+        self.include_quanta = include_quanta
+        self.port           = port
+
         self.system.own_port_virtual(self, self.port)
-        self.my.WpdDC = ports.SignalOutPort(sname = 'WpdDC')
-        self.fdkey  = ports.DictKey({ports.ClassicalFreqKey: ports.FrequencyKey({})})
-        self.pk_WpdDC = (self.WpdDC.o, self.fdkey)
+
+        self.my.WpdDC       = ports.SignalOutPort(sname = 'WpdDC')
+        self.fdkey          = ports.DictKey({ports.ClassicalFreqKey: ports.FrequencyKey({})})
+        self.pk_WpdDC       = (self.WpdDC.o, self.fdkey)
+
+        if self.include_quanta:
+            self.my.QuantaDC       = ports.SignalOutPort(sname = 'QuantaDC')
+            self.fdkey          = ports.DictKey({ports.ClassicalFreqKey: ports.FrequencyKey({})})
+            self.pk_QuantaDC       = (self.QuantaDC.o, self.fdkey)
         return
 
     def system_setup_ports(self, ports_algorithm):
@@ -366,6 +432,11 @@ class TotalDCPowerPD(
             self.WpdDC.o,
             self.fdkey,
         )
+        if self.include_quanta:
+            ports_algorithm.port_coupling_needed(
+                self.QuantaDC.o,
+                self.fdkey,
+            )
         return
 
     def system_setup_coupling(self, matrix_algorithm):
@@ -381,6 +452,15 @@ class TotalDCPowerPD(
                 1 / 2,
                 (self.port, kfrom_conj),
             )
+            if self.include_quanta:
+                iwavelen_m, freq_Hz = self.system.optical_frequency_extract(kfrom)
+                pwr = self.symbols.h_Js * self.symbols.c_m_s * iwavelen_m / 2
+                matrix_algorithm.port_coupling_insert(
+                    self.port, kfrom,
+                    self.QuantaDC.o, self.fdkey,
+                    1 / 2 / pwr,
+                    (self.port, kfrom_conj),
+                )
         return
 
 

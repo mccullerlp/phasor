@@ -73,3 +73,7 @@ from .modulators import (
 from .hidden_variable_homodyne import (
     HiddenVariableHomodynePD,
 )
+
+from .nonlinear_crystal import (
+    NonlinearCrystal,
+)
