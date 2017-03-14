@@ -9,6 +9,7 @@ import declarative
 
 from . import ports
 from . import bases
+from . import standard_attrs
 from ..utilities.print import pprint
 
 from ..system.matrix_injections import (
@@ -190,13 +191,16 @@ class NonlinearCrystal(
         val = self.ooa_params.setdefault('nlg', val)
         return val
 
-    @declarative.dproperty
-    def length_mm(self, val = 10):
-        """
-        in [mm]
-        """
-        val = self.ooa_params.setdefault('length_mm', val)
-        return val
+    #@declarative.dproperty
+    #def length_mm(self, val = 10):
+    #    """
+    #    in [mm]
+    #    """
+    #    val = self.ooa_params.setdefault('length_mm', val)
+    #    return val
+
+    _length_default = '10mm'
+    length = standard_attrs.generate_length()
 
     @declarative.dproperty
     def loss(self, val = 0):
@@ -310,9 +314,9 @@ class NonlinearCrystal(
                 barekey = kfrom.without_keys(ports.OpticalFreqKey, ports.ClassicalFreqKey, ports.QuantumKey)
 
                 if qkey == ports.LOWER[ports.QuantumKey]:
-                    G = +self.symbols.i * self.nlg * self.length_mm
+                    G = +self.symbols.i * self.nlg * self.length_mm.val
                 else:
-                    G = -self.symbols.i * self.nlg * self.length_mm
+                    G = -self.symbols.i * self.nlg * self.length_mm.val
 
                 for kfrom2 in matrix_algorithm.port_set_get(port.i):
                     #TODO could halve the number of ops here between these loops

@@ -60,6 +60,7 @@ def generate_refval_attribute(
             else:
                 k, v = sources.popitem()
 
+            #print("FINAL: ", k, v)
             if k in preferred_attr:
                 ooa = ooa.useidx('immediate')
                 if v is not None:
@@ -111,6 +112,7 @@ def generate_refval_attribute(
             )
         for pattr in preferred_attr:
             desc.mproperty(PREFERRED, name = pattr)
+        #desc.default(PREFERRED)
 
     def VALUE(
         self,
