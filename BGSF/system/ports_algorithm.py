@@ -10,6 +10,8 @@ from ..base import (
     DictKey,
 )
 
+from ..base import ports
+
 
 class PortUpdatesAlgorithm(object):
     def __init__(
@@ -154,6 +156,7 @@ class PortUpdatesAlgorithm(object):
         self.coherent_sources_needed(pto, kto)
 
     def readout_port_needed(self, pto, kto, portsets = ()):
+        assert(self.system.root is pto[ports.ElementKey].root)
         self.coherent_sources_needed(pto, kto)
         for pset in portsets:
             self.readout_pk_sets[pset].add((pto, kto))

@@ -264,6 +264,7 @@ class BGSystem(RootElement):
         return True
 
     def _setup_sequence(self):
+        self._complete()
         assert(not self._frozen)
         while self._include_lst:
             self.do_includes()
@@ -369,6 +370,7 @@ class BGSystem(RootElement):
             self.elements_named[element.name_system] = element
 
     def _autoterminate(self):
+        #TODO purge this code since now bonds handle autotermination
         terminated_ports = set(self.bonded_set)
         registered_ports = set(self.port_owners.keys())
         unterminated_ports = registered_ports - terminated_ports
@@ -391,10 +393,11 @@ class BGSystem(RootElement):
                 #print("with ", tinst)
                 self.bond(pobj, tinst.Fr)
 
-        for port, obj in self.targets_recurse(VISIT.auto_terminate):
-            #print("Autoterminating port:", port)
-            #print("with ", obj)
-            pass
+        with self.building:
+            for port, obj in self.targets_recurse(VISIT.auto_terminate):
+                #print("Autoterminating port:", port)
+                #print("with ", obj)
+                pass
         return
 
     def bond(self, port_A, port_B):
@@ -454,6 +457,8 @@ class BGSystem(RootElement):
 
     def own_port_virtual(self, element, port):
         #TODO rename bond port virtual
+        assert(self.root is port.element.root)
+        assert(self.element.root is self.root)
         self.port_owners_virtual[port].add(element)
         self.owners_ports_virtual.setdefault(element, []).append(port)
         return
