@@ -53,6 +53,16 @@ lengths_small = units_map(
     #feet = None,
 )
 
+time_small = units_map(
+    principle = 's',
+    s  = None,
+    fs = None,
+    ps = None,
+    ns = None,
+    us = None,
+    ms = None,
+)
+
 mass_small = units_map(
     principle = 'kg',
     g  = None,

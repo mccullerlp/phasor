@@ -27,22 +27,13 @@ class ExpMatCoupling(FactorCouplingBase):
     tups represent series multiplication, the first term is a raw number coefficient and any further are keys in the source
     vector
     """
-    #__slots__ = (
-    #    'pkfrom1',
-    #    'pkfrom2',
-    #    'pkto',
-    #    'cplg',
-    #    'edges_pkpk_dict',
-    #    'edges_NZ_pkset_dict',
-    #    'sources_pk_dict',
-    #    'sources_NZ_pkset_dict',
-    #)
 
     #must redefine since it was a property
     edges_req_pkset_dict = None
     def __init__(
         self,
         ddlt,
+        out_map,
         N_ode = 1,
         order = 2,
     ):
@@ -96,13 +87,16 @@ class ExpMatCoupling(FactorCouplingBase):
         pks.sort()
         pks_inv = dict()
         pkv = []
-        #print("SOL:")
+        #pprint("PKS:")
+        #pprint(pks)
         for idx, pk in enumerate(pks):
             pks_inv[pk] = idx
             #print("PK_G: ", (ins_p, pk))
             pkv.append(sol_vector.get((ins_p, pk), 0))
+        _pkv = np.empty(len(pkv), dtype=object)
+        _pkv[:] = pkv
+        pkv = _pkv
         #print("PKV: ", pkv)
-        pkv = np.array(pkv, dtype=object)
 
         def lt_val(lt):
             if isinstance(lt, list):
@@ -150,6 +144,7 @@ class ExpMatCoupling(FactorCouplingBase):
                 if np.any(edge != 0):
                     pk_in = pks[idx_in]
                     pk_out = pks[idx_out]
+                    #TODO: add debug config reference for this print
                     #if pk_in[ports.QuantumKey] != pk_out[ports.QuantumKey]:
                     #    print("SQZY: ", pk_in, pk_out, edge)
                     #else:
@@ -307,6 +302,7 @@ class NonlinearCrystal(
 
         for port in self.ports_optical:
             ddlt = collections.defaultdict(lambda : collections.defaultdict(list))
+            out_map = dict()
             portO = tmap[port]
             for kfrom in matrix_algorithm.port_set_get(port.i):
                 #print("KFR: ", kfrom)
@@ -352,9 +348,11 @@ class NonlinearCrystal(
                         if len(F_list) > 1:
                             raise RuntimeError("Can't Currently do nonlinear optics on multiply composite wavelengths")
                         F, n = F_list[0]
+                        #TODO finish out_map logic
                         ddlt[(portO.o, kto)][(port.i, kfrom)].append(
                             (n * G, (port.i, kfrom2))
                         )
+                        out_map[(port.i, kto)] = (portO.o, kto)
                         #print("JOIN: ", kfrom, kfrom2, kto)
 
                     #in the difference case there can also be conjugate generation, so try the other difference as well
@@ -389,6 +387,7 @@ class NonlinearCrystal(
             matrix_algorithm.injection_insert(
                 ExpMatCoupling(
                     ddlt = ddlt2,
+                    out_map = out_map,
                     N_ode = self.N_ode,
                     order = self.solution_order,
                 )

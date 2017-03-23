@@ -21,7 +21,7 @@ class MirrorSelectionStack(
     @declarative.dproperty
     def port_set(self):
         if self.AOI_deg == 0:
-            return set(['Fr', 'Fr'])
+            return set(['Fr', 'Bk'])
         else:
             return set(['FrA', 'FrB', 'BkA', 'BkB'])
 
@@ -32,6 +32,10 @@ class MirrorSelectionStack(
         if self.AOI_deg == 0:
             self.Fr.pchain = self.Bk
             self.Bk.pchain = self.Fr
+            self.FrA = self.Fr
+            self.FrB = self.Fr
+            self.BkA = self.Bk
+            self.BkB = self.Bk
         else:
             self.FrA.pchain = self.BkA
             self.BkA.pchain = self.FrA

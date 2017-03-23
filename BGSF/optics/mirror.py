@@ -30,6 +30,10 @@ class Mirror(
 ):
 
     @decl.dproperty
+    def flip_sign(self, val = False):
+        return val
+
+    @decl.dproperty
     def T_hr(self, val = 0):
         val = self.ooa_params.setdefault('T_hr', val)
         return val
@@ -291,12 +295,20 @@ class Mirror(
             self.BkB: (self.FrB   , t),
         }
 
-        rmap = {
-            self.FrA: (self.FrB   , r),
-            self.BkA: (self.BkB   , r_neg),
-            self.FrB: (self.FrA   , r),
-            self.BkB: (self.BkA   , r_neg),
-        }
+        if not self.flip_sign:
+            rmap = {
+                self.FrA: (self.FrB   , r),
+                self.BkA: (self.BkB   , r_neg),
+                self.FrB: (self.FrA   , r),
+                self.BkB: (self.BkA   , r_neg),
+            }
+        else:
+            rmap = {
+                self.FrA: (self.FrB   , r_neg),
+                self.BkA: (self.BkB   , r),
+                self.FrB: (self.FrA   , r_neg),
+                self.BkB: (self.BkA   , r),
+            }
 
         lmap = {
             self._LFrA: (self.FrA   , l),

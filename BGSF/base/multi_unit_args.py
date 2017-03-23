@@ -2,6 +2,8 @@
 TODO: Add additional data to "ref" for a standard width. Ref can be the center, there can be a width, and val is the true (possibly symbolic) value
 """
 from __future__ import division, print_function
+import collections
+import declarative
 
 from . import simple_units
 from . import pint
@@ -141,9 +143,10 @@ def generate_refval_attribute(
 
 def unitless_refval_attribute(
     desc,
-    prototypes,
-    ooa_name = None,
-    default_attr = None,
+    prototypes    = ['full', 'base'],
+    ooa_name      = None,
+    default_attr  = None,
+    allow_fitting = True,
 ):
     """
     for dproperty_adv
@@ -155,44 +158,54 @@ def unitless_refval_attribute(
     @desc.construct
     def CONSTRUCT(
             self,
-            arg,
+            arg = declarative.NOARG,
     ):
-        ooa = self.ooa_params[ooa_name]
         if self.inst_prototype_t in prototypes:
             #TODO make this do the correct thing
             oattr = getattr(self.inst_prototype, desc.__name__)
-            ooa.val   = oattr.val
-            if ooa.ref is not ooa.val:
-                ooa.ref   = oattr.ref
-            ooa.units = str(oattr.units)
+            ooa = self.ooa_params[ooa_name]
+            if isinstance(ooa, collections.Mapping):
+                #the ooa may or may not be specified, if it is, then it is a map type
+                if 'ref' not in ooa and 'val' not in ooa:
+                    if oattr.ref is oattr.val:
+                        #set the single value
+                        self.ooa_params[ooa_name] = oattr.val
+                    else:
+                        ooa.setdefault('ref', oattr.ref)
+                        ooa.setdefault('val', oattr.val)
+                else:
+                    ooa.setdefault('ref', oattr.ref)
+                    ooa.setdefault('val', oattr.val)
+            else:
+                #the ooa must already be specified
+                pass
             #self.ooa_params[ooa_name]["from"] = self.inst_prototype.name_system + "." + preferred_attr
         else:
-            ooa = ooa.useidx('immediate')
+            if arg is declarative.NOARG:
+                if default_attr is None:
+                    default = declarative.NOARG
+                else:
+                    default = getattr(self, default_attr)
+                if default is declarative.NOARG:
+                    raise RuntimeError("Must specify attribute: ".format(desc.__name__))
+                else:
+                    arg = default
+
             if isinstance(arg, simple_units.SimpleUnitfulGroup):
                 #TODO check that it is unitless
-                ooa.setdefault("ref",   arg.ref)
-                ooa.setdefault("val",   arg.val)
-                ooa.setdefault("units", pint.mag1_units(arg.units))
-            elif isinstance(arg, pint.ureg.Quantity):
-                #TODO check that it is unitless
-                ooa.setdefault("ref",   arg.magnitude)
-                ooa.setdefault("val",   arg.magnitude)
-                ooa.setdefault("units", pint.mag1_units(arg.units))
-            elif isinstance(arg, pint.ureg.Unit):
-                #TODO check that it is unitless
-                ooa.setdefault("units", pint.mag1_units(arg))
-                ooa.setdefault("ref",  1)
-                ooa.setdefault("val",  1)
+                if arg.ref is arg.val:
+                    self.ooa_params.useidx('immediate')[ooa_name] = arg.val
+                else:
+                    ooa = self.ooa_params[ooa_name].useidx('immediate')
+                    ooa.setdefault("ref",   arg.ref)
+                    ooa.setdefault("val",   arg.val)
             else:
-                ooa.setdefault("units", 1)
-                ooa.setdefault("ref", arg)
-                ooa.setdefault("val", ooa.ref)
+                self.ooa_params.useidx('immediate')[ooa_name] = arg
 
-        pint_units = pint.ureg[ooa.units]
-        return simple_units.ElementRefValue(
-            ooa_params = ooa,
-            units      = pint_units,
-            ooa_name   = ooa_name,
+        return simple_units.UnitlessElementRefValue(
+            ooa_params    = ooa,
+            ooa_name      = ooa_name,
+            allow_fitting = allow_fitting,
         )
 
 

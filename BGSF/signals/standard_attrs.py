@@ -5,6 +5,7 @@ from __future__ import division, print_function
 import declarative as decl
 from ..base.multi_unit_args import (
     generate_refval_attribute,
+    unitless_refval_attribute,
 )
 
 from ..base import units
@@ -42,20 +43,8 @@ def generate_L_detune(name = 'L_detune'):
     return L_detune
 
 
-def generate_length():
-    @decl.group_dproperty
-    def length(desc):
-        name = 'length'
-        return generate_refval_attribute(
-            desc,
-            ubunch = units.lengths_small,
-            stems = [name, 'L'],
-            ooa_name = name,
-            preferred_attr = name,
-            default_attr = '_{0}_default'.format(name),
-            prototypes = ['full', 'base'],
-        )
-    return length
+def generate_length(name = 'length'):
+    return generate_L_detune(name = name)
 
 
 def generate_rotate(name = 'rotate', default = True):

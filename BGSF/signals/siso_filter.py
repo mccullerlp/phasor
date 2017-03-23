@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
+from __future__ import division, print_function
 #from BGSF.utilities.print import print
+import declarative
 
 import numpy as np
 
@@ -19,21 +19,20 @@ from .bases import (
 
 
 class TransferFunctionSISOBase(SignalElementBase):
-    def __init__(
-            self,
-            max_freq         = None,
-            no_DC            = False,
-            fluct_diss_noise = False,
-            **kwargs
-    ):
-        super(TransferFunctionSISOBase, self).__init__(**kwargs)
-        OOA_ASSIGN(self).max_freq = max_freq
-        OOA_ASSIGN(self).no_DC       = no_DC
+    max_freq = None
 
-        self.my.In  = ports.SignalInPort(sname = 'In')
-        self.my.Out = ports.SignalOutPort(sname = 'Out')
+    @declarative.dproperty
+    def no_DC(self, val = False):
+        val = self.ooa_params.setdefault('no_DC', val)
+        return val
 
-        return
+    @declarative.dproperty
+    def In(self):
+        return ports.SignalInPort(sname = 'In', pchain = lambda : self.Out)
+
+    @declarative.dproperty
+    def Out(self):
+        return ports.SignalOutPort(sname = 'Out', pchain = lambda : self.In)
 
     def filter_func(self, freq):
         return 0

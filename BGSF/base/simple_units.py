@@ -3,6 +3,7 @@ TODO: Add additional data to "ref" for a standard width. Ref can be the center, 
 """
 from __future__ import division, print_function
 import declarative
+import collections
 
 from declarative.substrate import Element
 
@@ -167,6 +168,86 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
         return [declarative.FrozenBunch(
             parameter_key = self.fitter_parameter,
             units         = str(self.units),
+            name          = self.name_system,
+            name_global   = self.name_system,
+            initial       = fitter_initial,
+            inject        = fitter_inject,
+            reinject      = fitter_reinject,
+        )]
+
+
+class UnitlessElementRefValue(SimpleUnitfulGroup, Element):
+    units = None
+    allow_fitting = True
+
+    #TODO integrate or name this better
+    @declarative.mproperty
+    def ooa_name(self, val):
+        return val
+
+    @declarative.dproperty
+    def ref(self):
+        val = self.ooa_params
+        if not isinstance(val, collections.Mapping):
+            return val
+        #if it was a mapping, then it is split into ref and val
+        val = val.get('ref', declarative.NOARG)
+        if val is declarative.NOARG:
+            return self.val
+        return val
+
+    @declarative.dproperty
+    def val(self):
+        val = self.ooa_params
+        if not isinstance(val, collections.Mapping):
+            return val
+        #if it was a mapping, then it is split into ref and val
+        val = val.val
+        return val
+
+    @declarative.mproperty
+    def fitter_parameter(self):
+        root = self.root
+        names = [self.ooa_name]
+        current = self.parent
+        while current is not root:
+            names.append(current.name_child)
+            current = current.parent
+        return tuple(names[::-1])
+
+    @declarative.mproperty
+    def fitter_data(self):
+        if not self.allow_fitting:
+            #TODO have error specify the parameter (lazy)
+            raise RuntimeError("Fitting Now allowed for this parameter")
+        #TODO: provide real units rather than the str version
+        def fitter_inject(ooa, value, ivalue):
+            for key in self.fitter_parameter:
+                ooa = ooa[key]
+            ooa.val   = value
+            ooa.ref   = ivalue
+
+        def fitter_reinject(ooa, value):
+            #go to next to last so we can directly insert the value
+            for key in self.fitter_parameter[:-1]:
+                ooa = ooa[key]
+            ooa[self.fitter_parameter[-1]] = value
+
+        def fitter_initial(ooa):
+            for key in self.fitter_parameter:
+                ooa = ooa[key]
+            if not isinstance(ooa, collections.Mapping):
+                #directly found a non-mapping type, so ref and val are not split
+                return ooa
+            val = ooa.get('ref', declarative.NOARG)
+            if val is declarative.NOARG:
+                val = ooa.get('val', None)
+            return val
+
+        #TODO: fix name vs. name_global
+        return [declarative.FrozenBunch(
+            parameter_key = self.fitter_parameter,
+            units         = None,
             name          = self.name_system,
             name_global   = self.name_system,
             initial       = fitter_initial,

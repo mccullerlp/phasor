@@ -47,9 +47,6 @@ class SignalGenerator(bases.CouplerBase, bases.SystemElementBase):
             )
         return
 
-    def linked_elements(self):
-        return (self.F,)
-
     def system_setup_ports_initial(self, system):
         system.coherent_sources_needed(
             self.Out.o,

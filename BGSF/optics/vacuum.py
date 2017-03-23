@@ -22,9 +22,6 @@ class VacuumTerminator(bases.OpticalCouplerBase, bases.SystemElementBase):
     def _fluct(self):
         return OpticalVacuumFluctuation(port = self.Fr)
 
-    def linked_elements(self):
-        return (self._fluct,)
-
     def system_setup_ports(self, system):
         return
 

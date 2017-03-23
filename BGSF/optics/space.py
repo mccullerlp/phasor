@@ -9,6 +9,7 @@ import declarative as decl
 
 from . import bases
 from . import ports
+from . import standard_attrs
 
 
 class Space(
@@ -23,23 +24,16 @@ class Space(
     def Bk(self):
         return ports.OpticalPort(sname = 'Bk', pchain = 'Fr')
 
-    @decl.dproperty
-    def L_m(self, val):
-        val = self.ooa_params.setdefault('L_m', val)
-        return val
-
-    @decl.dproperty
-    def L_detune_m(self, val = 0):
-        val = self.ooa_params.setdefault('L_detune_m', val)
-        return val
+    length = standard_attrs.generate_length()
+    L_detune = standard_attrs.generate_L_detune()
 
     def phase_lower(self, iwavelen_m, F):
         symbols = self.symbols
-        return symbols.math.exp(-symbols.i2pi * (F * self.L_m / symbols.c_m_s + self.L_detune_m * iwavelen_m))
+        return symbols.math.exp(-symbols.i2pi * (F * self.L_m.val / symbols.c_m_s + self.L_detune_m.val * iwavelen_m))
 
     def phase_raise(self, iwavelen_m, F):
         symbols = self.symbols
-        return symbols.math.exp(symbols.i2pi * (F * self.L_m / symbols.c_m_s + self.L_detune_m * iwavelen_m))
+        return symbols.math.exp(symbols.i2pi * (F * self.L_m.val / symbols.c_m_s + self.L_detune_m.val * iwavelen_m))
 
     @decl.mproperty
     def ports_optical(self):
