@@ -59,16 +59,15 @@ class OpticalPort(OpticalPortRaw, bases.SystemElementBase):
     _bond_partner = None
     typename = 'optical'
 
-    def __build__(self):
-        super(OpticalPort, self).__build__()
-        print(self, self.inst_preincarnation)
-        prein = self.inst_preincarnation
-        if prein is not None:
-            if prein._bond_partner is not None and not prein._building_bonded:
-                #auto-insert bond partner as it was inserted during building
-                getnew = self.root[prein._bond_partner.name_system]
-                self._bond_partner = getnew
-                assert(self.root is getnew.root)
+    def _complete(self):
+        if not super(OpticalPort, self)._complete():
+            prein = self.inst_preincarnation
+            if prein is not None:
+                if prein._bond_partner is not None and not prein._building_bonded:
+                    #auto-insert bond partner as it was inserted during building
+                    getnew = self.root[prein._bond_partner.name_system]
+                    self._bond_partner = getnew
+                    assert(self.root is getnew.root)
         return
 
     @declarative.mproperty
@@ -86,9 +85,6 @@ class OpticalPort(OpticalPortRaw, bases.SystemElementBase):
         #default to not storing an override since most bonds will occur during building
         if not self.building:
             self._building_bonded = False
-            print(self, "NOT BUILDING")
-        else:
-            print(self, "BUILDING")
 
         #TODO make this smarter
         if self._bond_partner is not None:

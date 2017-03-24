@@ -171,6 +171,40 @@ def test_closed_loop_opamp_noise():
     test.assert_almost_equal(sys.RAC_P.AC_PSD / (resistance_Ohms**2 * (gain/(1 + gain))**2), 1)
 
 
+def test_closed_loop_opamp_noise_regen():
+    gain = 10
+    resistance_Ohms = 10
+    sys = BGSystem()
+    sys.my.V_P = electronics.VoltageSource()
+    sys.my.amp = electronics.OpAmp(
+        gain_by_freq = lambda F : gain
+    )
+    sys.bond(sys.amp.in_p, sys.V_P.A)
+    sys.my.RTRans = electronics.SeriesResistor(
+        resistance_Ohms = resistance_Ohms,
+    )
+    sys.bond_sequence(sys.amp.out, sys.RTRans.A, sys.amp.in_n)
+    sys.my.R1 = electronics.VoltageReadout(
+        terminal = sys.amp.out,
+    )
+    sys.my.VN = electronics.CurrentFluctuation(
+        port = sys.amp.in_n,
+        #port = sys.RTRans.B,
+        Isq_Hz_by_freq = lambda F : 1,
+        sided = 'one-sided',
+    )
+    sys.my.RAC_P = readouts.ACReadout(
+        portD = sys.V_P.V.i,
+        portN = sys.R1.V.o,
+    )
+    test.assert_almost_equal(sys.RAC_P.AC_sensitivity, gain/(1 + gain))
+    test.assert_almost_equal(sys.RAC_P.AC_PSD / (resistance_Ohms**2 * (gain/(1 + gain))**2), 1)
+
+    sys2 = sys.regenerate()
+    test.assert_almost_equal(sys2.RAC_P.AC_sensitivity, gain/(1 + gain))
+    test.assert_almost_equal(sys2.RAC_P.AC_PSD / (resistance_Ohms**2 * (gain/(1 + gain))**2), 1)
+
+
 def test_johnson_noise():
     resistance_Ohms = 1000
     sys = BGSystem()

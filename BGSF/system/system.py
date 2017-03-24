@@ -457,8 +457,8 @@ class BGSystem(RootElement):
 
     def own_port_virtual(self, element, port):
         #TODO rename bond port virtual
-        assert(self.root is port.element.root)
-        assert(self.element.root is self.root)
+        #assert(self.root is port.element.root)
+        #assert(self.element.root is self.root)
         self.port_owners_virtual[port].add(element)
         self.owners_ports_virtual.setdefault(element, []).append(port)
         return
