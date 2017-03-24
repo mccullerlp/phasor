@@ -135,7 +135,7 @@ class PortUpdatesAlgorithm(object):
 
     def coherent_sources_needed(self, pto, kto):
         #print('needed port: ', pto, kto)
-        assert(isinstance(pto, DictKey))
+        #assert(isinstance(pto, DictKey))
         assert(isinstance(kto, DictKey))
         self._coherent_sources_needed(pto, kto)
         #TODO: make this dispersal occur during resolve_port_updates
@@ -156,7 +156,6 @@ class PortUpdatesAlgorithm(object):
         self.coherent_sources_needed(pto, kto)
 
     def readout_port_needed(self, pto, kto, portsets = ()):
-        assert(self.system.root is pto[ports.ElementKey].root)
         self.coherent_sources_needed(pto, kto)
         for pset in portsets:
             self.readout_pk_sets[pset].add((pto, kto))

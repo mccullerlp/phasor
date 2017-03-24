@@ -38,8 +38,9 @@ class PortRawBase(bases.SystemElementBase):
 class PortInRaw(PortRawBase):
     @declarative.dproperty
     def i(self):
+        #pkey = self.element.name_system + self.sname + '.i'
         pkey = DictKey({
-            ElementKey : self.element,
+            ElementKey : self.element.name_system,
             PortKey    : self.sname + u'⥳',
         })
         self.system.port_add(self.element, pkey)
@@ -49,8 +50,9 @@ class PortInRaw(PortRawBase):
 class PortOutRaw(PortRawBase):
     @declarative.dproperty
     def o(self):
+        #pkey = self.element.name_system + self.sname + '.o'
         pkey = DictKey({
-            ElementKey: self.element,
+            ElementKey: self.element.name_system,
             PortKey   : self.sname + u'⥲',
         })
         self.system.port_add(self.element, pkey)
@@ -60,8 +62,9 @@ class PortOutRaw(PortRawBase):
 class PortInOutRaw(PortRawBase):
     @declarative.dproperty
     def i(self):
+        #pkey = self.element.name_system + self.sname + '.i'
         pkey = DictKey({
-            ElementKey : self.element,
+            ElementKey: self.element.name_system,
             PortKey    : self.sname + u'⥳',
         })
         self.system.port_add(self.element, pkey)
@@ -69,8 +72,9 @@ class PortInOutRaw(PortRawBase):
 
     @declarative.dproperty
     def o(self):
+        #pkey = self.element.name_system + self.sname + '.o'
         pkey = DictKey({
-            ElementKey: self.element,
+            ElementKey: self.element.name_system,
             PortKey   : self.sname + u'⥲',
         })
         self.system.port_add(self.element, pkey)
