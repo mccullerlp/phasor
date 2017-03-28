@@ -120,14 +120,13 @@ class SZPCascade(siso_filter.TransferFunctionSISOBase):
                 #get the initial value and create the constraint for it
                 if fitter_initial(self.root.ooa_params).real <= 0:
                     lower_bound = -float('inf')
-                    upper_bound = 0
+                    upper_bound = .0001
                 else:
                     lower_bound = 0
                     upper_bound = float('inf')
             else:
                 lower_bound = -float('inf')
                 upper_bound = float('inf')
-            print("XXX: ", root_key, sub_key, usecomplex, fitter_initial(self.root.ooa_params))
             #TODO: fix name vs. name_global
             return declarative.FrozenBunch(
                 usecomplex    = usecomplex,
@@ -228,7 +227,9 @@ class SRationalFilter(SZPCascade):
         return unitless_refval_attribute(desc)
 
     def filter_func(self, freq):
-        pre = self.gain.val * self.symbols.math.exp(self.symbols.i2pi * freq * self.delay_s.val)
+        pre = self.gain.val
+        if self.delay_s.val is not None:
+            pre *= self.symbols.math.exp(self.symbols.i2pi * freq * self.delay_s.val)
         return super(SRationalFilter, self).filter_func(freq) * pre
 
     @declarative.mproperty

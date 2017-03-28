@@ -49,6 +49,10 @@ class FitterExpression(FitterBase):
     def constraints(self):
         return self.root.constraints
 
+    max_iter = 3000
+    max_cpu_time = 100
+    #fitter_extra_params = dict()
+
     @declarative.mproperty
     def expression_remapped(self):
         expr = self.expression
@@ -68,9 +72,9 @@ class FitterExpression(FitterBase):
         for num in tlengths:
             total_pairs += num * (total_sum - num)
         total_pairs = total_pairs / 2
-        print("total_number: ", total_n)
-        print("total_sum: ", total_sum)
-        print("total_pairs: ", total_sum)
+        #print("total_number: ", total_n)
+        #print("total_sum: ", total_sum)
+        #print("total_pairs: ", total_sum)
 
         def sbunch_val(sbunch):
             return SimpleUnitfulGroup(
@@ -149,11 +153,11 @@ class FitterExpression(FitterBase):
         onesA = casadi.MX.ones(expr.shape[0])
         onesB = casadi.MX.ones(expr.shape[1])
 
-        print("Final Ntotal T1: ", N_expr)
-        print("Final Ntotal T2: ", N_total)
-        print("FINAL EXPR: ", onesA.shape)
-        print("FINAL EXPR: ", expr.shape)
-        print("FINAL EXPR: ", casadi.dot(onesA, expr).shape)
+        #print("Final Ntotal T1: ", N_expr)
+        #print("Final Ntotal T2: ", N_total)
+        #print("FINAL EXPR: ", onesA.shape)
+        #print("FINAL EXPR: ", expr.shape)
+        #print("FINAL EXPR: ", casadi.dot(onesA, expr).shape)
         #form the average
         return declarative.Bunch(
             expr = casadi.dot(casadi.dot(onesA, expr), onesB) / N_total,
@@ -183,8 +187,10 @@ class FitterExpression(FitterBase):
                     #mehrotra_algorithm = "yes",
                     #mu_strategy = 'adaptive',
                     tol = 1e-15,
-                    acceptable_tol = 1e-11,
+                    acceptable_tol = 1e-15,
                     acceptable_iter = 300,
+                    max_iter = self.max_iter,
+                    max_cpu_time = self.max_cpu_time,
                 ),
             )
         )

@@ -104,9 +104,9 @@ class FitterSym(FitterBase):
             symbol_map.append(sbunch)
         return symbol_map
 
+
 class FitterSymJitterPlacement(FitterSym):
 
-    #TODO: I dont like generate_refval_attribute for dimensionless things here
     @declarative.dproperty_adv
     def shift(desc):
         return arbunit_refval_attribute(
