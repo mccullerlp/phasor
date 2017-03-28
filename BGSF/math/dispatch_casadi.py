@@ -45,8 +45,6 @@ def fix_custom_complex(otype, opname, lambda_syntax):
 
 
 def fix_many(otype):
-    def null_conjugate(self):
-        return self
     fix_custom_complex(otype, '__mul__'  , lambda s, o: s * o)
     fix_custom_complex(otype, '__rmul__' , lambda s, o: o * s)
     fix_custom_complex(otype, '__div__'  , lambda s, o: s / o)
@@ -57,8 +55,16 @@ def fix_many(otype):
     fix_custom_complex(otype, '__radd__' , lambda s, o: o + s)
     fix_custom_complex(otype, '__sub__'  , lambda s, o: s - o)
     fix_custom_complex(otype, '__rsub__' , lambda s, o: o - s)
+    def null_conjugate(self):
+        return self
+
     otype.conjugate = null_conjugate
+
+    #TODO: does this need to be wrapper with a method descriptor?
     otype.__abs__ = lambda self: (self**2).sqrt()
+
+    otype.real = property(lambda self : self)
+    otype.imag = property(lambda self : 0)
 
 fix_many(casadi.MX)
 fix_many(casadi.SX)

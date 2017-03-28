@@ -13,6 +13,8 @@ from .base import (
     FitterBase,
 )
 
+from ...math.complex import Complex
+
 #from ...base import units
 
 
@@ -37,11 +39,18 @@ class FitterSym(FitterBase):
             pvalue,
     ):
         for fdatum in pvalue.fitter_data:
+            usecomplex = fdatum.get('usecomplex', False)
             system = pvalue.root
             sysname = self.root.object_roots_inv[system]
             self.root.parameter_add(system, fdatum)
             self._parameter_sysnames[fdatum] = sysname
-            self._parameter_symbols[fdatum] = casadi.MX.sym(fdatum.name)
+            if not usecomplex:
+                self._parameter_symbols[fdatum] = casadi.MX.sym(fdatum.name)
+            else:
+                self._parameter_symbols[fdatum] = Complex(
+                    casadi.MX.sym(fdatum.name + '.real'),
+                    casadi.MX.sym(fdatum.name + '.imag'),
+                )
         return
 
     def targets_list(self, typename):
@@ -76,20 +85,23 @@ class FitterSym(FitterBase):
     def fitter_symbol_map(self):
         symbol_map = []
         for datum, symbol in list(self._parameter_symbols.items()):
+            #usecomplex = datum.get('usecomplex', False)
             sysname = self._parameter_sysnames[datum]
             ival = datum.initial(self.root.meta_ooa[sysname])
             #TODO: document or describe what this bunch type should hold
-            symbol_map.append(
-                declarative.Bunch(
-                    datum         = datum,
-                    symbol        = symbol,
-                    initial_value = ival,
-                    upper_bound   = float('inf'),
-                    lower_bound   = -float('inf'),
-                    transforms    = self.transforms(datum),
-                    units         = datum.units,
-                )
+            sbunch = declarative.Bunch(
+                datum         = datum,
+                symbol        = symbol,
+                initial_value = ival,
+                upper_bound   = datum.get('upper_bound', float('inf')),
+                lower_bound   = datum.get('lower_bound', -float('inf')),
+                transforms    = self.transforms(datum),
+                units         = datum.units,
             )
+            if isinstance(symbol, Complex):
+                sbunch.upper_boundI = datum.get('upper_boundI', float('inf')),
+                sbunch.lower_boundI = datum.get('lower_boundI', -float('inf')),
+            symbol_map.append(sbunch)
         return symbol_map
 
 class FitterSymJitterPlacement(FitterSym):

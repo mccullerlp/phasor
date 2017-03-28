@@ -6,6 +6,7 @@ import numpy as np
 
 import declarative
 from declarative import bunch
+from ...math.complex import Complex
 
 from . import visitors as VISIT
 
@@ -153,13 +154,36 @@ class FitterRoot(RootElement, FitterBase):
         for smapper in smappers:
             for sbunch in smapper():
                 #TODO check sizes of ival and syms
-                ival_list.append(sbunch.initial_value)
-                datum_list.append(sbunch.datum)
-                sym_list.append(sbunch.symbol)
-                ub_list.append(sbunch.get('upper_bound', float('inf')))
-                lb_list.append(sbunch.get('lower_bound', -float('inf')))
-                transform_list.append(sbunch.setdefault('transforms', []))
-                sbunch_list.append(sbunch)
+                if isinstance(sbunch.symbol, Complex):
+                    ival_list.append(sbunch.initial_value.real)
+                    datum_list.append(sbunch.datum)
+                    sym_list.append(sbunch.symbol.real)
+                    ub_list.append(sbunch.get('upper_bound', float('inf')).real)
+                    lb_list.append(sbunch.get('lower_bound', -float('inf')).real)
+                    #not used in the current expressions and wont currently work with the
+                    #complex symbols
+                    #transform_list.append(sbunch.setdefault('transforms', []))
+                    sbunch_list.append(sbunch)
+
+                    ival_list.append(sbunch.initial_value.imag)
+                    datum_list.append(sbunch.datum)
+                    sym_list.append(sbunch.symbol.imag)
+                    ub_list.append(sbunch.get('upper_boundI', float('inf')).imag)
+                    lb_list.append(sbunch.get('lower_boundI', -float('inf')).imag)
+                    #not used in the current expressions and wont currently work with the
+                    #complex symbols
+                    #transform_list.append(sbunch.setdefault('transforms', []))
+                    sbunch_list.append(sbunch)
+                else:
+                    ival_list.append(sbunch.initial_value)
+                    datum_list.append(sbunch.datum)
+                    sym_list.append(sbunch.symbol)
+                    ub_list.append(sbunch.get('upper_bound', float('inf')))
+                    lb_list.append(sbunch.get('lower_bound', -float('inf')))
+                    #not used in the current expressions and wont currently work with the
+                    #complex symbols
+                    #transform_list.append(sbunch.setdefault('transforms', []))
+                    sbunch_list.append(sbunch)
         return declarative.Bunch(
             sym_list       = sym_list,
             ival_list      = ival_list,
@@ -167,7 +191,7 @@ class FitterRoot(RootElement, FitterBase):
             lb_list        = lb_list,
             ub_list        = ub_list,
             sbunch_list    = sbunch_list,
-            transform_list = transform_list,
+            #transform_list = transform_list,
         )
 
 

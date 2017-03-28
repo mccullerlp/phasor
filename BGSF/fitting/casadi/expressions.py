@@ -4,6 +4,7 @@ from __future__ import (division, print_function)
 from builtins import zip
 import numpy as np
 import operator
+from ...math.complex import Complex
 
 from . import visitors as VISIT
 import casadi
@@ -80,11 +81,18 @@ class FitterExpression(FitterBase):
 
         def t_eval(expr, transform, val):
             val2 = transform(val)
-            return casadi.graph_substitute(
-                expr,
-                [val.val],
-                [val2.val],
-            )
+            if isinstance(val2.val, Complex):
+                return casadi.graph_substitute(
+                    expr,
+                    [val.val.real,  val.val.imag],
+                    [val2.val.real, val2.val.imag],
+                )
+            else:
+                return casadi.graph_substitute(
+                    expr,
+                    [val.val],
+                    [val2.val],
+                )
 
         expr_combine = []
         type1 = 'double'
@@ -138,14 +146,17 @@ class FitterExpression(FitterBase):
 
         N_total = N_expr * expr.shape[0] * expr.shape[1]
 
-        onesA = np.ones(expr.shape[0])
-        onesB = np.ones(expr.shape[1])
+        onesA = casadi.MX.ones(expr.shape[0])
+        onesB = casadi.MX.ones(expr.shape[1])
 
         print("Final Ntotal T1: ", N_expr)
         print("Final Ntotal T2: ", N_total)
+        print("FINAL EXPR: ", onesA.shape)
+        print("FINAL EXPR: ", expr.shape)
+        print("FINAL EXPR: ", casadi.dot(onesA, expr).shape)
         #form the average
         return declarative.Bunch(
-            expr = ((onesA * expr) * onesB) / N_total,
+            expr = casadi.dot(casadi.dot(onesA, expr), onesB) / N_total,
             expr_expanded = expr / N_expr,
         )
 

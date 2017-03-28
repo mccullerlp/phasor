@@ -26,3 +26,7 @@ from .siso_filter import (
 from .mimo_filter import (
     TransferFunctionMIMO,
 )
+
+from .ZPSOS import (
+    SRationalFilter,
+)

@@ -203,7 +203,7 @@ def unitless_refval_attribute(
                 self.ooa_params.useidx('immediate')[ooa_name] = arg
 
         return simple_units.UnitlessElementRefValue(
-            ooa_params    = ooa,
+            ooa_params    = self.ooa_params[ooa_name],
             ooa_name      = ooa_name,
             allow_fitting = allow_fitting,
         )

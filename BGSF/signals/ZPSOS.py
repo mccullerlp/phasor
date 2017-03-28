@@ -4,6 +4,7 @@
 from __future__ import division, print_function
 #from BGSF.utilities.print import print
 import declarative
+import collections
 
 import numpy as np
 
@@ -20,37 +21,171 @@ from ..base.multi_unit_args import (
     generate_refval_attribute,
 )
 
-class SRealZPCascade(siso_filter.TransferFunctionSISOBase):
+def ooa_root_grab(ooa_params, root_key, defaults):
+        #only used if the ooa params are completely missing
+        ooa_roots = ooa_params[root_key]
+        print("KEYS: ", list(ooa_roots.keys()))
+        print("LEN: ", len(ooa_roots))
+        print("BOOL: ", bool(ooa_roots))
+        if not ooa_roots:
+            print("NOT OOA")
+            if isinstance(defaults, collections.Mapping):
+                roots = []
+                for idx, root in defaults.items():
+                    ooa_roots[str(idx)] = root
+                    roots.append(root)
+                return tuple(roots)
+
+            else:
+                for idx, root in enumerate(defaults):
+                    ooa_roots[str(idx)] = root
+                return tuple(defaults)
+        else:
+            rlist = []
+            for pkey, root in ooa_roots.items():
+                rlist.append(root)
+            print("RLIST: ", rlist)
+        return tuple(rlist)
+
+
+class SZPCascade(siso_filter.TransferFunctionSISOBase):
 
     @declarative.dproperty
-    def poles(self, plist):
-        return plist
+    def poles_r(self, plist = []):
+        #only used if the ooa params are completely missing
+        poles = ooa_root_grab(self.ooa_params, 'poles_r', plist)
+        for root in poles:
+            assert(root.imag == 0)
+        return poles
 
     @declarative.dproperty
-    def zeros(self, zlist):
-        return zlist
+    def zeros_r(self, zlist = []):
+        #only used if the ooa params are completely missing
+        zeros = ooa_root_grab(self.ooa_params, 'zeros_r', zlist)
+        for root in zeros:
+            assert(root.imag == 0)
+        print("ZEROS: ", zeros)
+        print(self.ooa_params['zeros_r'])
+        return zeros
 
     @declarative.dproperty
-    def N_poles(self):
-        val = self.ooa_params.setdefault('N_poles', len(self.poles))
+    def poles_c(self, plist = []):
+        #only used if the ooa params are completely missing
+        poles = ooa_root_grab(self.ooa_params, 'poles_c', plist)
+        return poles
+
+    @declarative.dproperty
+    def zeros_c(self, zlist = []):
+        #only used if the ooa params are completely missing
+        zeros = ooa_root_grab(self.ooa_params, 'zeros_c', zlist)
+        return zeros
+
+    @declarative.dproperty
+    def preserve_plane(self, val = True):
+        val = self.ooa_params.setdefault('preserve_plane', val)
         return val
-
-    @declarative.dproperty
-    def N_zeros(self):
-        val = self.ooa_params.setdefault('N_zeros', len(self.poles))
-        return val
-
-    def __build__(self):
-        super(SRealZPCascade, self).__build__()
-        return
 
     @declarative.mproperty
     def fitter_data(self):
+        return self.fitter_data_()
+
+    def fitter_data_(self):
         """
         Combination of all subordinate fitter parameters to fully fit this function
         """
         fitters = []
+
+        def add_fit(root_key, sub_key, usecomplex = False):
+            root = self.root
+            current = self.parent
+            names = [root_key, self.name_child]
+            print(current, root)
+            while current is not root:
+                print(current, root)
+                names.append(current.name_child)
+                current = current.parent
+            fitter_parameter = tuple(names[::-1])
+            print("FP: ", fitter_parameter)
+
+            #TODO: provide real units rather than the str version
+            def fitter_inject(ooa, value, ivalue):
+                for key in fitter_parameter:
+                    ooa = ooa[key]
+                ooa[sub_key]   = value
+
+            def fitter_reinject(ooa, value):
+                for key in fitter_parameter:
+                    ooa = ooa[key]
+                ooa[sub_key]   = value
+
+            def fitter_initial(ooa):
+                for key in fitter_parameter:
+                    ooa = ooa[key]
+                val = ooa[sub_key]
+                return val
+
+            if self.preserve_plane:
+                #get the initial value and create the constraint for it
+                if fitter_initial(self.root.ooa_params) <= 0:
+                    lower_bound = -float('inf')
+                    upper_bound = 0
+                else:
+                    lower_bound = 0
+                    upper_bound = float('inf')
+            else:
+                lower_bound = -float('inf')
+                upper_bound = float('inf')
+            #TODO: fix name vs. name_global
+            return declarative.FrozenBunch(
+                usecomplex    = usecomplex,
+                parameter_key = fitter_parameter + (sub_key, ),
+                units         = 'Hz',
+                name          = self.name_system + '.{0}.{1}'.format(root_key, sub_key),
+                name_global   = self.name_system + '.{0}.{1}'.format(root_key, sub_key),
+                initial       = fitter_initial,
+                inject        = fitter_inject,
+                reinject      = fitter_reinject,
+                lower_bound   = lower_bound,
+                upper_bound   = upper_bound,
+            )
+        for pname, pval in self.ooa_params['zeros_r'].items():
+            fitters.append(
+                add_fit('zeros_r', pname)
+            )
+        for pname, pval in self.ooa_params['poles_r'].items():
+            fitters.append(
+                add_fit('poles_r', pname)
+            )
+        for pname, pval in self.ooa_params['zeros_c'].items():
+            fitters.append(
+                add_fit('zeros_c', pname, usecomplex = True)
+            )
+        for pname, pval in self.ooa_params['poles_c'].items():
+            fitters.append(
+                add_fit('poles_c', pname, usecomplex = True)
+            )
         return fitters
+
+    def filter_func(self, freq):
+        def root_xfer(rlist):
+            if rlist:
+                xfer = (1 - 1j * freq/rlist[0])
+                for root in rlist[1:]:
+                    xfer *= (1 - 1j * freq/root)
+            else:
+                xfer = 1
+            return xfer
+
+        def root_xfer2(rlist):
+            if rlist:
+                xfer = (1 - freq/rlist[0].conjugate() * 1j) * (1 - freq/rlist[0] * 1j)
+                for root in rlist[1:]:
+                    xfer *= (1 - freq/root.conjugate() * 1j) * (1 - freq/root * 1j)
+            else:
+                xfer = 1
+            return xfer
+        return (root_xfer(self.zeros_r) * root_xfer2(self.zeros_c)) / (root_xfer(self.poles_r) * root_xfer2(self.poles_c))
+
 
 class SBQFCascade(siso_filter.TransferFunctionSISOBase):
     @declarative.dproperty
@@ -71,10 +206,6 @@ class SBQFCascade(siso_filter.TransferFunctionSISOBase):
         val = self.ooa_params.setdefault('N_zeros', len(self.poles))
         return val
 
-    def __build__(self):
-        super(SRealZPCascade, self).__build__()
-        return
-
     @declarative.mproperty
     def fitter_data(self):
         """
@@ -84,10 +215,9 @@ class SBQFCascade(siso_filter.TransferFunctionSISOBase):
         return fitters
 
 
-class SRationalFilter(siso_filter.TransferFunctionSISOBase):
-
+class SRationalFilter(SZPCascade):
     delay_default = ('delay_s', 0)
-    @declarative.declarative_adv_group
+    @declarative.dproperty_adv_group
     def delay(desc):
         name = desc.__name__
         return generate_refval_attribute(
@@ -104,54 +234,17 @@ class SRationalFilter(siso_filter.TransferFunctionSISOBase):
     def gain(desc):
         return unitless_refval_attribute(desc)
 
-    @declarative.dproperty
-    def cpoles(self, plist):
-        return plist
-
-    @declarative.dproperty
-    def czeros(self, zlist):
-        return zlist
-
-    @declarative.dproperty
-    def rpoles(self, plist):
-        return plist
-
-    @declarative.dproperty
-    def rzeros(self, zlist):
-        return zlist
-
-    def cplx(self):
-        return SBQFCascade(
-            poles = self.cpoles,
-            zeros = self.czeros,
-        )
-
-    def real(self):
-        return SRealZPCascade(
-            poles = self.rpoles,
-            zeros = self.rzeros,
-        )
-
     def filter_func(self, freq):
         pre = self.gain.val * self.symbols.math.exp(self.symbols.i2pi * freq * self.delay_s.val)
-        real = self.real.filter_func(freq)
-        cplx = self.cplx.filter_func(freq)
-        return pre * real * cplx
+        return super(SRationalFilter, self).filter_func(freq) * pre
 
     @declarative.mproperty
     def fitter_data(self):
         """
         Combination of all subordinate fitter parameters to fully fit this function
         """
-        fitters = []
-        fitters.extend(self.delay.fitter_data)
-        fitters.extend(self.gain.fitter_data)
-        fitters.extend(self.real.fitter_data)
-        fitters.extend(self.cplx.fitter_data)
+        fitters = self.fitter_data_()
+        #fitters.extend(self.delay.fitter_data)
+        #fitters.extend(self.gain.fitter_data)
         return fitters
-
-    def __build__(self):
-        super(SRationalFilter, self).__build__()
-        return
-
 

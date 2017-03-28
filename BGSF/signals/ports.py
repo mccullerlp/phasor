@@ -66,6 +66,30 @@ class SignalInPort(SignalInPortRaw, bases.SystemElementBase):
         else:
             self._bond_partners_building.append(False)
 
+    """TODO
+    def bond_completion(self):
+        if len(self._bond_partners) == 1:
+            self.system.bond_completion_raw(self, self._bond_partners[0], self)
+        elif len(self._bond_partners) == 0:
+            raise RuntimeError("Must be Terminated")
+        else:
+            from .elements import Connection
+            self.my.connection = Connection(
+                N_ports = 1 + len(self._bond_partners)
+            )
+            self.system._include(self.connection)
+            self.connection.p0.bond_inform(self)
+            self.system.bond_completion_raw(self, self.connection.p0, self)
+            self.connection.p0.bond_completion()
+            for idx, partner in enumerate(self._bond_partners):
+                #TODO not sure if I like the connection object not knowing who it is bound to
+                #maybe make a more explicit notification for the raw bonding
+                port = self.connection.ports_electrical[idx + 1]
+                #print("PORTSSS", port)
+                self.system.bond_completion_raw(self, partner, port)
+        return
+    """
+
     def bond_completion(self):
         for partner in self._bond_partners:
             self.system.bond_completion_raw(self, partner, self)
@@ -95,7 +119,7 @@ class SignalInPort(SignalInPortRaw, bases.SystemElementBase):
 
 
 class SignalOutPort(SignalOutPortRaw, bases.SystemElementBase):
-    typename = 'signal_in'
+    typename = 'signal_out'
 
     def _complete(self):
         if not super(SignalOutPort, self)._complete():
