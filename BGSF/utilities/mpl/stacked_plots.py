@@ -2,7 +2,6 @@
 """
 from matplotlib import gridspec
 import matplotlib.pyplot as plt
-
 import declarative
 
 from .autoniceplot import asavefig
@@ -82,6 +81,7 @@ def generate_stacked_plot_ax(
 
     for col_idx in range(len(width_ratios)):
         ax_top = None
+        ax_list = []
         for idx, name in enumerate(view_names):
             ax_local  = fig.add_subplot(gs_DC[idx, col_idx], sharex = ax_top)
             ax_local.grid(b=True)
@@ -94,11 +94,14 @@ def generate_stacked_plot_ax(
             if ax_top is None:
                 ax_top = ax_local
             ax_local.set_xscale(xscales[col_idx])
+            ax_list.append(ax_local)
             if idx < len(view_names) - 1:
                 axB.finalizers.append(hide_finalizer(axB, ax_local))
         axB['ax_bottom_{0}'.format(col_idx)] = ax_local
         axB['ax_top_{0}'.format(col_idx)]    = ax_top
+        axB['ax_list_{0}'.format(col_idx)]    = ax_list
         if col_idx == 0:
             axB['ax_bottom'] = ax_local
             axB['ax_top']    = ax_top
+            axB['ax_list']   = ax_list
     return axB

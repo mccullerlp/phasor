@@ -22,6 +22,9 @@ from .base import (
 
 class FitterRoot(RootElement, FitterBase):
 
+    casadi_sol_obj = None
+    sequence_N = 0
+
     @declarative.mproperty
     def _system_map(self, val = declarative.NOARG):
         if val is declarative.NOARG:

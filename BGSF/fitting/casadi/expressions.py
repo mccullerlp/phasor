@@ -259,12 +259,8 @@ class FitterExpression(FitterBase):
             systems[sysname] = new_obj
             systems_map[sysname] = new_obj
         return self.root.regenerate(
-            _system_map = systems_map
-        )
-        return declarative.Bunch(
-            ipopt_sol = sols,
-            sol_vec = sols['x'],
-            val_map = sol_map,
-            systems   = systems,
+            _system_map    = systems_map,
+            casadi_sol_obj = sols,
+            sequence_N     = self.root.sequence_N + 1,
         )
         return

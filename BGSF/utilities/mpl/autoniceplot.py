@@ -4,9 +4,10 @@
 
 import os
 from os import path
-import matplotlib as mpl
-import declarative as decl
 
+import declarative
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 
 try:
     org_mode
@@ -14,7 +15,7 @@ except NameError:
     org_mode = False
 
 
-class SaveToken(decl.OverridableObject):
+class SaveToken(declarative.OverridableObject):
     aps = None
     fbasename = None
 
@@ -52,6 +53,7 @@ def mpl_autorasterize(fig):
             xdat = child.get_xdata()
             if len(xdat) > 100:
                 child.set_rasterized(True)
+                child.set_antialiased(True)
             continue
         except AttributeError:
             pass
@@ -61,12 +63,13 @@ def mpl_autorasterize(fig):
             for p in paths:
                 if len(p.vertices) > 100:
                     child.set_rasterized(True)
-                    print(child, len(xdat))
+                    child.set_antialiased(True)
+                    #print(child, len(xdat))
         except AttributeError:
             pass
 
 
-class AutoPlotSaver(decl.OverridableObject):
+class AutoPlotSaver(declarative.OverridableObject):
     max_width_in = None
     max_height_in = None
     save_dpi = 400
@@ -75,6 +78,12 @@ class AutoPlotSaver(decl.OverridableObject):
     org_subfolder = None
 
     rasterize_auto = True
+    formats = declarative.DeepBunch()
+    formats.pdf.use = True
+    formats.jpg.use = False
+    formats.jpg.dpi = 200
+    formats.jpg.facecolorize = True
+    formats.png.use = False
 
     def __call__(self, fbasename, fig_or_fbunch = None):
         if fig_or_fbunch is None:
@@ -103,26 +112,32 @@ class AutoPlotSaver(decl.OverridableObject):
         if dirname and not os.path.exists(dirname):
             os.makedirs(dirname)
 
-        fig.savefig(
-            fbasename + '.pdf',
-            dpi = self.save_dpi,
-            bbox_inches = 'tight',
-            #tight_layout=True,
-            pad_inches = 0.05,
-            transparent=True,
-        )
-
         global org_mode
-        if org_mode or self.org_subfolder:
-            fname = fbasename + '.png'
+        for fmt, fB in self.formats.items():
+            if fmt == 'png' and (org_mode or self.org_subfolder):
+                pass
+            elif not fB.use:
+                continue
+            if fB.dpi:
+                dpi = fB.dpi
+            else:
+                dpi = self.save_dpi
+            kwargs = dict()
+            if fB.facecolorize:
+                kwargs['facecolor'] = fig.get_facecolor()
             fig.savefig(
-                fname,
-                dpi = self.org_dpi,
+                fbasename + '.' + fmt,
+                dpi = dpi,
                 bbox_inches = 'tight',
                 #tight_layout=True,
                 pad_inches = 0.05,
-                transparent=False,
+                transparent=True,
+                quality = 50,
+                **kwargs
             )
+
+        if org_mode or self.org_subfolder:
+            fname = fbasename + '.png'
             print("figure: {0}".format(fname))
             print("[[file:{0}]]".format(fname))
             try:
@@ -131,13 +146,14 @@ class AutoPlotSaver(decl.OverridableObject):
                 #IPython.display.display(IPython.display.Image(filename=fname, embed=False))
                 html_bit = '<img src="{1}/../{0}?{1}">'.format(fname, int(time.time()))
                 IPython.display.display(IPython.display.HTML(html_bit))
-                import matplotlib.pyplot as plt
                 plt.close(fig)
             except ImportError:
                 pass
 
         fig.set_dpi(144)
         return
+
+asavefig = AutoPlotSaver()
 
 
 def mplfigB(
@@ -155,8 +171,8 @@ def mplfigB(
         width_in = size_in_base[0] + Ncols * size_in_dW_dH[0]
         height_in = size_in_base[1] + Nrows * size_in_dW_dH[1]
 
-    axB = decl.Bunch()
-    axB.fig = mpl.figure()
+    axB = declarative.Bunch()
+    axB.fig = plt.figure()
     axB.fig.set_size_inches(width_in, height_in)
 
     global asavefig
@@ -167,6 +183,7 @@ def mplfigB(
     N = 0
     axB.ax_grid_colrow = []
     for idx_col in range(Ncols):
+        ax_list = []
         axB.ax_grid_colrow.append([])
         for idx_row in range(Nrows):
             if x_by_col:
@@ -177,6 +194,7 @@ def mplfigB(
             else:
                 sharex = None
             ax = axB.fig.add_subplot(Nrows, Ncols, idx_row + idx_col*Nrows + 1, sharex = sharex)
+            ax_list.append(ax)
             ax.grid(b=True)
             axB.ax_grid_colrow[idx_col].append(ax)
             axB["ax{0}_{1}".format(idx_row, idx_col)] = ax
@@ -187,6 +205,8 @@ def mplfigB(
                     axB.ax_top = ax
                 if idx_row == Nrows-1:
                     axB.ax_bottom = ax
+                axB['ax_list']   = ax_list
+        axB['ax_list_{0}'.format(idx_col)]    = ax_list
     return axB
 
 

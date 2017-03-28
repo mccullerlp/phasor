@@ -59,14 +59,14 @@ class SZPCascade(siso_filter.TransferFunctionSISOBase):
         zeros = ooa_root_grab(self.ooa_params, 'zeros_r', zlist)
         for root in zeros:
             assert(root.imag == 0)
-        print(self.ooa_params['zeros_r'])
+        #print(self.ooa_params['zeros_r'])
         return zeros
 
     @declarative.dproperty
     def poles_c(self, plist = []):
         #only used if the ooa params are completely missing
         poles = ooa_root_grab(self.ooa_params, 'poles_c', plist)
-        print("POLES_C: ", poles)
+        #print("POLES_C: ", poles)
         return poles
 
     @declarative.dproperty

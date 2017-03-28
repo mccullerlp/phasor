@@ -322,4 +322,3 @@ def angle(arg, deg = False):
 
 dispatched.module_by_type[Complex] = [sys.modules[__name__]]
 
-
