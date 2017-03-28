@@ -277,6 +277,10 @@ class Complex(ReprMixin):
     def __hash__(self):
         return hash(self.real) ^ hash(self.imag)
 
+    def __numpy_ufunc__(ufunc, method_name, self_idx, in_tup, **kwargs):
+        print("UFUNC: ", ufunc)
+        return NotImplemented
+
     def conjugate(self):
         return self.__class__(
             self.real,

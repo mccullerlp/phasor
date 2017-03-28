@@ -204,9 +204,12 @@ class FitterExpression(FitterBase):
 
         sol_vec = casadi_sparsity_unravel(self.symbol_map.sym_list, sols['x'])
         sol_map = dict()
-        for datum, sol_val in zip(
-                self.symbol_map.datum_list,
-                sol_vec,
+        cplx_reals_map = dict()
+        cplx_imags_map = dict()
+        for datum, type_desc, sol_val in zip(
+            self.symbol_map.datum_list,
+            self.symbol_map.type_list,
+            sol_vec,
         ):
             #casadi.DM types screw up matplotlib and others
             #so reconvert to numpy
@@ -218,7 +221,20 @@ class FitterExpression(FitterBase):
                 sol_val = float(sol_val)
             else:
                 sol_val = np.array(sol_val).reshape(sol_val.shape[:idx])
-            sol_map[datum] = sol_val
+            if type_desc == 'real':
+                sol_map[datum] = sol_val
+            elif type_desc == 'cplx.real':
+                cplx_reals_map[datum] = sol_val
+            elif type_desc == 'cplx.imag':
+                cplx_imags_map[datum] = sol_val
+            else:
+                raise RuntimeError("Unknown type description {0}".format(type_desc))
+        while cplx_reals_map:
+            kdatum, rval = cplx_reals_map.popitem()
+            ival = cplx_imags_map.pop(kdatum)
+            sol_map[kdatum] = rval + 1j*ival
+        #double check that they were balanced
+        assert(not cplx_imags_map)
 
         ooa_meta = declarative.Bunch()
         for sysname in list(self.root.systems.keys()):

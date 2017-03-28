@@ -147,6 +147,7 @@ class FitterRoot(RootElement, FitterBase):
         sym_list   = []
         ival_list  = []
         datum_list = []
+        type_list  = []
         lb_list    = []
         ub_list    = []
         transform_list = []
@@ -157,6 +158,7 @@ class FitterRoot(RootElement, FitterBase):
                 if isinstance(sbunch.symbol, Complex):
                     ival_list.append(sbunch.initial_value.real)
                     datum_list.append(sbunch.datum)
+                    type_list.append('cplx.real')
                     sym_list.append(sbunch.symbol.real)
                     ub_list.append(sbunch.get('upper_bound', float('inf')).real)
                     lb_list.append(sbunch.get('lower_bound', -float('inf')).real)
@@ -167,9 +169,10 @@ class FitterRoot(RootElement, FitterBase):
 
                     ival_list.append(sbunch.initial_value.imag)
                     datum_list.append(sbunch.datum)
+                    type_list.append('cplx.imag')
                     sym_list.append(sbunch.symbol.imag)
-                    ub_list.append(sbunch.get('upper_boundI', float('inf')).imag)
-                    lb_list.append(sbunch.get('lower_boundI', -float('inf')).imag)
+                    ub_list.append(sbunch.get('upper_boundI', float('inf')))
+                    lb_list.append(sbunch.get('lower_boundI', -float('inf')))
                     #not used in the current expressions and wont currently work with the
                     #complex symbols
                     #transform_list.append(sbunch.setdefault('transforms', []))
@@ -178,6 +181,7 @@ class FitterRoot(RootElement, FitterBase):
                     ival_list.append(sbunch.initial_value)
                     datum_list.append(sbunch.datum)
                     sym_list.append(sbunch.symbol)
+                    type_list.append('real')
                     ub_list.append(sbunch.get('upper_bound', float('inf')))
                     lb_list.append(sbunch.get('lower_bound', -float('inf')))
                     #not used in the current expressions and wont currently work with the
@@ -188,6 +192,7 @@ class FitterRoot(RootElement, FitterBase):
             sym_list       = sym_list,
             ival_list      = ival_list,
             datum_list     = datum_list,
+            type_list      = type_list,
             lb_list        = lb_list,
             ub_list        = ub_list,
             sbunch_list    = sbunch_list,

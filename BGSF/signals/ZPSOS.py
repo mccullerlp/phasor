@@ -24,11 +24,7 @@ from ..base.multi_unit_args import (
 def ooa_root_grab(ooa_params, root_key, defaults):
         #only used if the ooa params are completely missing
         ooa_roots = ooa_params[root_key]
-        print("KEYS: ", list(ooa_roots.keys()))
-        print("LEN: ", len(ooa_roots))
-        print("BOOL: ", bool(ooa_roots))
         if not ooa_roots:
-            print("NOT OOA")
             if isinstance(defaults, collections.Mapping):
                 roots = []
                 for idx, root in defaults.items():
@@ -44,7 +40,6 @@ def ooa_root_grab(ooa_params, root_key, defaults):
             rlist = []
             for pkey, root in ooa_roots.items():
                 rlist.append(root)
-            print("RLIST: ", rlist)
         return tuple(rlist)
 
 
@@ -64,7 +59,6 @@ class SZPCascade(siso_filter.TransferFunctionSISOBase):
         zeros = ooa_root_grab(self.ooa_params, 'zeros_r', zlist)
         for root in zeros:
             assert(root.imag == 0)
-        print("ZEROS: ", zeros)
         print(self.ooa_params['zeros_r'])
         return zeros
 
@@ -72,6 +66,7 @@ class SZPCascade(siso_filter.TransferFunctionSISOBase):
     def poles_c(self, plist = []):
         #only used if the ooa params are completely missing
         poles = ooa_root_grab(self.ooa_params, 'poles_c', plist)
+        print("POLES_C: ", poles)
         return poles
 
     @declarative.dproperty
@@ -99,13 +94,10 @@ class SZPCascade(siso_filter.TransferFunctionSISOBase):
             root = self.root
             current = self.parent
             names = [root_key, self.name_child]
-            print(current, root)
             while current is not root:
-                print(current, root)
                 names.append(current.name_child)
                 current = current.parent
             fitter_parameter = tuple(names[::-1])
-            print("FP: ", fitter_parameter)
 
             #TODO: provide real units rather than the str version
             def fitter_inject(ooa, value, ivalue):
@@ -126,7 +118,7 @@ class SZPCascade(siso_filter.TransferFunctionSISOBase):
 
             if self.preserve_plane:
                 #get the initial value and create the constraint for it
-                if fitter_initial(self.root.ooa_params) <= 0:
+                if fitter_initial(self.root.ooa_params).real <= 0:
                     lower_bound = -float('inf')
                     upper_bound = 0
                 else:
@@ -135,6 +127,7 @@ class SZPCascade(siso_filter.TransferFunctionSISOBase):
             else:
                 lower_bound = -float('inf')
                 upper_bound = float('inf')
+            print("XXX: ", root_key, sub_key, usecomplex, fitter_initial(self.root.ooa_params))
             #TODO: fix name vs. name_global
             return declarative.FrozenBunch(
                 usecomplex    = usecomplex,

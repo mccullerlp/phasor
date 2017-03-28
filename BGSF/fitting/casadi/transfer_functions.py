@@ -60,8 +60,8 @@ class TransferACExpression(FitterExpression):
         return np.asarray(val)
 
     @declarative.dproperty
-    def residuals_model(self, val = 'debiased'):
-        assert(val in ['debiased', 'direct'])
+    def residuals_model(self, val = 'direct'):
+        assert(val in ['bias_balance', 'direct', 'subtract', 'magnitude'])
         return val
 
     @declarative.mproperty
@@ -70,7 +70,6 @@ class TransferACExpression(FitterExpression):
 
     def function(self, xfer):
         SNR_weights = np.copy(self.SNR_weights)
-        print(xfer.ooa_params)
 
         #apply the SNR_limit
         SNR_weights[SNR_weights < self.SNR_limit] = 0
@@ -86,7 +85,17 @@ class TransferACExpression(FitterExpression):
             a_div = abs(div)
             residuals1 = dmath.log(a_div)
             residuals2 = div.imag / a_div
-        elif self.residuals_model == "debiased":
+        elif self.residuals_model == "subtract":
+            #need to multiply by either the data or the fit magnitude as the weights are in SNR
+            sub = (remapped_readout / self.ACData - 1)
+            residuals1 = sub.real
+            residuals2 = sub.imag
+        elif self.residuals_model == "magnitude":
+            div = (remapped_readout / self.ACData)
+            a_div = abs(div)
+            residuals1 = dmath.log(a_div)
+            residuals2 = 0
+        elif self.residuals_model == "bias_balance":
             debias_reweight = 1 / (SNR_weights**2)
             ratio = (remapped_readout / self.ACData)
             upward_biased = ratio - 1
@@ -100,7 +109,7 @@ class TransferACExpression(FitterExpression):
 
         residuals1 = residuals1 * SNR_weights
         residuals2 = residuals2 * SNR_phase_weights
-        resid = residuals1**2 + residuals2**2
+        resid = casadi.dot(residuals1, residuals1) + casadi.dot(residuals2, residuals2)
         return resid
 
 
