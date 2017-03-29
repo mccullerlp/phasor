@@ -168,6 +168,7 @@ class BGSystem(RootElement):
             F_Hz  = val,
             name  = 'AC',
             order = 2,
+            F_center_Hz = 1e3,
         )
         return self.environment.my.F_AC
 
@@ -250,6 +251,13 @@ class BGSystem(RootElement):
         freq_Hz = 0
         for F, n in list(key[ClassicalFreqKey].F_dict.items()):
             freq_Hz += n * F.F_Hz.val
+        return freq_Hz
+
+    def classical_frequency_extract_center(self, ekey):
+        #TODO put this logic in a subobject
+        freq_Hz = 0
+        for F, n in list(ekey.F_dict.items()):
+            freq_Hz += n * F.F_center_Hz
         return freq_Hz
 
     def classical_frequency_test_max(self, key, max_freq):

@@ -35,6 +35,13 @@ class Frequency(
 
     F_Hz = generate_F_Hz()
 
+    @declarative.dproperty
+    def F_center_Hz(self, val = declarative.NOARG):
+        if val is declarative.NOARG:
+            val = self.F_Hz.ref
+        val = self.ooa_params.setdefault('F_center_Hz', val)
+        return val
+
     def __init__(
             self,
             F_center_Hz = None,
@@ -45,6 +52,5 @@ class Frequency(
         super(Frequency, self).__init__(**kwargs)
 
         bases.OOA_ASSIGN(self).F_width_Hz  = F_width_Hz
-
         bases.OOA_ASSIGN(self).order = order
         return

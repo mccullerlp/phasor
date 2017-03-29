@@ -70,6 +70,10 @@ from .modulators import (
     PM,
 )
 
+from .AOM import (
+    AOM
+)
+
 from .hidden_variable_homodyne import (
     HiddenVariableHomodynePD,
 )

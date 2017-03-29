@@ -12,8 +12,14 @@ import numpy as np
 from . import bases
 from . import ports
 
+from ..optics import standard_attrs as standard_attrs_opt
 
-class SignalGenerator(bases.CouplerBase, bases.SystemElementBase):
+
+class SignalGenerator(bases.SignalElementBase):
+
+    phase = standard_attrs_opt.generate_rotate(name = 'phase')
+    _phase_default = ('phase_rad', 0)
+
     def __init__(
         self,
         F,
@@ -72,26 +78,38 @@ class SignalGenerator(bases.CouplerBase, bases.SystemElementBase):
         return
 
     def system_setup_coupling(self, system):
+        if self.phase_rad.val is not 0:
+            cplg = self.symbols.math.exp(self.symbols.i * self.phase_rad.val)
+            cplgC = self.symbols.math.exp(-self.symbols.i * self.phase_rad.val)
+        else:
+            cplg = 1
+            cplgC = 1
         system.coherent_sources_insert(
             self.Out.o,
             ports.DictKey({ports.ClassicalFreqKey: self.f_key}),
-            self.amplitude,
+            cplg * self.amplitude,
         )
         system.coherent_sources_insert(
             self.Out.o,
             ports.DictKey({ports.ClassicalFreqKey: -self.f_key}),
-            self.amplitudeC,
+            cplgC * self.amplitudeC,
         )
         for Hidx, gain in list(self.harmonic_gains.items()):
             port = getattr(self, 'OutH{0}'.format(Hidx))
+            if self.phase_rad.val is not 0:
+                cplg = self.symbols.math.exp(self.symbols.i * Hidx * self.phase_rad.val)
+                cplgC = self.symbols.math.exp(-self.symbols.i * Hidx * self.phase_rad.val)
+            else:
+                cplg = 1
+                cplgC = 1
             system.coherent_sources_insert(
                 port.o,
                 ports.DictKey({ports.ClassicalFreqKey: Hidx * self.f_key}),
-                gain,
+                cplg * gain,
             )
             system.coherent_sources_insert(
                 port.o,
                 ports.DictKey({ports.ClassicalFreqKey: -Hidx * self.f_key}),
-                np.conjugate(gain),
+                cplgC * np.conjugate(gain),
             )
 
