@@ -33,20 +33,16 @@ class ExpMatCoupling(FactorCouplingBase):
     def __init__(
         self,
         ddlt,
+        in_map,
         out_map,
         N_ode = 1,
         order = 2,
     ):
-        self.N_ode = N_ode
-        self.order = order
-        self.ddlt = ddlt
-
-        self.all_ins = set()
-        self.all_outs = set()
-        for out, din in self.ddlt.items():
-            self.all_outs.add(out)
-            for pk_in, lt in din.items():
-                self.all_ins.add(pk_in)
+        self.N_ode   = N_ode
+        self.order   = order
+        self.ddlt    = ddlt
+        self.out_map = out_map
+        self.in_map  = in_map
 
         #all edges are generated immediately. Currently assumes full density
         self.edges_NZ_pkset_dict = {}
@@ -54,15 +50,63 @@ class ExpMatCoupling(FactorCouplingBase):
         self.edges_req_pkset_dict = {}
         def gen_edge_func(pk_in, pk_out):
             return lambda sV, sB: self.edge_func(pk_in, pk_out, sV, sB)
-        for pk_out in self.all_outs:
-            for pk_in in self.all_ins:
+        for pk_out in self.out_map.values():
+            for pk_in in self.in_map.values():
                 self.edges_NZ_pkset_dict[(pk_in, pk_out)] = frozenset()
                 self.edges_pkpk_dict[(pk_in, pk_out)] = gen_edge_func(pk_in, pk_out)
-                self.edges_req_pkset_dict[(pk_in, pk_out)] = frozenset(self.all_ins)
+                self.edges_req_pkset_dict[(pk_in, pk_out)] = frozenset(self.in_map.values())
 
         #Currently, nonlinear doesn't need to make any sources. It may in the future as that may be a more stable way to converge
         self.sources_pk_dict = {}
         self.sources_NZ_pkset_dict = {}
+
+        pks = set()
+        def pks_grab(lt):
+            if isinstance(lt, list):
+                for sublt in lt:
+                    pks_grab(sublt)
+            elif isinstance(lt, tuple):
+                for pk in lt[1:]:
+                    pks.add(pk)
+            else:
+                raise RuntimeError("BOO")
+            return
+        for pk_out, din in self.ddlt.items():
+            pks.add(pk_out)
+            for pk_in, lt in din.items():
+                pks.add(pk_in)
+                pks_grab(lt)
+
+        #print(ins_p, sol_vector)
+        self.pks = list(pks)
+        self.pks.sort()
+        self.pks_inv = dict()
+        for idx, pk in enumerate(self.pks):
+            self.pks_inv[pk] = idx
+
+        #remap the index keys into integer indexes for speed
+        ddlt_accel = dict()
+        def ddlt_remap(lt):
+            if isinstance(lt, list):
+                sublist = []
+                for sublt in lt:
+                    sublist.append(ddlt_remap(sublt))
+                return sublist
+            elif isinstance(lt, tuple):
+                #get the gain
+                newtup = [lt[0]]
+                for pk in lt[1:]:
+                    newtup.append(self.pks_inv[pk])
+                return tuple(newtup)
+            else:
+                raise RuntimeError("BOO")
+            return
+        for pk_out, din in self.ddlt.items():
+            for pk_in, lt in din.items():
+                ddlt_accel[self.pks_inv[pk_out], self.pks_inv[pk_in]] = ddlt_remap(lt)
+        self.ddlt_accel = ddlt_accel
+        #pprint("PKS:")
+        #pprint(pks)
 
     _prev_sol_vector = None
 
@@ -73,29 +117,12 @@ class ExpMatCoupling(FactorCouplingBase):
         return self.solution.get((pk_in, pk_out), 0)
 
     def generate_solution(self, sol_vector):
-        solution = dict()
-        ins = set(pk[1] for pk in self.all_ins)
-        outs = set(pk[1] for pk in self.all_outs)
-        ins_p = set(pk[0] for pk in self.all_ins)
-        outs_p = set(pk[0] for pk in self.all_outs)
-        assert(len(ins_p) == 1)
-        assert(len(outs_p) == 1)
-        ins_p = list(ins_p)[0]
-        outs_p = list(outs_p)[0]
-        #print(ins_p, sol_vector)
-        pks = list(ins.union(outs))
-        pks.sort()
-        pks_inv = dict()
-        pkv = []
-        #pprint("PKS:")
-        #pprint(pks)
+        pks = self.pks
+        pks_inv = self.pks_inv
+        pkv = np.empty(len(pks), dtype=object)
         for idx, pk in enumerate(pks):
-            pks_inv[pk] = idx
             #print("PK_G: ", (ins_p, pk))
-            pkv.append(sol_vector.get((ins_p, pk), 0))
-        _pkv = np.empty(len(pkv), dtype=object)
-        _pkv[:] = pkv
-        pkv = _pkv
+            pkv[idx] = sol_vector.get(self.in_map[pk], 0)
         #print("PKV: ", pkv)
 
         def lt_val(lt):
@@ -106,8 +133,8 @@ class ExpMatCoupling(FactorCouplingBase):
             elif isinstance(lt, tuple):
                 val = lt[0]
                 #print("LT0: ", val)
-                for pk in lt[1:]:
-                    val = val * pkv[pks_inv[pk[1]]]  # sol_vector.get(pk, 0)
+                for pk_idx in lt[1:]:
+                    val = val * pkv[pk_idx]  # sol_vector.get(pk, 0)
             else:
                 raise RuntimeError("BOO")
             return val
@@ -116,11 +143,8 @@ class ExpMatCoupling(FactorCouplingBase):
         Mexp_tot = eye
         for idx_N in range(self.N_ode):
             m1 = np.zeros([len(pks), len(pks)], dtype = object)
-            for pk_out, din in self.ddlt.items():
-                for pk_in, lt in din.items():
+            for (idx_out, idx_in), lt in self.ddlt_accel.items():
                     val = lt_val(lt)
-                    idx_in = pks_inv[pk_in[1]]
-                    idx_out = pks_inv[pk_out[1]]
                     m1[idx_out, idx_in] = val
             #print("M1: ", m1)
             m1 = m1 / self.N_ode
@@ -138,6 +162,7 @@ class ExpMatCoupling(FactorCouplingBase):
         #print(m1)
         #print(Mexp)
 
+        solution = dict()
         for idx_in in range(len(pks)):
             for idx_out in range(len(pks)):
                 edge = Mexp_tot[idx_out, idx_in]
@@ -149,7 +174,8 @@ class ExpMatCoupling(FactorCouplingBase):
                     #    print("SQZY: ", pk_in, pk_out, edge)
                     #else:
                     #    print(pk_in, pk_out, edge)
-                solution[(ins_p, pks[idx_in]), (outs_p, pks[idx_out])] = edge
+                #solution[(ins_p, pks[idx_in]), (outs_p, pks[idx_out])] = edge
+                solution[self.in_map[pks[idx_in]], self.out_map[pks[idx_out]]] = edge
 
         #pprint(pks)
 
@@ -303,6 +329,7 @@ class NonlinearCrystal(
         for port in self.ports_optical:
             ddlt = collections.defaultdict(lambda : collections.defaultdict(list))
             out_map = dict()
+            in_map = dict()
             portO = tmap[port]
             for kfrom in matrix_algorithm.port_set_get(port.i):
                 #print("KFR: ", kfrom)
@@ -349,9 +376,10 @@ class NonlinearCrystal(
                             raise RuntimeError("Can't Currently do nonlinear optics on multiply composite wavelengths")
                         F, n = F_list[0]
                         #TODO finish out_map logic
-                        ddlt[(portO.o, kto)][(port.i, kfrom)].append(
+                        ddlt[(port.i, kto)][(port.i, kfrom)].append(
                             (n * G, (port.i, kfrom2))
                         )
+                        in_map[(port.i, kfrom)] = (port.i, kfrom)
                         out_map[(port.i, kto)] = (portO.o, kto)
                         #print("JOIN: ", kfrom, kfrom2, kto)
 
@@ -373,9 +401,11 @@ class NonlinearCrystal(
                                 raise RuntimeError("Can't Currently do nonlinear optics on multiply composite wavelengths")
                             F, n = F_list[0]
 
-                            ddlt[(portO.o, kto)][(port.i, kfrom)].append(
+                            ddlt[(port.i, kto)][(port.i, kfrom)].append(
                                 (-n * G, (port.i, kfrom2))
                             )
+                            in_map[(port.i, kfrom)] = (port.i, kfrom)
+                            out_map[(port.i, kto)] = (portO.o, kto)
 
             ddlt2 = dict()
             for k, v in ddlt.items():
@@ -386,10 +416,11 @@ class NonlinearCrystal(
             #pprint(ddlt2)
             matrix_algorithm.injection_insert(
                 ExpMatCoupling(
-                    ddlt = ddlt2,
+                    ddlt    = ddlt2,
+                    in_map  = in_map,
                     out_map = out_map,
-                    N_ode = self.N_ode,
-                    order = self.solution_order,
+                    N_ode   = self.N_ode,
+                    order   = self.solution_order,
                 )
             )
         return

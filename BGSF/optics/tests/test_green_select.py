@@ -3,6 +3,7 @@
 from __future__ import (division, print_function)
 
 import numpy.testing as np_test
+import numpy as np
 import declarative as decl
 from declarative.bunch import (
     DeepBunch,
@@ -83,12 +84,14 @@ def test_shg():
     sys = system.BGSystem()
     sys.my.PSL = optics.Laser(
         F = sys.system.F_carrier_1064,
-        power_W = 2.,
+        power_W = 1.,
     )
 
     sys.my.ktp = NonlinearCrystal(
-        nlg = .1,
-        length_mm = 10,
+        nlg = 1,
+        length_mm = 1,
+        N_ode = 1000,
+        solution_order = 4,
     )
 
     sys.my.mDC2 = optics.HarmonicMirror(
@@ -123,8 +126,10 @@ def test_shg():
     #pprint(sys.ooa_params.test.PSL)
     print("sys.DC_R.DC_readout", sys.DC_R.DC_readout, 2)
     print("sys.DC_G.DC_readout", sys.DC_G.DC_readout, 1)
-    np_test.assert_almost_equal(sys.DC_R.DC_readout, 2)
-    np_test.assert_almost_equal(sys.DC_G.DC_readout, 1)
+    conv = 0.069527636785009506
+    conv = 1 - np.tanh(2)**2
+    np_test.assert_almost_equal(sys.DC_R.DC_readout / conv, 1, 2)
+    np_test.assert_almost_equal(sys.DC_G.DC_readout / (1 - conv), 1, 2)
 
 if __name__ == '__main__':
     main()
