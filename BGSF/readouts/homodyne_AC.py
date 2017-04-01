@@ -149,19 +149,23 @@ class HomodyneACReadoutBase(base.SystemElementBase):
 
     @declarative.mproperty
     def AC_CSD_ellipse(self):
-        NIQ = np.real(self.AC_CSD_IQ)
-        rtDisc = np.sqrt((NIQ[0, 0] - NIQ[1, 1])**2 + 4*(NIQ[0, 1]*NIQ[1, 0]))
-        min_eig = (NIQ[0, 0] + NIQ[1, 1] - rtDisc)/2
-        max_eig = (NIQ[0, 0] + NIQ[1, 1] + rtDisc)/2
-        disc = np.asarray(NIQ[0, 0] - min_eig)
+        NIQ            = np.real(self.AC_CSD_IQ)
+        rtDisc         = np.sqrt((NIQ[0, 0] - NIQ[1, 1])**2 + 4*(NIQ[0, 1]*NIQ[1, 0]))
+        min_eig        = (NIQ[0, 0] + NIQ[1, 1] - rtDisc)/2
+        max_eig        = (NIQ[0, 0] + NIQ[1, 1] + rtDisc)/2
+        disc           = np.asarray(NIQ[0, 0] - min_eig)
         disc[disc < 0] = 0
-        ratio = ((NIQ[1, 0] > 0)*2 - 1) * np.sqrt(disc / (max_eig - min_eig))
-        ang_rad = np.pi - np.arccos(ratio)
+        ratio          = ((NIQ[1, 0] > 0)*2 - 1) * np.sqrt(disc / (max_eig - min_eig))
+        ang_rad        = np.pi - np.arccos(ratio)
+        Imin           = NIQ[0, 0] - abs(NIQ[1, 0])**2 / NIQ[1, 1]
+        Qmin           = NIQ[1, 1] - abs(NIQ[1, 0])**2 / NIQ[0, 0]
         return declarative.Bunch(
-            min = min_eig,
-            max = max_eig,
-            rad = ang_rad,
-            deg = 180 * ang_rad / np.pi,
+            min  = min_eig,
+            max  = max_eig,
+            Imin = Imin,
+            Qmin = Qmin,
+            rad  = ang_rad,
+            deg  = 180 * ang_rad / np.pi,
         )
 
     @declarative.mproperty

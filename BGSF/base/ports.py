@@ -15,7 +15,6 @@ from . import bases
 
 ElementKey = u'▲'
 PortKey = u'🔌'
-MechKey = u'⌖'
 PostBondKey = u'№'
 
 ClassicalFreqKey = u'𝓕'

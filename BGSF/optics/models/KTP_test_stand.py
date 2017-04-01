@@ -111,6 +111,11 @@ class KTPTestStand(optics.OpticalCouplerBase):
                 portNQ = self.hPD_G.rtQuantumI.o,
                 portD  = self.ditherAM.Drv.i,
             )
+            self.my.AC_RGQ = readouts.HomodyneACReadout(
+                portNI = self.hPD_R.rtQuantumQ.o,
+                portNQ = self.hPD_G.rtQuantumQ.o,
+                portD  = self.ditherAM.Drv.i,
+            )
             self.my.AC_N = readouts.NoiseReadout(
                 port_map = dict(
                     RI = self.hPD_R.rtQuantumI.o,
@@ -253,6 +258,11 @@ class SHGTestStandResonant(optics.OpticalCouplerBase):
                 portNQ = self.hPD_G.rtQuantumI.o,
                 portD  = self.ditherPM.Drv.i,
             )
+            self.my.AC_RGQ = readouts.HomodyneACReadout(
+                portNI = self.hPD_R.rtQuantumQ.o,
+                portNQ = self.hPD_G.rtQuantumQ.o,
+                portD  = self.ditherPM.Drv.i,
+            )
             self.my.AC_N = readouts.NoiseReadout(
                 port_map = dict(
                     RI = self.hPD_R.rtQuantumI.o,
@@ -262,17 +272,27 @@ class SHGTestStandResonant(optics.OpticalCouplerBase):
                 )
             )
 
-    def full_noise_matrix(self, lst = ['RI', 'RQ', 'GI', 'GQ'], display = True):
+    def full_noise_matrix(
+            self,
+            lst = [
+                'RI',
+                'RQ',
+                'GI',
+                'GQ',
+            ],
+            display = True
+    ):
         arr = np.zeros((len(lst), len(lst)))
         for idx_L, NL in enumerate(lst):
             for idx_R, NR in enumerate(lst):
-                arr[idx_L, idx_R] = self.AC_N.CSD[(NL, NR)].real
+                val = self.AC_N.CSD[(NL, NR)].real
+                arr[idx_L, idx_R] = val
         #clean up the presentation
-        arr[arr < 1e-10] = 0
+        arr[abs(arr) < 1e-10] = 0
         if display:
             try:
                 import tabulate
-                tabular_data = [[label] + list(td) for label, td in zip(lst, arr)]
+                tabular_data = [[label] + list(str(t) for t in td) for label, td in zip(lst, arr)]
                 print(tabulate.tabulate(tabular_data, headers = lst))
             except ImportError:
                 print(lst, arr)
@@ -414,6 +434,11 @@ class OPOTestStandResonant(optics.OpticalCouplerBase):
                 portNQ = self.hPD_G.rtQuantumI.o,
                 portD  = self.ditherPM.Drv.i,
             )
+            self.my.AC_RGQ = readouts.HomodyneACReadout(
+                portNI = self.hPD_R.rtQuantumQ.o,
+                portNQ = self.hPD_G.rtQuantumQ.o,
+                portD  = self.ditherPM.Drv.i,
+            )
             self.my.AC_N = readouts.NoiseReadout(
                 port_map = dict(
                     RI = self.hPD_R.rtQuantumI.o,
@@ -427,7 +452,9 @@ class OPOTestStandResonant(optics.OpticalCouplerBase):
         arr = np.zeros((len(lst), len(lst)))
         for idx_L, NL in enumerate(lst):
             for idx_R, NR in enumerate(lst):
-                arr[idx_L, idx_R] = self.AC_N.CSD[(NL, NR)].real
+                val = self.AC_N.CSD[(NL, NR)].real
+                print(NL, NR, val)
+                arr[idx_L, idx_R] = val
         #clean up the presentation
         arr[arr < 1e-10] = 0
         if display:
