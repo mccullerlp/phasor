@@ -2,7 +2,7 @@
 """
 
 from __future__ import (division, print_function)
-from builtins import zip, range, object
+#from builtins import zip, range, object
 from .optical_system import OpticalSystem
 import sympy
 import numpy as np

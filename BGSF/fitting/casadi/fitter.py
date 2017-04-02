@@ -1,7 +1,7 @@
 """
 """
 from __future__ import division, print_function
-from builtins import zip
+#from builtins import zip
 import numpy as np
 
 import declarative

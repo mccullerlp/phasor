@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import (division, print_function)
-from builtins import object
+#from builtins import object
 
 import declarative as declarative
 

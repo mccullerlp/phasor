@@ -9,7 +9,7 @@ These are medium-duty implementations, they still use a hash-table for lookup, r
 
 .. autofunction:: topological_sort
 """
-from builtins import str
+#from builtins import str
 
 
 class SCCError(RuntimeError):

@@ -131,3 +131,85 @@ class MechanicalPort(MechanicalPortRaw, bases.SystemElementBase):
             return None
 
 
+class MechanicalXYZPort(bases.SystemElementBase):
+    typename = 'MechanicalXYZ'
+
+    def X(self, val = None):
+        if val is None:
+            val = MechanicalPort()
+        return val
+
+    def Y(self, val = None):
+        if val is None:
+            val = MechanicalPort()
+        return val
+
+    def Z(self, val = None):
+        if val is None:
+            val = MechanicalPort()
+        return val
+
+    def _complete(self):
+        if not super(MechanicalPort, self)._complete():
+            prein = self.inst_preincarnation
+            if prein is not None:
+                for built, bpartner in zip(prein._bond_partners_building, prein._bond_partners):
+                    if not built:
+                        new_bpartner = self.root[bpartner.name_system]
+                        self._bond_partners.append(new_bpartner)
+                        assert(self.root is new_bpartner.root)
+                        self._bond_partners_building.append(built)
+        return
+
+    @declarative.mproperty
+    def bond_key(self):
+        return self
+
+    @declarative.mproperty
+    def _bond_partners(self):
+        return []
+
+    @declarative.mproperty
+    def _bond_partners_building(self):
+        return []
+
+    def bond(self, other):
+        self.bond_inform(other.bond_key)
+        other.bond_inform(self)
+
+    def bond_inform(self, other_key):
+        #TODO make this smarter
+        self._bond_partners.append(other_key)
+        if self.building:
+            self._bond_partners_building.append(True)
+        else:
+            self._bond_partners_building.append(False)
+
+    def bond_delegate(self):
+        for bpartner in self._bond_partners:
+            self.X.bond(bpartner.X)
+            self.Y.bond(bpartner.Y)
+            self.Z.bond(bpartner.Z)
+        return
+
+    def targets_list(self, typename):
+        if typename == VISIT.bond_delegate:
+            return self, self.bond_delegate
+        else:
+            return super(MechanicalXYZPort, self).targets_list(typename)
+
+    pchain = None
+
+    @declarative.mproperty
+    def chain_next(self):
+        if self.pchain is not None:
+            if isinstance(self.pchain, str):
+                return getattr(self.element, self.pchain)
+            elif callable(self.pchain):
+                return self.pchain()
+            else:
+                return self.pchain
+        else:
+            return None
+
+

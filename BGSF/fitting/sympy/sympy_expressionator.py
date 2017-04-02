@@ -1,6 +1,6 @@
 """
 """
-from builtins import zip, object
+#from builtins import zip, object
 import sympy
 from sympy.utilities.lambdify import lambdastr
 from BGSF.utilities.strings import canonicalize_TQStrings

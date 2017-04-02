@@ -1,7 +1,7 @@
 """
 """
 from __future__ import division
-from builtins import object
+#from builtins import object
 import numpy as np
 
 import declarative as decl

@@ -3,7 +3,7 @@
 """
 from future import standard_library
 standard_library.install_aliases()
-from builtins import object
+#from builtins import object
 import heapq
 import queue
 import threading

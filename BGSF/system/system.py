@@ -274,6 +274,21 @@ class BGSystem(RootElement):
     def _setup_sequence(self):
         self._complete()
         assert(not self._frozen)
+
+        with self.building:
+            #must do delegate calls before autotermination
+            has_delegated = set()
+            while True:
+                no_delegates = True
+                for element, delegate_call in self.targets_recurse(VISIT.bond_delegate):
+                    if element not in has_delegated:
+                        has_delegated.add(element)
+                        delegate_call()
+                        no_delegates = False
+                    #print("Bond delegate", element)
+                if no_delegates:
+                    break
+
         while self._include_lst:
             self.do_includes()
             #print("INCLUDE LST: ", self._include_lst)
