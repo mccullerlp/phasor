@@ -7,9 +7,10 @@ import declarative
 
 from . import ports
 from . import passive
+from . import elements
 
 
-class XYZMass(object):
+class XYZMass(elements.Mechanical1PortBase):
     @declarative.dproperty
     def A(self):
         return ports.MechanicalXYZPort(
@@ -41,7 +42,7 @@ class XYZMass(object):
         )
 
 
-class XYZTerminatorSpring(object):
+class XYZTerminatorSpring(elements.Mechanical1PortBase):
 
     @declarative.dproperty
     def A(self):
@@ -82,7 +83,7 @@ class XYZTerminatorSpring(object):
         )
 
 
-class XYZTerminatorDamper(object):
+class XYZTerminatorDamper(elements.Mechanical1PortBase):
 
     @declarative.dproperty
     def A(self):
@@ -123,7 +124,7 @@ class XYZTerminatorDamper(object):
         )
 
 
-class XYZMoment(object):
+class XYZMoment(elements.Mechanical1PortBase):
     @declarative.dproperty
     def L(self):
         return ports.MechanicalXYZPort(
@@ -163,7 +164,7 @@ class XYZMoment(object):
         )
 
 
-class XYZMomentDriver(object):
+class XYZMomentDriver(elements.Mechanical1PortBase):
     @declarative.dproperty
     def L(self):
         return ports.MechanicalXYZPort()
@@ -220,7 +221,7 @@ class XYZMomentDriver(object):
         return
 
 
-class MomentDriver(object):
+class MomentDriver(elements.Mechanical1PortBase):
     @declarative.dproperty
     def L(self):
         return ports.MechanicalXYZPort()

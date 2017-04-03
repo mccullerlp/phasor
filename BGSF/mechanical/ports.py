@@ -75,14 +75,15 @@ class MechanicalPort(MechanicalPortRaw, bases.SystemElementBase):
             raise RuntimeError("Must be Terminated")
         else:
             from .elements import Connection
+            b_p_set = set(self._bond_partners)
             self.my.connection = Connection(
-                N_ports = 1 + len(self._bond_partners)
+                N_ports = 1 + len(b_p_set)
             )
             self.system._include(self.connection)
             self.connection.p0.bond_inform(self)
             self.system.bond_completion_raw(self, self.connection.p0, self)
             self.connection.p0.bond_completion()
-            for idx, partner in enumerate(self._bond_partners):
+            for idx, partner in enumerate(b_p_set):
                 #TODO not sure if I like the connection object not knowing who it is bound to
                 #maybe make a more explicit notification for the raw bonding
                 port = self.connection.ports_mechanical[idx + 1]
@@ -150,7 +151,7 @@ class MechanicalXYZPort(bases.SystemElementBase):
         return val
 
     def _complete(self):
-        if not super(MechanicalPort, self)._complete():
+        if not super(MechanicalXYZPort, self)._complete():
             prein = self.inst_preincarnation
             if prein is not None:
                 for built, bpartner in zip(prein._bond_partners_building, prein._bond_partners):
@@ -186,10 +187,11 @@ class MechanicalXYZPort(bases.SystemElementBase):
             self._bond_partners_building.append(False)
 
     def bond_delegate(self):
+        #print("DELEGATIN'", self, self._bond_partners)
         for bpartner in self._bond_partners:
-            self.X.bond(bpartner.X)
-            self.Y.bond(bpartner.Y)
-            self.Z.bond(bpartner.Z)
+            self.X.bond_inform(bpartner.X)
+            self.Y.bond_inform(bpartner.Y)
+            self.Z.bond_inform(bpartner.Z)
         return
 
     def targets_list(self, typename):

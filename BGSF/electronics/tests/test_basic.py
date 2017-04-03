@@ -123,6 +123,37 @@ def test_VIR_conn():
     test.assert_almost_equal(sys.R2.DC_readout, 5)
     test.assert_almost_equal(sys.R3.DC_readout, .5)
 
+def test_VIR_conn2():
+    sys = system.BGSystem()
+    sys.my.I1 = electronics.CurrentSource(I_DC = 1)
+    sys.my.Conn1 = electronics.Connection(N_ports = 4)
+    sys.my.Conn2 = electronics.Connection(N_ports = 5)
+    sys.my.T1 = electronics.TerminatorResistor(
+        resistance_Ohms = 10,
+    )
+    sys.my.T2 = electronics.TerminatorResistor(
+        resistance_Ohms = 10,
+    )
+    sys.bond(sys.I1.A, sys.Conn1.p0)
+    sys.bond(sys.Conn1.p1, sys.Conn2.p0)
+    sys.bond(sys.Conn1.p2, sys.Conn2.p3)
+    sys.bond(sys.Conn2.p1, sys.T1.A)
+    sys.bond(sys.Conn2.p2, sys.T2.A)
+    sys.my.R1 = electronics.CurrentReadout(
+        terminal = sys.I1.A,
+        direction = 'out',
+    )
+    sys.my.R2 = electronics.VoltageReadout(
+        terminal = sys.I1.A,
+    )
+    sys.my.R3 = electronics.CurrentReadout(
+        terminal = sys.T1.A,
+        direction = 'in',
+    )
+    test.assert_almost_equal(sys.R1.DC_readout, 1)
+    test.assert_almost_equal(sys.R2.DC_readout, 5)
+    test.assert_almost_equal(sys.R3.DC_readout, .5)
+
 def test_bdV():
     """
     Test the balanced voltage source with different pairs of terminations. Not allowed to short both sides or have
