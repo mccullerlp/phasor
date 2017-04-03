@@ -8,66 +8,12 @@ from . import ports
 from . import smatrix
 
 
-class ForceSource(smatrix.SMatrix1PortBase):
+class DisplacementSource(smatrix.SMatrix1PortBase):
     def S11_by_freq(self, F):
         return -1
 
     @decl.mproperty
-    def F_DC(self, val = 0):
-        return val
-
-    @decl.dproperty
-    def F(self):
-        return ports.SignalInPort(sname = 'F')
-
-    @decl.mproperty
-    def fkey(self):
-        return ports.DictKey({
-            ports.ClassicalFreqKey: ports.FrequencyKey({}),
-        })
-
-    def system_setup_ports_initial(self, ports_algorithm):
-        if self.F_DC != 0:
-            ports_algorithm.coherent_sources_needed(self.A.o, self.fkey)
-        return
-
-    def system_setup_ports(self, ports_algorithm):
-        super(ForceSource, self).system_setup_ports(ports_algorithm)
-        for kfrom in ports_algorithm.port_update_get(self.F.i):
-            ports_algorithm.port_coupling_needed(self.A.o, kfrom)
-        for kto in ports_algorithm.port_update_get(self.A.o):
-            ports_algorithm.port_coupling_needed(self.F.i, kto)
-        return
-
-    def system_setup_coupling(self, matrix_algorithm):
-        #TODO setup DC
-        super(ForceSource, self).system_setup_coupling(matrix_algorithm)
-
-        if self.F_DC != 0:
-            matrix_algorithm.coherent_sources_insert(
-                self.A.o,
-                self.fkey,
-                self.F_DC
-            )
-
-        for kfrom in matrix_algorithm.port_set_get(self.F.i):
-            matrix_algorithm.port_coupling_insert(
-                self.F.i,
-                kfrom,
-                self.A.o,
-                kfrom,
-                1,
-            )
-        return
-
-
-class DisplacementSource(smatrix.SMatrix1PortBase):
-    def S11_by_freq(self, F):
-        return 1
-
-    @decl.mproperty
     def d_DC(self, val = 0):
-        #TODO set d_DC
         return val
 
     @decl.dproperty
@@ -101,12 +47,66 @@ class DisplacementSource(smatrix.SMatrix1PortBase):
             matrix_algorithm.coherent_sources_insert(
                 self.A.o,
                 self.fkey,
-                self.d_DC * self.zM_termination
+                self.d_DC
             )
 
         for kfrom in matrix_algorithm.port_set_get(self.d.i):
             matrix_algorithm.port_coupling_insert(
                 self.d.i,
+                kfrom,
+                self.A.o,
+                kfrom,
+                1,
+            )
+        return
+
+
+class ForceSource(smatrix.SMatrix1PortBase):
+    def S11_by_freq(self, F):
+        return 1
+
+    @decl.mproperty
+    def F_DC(self, val = 0):
+        #TODO set F_DC
+        return val
+
+    @decl.dproperty
+    def F(self):
+        return ports.SignalInPort(sname = 'F')
+
+    @decl.mproperty
+    def fkey(self):
+        return ports.DictKey({
+            ports.ClassicalFreqKey: ports.FrequencyKey({}),
+        })
+
+    def system_setup_ports_initial(self, ports_algorithm):
+        if self.F_DC != 0:
+            ports_algorithm.coherent_sources_needed(self.A.o, self.fkey)
+        return
+
+    def system_setup_ports(self, ports_algorithm):
+        super(ForceSource, self).system_setup_ports(ports_algorithm)
+        for kfrom in ports_algorithm.port_update_get(self.F.i):
+            ports_algorithm.port_coupling_needed(self.A.o, kfrom)
+        for kto in ports_algorithm.port_update_get(self.A.o):
+            ports_algorithm.port_coupling_needed(self.F.i, kto)
+        return
+
+    def system_setup_coupling(self, matrix_algorithm):
+        #TODO setup DC
+        super(ForceSource, self).system_setup_coupling(matrix_algorithm)
+
+        if self.F_DC != 0:
+            matrix_algorithm.coherent_sources_insert(
+                self.A.o,
+                self.fkey,
+                self.F_DC * self.zM_termination
+            )
+
+        for kfrom in matrix_algorithm.port_set_get(self.F.i):
+            matrix_algorithm.port_coupling_insert(
+                self.F.i,
                 kfrom,
                 self.A.o,
                 kfrom,

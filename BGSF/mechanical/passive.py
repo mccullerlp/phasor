@@ -16,7 +16,7 @@ class DamperBase(object):
     def resistance_Ns_m(self, val):
         return val
 
-    def impedance_by_freq(self, F):
+    def mobility_by_freq(self, F):
         return self.symbols.i2pi * F * self.resistance_Ns_m
 
     @decl.dproperty
@@ -35,7 +35,7 @@ class SpringBase(object):
     def elasticity_N_m(self, val):
         return val
 
-    def impedance_by_freq(self, F):
+    def mobility_by_freq(self, F):
         #TODO
         return self.elasticity_N_m
 
@@ -45,61 +45,61 @@ class MassBase(object):
     def mass_kg(self, val):
         return val
 
-    def impedance_by_freq(self, F):
+    def mobility_by_freq(self, F):
         return (self.symbols.i2pi * F)**2 * self.mass_kg
 
 
-class TerminatorImpedance(smatrix.SMatrix1PortBase):
-    def impedance_by_freq(self, F):
+class TerminatorMobility(smatrix.SMatrix1PortBase):
+    def mobility_by_freq(self, F):
         raise NotImplementedError()
 
     def S11_by_freq(self, F):
-        Z = self.impedance_by_freq(F)
-        return ((Z - self.zM_termination) / (Z + self.zM_termination))
+        Y = self.mobility_by_freq(F)
+        return ((1 - Y * self.zM_termination) / (1 + Y * self.zM_termination))
 
 
-class TerminatorDamper(DamperBase, TerminatorImpedance):
+class TerminatorDamper(DamperBase, TerminatorMobility):
     pass
 
 
-class TerminatorSpring(SpringBase, TerminatorImpedance):
+class TerminatorSpring(SpringBase, TerminatorMobility):
     pass
 
 
-class Mass(MassBase, TerminatorImpedance):
+class Mass(MassBase, TerminatorMobility):
     pass
 
 
-class SeriesImpedance(smatrix.SMatrix2PortBase):
-    def impedance_by_freq(self, F):
+class SeriesMobility(smatrix.SMatrix2PortBase):
+    def mobility_by_freq(self, F):
         raise NotImplementedError()
 
     def S11_by_freq(self, F):
-        Z = self.impedance_by_freq(F)
-        return (Z / (Z + self.zM_termination * 2))
+        Y = self.mobility_by_freq(F)
+        return (1 / (1 + Y * self.Z_termination * 2))
 
     def S12_by_freq(self, F):
-        Z = self.impedance_by_freq(F)
-        return ((2 * self.zM_termination) / (Z + self.zM_termination * 2))
+        Y = self.mobility_by_freq(F)
+        return ((2 * Y * self.Z_termination) / (1 + Y * self.Z_termination * 2))
 
     def S21_by_freq(self, F):
-        Z = self.impedance_by_freq(F)
-        return ((2 * self.zM_termination) / (Z + self.zM_termination * 2))
+        Y = self.mobility_by_freq(F)
+        return ((2 * Y * self.Z_termination) / (1 + Y * self.Z_termination * 2))
 
     def S22_by_freq(self, F):
-        Z = self.impedance_by_freq(F)
-        return (Z / (Z + self.zM_termination * 2))
+        Y = self.mobility_by_freq(F)
+        return (1 / (1 + Y * self.Z_termination * 2))
 
 
-class SeriesDamper(DamperBase, SeriesImpedance):
+class SeriesDamper(DamperBase, SeriesMobility):
     pass
 
 
-class SeriesSpring(SpringBase, SeriesImpedance):
+class SeriesSpring(SpringBase, SeriesMobility):
     pass
 
 
-class SeriesMass(MassBase, SeriesImpedance):
+class SeriesMass(MassBase, SeriesMobility):
     """
     Also known as an "inerter"
     """

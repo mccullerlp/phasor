@@ -1,21 +1,21 @@
 """
-The zM_termination uses mechanical impedance in its calculations, folling the electrical/mechanical impedance analogy
+The zM_termination uses mechanical mobility in its calculations, folling the electrical/mechanical impedance analogy. In this case using mobility/admittance rather than impedance to preserve the mechanical topology.
 
 https://en.wikipedia.org/wiki/Impedance_analogy
+https://en.wikipedia.org/wiki/Mobility_analogy
 
 This implementation is more interested in measuring displacements rather than velocities so that the DC term may be
-calculated. In the standard analogy, current becomes velocity and voltage becomes force and impedance is [kg/s]. This allows
-wave parameters to carry W as in the electrical case and the ports may be easily converted to vel and force. Displacement can be calculated as charge is, which requires knowing the DC force on all spring (capacitive) elements.
+calculated. In the standard mobility analogy, current becomes force and voltage becomes velocity and admittance [I/V] is [kg/s]. This allows wave parameters to carry W as in the electrical case and the ports may be easily converted to vel and force. Displacement can be calculated as charge is, which requires knowing the DC force on all spring (capacitive) elements.
 
-Instead this implementation uses a different convention, where voltage->force current->displacement. This means all of the wave parameters carry J and impedance is in units of [kg/s^2].
+Instead this implementation uses a different convention, where voltage->displacement current->force. This means all of the wave parameters carry J and mobility is in units of [kg/s^2].
 
 This does complicate johnson_noise, but the correspondance shouldn't be too bad
 
-For convenience, multiple kinds of impedance are used, and formulas are modified. This is to prevent division by zero
+For convenience, multiple kinds of mobility are used, and formulas are modified. This is to prevent division by zero
 
-impedance [kg/s^2]
-Vimpedance [kg/s]
-Aimpedance [kg]
+mobility  [kg/s^2]
+Vmobility [kg/s]
+Amobility [kg]
 
 and their inverses for reactance
 """
@@ -176,7 +176,7 @@ class Connection(MechanicalElementBase):
 
 class Cable(Mechanical2PortBase):
     """
-    Basically a longitudinal wave string with. This should be designed to have certain characteristic impedance
+    Basically a longitudinal wave string with. This should be designed to have certain characteristic mobility
     """
     @decl.dproperty
     def length_ns(self, val = 0):
