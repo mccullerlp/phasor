@@ -135,16 +135,19 @@ class MechanicalPort(MechanicalPortRaw, bases.SystemElementBase):
 class MechanicalXYZPort(bases.SystemElementBase):
     typename = 'MechanicalXYZ'
 
+    @declarative.dproperty
     def X(self, val = None):
         if val is None:
             val = MechanicalPort()
         return val
 
+    @declarative.dproperty
     def Y(self, val = None):
         if val is None:
             val = MechanicalPort()
         return val
 
+    @declarative.dproperty
     def Z(self, val = None):
         if val is None:
             val = MechanicalPort()

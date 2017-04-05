@@ -83,14 +83,14 @@ class MatrixAmplifier(bases.CouplerBase, bases.SystemElementBase):
             port_pair_gains,
             **kwargs
     ):
-        super(DistributionAmplifier, self).__init__(**kwargs)
+        super(MatrixAmplifier, self).__init__(**kwargs)
         bases.OOA_ASSIGN(self).port_pair_gains = port_pair_gains
 
         self.I  = declarative.Bunch()
         self.O  = declarative.Bunch()
 
         dd = defaultdict(dict)
-        for (iname, oname), xfer in list(self.port_pair_xfers.items()):
+        for (iname, oname), xfer in list(self.port_pair_gains.items()):
             dd[iname][oname] = xfer
         self._dd = dd
 

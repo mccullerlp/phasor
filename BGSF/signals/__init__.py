@@ -11,6 +11,7 @@ from .signal_generator import (
 from .amplifiers import (
     DistributionAmplifier,
     SummingAmplifier,
+    MatrixAmplifier,
 )
 
 from .RMS import (

@@ -81,13 +81,13 @@ def mgraph_simplify_inplace(
                 r_n_full += 1
             else:
                 r_n_full += len(np.asanyarray(edge_val).flatten())
-        #TODO, deal with bad loops
-        self_edge = edge_map.get((node, node), None)
-        if self_edge is not None:
-            if np.any(self_edge == 1):
-                return float('inf')
-            else:
-                return 10
+        ##TODO, deal with bad loops
+        #self_edge = edge_map.get((node, node), None)
+        #if self_edge is not None:
+        #    if np.any(self_edge == 1):
+        #        return float('inf')
+        #    else:
+        #        return 10
         return s_n * r_n_full + r_n * s_n_full
     pqueue = HeapPriorityQueue()
 
@@ -102,9 +102,9 @@ def mgraph_simplify_inplace(
         cost, node = pqueue.pop()
         newcost = generate_node_cost(node)
         #TODO, deal with bad loops
-        if newcost != cost:
-            pqueue.push((newcost, node))
-            continue
+        #if newcost != cost:
+        #    pqueue.push((newcost, node))
+        #    continue
         #print(node, cost)
         if not np.isfinite(cost) and pqueue:
             pqueue.push((cost, node))

@@ -10,6 +10,10 @@ from . import smatrix
 from . import elements
 from . import noise
 
+from .smatrix import (
+    TerminatorOpen,
+    TerminatorShorted,
+)
 
 class DamperBase(object):
     @decl.dproperty
@@ -76,19 +80,19 @@ class SeriesMobility(smatrix.SMatrix2PortBase):
 
     def S11_by_freq(self, F):
         Y = self.mobility_by_freq(F)
-        return (1 / (1 + Y * self.Z_termination * 2))
+        return (1 / (1 + Y * self.zM_termination * 2))
 
     def S12_by_freq(self, F):
         Y = self.mobility_by_freq(F)
-        return ((2 * Y * self.Z_termination) / (1 + Y * self.Z_termination * 2))
+        return ((2 * Y * self.zM_termination) / (1 + Y * self.zM_termination * 2))
 
     def S21_by_freq(self, F):
         Y = self.mobility_by_freq(F)
-        return ((2 * Y * self.Z_termination) / (1 + Y * self.Z_termination * 2))
+        return ((2 * Y * self.zM_termination) / (1 + Y * self.zM_termination * 2))
 
     def S22_by_freq(self, F):
         Y = self.mobility_by_freq(F)
-        return (1 / (1 + Y * self.Z_termination * 2))
+        return (1 / (1 + Y * self.zM_termination * 2))
 
 
 class SeriesDamper(DamperBase, SeriesMobility):

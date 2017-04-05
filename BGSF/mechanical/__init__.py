@@ -4,9 +4,13 @@
 from .xyz import (
     MomentDriver,
     XYZMomentDriver,
+    XYZMoment,
     XYZTerminatorDamper,
     XYZTerminatorSpring,
     XYZMass,
+    XYZTerminatorOpen,
+    XYZTerminatorShorted,
+    Moment1D,
 )
 
 from .passive import (
