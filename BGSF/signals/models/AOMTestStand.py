@@ -126,7 +126,6 @@ class AOM1X(optics.OpticalCouplerBase):
     def AOM1(self, val = None):
         val = optics.AOM(
             N_ode = 5,
-            solution_order = 2,
         )
         return val
 

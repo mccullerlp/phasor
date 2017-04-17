@@ -30,22 +30,6 @@ class NonlinearCrystal(
         return val
 
     @declarative.dproperty
-    def symplectify(self, val = True):
-        """
-        Number of iterations to use in the ODE solution
-        """
-        val = self.ooa_params.setdefault('symplectify', val)
-        return val
-
-    @declarative.dproperty
-    def solution_order(self, val = 3):
-        """
-        Taylor expansion order used for the expM in the ODE solution
-        """
-        val = self.ooa_params.setdefault('solution_order', val)
-        return val
-
-    @declarative.dproperty
     def nlg(self, val):
         """
         This is in rtW/(W * mm)
@@ -269,8 +253,6 @@ class NonlinearCrystal(
                     in_map      = in_map,
                     out_map     = out_map,
                     N_ode       = self.N_ode,
-                    order       = self.solution_order,
-                    symplectify = self.symplectify,
                 )
             )
         return

@@ -98,11 +98,9 @@ class ExpMatCoupling(FactorCouplingBase):
         in_map,
         out_map,
         N_ode = 1,
-        order = 2,
         symplectify = True,
     ):
         self.N_ode     = N_ode
-        self.order     = order
         self.dLt       = dLt
         self.out_map   = out_map
         self.in_map    = in_map
@@ -200,9 +198,7 @@ class ExpMatCoupling(FactorCouplingBase):
     def update_solution(self, sol_vector):
         if sol_vector != self._prev_sol_vector:
             self._prev_sol_vector = sol_vector
-            if self.order > 0:
-                #self.generate_solution(sol_vector)
-                self.generate_solution_premult(sol_vector)
+            self.generate_solution(sol_vector)
         return
 
     def edge_func(self, pk_in, pk_out, sol_vector, sB):
@@ -217,7 +213,7 @@ class ExpMatCoupling(FactorCouplingBase):
         self.update_solution(sol_vector)
         return self.solution.get(pk_out, 0)
 
-    def generate_solution_premult(self, sol_vector):
+    def generate_solution(self, sol_vector):
         pks = self.pks
         pkv = np.empty(len(pks), dtype=object)
 
@@ -229,16 +225,17 @@ class ExpMatCoupling(FactorCouplingBase):
             prev_val = self.vals_prev.get(pk_in, 0)
             tot_val = sol_val - prev_val
             pkv[idx] = np.copy(sol_val)
-            #print(pk, sol_val, prev_val)
             if np.any(abs(tot_val) > 1e-8 * abs(sol_val)):
                 all_zeros = False
         if all_zeros:
-            print("ALL ZEROS")
+            #TODO debug statements
+            #print("ALL ZEROS")
             #no need to update the solution vector since nothing changed
             return
             pass
         else:
-            print("NOT ZEROS")
+            #TODO debug statements
+            #print("NOT ZEROS")
             pass
 
         pk_original = pkv.copy()
@@ -306,19 +303,11 @@ class ExpMatCoupling(FactorCouplingBase):
 
             val = pk_original[idx_in]
             if np.any(val != 0):
-                self.vals_prev[pkin] = -val
+                self.vals_prev[pkin] = val
 
-        #TODO better description
-        #inject final values at output to fix the removed inputs
-        #for idx_out in range(len(pks)):
-        #    pkout = self.out_map[pks[idx_out]]
-        #    if pkout is None:
-        #        continue
-
-        #    val = pkv[idx_out]
-        #    if np.any(val != 0):
-        #        solution[pkout] = val
-
+        #dval_out holds the product of the input through the derivative matrix
+        #this way it can cancel the forward propagation so that the output is correct assuming
+        #the inputs do not change
         dval_out = collections.defaultdict(lambda : 0)
         for (idx_out, idx_in), edge in dMexp_s1.items():
             pkin = self.in_map[pks[idx_in]]
@@ -328,6 +317,7 @@ class ExpMatCoupling(FactorCouplingBase):
 
             solution[pkin, pkout] = edge
 
+            #also compute dval_out
             val_orig = pk_original[idx_in]
             prod = (edge * val_orig)
             if np.any(prod != 0):
