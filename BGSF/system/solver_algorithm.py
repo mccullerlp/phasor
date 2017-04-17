@@ -370,7 +370,13 @@ class SystemSolver(object):
         solution_vector_kv = KeyVector(field_space)
         #TODO may be able to avoid this copy
         for node in outputs_set:
-            solution_vector_kv[node] = solution_dict.get(node, 0)
+            node_val = solution_dict.get(node, 0)
+            if np.any(node_val != 0):
+                node_val = np.asarray(node_val)
+                #now adjust so that it cannot be modified. Can prevent some
+                #nasty bugs arising from the mutability of numpy arrays (which is nice usually for speed)
+                node_val.flags.writeable = False
+                solution_vector_kv[node] = node_val
 
         solution_bunch = declarative.Bunch(
             source   = source_vector,
