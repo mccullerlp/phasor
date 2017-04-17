@@ -26,12 +26,14 @@ class HomodyneCoupling(FactorCouplingBase):
             pksrc,
             pknorm,
             cplg,
+            norm_root = True
     ):
-        self.pkfrom = pkfrom
-        self.pkto   = pkto
-        self.pksrc  = pksrc
-        self.pknorm = pknorm
-        self.cplg   = cplg
+        self.pkfrom    = pkfrom
+        self.pkto      = pkto
+        self.pksrc     = pksrc
+        self.pknorm    = pknorm
+        self.cplg      = cplg
+        self.norm_root = norm_root
 
         self.edges_pkpk_dict = {
             (self.pkfrom, self.pkto) : self.edge_func,
@@ -46,7 +48,10 @@ class HomodyneCoupling(FactorCouplingBase):
     def edge_func(self, sol_vector, sB):
         normalization_PWR = sol_vector.get(self.pknorm, 1)
         source            = sol_vector.get(self.pksrc, 0)
-        normalized_gain = source * self.cplg / np.sqrt(normalization_PWR)
+        if self.norm_root:
+            normalized_gain = source * self.cplg / np.sqrt(normalization_PWR)
+        else:
+            normalized_gain = source * self.cplg / normalization_PWR
         return normalized_gain
 
 
@@ -60,11 +65,13 @@ class HiddenVariableHomodynePD(
         phase_deg        = 0,
         include_readouts = False,
         include_quanta   = False,
+        include_relative = False,
         **kwargs
     ):
         #TODO make optional, requires adjusting the ports.OpticalNonOriented1PortMixin base to be adjustable
         super(HiddenVariableHomodynePD, self).__init__(**kwargs)
         self.include_quanta = include_quanta
+        self.include_relative = include_relative
 
         self.my.Fr    = ports.OpticalPort(sname = 'Fr', pchain = 'Bk')
         bases.OOA_ASSIGN(self).phase_deg = phase_deg
@@ -73,14 +80,17 @@ class HiddenVariableHomodynePD(
         ##Only required if Bk isn't used (not a MagicPD)
         #self._fluct = vacuum.OpticalVacuumFluctuation(port = self.Fr)
 
-        self.my.rtWpdI   = ports.SignalOutPort(sname = 'rtWpdI')
-        self.my.rtWpdQ   = ports.SignalOutPort(sname = 'rtWpdQ')
-        self.my.rtWpdCmn = ports.SignalOutPort(sname = 'rtWpdCmn')
+        self.my.rtWpdI   = ports.SignalOutPort()
+        self.my.rtWpdQ   = ports.SignalOutPort()
+        self.my.rtWpdCmn = ports.SignalOutPort()
 
         if self.include_quanta:
-            self.my.rtQuantumI   = ports.SignalOutPort(sname = 'rtQuantumI')
-            self.my.rtQuantumQ   = ports.SignalOutPort(sname = 'rtQuantumQ')
-            self.my.rtQuantumCmn = ports.SignalOutPort(sname = 'rtQuantumCmn')
+            self.my.rtQuantumI   = ports.SignalOutPort()
+            self.my.rtQuantumQ   = ports.SignalOutPort()
+
+        if self.include_relative:
+            self.my.RinI   = ports.SignalOutPort()
+            self.my.RadQ   = ports.SignalOutPort()
 
         if source_port is None:
             self.source_port = self.Fr.i
@@ -100,6 +110,9 @@ class HiddenVariableHomodynePD(
             if self.include_quanta:
                 self.my.qI_DC    = readouts.DCReadout(port = self.rtQuantumI.o)
                 self.my.qQ_DC    = readouts.DCReadout(port = self.rtQuantumQ.o)
+            if self.include_relative:
+                self.my.rI_DC    = readouts.DCReadout(port = self.RinI.o)
+                self.my.rQ_DC    = readouts.DCReadout(port = self.RadQ.o)
         return
 
     def system_setup_ports(self, ports_algorithm):
@@ -167,6 +180,14 @@ class HiddenVariableHomodynePD(
             referred_ports_fill(
                 out_port_classical = self.rtQuantumQ,
             )
+        if self.include_relative:
+            referred_ports_fill(
+                out_port_classical = self.RinI,
+            )
+            referred_ports_fill(
+                out_port_classical = self.RadQ,
+            )
+
 
         ports_fill_2optical_2classical_hdyne(
             system = self.system,
@@ -174,13 +195,6 @@ class HiddenVariableHomodynePD(
             ports_in_optical = [self.Fr.i, self.source_port],
             out_port_classical = self.rtWpdCmn,
         )
-        if self.include_quanta:
-            ports_fill_2optical_2classical_hdyne(
-                system = self.system,
-                ports_algorithm = ports_algorithm,
-                ports_in_optical = [self.Fr.i, self.source_port],
-                out_port_classical = self.rtQuantumCmn,
-            )
 
         pmap = {
             self.Fr.i : self.Bk.o,
@@ -222,6 +236,7 @@ class HiddenVariableHomodynePD(
                     Stdcplg, StdcplgC,
                     norm_port,
                     as_quanta,
+                    norm_root = True,
             ):
                 lktos = matrix_algorithm.port_set_get(out_port_classical.o)
                 lkto_completed = set()
@@ -275,6 +290,7 @@ class HiddenVariableHomodynePD(
                                 pksrc       = optCplgC,
                                 pknorm      = norm_port,
                                 cplg        = Stdcplg / 2 * cplg_adjust,
+                                norm_root   = norm_root,
                             )
                             matrix_algorithm.injection_insert(inj)
                         if lktoN != lkto and ktoOptN is not None:
@@ -284,6 +300,7 @@ class HiddenVariableHomodynePD(
                                 pksrc       = optCplgC,
                                 pknorm      = norm_port,
                                 cplg        = Stdcplg / 2 * cplg_adjust,
+                                norm_root   = norm_root,
                             )
                             matrix_algorithm.injection_insert(inj)
                     elif kfrom.contains(ports.RAISE):
@@ -296,6 +313,7 @@ class HiddenVariableHomodynePD(
                                 pksrc       = optCplgC,
                                 pknorm      = norm_port,
                                 cplg        = StdcplgC / 2 * cplg_adjust,
+                                norm_root   = norm_root,
                             )
                             matrix_algorithm.injection_insert(inj)
                         if lktoN != lkto and ktoOptN is not None:
@@ -305,6 +323,7 @@ class HiddenVariableHomodynePD(
                                 pksrc       = optCplgC,
                                 pknorm      = norm_port,
                                 cplg        = StdcplgC / 2 * cplg_adjust,
+                                norm_root   = norm_root,
                             )
                             matrix_algorithm.injection_insert(inj)
                     else:
@@ -316,6 +335,7 @@ class HiddenVariableHomodynePD(
                 StdcplgC,
                 norm_port = self.PWR_tot.pk_WpdDC,
                 as_quanta = False,
+                norm_root = True,
             )
             insert_coupling(
                 self.rtWpdQ,
@@ -323,6 +343,7 @@ class HiddenVariableHomodynePD(
                 -self.symbols.i * StdcplgC,
                 norm_port = self.PWR_tot.pk_WpdDC,
                 as_quanta = False,
+                norm_root = True,
             )
             if self.include_quanta:
                 insert_coupling(
@@ -331,6 +352,7 @@ class HiddenVariableHomodynePD(
                     StdcplgC,
                     norm_port = self.PWR_tot.pk_WpdDC,
                     as_quanta = True,
+                    norm_root = True,
                 )
                 insert_coupling(
                     self.rtQuantumQ,
@@ -338,6 +360,24 @@ class HiddenVariableHomodynePD(
                     -self.symbols.i * StdcplgC,
                     norm_port = self.PWR_tot.pk_WpdDC,
                     as_quanta = True,
+                    norm_root = True,
+                )
+            if self.include_relative:
+                insert_coupling(
+                    self.RinI,
+                    Stdcplg,
+                    StdcplgC,
+                    norm_port = self.PWR_tot.pk_WpdDC,
+                    as_quanta = False,
+                    norm_root = False,
+                )
+                insert_coupling(
+                    self.RadQ,
+                    self.symbols.i * Stdcplg,
+                    -self.symbols.i * StdcplgC,
+                    norm_port = self.PWR_tot.pk_WpdDC,
+                    as_quanta = False,
+                    norm_root = False,
                 )
 
         for kfrom in matrix_algorithm.port_set_get(self.Bk.i):

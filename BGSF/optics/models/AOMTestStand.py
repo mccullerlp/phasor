@@ -130,8 +130,9 @@ class AOM2VCOTestStand(optics.OpticalCouplerBase):
     @declarative.dproperty
     def hPD_R(self, val = None):
         val = optics.HiddenVariableHomodynePD(
-            source_port = self.PSLRs.Fr.o,
-            include_quanta = True,
+            source_port = self.aoms.Bk.o,
+            include_quanta = False,
+            include_relative = True,
         )
         return val
 
@@ -153,8 +154,40 @@ class AOM2VCOTestStand(optics.OpticalCouplerBase):
     @declarative.dproperty
     def AC_hR(self, val = None):
         val = readouts.HomodyneACReadout(
-            portNI = self.hPD_R.rtQuantumI.o,
-            portNQ = self.hPD_R.rtQuantumQ.o,
+            portNI = self.hPD_R.rtWpdI.o,
+            portNQ = self.hPD_R.rtWpdQ.o,
+            portD  = self.aoms.VCO_AOM1.modulate.Mod_amp.i,
+        )
+        return val
+
+    @declarative.dproperty
+    def AC_R_Q_phase(self, val = None):
+        val = readouts.ACReadout(
+            portN = self.hPD_R.RadQ.o,
+            portD  = self.aoms.VCO_AOM1.modulate.Mod_phase.i,
+        )
+        return val
+
+    @declarative.dproperty
+    def AC_R_I_phase(self, val = None):
+        val = readouts.ACReadout(
+            portN = self.hPD_R.RinI.o,
+            portD  = self.aoms.VCO_AOM1.modulate.Mod_phase.i,
+        )
+        return val
+
+    @declarative.dproperty
+    def AC_R_Q_amp(self, val = None):
+        val = readouts.ACReadout(
+            portN = self.hPD_R.RadQ.o,
+            portD  = self.aoms.VCO_AOM1.modulate.Mod_amp.i,
+        )
+        return val
+
+    @declarative.dproperty
+    def AC_R_I_amp(self, val = None):
+        val = readouts.ACReadout(
+            portN = self.hPD_R.RinI.o,
             portD  = self.aoms.VCO_AOM1.modulate.Mod_amp.i,
         )
         return val
@@ -180,7 +213,7 @@ class AOM2VCOTestStand(optics.OpticalCouplerBase):
 
         self.aoms.Bk.bond_sequence(
             self.PD_R.Fr,
-            #self.hPD_R.Fr,
+            self.hPD_R.Fr,
         )
         return
 
