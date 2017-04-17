@@ -8,6 +8,7 @@ from os import path
 import declarative
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
 
 try:
     org_mode
@@ -155,6 +156,24 @@ class AutoPlotSaver(declarative.OverridableObject):
 
 asavefig = AutoPlotSaver()
 
+def patchify_axes(ax, plotname):
+    oldplot = getattr(ax, plotname)
+
+    def plot(X, Y, *args, **kwargs):
+        Y = np.asarray(Y)
+        b = np.broadcast(X, Y)
+        if b.shape != Y.shape:
+            Y = np.ones(X.shape) * Y
+        return oldplot(X, Y, *args, **kwargs)
+    plot.__name__ = oldplot.__name__
+    plot.__doc__  = oldplot.__doc__
+    setattr(ax, plotname, plot)
+
+def patch_axes(ax):
+    patchify_axes(ax, 'plot')
+    patchify_axes(ax, 'loglog')
+    patchify_axes(ax, 'semilogy')
+    patchify_axes(ax, 'semilogx')
 
 def mplfigB(
         Nrows         = 1,
@@ -194,6 +213,7 @@ def mplfigB(
             else:
                 sharex = None
             ax = axB.fig.add_subplot(Nrows, Ncols, idx_row + idx_col*Nrows + 1, sharex = sharex)
+            patch_axes(ax)
             ax_list.append(ax)
             ax.grid(b=True)
             axB.ax_grid_colrow[idx_col].append(ax)

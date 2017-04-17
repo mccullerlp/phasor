@@ -35,7 +35,7 @@ class SHGaLIGO(optics.OpticalCouplerBase):
     @declarative.dproperty
     def ktp(self, val = None):
         val = optics.NonlinearCrystal(
-            nlg = .0014,
+            nlg = .0024,
             length_mm = 10,
             N_ode = 20,
         )

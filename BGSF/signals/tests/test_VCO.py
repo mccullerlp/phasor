@@ -2,70 +2,109 @@
 """
 from __future__ import (division, print_function)
 #import pytest
-import numpy as np
+import declarative
+#import numpy as np
 import numpy.testing as test
 
 import BGSF.signals as signals
 import BGSF.readouts as readouts
 import BGSF.system as system
+from BGSF import base
 
-from BGSF.utilities.np import logspaced
+
+class VCOTest(signals.SignalElementBase):
+    f_dict = None
+
+    @declarative.dproperty
+    def F_AOM1(self):
+        val = base.Frequency(
+            F_Hz  = 200e6,
+            order = 1,
+        )
+        return val
+
+    @declarative.dproperty
+    def generate(self):
+        val = signals.SignalGenerator(
+            F = self.F_AOM1,
+            amplitude = 1,
+        )
+        return val
+
+    @declarative.dproperty
+    def modulate(self):
+        val = signals.Modulator()
+        return val
+
+    @declarative.dproperty
+    def mix(self):
+        val = signals.Mixer()
+        return val
+
+    @declarative.dproperty
+    def AC_I(self, val = None):
+        val = readouts.ACReadout(
+            portN = self.mix.R_I.o,
+            portD  = self.modulate.Mod_amp.i,
+        )
+        return val
+
+    @declarative.dproperty
+    def AC_IQ(self, val = None):
+        val = readouts.ACReadout(
+            portN = self.mix.R_Q.o,
+            portD  = self.modulate.Mod_amp.i,
+        )
+        return val
+
+    @declarative.dproperty
+    def AC_QI(self, val = None):
+        val = readouts.ACReadout(
+            portN = self.mix.R_Q.o,
+            portD  = self.modulate.Mod_amp.i,
+        )
+        return val
+
+    @declarative.dproperty
+    def AC_Q(self, val = None):
+        val = readouts.ACReadout(
+            portN = self.mix.R_Q.o,
+            portD  = self.modulate.Mod_phase.i,
+        )
+        return val
+
+    def __build__(self):
+        super(VCOTest, self).__build__()
+        self.generate.Out.bond(
+            self.modulate.In,
+        )
+        self.mix.LO.bond(self.generate.Out)
+        self.modulate.Out.bond(
+            self.mix.I,
+        )
 
 
-def test_Xfer():
-    #with explicit terminator
+def test_VCO():
+    db = declarative.DeepBunch()
+    db.environment.F_AC.order = 1
     sys = system.BGSystem(
-        F_AC = np.linspace(0, 10, 10)
+        ooa_params = db,
+        F_AC = 1e3,
     )
-    sys.my.X1 = signals.SRationalFilter(
-        poles_r = (-1, ),
-        gain    = 1,
-    )
-    sys.my.R1 = readouts.ACReadout(
-        portN = sys.X1.Out.o,
-        portD = sys.X1.In.i,
-    )
-    compare = 1/(1 + 1j*sys.F_AC.F_Hz.val)
-    test.assert_almost_equal(sys.R1.AC_sensitivity / compare, 1)
+    sys.my.test = VCOTest()
+    db = sys.ooa_shadow()
+
+    print(sys.test.AC_I.AC_sensitivity)
+    print(sys.test.AC_Q.AC_sensitivity)
+    print(sys.test.AC_IQ.AC_sensitivity)
+    print(sys.test.AC_QI.AC_sensitivity)
+
+    test.assert_almost_equal(sys.test.AC_I.AC_sensitivity / 0.5, 1)
+    test.assert_almost_equal(sys.test.AC_Q.AC_sensitivity / 0.5, 1)
+    test.assert_almost_equal(sys.test.AC_IQ.AC_sensitivity, 0)
+    test.assert_almost_equal(sys.test.AC_QI.AC_sensitivity, 0)
     return
 
 
-def test_XFer_fit():
-    sys = system.BGSystem(
-        F_AC = logspaced(0.1, 100, 10)
-    )
-    sys.my.X1 = signals.SRationalFilter(
-        #poles_c = (-2 - 10j, ),
-        zeros_r = (-10, -10),
-        gain    = 1,
-    )
-    sys.my.R1 = readouts.ACReadout(
-        portN = sys.X1.Out.o,
-        portD = sys.X1.In.i,
-    )
-
-    size = len(sys.R1.F_Hz.val)
-    relscale = .1
-    AC_data = sys.R1.AC_sensitivity * (
-        1
-        + np.random.normal(0, relscale, size) 
-        + 1j*np.random.normal(0, relscale, size)
-    )
-    print(sys.X1.ooa_as_yaml())
-
-    import BGSF.fitting.casadi as FIT
-    import BGSF.fitting.casadi.transfer_functions as FIT_TF
-    froot = FIT.FitterRoot()
-    froot.my.sym = FIT.FitterSym()
-    froot.systems.xfer = sys
-    froot.sym.parameter(sys.X1)
-    froot.my.residual = FIT_TF.TransferACExpression(
-        ACData = AC_data,
-        ACReadout = sys.R1,
-        SNR_weights = 1/relscale,
-    )
-    return froot.residual.minimize_function()
-
-
 if __name__ == '__main__':
-    test_V()
+    test_VCO()

@@ -113,7 +113,6 @@ class AOM2XaLIGO(optics.OpticalCouplerBase):
         self.AOM1.BkB.bond(
             self.AOM2.FrB
         )
-
         self.AOM1.Drv.bond(
             self.VCO_AOM1.Out,
         )
@@ -214,7 +213,7 @@ class AOM2XTestStand(optics.OpticalCouplerBase):
         return val
 
     @declarative.dproperty
-    def AC_R(self, val = None):
+    def AC_R_amp(self, val = None):
         val = readouts.ACReadout(
             portN = self.PD_R.Wpd.o,
             portD  = self.aoms.VCO_AOM1.modulate.Mod_amp.i,
@@ -222,13 +221,21 @@ class AOM2XTestStand(optics.OpticalCouplerBase):
         return val
 
     @declarative.dproperty
-    def AC_hR(self, val = None):
-        val = readouts.HomodyneACReadout(
-            portNI = self.hPD_R.rtQuantumI.o,
-            portNQ = self.hPD_R.rtQuantumQ.o,
-            portD  = self.aoms.VCO_AOM1.modulate.Mod_amp.i,
+    def AC_R_phase(self, val = None):
+        val = readouts.ACReadout(
+            portN = self.PD_R.Wpd.o,
+            portD  = self.aoms.VCO_AOM1.modulate.Mod_phase.i,
         )
         return val
+
+    #@declarative.dproperty
+    #def AC_hR(self, val = None):
+    #    val = readouts.HomodyneACReadout(
+    #        portNI = self.hPD_R.rtQuantumI.o,
+    #        portNQ = self.hPD_R.rtQuantumQ.o,
+    #        portD  = self.aoms.VCO_AOM1.modulate.Mod_amp.i,
+    #    )
+    #    return val
 
     def __build__(self):
         super(AOM2XTestStand, self).__build__()

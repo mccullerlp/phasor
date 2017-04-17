@@ -127,8 +127,6 @@ class OPOaLIGO(optics.OpticalCouplerBase):
                 nlg = .0015,
                 length_mm = 10,
                 N_ode = 10,
-                symplectify = False,
-                solution_order = 2,
             )
         return val
 

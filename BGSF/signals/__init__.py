@@ -1,4 +1,7 @@
 
+from .bases import (
+    SignalElementBase,
+)
 
 from .mixer import (
     Mixer,

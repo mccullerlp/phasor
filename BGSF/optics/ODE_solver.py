@@ -113,8 +113,6 @@ class ExpMatCoupling(FactorCouplingBase):
         self.edges_req_pkset_dict = {}
         def gen_edge_func(pk_in, pk_out):
             return lambda sV, sB: self.edge_func(pk_in, pk_out, sV, sB)
-        def gen_src_func_in(pk_in):
-            return lambda sV, sB: self.source_func_in(pk_in, sV, sB)
         def gen_src_func_out(pk_out):
             return lambda sV, sB: self.source_func_out(pk_out, sV, sB)
 
@@ -133,9 +131,6 @@ class ExpMatCoupling(FactorCouplingBase):
                 continue
             self.sources_pk_dict[pk_out] = gen_src_func_out(pk_out)
             self.sources_NZ_pkset_dict[pk_out] = frozenset()
-        for pk_in in self.in_map.values():
-            self.sources_pk_dict[pk_in] = gen_src_func_in(pk_in)
-            self.sources_NZ_pkset_dict[pk_in] = frozenset()
 
         pks = set()
         def pks_grab(lt):
@@ -154,7 +149,8 @@ class ExpMatCoupling(FactorCouplingBase):
 
         #print(ins_p, sol_vector)
         self.pks = list(pks)
-        print("OMG: ", len(pks))
+        #TODO: debug config
+        print("Number of states: ", len(pks))
         #pprint(pks)
         self.pks.sort(key = pk_prefs(
             ports.QuantumKey,
@@ -205,10 +201,6 @@ class ExpMatCoupling(FactorCouplingBase):
         self.update_solution(sol_vector)
         return self.solution.get((pk_in, pk_out), 0)
 
-    def source_func_in(self, pk_in, sol_vector, sB):
-        self.update_solution(sol_vector)
-        return self.solution.get(pk_in, 0)
-
     def source_func_out(self, pk_out, sol_vector, sB):
         self.update_solution(sol_vector)
         return self.solution.get(pk_out, 0)
@@ -224,7 +216,10 @@ class ExpMatCoupling(FactorCouplingBase):
             sol_val = sol_vector.get(pk_in, 0)
             prev_val = self.vals_prev.get(pk_in, 0)
             tot_val = sol_val - prev_val
-            pkv[idx] = np.copy(sol_val)
+            new_val = np.copy(sol_val)
+            if np.all(new_val == 0):
+                new_val = 0
+            pkv[idx] = new_val
             if np.any(abs(tot_val) > 1e-8 * abs(sol_val)):
                 all_zeros = False
         if all_zeros:
@@ -251,48 +246,125 @@ class ExpMatCoupling(FactorCouplingBase):
                 val += gain
             return val
 
-        def lt_val_matrix(vec_d, lt):
+        def lt_val_matrix_d(vec_d, lt_M_d):
+            for pk_idx_from, lt in lt_M_d.items():
+                assert(isinstance(lt, list))
+                for sublt in lt:
+                    assert(isinstance(sublt, tuple))
+                    local_gain = np.copy(sublt[0])
+                    for pk_idx in sublt[1:]:
+                        val = pkv[pk_idx]
+                        local_gain = local_gain * val
+                    vec_d[pk_idx_from] += local_gain
+
+        def lt_val_matrix_d_generate(pkv_nz_set, lt):
+            lt_M_d = dict()
+            full = 0
+            reduced = 0
             assert(isinstance(lt, list))
             for sublt in lt:
                 assert(isinstance(sublt, tuple))
                 gain = sublt[0]
                 for idx_idx, pk_idx_from in enumerate(sublt[1:]):
-                    local_gain = np.copy(gain)
+                    newtup = [gain]
+                    full += 1
                     for idx_idx2, pk_idx in enumerate(sublt[1:]):
                         if idx_idx == idx_idx2:
                             continue
-                        local_gain = local_gain * pkv[pk_idx]
-                    if np.any(local_gain != 0):
-                        vec_d[pk_idx_from] += local_gain
+                        if pk_idx not in pkv_nz_set:
+                            break
+                        newtup.append(pk_idx)
+                    else:
+                        #only occurs if break was NOT called
+                        reduced += 1
+                        lt_inj = lt_M_d.setdefault(pk_idx_from, [])
+                        lt_inj.append(
+                            tuple(newtup)
+                        )
+            #print("REDUCED LT_d: ", reduced / full)
+            return lt_M_d
 
-        dMexp_s1 = collections.defaultdict(lambda : 0)
+        def lt_reduced_generate(pkv_nz_set, lt):
+            newlt = []
+            assert(isinstance(lt, list))
+            for sublt in lt:
+                assert(isinstance(sublt, tuple))
+                newtup = [sublt[0]]
+                for pk_idx in sublt[1:]:
+                    if pk_idx not in pkv_nz_set:
+                        break
+                    newtup.append(pk_idx)
+                else:
+                    #only occurs if break was NOT called
+                    newlt.append(
+                        tuple(newtup)
+                    )
+            #print("REDUCED LT: ", len(newlt) / len(lt))
+            return newlt
+
+        #a double map matrix dMexp_s1[idx_out][idx_in]
         ##this dMexp_s1 does not have the one. For speed that is applied separately
-        #for idx_N in range(len(pks)):
-        #    dMexp_s1[idx_N, idx_N] = 1
+        dMexp_s1 = collections.defaultdict(lambda : collections.defaultdict(lambda : 0))
+
+        pkv_nz_set = set()
+        for idx, val in enumerate(pkv):
+            if np.any(val != 0):
+                pkv_nz_set.add(idx)
+
+        dLt_base = sorted(self.dLt_accel.items())
+        dLt_idx_list = [T[0] for T in dLt_base]
+        dLt_lt_list  = [lt_reduced_generate(pkv_nz_set, T[1]) for T in dLt_base]
+        dLt_lt_M_list  = [lt_val_matrix_d_generate(pkv_nz_set, T[1]) for T in dLt_base]
+
         for idx_N in range(self.N_ode):
-            for idx_pk in range(len(pks)):
-                lt = self.dLt_accel.get(idx_pk, None)
-                if lt is None:
-                    continue
+            idx_in_list = 0
+            fullskip = 0
+            while idx_in_list < len(dLt_idx_list):
+                idx_pk = dLt_idx_list[idx_in_list]
+                lt     = dLt_lt_list[idx_in_list]
+                lt_M_d = dLt_lt_M_list[idx_in_list]
+                idx_in_list += 1
+                if not lt and not lt_M_d:
+                    fullskip += 1
+
                 dPK = lt_val(lt)
                 Mexp_vec_d = collections.defaultdict(lambda : 0)
-                lt_val_matrix(Mexp_vec_d, lt)
+                lt_val_matrix_d(Mexp_vec_d, lt_M_d)
 
-                pkv[idx_pk] = pkv[idx_pk] + dPK
+                if pkv[idx_pk] is 0:
+                    if np.any(dPK != 0):
+                        print("STATUS CHANGE: ", idx_pk)
+                        pkv_nz_set.add(idx_pk)
+                        dLt_idx_list = [T[0] for T in dLt_base]
+                        dLt_lt_list  = [lt_reduced_generate(pkv_nz_set, T[1]) for T in dLt_base]
+                        dLt_lt_M_list  = [lt_val_matrix_d_generate(pkv_nz_set, T[1]) for T in dLt_base]
+                if np.any(dPK != 0):
+                    pkv[idx_pk] = pkv[idx_pk] + dPK
 
                 dMexp_update = collections.defaultdict(lambda : 0)
-                for (idx_out, idx_in), matval in dMexp_s1.items():
-                    vec_val = Mexp_vec_d[idx_out]
-                    prod = (matval * vec_val)
-                    if np.any(prod != 0):
-                        dMexp_update[idx_in] += prod
+                #print("LEN: ", len(dMexp_s1))
+                #print("VEC: ", len(Mexp_vec_d))
+                N_zero = 0
+                N_skip = 0
+                for idx_out, vec_val in Mexp_vec_d.items():
+                    for idx_in, edge in dMexp_s1[idx_out].items():
+                        if np.all(edge == 0):
+                            N_zero += 1
+                            continue
+                        dMexp_update[idx_in] += (edge * vec_val)
+
+                #print("NZERO: ", N_zero, N_zero / (.001+len(dMexp_s1)))
+                #print("NSKIP: ", N_skip, N_skip / (.001+len(dMexp_s1)))
 
                 for idx_in, vec_val in dMexp_update.items():
-                    dMexp_s1[(idx_pk, idx_in)] += vec_val
+                    if np.any(vec_val != 0):
+                        dMexp_s1[idx_pk][idx_in] += vec_val
 
                 #applied the initial vector again since the dMexp_s1 didn't start with diagonal ones
                 for idx_in, vec_val in Mexp_vec_d.items():
-                    dMexp_s1[(idx_pk, idx_in)] += vec_val
+                    if np.any(vec_val != 0):
+                        dMexp_s1[idx_pk][idx_in] += vec_val
+            #print("FULLSKIP: ", fullskip, fullskip / len(dLt_idx_list))
 
         solution = dict()
         self.vals_prev = dict()
@@ -309,19 +381,20 @@ class ExpMatCoupling(FactorCouplingBase):
         #this way it can cancel the forward propagation so that the output is correct assuming
         #the inputs do not change
         dval_out = collections.defaultdict(lambda : 0)
-        for (idx_out, idx_in), edge in dMexp_s1.items():
-            pkin = self.in_map[pks[idx_in]]
-            pkout = self.out_map[pks[idx_out]]
-            if idx_in == idx_out:
-                edge = edge + 1
+        for idx_out, in_map in dMexp_s1.items():
+            for idx_in, edge in in_map.items():
+                pkin = self.in_map[pks[idx_in]]
+                pkout = self.out_map[pks[idx_out]]
+                if idx_in == idx_out:
+                    edge = edge + 1
 
-            solution[pkin, pkout] = edge
+                solution[pkin, pkout] = edge
 
-            #also compute dval_out
-            val_orig = pk_original[idx_in]
-            prod = (edge * val_orig)
-            if np.any(prod != 0):
-                dval_out[idx_out] += prod
+                #also compute dval_out
+                val_orig = pk_original[idx_in]
+                prod = (edge * val_orig)
+                if np.any(prod != 0):
+                    dval_out[idx_out] += prod
 
         for idx_out in range(len(pks)):
             pkout = self.out_map[pks[idx_out]]
