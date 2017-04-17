@@ -107,6 +107,12 @@ class ExpMatCoupling(FactorCouplingBase):
         self.solution  = dict()
         self.vals_prev = dict()
 
+        #make the internal solution have no action initially (so that cavity feedback converges faster)
+        for pk_internal, pk_in in self.in_map.items():
+            pk_out = self.out_map.get(pk_internal, None)
+            if pk_out is not None:
+                self.solution[pk_in, pk_out] = 1
+
         #all edges are generated immediately. Currently assumes full density
         self.edges_NZ_pkset_dict = {}
         self.edges_pkpk_dict = {}
@@ -333,7 +339,7 @@ class ExpMatCoupling(FactorCouplingBase):
 
                 if pkv[idx_pk] is 0:
                     if np.any(dPK != 0):
-                        print("STATUS CHANGE: ", idx_pk)
+                        #print("STATUS CHANGE: ", idx_pk)
                         pkv_nz_set.add(idx_pk)
                         dLt_idx_list = [T[0] for T in dLt_base]
                         dLt_lt_list  = [lt_reduced_generate(pkv_nz_set, T[1]) for T in dLt_base]
