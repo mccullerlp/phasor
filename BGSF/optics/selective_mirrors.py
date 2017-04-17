@@ -5,8 +5,11 @@ from __future__ import division, print_function
 #from BGSF.utilities.print import print
 import declarative
 
+from .. import mechanical
+
 from . import ports
 from . import selectors
+
 
 
 class MirrorSelectionStack(
@@ -19,6 +22,16 @@ class MirrorSelectionStack(
         return val
 
     @declarative.dproperty
+    def Z(self):
+        # since the sub_elements will be bound, require more connections before autoterminating
+        N = len(self.sub_element_map)
+        mechport = mechanical.MechanicalPortDriven(
+            t_terminator = mechanical.TerminatorShorted,
+            require_N_autoterminate = N + 1,
+        )
+        return mechport
+
+    @declarative.dproperty
     def port_set(self):
         if self.AOI_deg == 0:
             return set(['Fr', 'Bk'])
@@ -27,6 +40,9 @@ class MirrorSelectionStack(
 
     def __build__(self):
         super(MirrorSelectionStack, self).__build__()
+
+        for sname, sub_element in self.sub_element_map.items():
+            self.Z.bond(sub_element.Z)
 
         #TODO, HACK!
         if self.AOI_deg == 0:

@@ -3,6 +3,7 @@
 """
 from __future__ import division, print_function
 #from BGSF.utilities.print import print
+import declarative
 
 import numpy as np
 
@@ -20,34 +21,50 @@ class SignalGenerator(bases.SignalElementBase):
     phase = standard_attrs_opt.generate_rotate(name = 'phase')
     _phase_default = ('phase_rad', 0)
 
-    def __init__(
-        self,
-        F,
-        multiple = 1,
-        amplitude  = 1,
-        amplitudeC = None,
-        harmonic_gains = {},
-        **kwargs
-    ):
-        super(SignalGenerator, self).__init__(**kwargs)
-        bases.OOA_ASSIGN(self).F = F
-        bases.OOA_ASSIGN(self).multiple = multiple
-        bases.OOA_ASSIGN(self).amplitude = amplitude
-        if amplitudeC is None:
-            bases.OOA_ASSIGN(self).amplitudeC = np.conjugate(self.amplitude)
-        else:
-            bases.OOA_ASSIGN(self).amplitudeC = amplitudeC
+    @declarative.dproperty
+    def F(self, val = None):
+        return val
 
-        self.classical_f_dict = {self.F : self.multiple}
-        self.f_key = ports.FrequencyKey(self.classical_f_dict)
+    @declarative.dproperty
+    def multiple(self, val = 1):
+        return val
 
+    @declarative.dproperty
+    def f_dict(self, val = None):
+        if val is None:
+            val = {self.F : self.multiple}
+        return val
+
+    @declarative.dproperty
+    def harmonic_gains(self, val = None):
+        if val is None:
+            val = dict()
+        return val
+
+    @declarative.dproperty
+    def amplitude(self, val = 1):
+        val = self.ooa_params.setdefault('amplitude', val)
+        return val
+
+    @declarative.dproperty
+    def amplitudeC(self, val = None):
+        val = self.ooa_params.setdefault('amplitudeC', val)
+        if val is None:
+            val = self.symbols.math.conjugate(self.amplitude)
+        return val
+
+    @declarative.dproperty
+    def f_key(self):
+        return ports.FrequencyKey(self.f_dict)
+
+    def __build__(self):
+        super(SignalGenerator, self).__build__()
         self.my.Out = ports.SignalOutPort(sname = 'Out')
 
-        self.harmonic_gains = harmonic_gains
         for Hidx, gain in list(self.harmonic_gains.items()):
             #just to check that it is a number
             Hidx + 1
-            port = self.insert(
+            self.insert(
                 ports.SignalOutPort(sname = 'OutH{0}'.format(Hidx)),
                 'OutH{0}'.format(Hidx),
             )

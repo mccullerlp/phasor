@@ -151,7 +151,7 @@ class CMeasurements(Element):
     def q_target_z(self, z_m, beam_source = None):
         if beam_source is None:
             if self.layout.env_principle_target is None:
-                beam_source = self.beam_targets[0]
+                beam_source = self.beam_targets.tname[0]
             else:
                 beam_source = self.layout.env_principle_target
 
@@ -194,9 +194,9 @@ class CMeasurements(Element):
         return self.layout.target_pos(tidx)
 
     def overlap_seq(self, *tlist):
-        tprev = self.beam_targets[0]
+        tprev = self.beam_targets.tname[0]
         olap = 1
-        for tnext in self.beam_targets[1:]:
+        for tnext in self.beam_targets.tname[1:]:
             tnext = tnext
             if (not tlist) or (tnext in tlist):
                 olap *= abs(self.overlap(tprev, tnext))**4
@@ -205,9 +205,9 @@ class CMeasurements(Element):
 
     def overlap(self, tname1 = None, tname2 = None):
         if (tname1 is None) and (tname2 is None):
-            if len(self.beam_targets) == 2:
-                tname1 = self.beam_targets[0]
-                tname2 = self.beam_targets[-1]
+            if len(self.beam_targets.tname) == 2:
+                tname1 = self.beam_targets.tname[0]
+                tname2 = self.beam_targets.tname[-1]
         tidx1 = self.target_idx(tname1)
         tidx2 = self.target_idx(tname2)
         mat = self.layout.matrix_between(tidx1, tidx2)
@@ -230,7 +230,7 @@ class CMeasurements(Element):
     ):
         if beam_source is None:
             if self.layout.env_principle_target is None:
-                beam_source = self.beam_targets[0]
+                beam_source = self.beam_targets.tname[0]
             else:
                 beam_source = self.layout.env_principle_target
 
@@ -261,7 +261,7 @@ class CMeasurements(Element):
             beam_source = None
     ):
         if beam_source is None:
-            beam_source = self.beam_targets[0]
+            beam_source = self.beam_targets.tname[0]
 
         tidx_beam = self.target_idx(beam_source)
 
@@ -315,16 +315,19 @@ class CMeasurements(Element):
         funcmap_inv = {}
         for tidx, name in list(namemap.items()):
             funcmap_inv[name] = tidx
-        print("TARGETS: ", funcmap_inv)
+        #print("TARGETS: ", funcmap_inv)
 
         z_targets = [(self.target_z(tidx), tname) for tname, tidx in list(funcmap_inv.items())]
         z_targets.sort()
-        return [tname for t_z, tname in z_targets]
+        return declarative.Bunch(
+            tname = [tname for t_z, tname in z_targets],
+            z = [t_z for t_z, tname in z_targets],
+        )
 
     def _z_q_descmap(self, descmap, beam_source, no_q = False):
         if beam_source is None:
             if self.layout.env_principle_target is None:
-                beam_source = self.beam_targets[0]
+                beam_source = self.beam_targets.tname[0]
             else:
                 beam_source = self.layout.env_principle_target
 
@@ -387,6 +390,28 @@ class CMeasurements(Element):
 
     def waist_descriptions(self, beam_source = None):
         funcmap = self.layout.system_data_targets('waist_description')
+        data = []
+        N = len(self.beam_targets.tname)
+        for idx in range(N):
+            target = self.beam_targets.tname[idx]
+            z1 = self.beam_targets.z[idx]
+            if idx + 1 == N:
+                z2 = float('inf')
+            else:
+                z2 = self.beam_targets.z[idx+1]
+            for z, q, target_side, dfunc in self._z_q_descmap(funcmap, target):
+                if z > z1 and z <= z2:
+                    data.append((z, q, target_side, dfunc))
+
+        z_descs = []
+        for z, q, target_side, dfunc in data:
+            ret = dfunc(z = z, q = q, from_target = target_side)
+            if ret is not None:
+                z_descs.append(ret)
+        return z_descs
+
+    def extra_descriptions(self, beam_source = None):
+        funcmap = self.layout.system_data_targets('extra_description')
         z_descs = []
         for z, q, target_side, dfunc in self._z_q_descmap(funcmap, beam_source):
             ret = dfunc(z = z, q = q, from_target = target_side)

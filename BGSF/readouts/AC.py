@@ -67,10 +67,10 @@ class ACReadout(base.SystemElementBase):
     def AC_sensitivity(self):
 
         pk_DP = (self.portD, self.keyP)
-        #pk_DN = (self.portD, self.keyN)
+        pk_DN = (self.portD, self.keyN)
 
         pk_NP = (self.portN, self.keyP)
-        #pk_NN = (self.portD, self.keyN)
+        pk_NN = (self.portN, self.keyN)
 
         pk_DrP = (self.portDrv, self.keyP)
         pk_DrN = (self.portDrv, self.keyN)
@@ -81,13 +81,22 @@ class ACReadout(base.SystemElementBase):
         )
 
         coupling_matrix_inv = cbunch.coupling_matrix_inv
+
+        #print("PP", coupling_matrix_inv.get((pk_DrP, pk_NP), 0))
+        #print("NN", coupling_matrix_inv.get((pk_DrN, pk_NP), 0))
+        #print("PN", coupling_matrix_inv.get((pk_DrP, pk_NN), 0))
+        #print("NN", coupling_matrix_inv.get((pk_DrN, pk_NN), 0))
         N_tot = (
             + coupling_matrix_inv.get((pk_DrP, pk_NP), 0)
             + coupling_matrix_inv.get((pk_DrN, pk_NP), 0)
+            #+ coupling_matrix_inv.get((pk_DrP, pk_NN), 0)
+            #+ coupling_matrix_inv.get((pk_DrN, pk_NN), 0)
         )
         D_tot = (
             + coupling_matrix_inv.get((pk_DrP, pk_DP), 0)
             + coupling_matrix_inv.get((pk_DrN, pk_DP), 0)
+            #+ coupling_matrix_inv.get((pk_DrP, pk_DN), 0)
+            #+ coupling_matrix_inv.get((pk_DrN, pk_DN), 0)
         )
         #print("NTOT: ", N_tot)
         #print("DOT: ", D_tot)

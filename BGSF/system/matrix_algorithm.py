@@ -190,7 +190,9 @@ class MatrixBuildAlgorithm(object):
 
             #to ensure only single edges for now
             if not (len(self.coupling_matrix_injlist[pkf, pkt]) == 1):
-                print("WARNING: multiple redundant edges {0}, {1}".format(pkf, pkt))
+                #TODO make this a warning as many things now use these edges
+                #print("WARNING: multiple redundant edges {0}, {1}".format(pkf, pkt))
+                pass
 
             self.field_space.keys_add(pkf)
             self.field_space.keys_add(pkt)

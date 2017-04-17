@@ -73,7 +73,7 @@ def gensys(
         port = sys.asymPD.Wpd.o,
     )
     sys.my.asym_drive = readouts.ACReadout(
-        portD = sys.mX.posZ.i,
+        portD = sys.mX.Z.d.o,
         portN = sys.asymPD.Wpd.o,
     )
     return declarative.Bunch(locals())

@@ -7,6 +7,7 @@ import declarative
 from .utils import (
     str_m,
     TargetIdx,
+    TargetRight,
 )
 
 from .beam import (
@@ -70,7 +71,7 @@ class PLCX(CSystemStack):
         f_m = -1/self.matrix[1, 0]
         return declarative.Bunch(
             f_m = f_m,
-            width_m = self.width_m,
+            width_m = self.width_m * (-1 if from_target == TargetRight else 1),
             z = z,
             type = 'lens',
             str = 'PLCX R_m={R_m} f_m = {f_m}'.format(R_m = str_m(self.R_m.val), f_m = str_m(f_m)),
@@ -125,7 +126,7 @@ class CXCX(CSystemStack):
         f_m = -1/self.matrix[1, 0]
         return declarative.Bunch(
             f_m = f_m,
-            width_m = self.width_m,
+            width_m = self.width_m * (-1 if from_target == TargetRight else 1),
             R1_m = self.R1_m.val,
             R2_m = self.R2_m.val,
             z = z,

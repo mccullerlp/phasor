@@ -341,7 +341,149 @@ class XYZMomentDriver(elements.Mechanical1PortBase):
 
         matrix_inject(A_ports, B_ports, 2/den * I_sub + P_d)
         matrix_inject(B_ports, A_ports, 2/den * I_sub + P_d)
-        print("NEW! 2")
+        return
+
+
+class MomentDriver(elements.Mechanical1PortBase):
+    @declarative.dproperty
+    def L(self):
+        return ports.MechanicalXYZPort(
+            X = self.Lx,
+            Y = self.Ly,
+            Z = self.Lz,
+        )
+
+    #TODO temporary fix, remove
+    @declarative.dproperty
+    def Lx(self):
+        return ports.MechanicalPort()
+
+    #TODO temporary fix, remove
+    @declarative.dproperty
+    def Ly(self):
+        return ports.MechanicalPort()
+
+    #TODO temporary fix, remove
+    @declarative.dproperty
+    def Lz(self):
+        return ports.MechanicalPort()
+
+    @declarative.dproperty
+    def A(self):
+        return ports.MechanicalPort()
+
+    @declarative.dproperty
+    def B(self):
+        return ports.MechanicalXYZPort(
+            X = self.Bx,
+            Y = self.By,
+            Z = self.Bz,
+        )
+
+    #TODO temporary fix, remove
+    @declarative.dproperty
+    def Bx(self):
+        return ports.MechanicalPort()
+
+    #TODO temporary fix, remove
+    @declarative.dproperty
+    def By(self):
+        return ports.MechanicalPort()
+
+    #TODO temporary fix, remove
+    @declarative.dproperty
+    def Bz(self):
+        return ports.MechanicalPort()
+
+    @declarative.dproperty
+    def displacementXYZ(self, XYZ):
+        return XYZ
+
+    @declarative.dproperty
+    def driveXYZ(self, XYZ):
+        return XYZ
+
+    def system_setup_ports(self, ports_algorithm):
+        all_ports = [self.A] + [self.L.X, self.L.Y, self.L.Z] + [self.B.X, self.B.Y, self.B.Z]
+        for port1 in all_ports:
+            for port2 in all_ports:
+                for kfrom in ports_algorithm.port_update_get(port1.i):
+                    ports_algorithm.port_coupling_needed(port2.o, kfrom)
+                for kto in ports_algorithm.port_update_get(port2.o):
+                    ports_algorithm.port_coupling_needed(port1.i, kto)
+        return
+
+    def system_setup_coupling(self, matrix_algorithm):
+        A_ports = [self.A]
+        L_ports = [self.L.X, self.L.Y, self.L.Z]
+        B_ports = [self.B.X, self.B.Y, self.B.Z]
+        d_vec = np.array(self.displacementXYZ)
+        v_vec = np.array(self.driveXYZ)
+
+        I = np.eye(3)
+        dLsq = np.dot(d_vec, d_vec)
+        vLsq = np.dot(v_vec, v_vec)
+
+        d = dLsq**.5
+        v = vLsq**.5
+
+        vN_vec = v_vec / v
+        dN_vec = d_vec / d
+
+        P_d = np.outer(dN_vec, dN_vec)
+
+        vp_vec = v_vec - np.dot(P_d, v_vec)
+        vpLsq = np.dot(vp_vec, vp_vec)
+        P_vp = np.outer(vp_vec, vp_vec) / vpLsq
+
+        P_force = -np.array([
+            [-dN_vec[2] * vN_vec[1] + dN_vec[1] * vN_vec[2]],
+            [+dN_vec[2] * vN_vec[0] - dN_vec[0] * vN_vec[2]],
+            [-dN_vec[1] * vN_vec[0] + dN_vec[0] * vN_vec[1]]
+        ])
+
+        P_torque = P_force.T
+        P_FT = np.dot(P_force, P_force.T)
+
+        P_ff = np.dot(P_force, P_force.T)
+        P_X = P_d + P_vp
+        I_sub = I - P_d
+
+        def matrix_inject(ports1, ports2, matrix):
+            for idx1, port1 in enumerate(ports1):
+                for idx2, port2 in enumerate(ports2):
+                    for kfrom in matrix_algorithm.port_set_get(port1.i):
+                        matrix_algorithm.port_coupling_insert(
+                            port1.i,
+                            kfrom,
+                            port2.o,
+                            kfrom,
+                            matrix[idx1, idx2],
+                        )
+
+        #    [d**2, 2   , +2*d],
+        #    [2   , d**2, -2*d],
+        #    [2*d , -2*d, -d**2 + 2],
+        den = d**2 + 2
+        r = np.dot(dN_vec, vN_vec)
+        dN_vec_noV = dN_vec - vN_vec * r
+        vN_vec_noD = vN_vec - vN_vec * r
+        P_dNvnV = np.dot(dN_vec_noV, dN_vec_noV.T)
+        P_vNvnD = np.dot(dN_vec_noV, dN_vec_noV.T)
+
+        #may need to sqrt the 1-r**2
+        matrix_inject(A_ports, A_ports,  np.array([[(1-r**2)**.5 * d**2/den]]))
+        matrix_inject(B_ports, B_ports, d**2/den * P_vNvnD + P_FT)
+        matrix_inject(L_ports, L_ports, (2-d**2)/den * P_FT + (I - P_FT))
+
+        matrix_inject(A_ports, L_ports, 2*d/den * P_torque)
+        matrix_inject(L_ports, A_ports, 2*d/den * P_force)
+
+        matrix_inject(B_ports, L_ports, -2*d/den * P_torque)
+        matrix_inject(L_ports, B_ports, -2*d/den * P_force)
+
+        matrix_inject(A_ports, B_ports, 2/den * vN_vec_noD + dN_vec_noV)
+        matrix_inject(B_ports, A_ports, 2/den * vN_vec_noD + dN_vec_noV.T)
         return
 
 
@@ -400,91 +542,4 @@ class Moment1D(elements.Mechanical1PortBase):
                                 cplg,
                             )
         matrix_inject(ports, ports, matrix)
-        return
-
-class MomentDriver(elements.Mechanical1PortBase):
-    @declarative.dproperty
-    def L(self):
-        return ports.MechanicalXYZPort(
-            X = self.Lx,
-            Y = self.Ly,
-            Z = self.Lz,
-        )
-
-    #TODO temporary fix, remove
-    @declarative.dproperty
-    def Lx(self):
-        return ports.MechanicalPort()
-
-    #TODO temporary fix, remove
-    @declarative.dproperty
-    def Ly(self):
-        return ports.MechanicalPort()
-
-    #TODO temporary fix, remove
-    @declarative.dproperty
-    def Lz(self):
-        return ports.MechanicalPort()
-
-    @declarative.dproperty
-    def A(self):
-        return ports.MechanicalPort()
-
-    @declarative.dproperty
-    def displacementXYZ(self, XYZ):
-        return XYZ
-
-    @declarative.dproperty
-    def driveXYZ(self, XYZ):
-        return XYZ
-
-    def system_setup_ports(self, ports_algorithm):
-        all_ports = [self.A] + [self.L.X, self.L.Y, self.L.Z]
-        for port1 in all_ports:
-            for port2 in all_ports:
-                for kfrom in ports_algorithm.port_update_get(port1.i):
-                    ports_algorithm.port_coupling_needed(port2.o, kfrom)
-                for kto in ports_algorithm.port_update_get(port2.o):
-                    ports_algorithm.port_coupling_needed(port1.i, kto)
-        return
-
-    def system_setup_coupling(self, matrix_algorithm):
-        A_ports = [self.A]
-        L_ports = [self.L.X, self.L.Y, self.L.Z]
-        d_vec = np.array(self.displacementXYZ)
-        v_vec = np.array(self.driveXYZ)
-
-        dLsq = np.dot(d_vec, d_vec)
-        vLsq = np.dot(v_vec, v_vec)
-
-        P_d = np.outer(d_vec, d_vec) / dLsq
-        vp_vec = v_vec - np.dot(P_d, v_vec)
-        vpLsq = np.dot(vp_vec, vp_vec)
-        P_vp = np.outer(vp_vec, vp_vec) / vpLsq
-
-        P_force = -1/vLsq**.5 * np.array([
-            [-d_vec[2] * v_vec[1] + d_vec[1] * v_vec[2]],
-            [+d_vec[2] * v_vec[0] - d_vec[0] * v_vec[2]],
-            [-d_vec[1] * v_vec[0] + d_vec[0] * v_vec[1]]
-        ])
-
-        P_torque = P_force.T / dLsq
-
-        P_X = P_d + P_vp
-
-        def matrix_inject(ports1, ports2, matrix):
-            for idx1, port1 in enumerate(ports1):
-                for idx2, port2 in enumerate(ports2):
-                    for kfrom in matrix_algorithm.port_set_get(port1.i):
-                        matrix_algorithm.port_coupling_insert(
-                            port1.i,
-                            kfrom,
-                            port2.o,
-                            kfrom,
-                            matrix[idx1, idx2],
-                        )
-        matrix_inject(A_ports, A_ports, np.array([[0]]))
-        matrix_inject(L_ports, L_ports, P_X)
-        matrix_inject(A_ports, L_ports, P_torque)
-        matrix_inject(L_ports, A_ports, P_force)
         return

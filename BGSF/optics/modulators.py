@@ -59,8 +59,8 @@ class Optical2PortModulator(
             self.ports_optical,
             self.ports_optical,
             pmap,
-            self.Drv,
-            self.BA,
+            self.Drv.i,
+            self.BA.o,
         )
         return
 
@@ -87,8 +87,8 @@ class PM(Optical2PortModulator):
                     matrix_algorithm,
                     pfrom, kfrom,
                     ptoOpt,
-                    self.Drv,
-                    self.BA,
+                    self.Drv.i,
+                    self.BA.o,
                     std_cplg,
                     std_cplgC,
                     self.symbols.i / 2,
@@ -121,8 +121,8 @@ class AM(Optical2PortModulator):
                     matrix_algorithm,
                     pfrom, kfrom,
                     ptoOpt,
-                    self.Drv,
-                    self.BA,
+                    self.Drv.i,
+                    self.BA.o,
                     std_cplg,
                     std_cplgC,
                     1 / 2,
@@ -201,8 +201,8 @@ class AOM(
             self.ports_optical,
             self.ports_optical,
             pmap,
-            self.Drv,
-            self.BA,
+            self.Drv.i,
+            self.BA.o,
         )
         return
 
@@ -228,8 +228,8 @@ class AOM(
                     matrix_algorithm,
                     pfrom, kfrom,
                     ptoOpt,
-                    self.Drv,
-                    self.BA,
+                    self.Drv.i,
+                    self.BA.o,
                     std_cplg,
                     std_cplgC,
                     1 / 2,

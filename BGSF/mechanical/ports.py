@@ -98,6 +98,7 @@ class MechanicalPort(MechanicalPortRaw, bases.SystemElementBase):
             val = TerminatorOpen
         return val
 
+    require_N_autoterminate = 1
     def auto_terminate(self):
         """
         Only call if this port has not been bonded
@@ -112,7 +113,7 @@ class MechanicalPort(MechanicalPortRaw, bases.SystemElementBase):
             self.bond_completion()
             return self
         elif typename == VISIT.auto_terminate:
-            if not self._bond_partners:
+            if len(self._bond_partners) < self.require_N_autoterminate:
                 return self.auto_terminate()
         else:
             return super(MechanicalPort, self).targets_list(typename)
@@ -135,22 +136,24 @@ class MechanicalPort(MechanicalPortRaw, bases.SystemElementBase):
 class MechanicalXYZPort(bases.SystemElementBase):
     typename = 'MechanicalXYZ'
 
+    t_port = MechanicalPort
+
     @declarative.dproperty
     def X(self, val = None):
         if val is None:
-            val = MechanicalPort()
+            val = self.t_port()
         return val
 
     @declarative.dproperty
     def Y(self, val = None):
         if val is None:
-            val = MechanicalPort()
+            val = self.t_port()
         return val
 
     @declarative.dproperty
     def Z(self, val = None):
         if val is None:
-            val = MechanicalPort()
+            val = self.t_port()
         return val
 
     def _complete(self):

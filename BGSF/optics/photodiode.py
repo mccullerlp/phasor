@@ -70,8 +70,8 @@ class PD(
             [self.Fr],
             [],
             pmap,
-            self.BA,
-            self.Wpd,
+            self.BA.i,
+            self.Wpd.o,
         )
         return
 
@@ -85,8 +85,8 @@ class PD(
                 matrix_algorithm,
                 self.Fr, kfrom,
                 None,
-                self.BA,
-                self.Wpd,
+                self.BA.i,
+                self.Wpd.o,
                 std_cplg,
                 std_cplgC,
                 +self.symbols.i,
@@ -144,7 +144,7 @@ class MagicPD(
             [self.Fr],
             pmap,
             None,
-            self.Wpd,
+            self.Wpd.o,
         )
 
         for kfrom in ports_algorithm.port_update_get(self.Bk.i):
@@ -164,7 +164,7 @@ class MagicPD(
                 self.Fr, kfrom,
                 self.Bk,
                 None,
-                self.Wpd,
+                self.Wpd.o,
                 std_cplg,
                 std_cplgC,
                 0,

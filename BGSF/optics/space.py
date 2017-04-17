@@ -25,6 +25,8 @@ class Space(
         return ports.OpticalPort(sname = 'Bk', pchain = 'Fr')
 
     length = standard_attrs.generate_length()
+
+    _L_detune_default = ('L_detune_m', 0)
     L_detune = standard_attrs.generate_L_detune()
 
     def phase_lower(self, iwavelen_m, F):

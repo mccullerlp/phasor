@@ -89,7 +89,9 @@ def mgraph_simplify_inplace(
         #    else:
         #        return 10
         return s_n * r_n_full + r_n * s_n_full
+
     pqueue = HeapPriorityQueue()
+    pqueue_loop = HeapPriorityQueue()
 
     for node in list(seq.keys()):
         if not seq[node] or not req[node]:
@@ -98,9 +100,18 @@ def mgraph_simplify_inplace(
         cost = generate_node_cost(node)
         pqueue.push((cost, node))
 
-    while pqueue:
-        cost, node = pqueue.pop()
-        newcost = generate_node_cost(node)
+    while pqueue or pqueue_loop:
+        if pqueue:
+            cost, node = pqueue.pop()
+            #move to other queue if self-edge node
+            if node in seq[node]:
+                cost = generate_node_cost(node)
+                pqueue_loop.push((cost, node))
+                continue
+        else:
+            cost, node = pqueue_loop.pop()
+
+        #newcost = generate_node_cost(node)
         #TODO, deal with bad loops
         #if newcost != cost:
         #    pqueue.push((newcost, node))

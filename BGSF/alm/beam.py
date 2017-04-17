@@ -340,6 +340,8 @@ class CSpace(MatrixAtsBase, declarative.OverridableObject):
     _loc_default = ('loc_m', None)
     loc_m = attrs.generate_loc_m()
 
+    annotate_extra = None
+
     @declarative.mproperty
     def width_m(self):
         return self.L_m.val
@@ -417,13 +419,16 @@ class CSpace(MatrixAtsBase, declarative.OverridableObject):
         return [(self.L_m.val, self.min_spacing, +float('inf'))]
 
     def waist_description(self, z, q, from_target):
-        zw = z - q.Z
         has_waist = False
+        n = self.substrate.n(self)
+        #print("N: ", n)
+        qZ = q.Z * n
+        zw = z - qZ
         if from_target == TargetLeft:
-            if -q.Z > -1e-16 and -q.Z < self.L_m.val:
+            if -qZ > -1e-16 and -qZ < self.L_m.val:
                 has_waist = True
         elif from_target == TargetRight:
-            if q.Z > -1e-16 and q.Z < self.L_m.val:
+            if qZ > -1e-16 and qZ < self.L_m.val:
                 has_waist = True
         if has_waist:
             return declarative.Bunch(
@@ -433,10 +438,21 @@ class CSpace(MatrixAtsBase, declarative.OverridableObject):
             )
         return None
 
+    def extra_description(self, z, q, from_target):
+        return self.annotate_extra(
+            self,
+            z = z,
+            q = q,
+            target = from_target,
+        )
+
     def system_data_targets(self, typename):
         dmap = {}
         if typename == 'waist_description':
             dmap[TargetIdx()] = self.waist_description
+        elif typename == 'extra_description':
+            if self.annotate_extra:
+                dmap[TargetIdx()] = self.extra_description
         return dmap
 
 

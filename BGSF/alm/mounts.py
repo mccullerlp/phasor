@@ -23,9 +23,7 @@ from .substrates import (
 
 
 class MountBase(MatrixAtsBase, declarative.OverridableObject):
-    loc_m        = None
     _target_type = None
-    reverse      = False
 
     @declarative.mproperty
     def subsystem(self, ssys = declarative.NOARG):

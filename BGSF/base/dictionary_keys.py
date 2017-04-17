@@ -31,6 +31,11 @@ class DictKey(MappingABC):
     def __getitem__(self, key):
         return self._dict[key]
 
+    def get(self, key, default = declarative.NOARG):
+        if default is declarative.NOARG:
+            return self._dict[key]
+        return self._dict.get(key, default)
+
     def __len__(self):
         return len(self._dict)
 

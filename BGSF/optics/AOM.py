@@ -3,69 +3,15 @@
 """
 from __future__ import (division, print_function)
 #from BGSF.utilities.print import print
+import numpy as np
 import declarative
 import collections
 
 from . import bases
 from . import ports
-from . import nonlinear_utilities
-from . import nonlinear_crystal
-from ..utilities.print import pprint
+from . import ODE_solver
+#from ..utilities.print import pprint
 
-class Optical2PortModulator(
-    bases.OpticalCouplerBase,
-    bases.SystemElementBase,
-):
-    @declarative.dproperty
-    def Fr(self):
-        return ports.OpticalPort(sname = 'Fr', pchain = 'Bk')
-
-    @declarative.dproperty
-    def Bk(self):
-        return ports.OpticalPort(sname = 'Bk', pchain = 'Fr')
-
-    @declarative.dproperty
-    def Drv(self):
-        return ports.SignalInPort(sname = 'Drv')
-
-    @declarative.dproperty
-    def BA(self):
-        return ports.SignalOutPort(sname = 'BA')
-
-    @declarative.mproperty
-    def ports_optical(self):
-        return set([
-            self.Fr,
-            self.Bk,
-        ])
-
-    def system_setup_ports(self, ports_algorithm):
-        pmap = {
-            self.Fr.i : [self.Bk.o],
-            self.Bk.i : [self.Fr.o],
-            self.Fr.o : [self.Bk.i],
-            self.Bk.o : [self.Fr.i],
-        }
-
-        #direct couplings
-        for port in self.ports_optical:
-            for kfrom in ports_algorithm.port_update_get(port.i):
-                for pto in pmap[port.i]:
-                    ports_algorithm.port_coupling_needed(pto, kfrom)
-            for kto in ports_algorithm.port_update_get(port.o):
-                for pfrom in pmap[port.o]:
-                    ports_algorithm.port_coupling_needed(pfrom, kto)
-
-        nonlinear_utilities.ports_fill_2optical_2classical(
-            self.system,
-            ports_algorithm,
-            self.ports_optical,
-            self.ports_optical,
-            pmap,
-            self.Drv,
-            self.BA,
-        )
-        return
 
 class AOM(
     bases.OpticalCouplerBase,
@@ -92,7 +38,7 @@ class AOM(
         return ports.SignalInPort()
 
     @declarative.dproperty
-    def N_ode(self, val = 10):
+    def N_ode(self, val = 4):
         """
         Number of iterations to use in the ODE solution
         """
@@ -100,16 +46,11 @@ class AOM(
         return val
 
     @declarative.dproperty
-    def solution_order(self, val = 3):
+    def solution_order(self, val = 2):
         """
         Taylor expansion order used for the expM in the ODE solution
         """
         val = self.ooa_params.setdefault('solution_order', val)
-        return val
-
-    @declarative.dproperty
-    def shift_direction(self, val = 'up'):
-        assert(val in ['up', 'dn'])
         return val
 
     @declarative.dproperty
@@ -208,6 +149,7 @@ class AOM(
                         if neg * nkey > self.freq_split_Hz:
                             portO = smap[port]
                         if neg * nkey > 0:
+                            continue
                             portO = tmap[port]
                         else:
                             continue
@@ -256,9 +198,10 @@ class AOM(
             #self.BkB: self.FrA,
         }
 
-        ddlt = collections.defaultdict(lambda : collections.defaultdict(list))
+        dLt = collections.defaultdict(list)
         out_map = dict()
         in_map = dict()
+        N = 0
         for port, direction in {self.FrA : 1, self.FrB : -1}.items():
             for kfrom in matrix_algorithm.port_set_get(port.i):
                 #print("KFR: ", kfrom)
@@ -269,9 +212,9 @@ class AOM(
 
                 #TODO probably need a pi in here
                 if qkey == ports.LOWER[ports.QuantumKey]:
-                    G = -self.symbols.i / self.drive_PWR_nominal**.5 * self.symbols.pi / 4
+                    G = -self.symbols.i / self.drive_PWR_nominal**.5 * self.symbols.pi / 2
                 else:
-                    G = +self.symbols.i / self.drive_PWR_nominal**.5 * self.symbols.pi / 4
+                    G = +self.symbols.i / self.drive_PWR_nominal**.5 * self.symbols.pi / 2
 
                 for kfrom2 in matrix_algorithm.port_set_get(self.Drv.i):
                     drv_ckey = kfrom2[ports.ClassicalFreqKey]
@@ -288,6 +231,7 @@ class AOM(
                         if neg * nkey * direction > self.freq_split_Hz:
                             portO = smap[port]
                         elif neg * nkey * direction > 0:
+                            continue
                             portO = tmap[port]
                         else:
                             continue
@@ -304,11 +248,9 @@ class AOM(
                         #    print("KFR2: ", self.Drv.i, kfrom2)
                         #    print("KTO: ", portO.i, kto)
                         #    print("G: ", G)
-                        ddlt[(portO.i, kto)][(port.i, kfrom)].append(
-                            (G, (self.Drv.i, kfrom2))
-                        )
-                        ddlt[(portO.i, kto)][(self.Drv.i, kfrom2)].append(
-                            (G, (port.i, kfrom))
+                        N += 1
+                        dLt[(portO.i, kto)].append(
+                            (G, (port.i, kfrom), (self.Drv.i, kfrom2))
                         )
                         in_map[(port.i, kto)] = (port.i, kto)
                         in_map[(port.i, kfrom)] = (port.i, kfrom)
@@ -323,8 +265,8 @@ class AOM(
                         #print("JOIN: ", kfrom, kfrom2, kto)
 
         matrix_algorithm.injection_insert(
-            nonlinear_crystal.ExpMatCoupling(
-                ddlt    = ddlt,
+            ODE_solver.ExpMatCoupling(
+                dLt    = dLt,
                 in_map  = in_map,
                 out_map = out_map,
                 N_ode   = self.N_ode,

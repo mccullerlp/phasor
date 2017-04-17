@@ -43,6 +43,7 @@ class MPlotter(declarative.OverridableObject):
             overlap_target = None,
             annotate = 'full',
             use_in = True,
+            padding_m = .1,
     ):
         if fname is None:
             raise RuntimeError("Must specify fname")
@@ -59,7 +60,7 @@ class MPlotter(declarative.OverridableObject):
         overlap_target = declarative.first_non_none(overlap_target, self.overlap_target)
 
         if z is None:
-            z = np.linspace(-.1, float(sys.layout.width_m) + .1, self.N_points)
+            z = np.linspace(-padding_m, float(sys.layout.width_m) + padding_m, self.N_points)
 
         #fB = mplfigB(Nrows = 3)
         fB = generate_stacked_plot_ax(
@@ -72,12 +73,12 @@ class MPlotter(declarative.OverridableObject):
             heights_phys_in_default = 1.5,
             hspace = .08,
         )
-        fB.width.set_ylabel(u'2σ intensity\nradius [mm]')
+        fB.width.set_ylabel(u'2σ intensity\ndiameter[mm]')
 
-        beam_zs = [sys.target_z(t) for t in sys.beam_targets]
+        beam_zs = [sys.target_z(t) for t in sys.beam_targets.tname]
         last_phase = 0
         last_zsub = 0
-        for idx, tname in enumerate(sys.beam_targets):
+        for idx, tname in enumerate(sys.beam_targets.tname):
             z_sub = z
             if idx > 0:
                 z_from = beam_zs[idx - 1]
@@ -86,7 +87,7 @@ class MPlotter(declarative.OverridableObject):
                 z_to = beam_zs[idx + 1]
                 z_sub = z_sub[z_sub < z_to]
             qs1 = sys.q_target_z(z_sub, tname)
-            fB.width.plot(z_unit * z_sub, 1e3 * qs1.W, label = tname)
+            fB.width.plot(z_unit * z_sub, 2 * 1e3 * qs1.W, label = tname)
             fB.iROC.plot(z_unit * z_sub, qs1.R_inv, label = tname)
             #fB.iROC.plot(z_unit * z_sub, qs1.W * qs1.R_inv, label = tname)
             #fB.iROC.plot(z_unit * z_sub, qs1.divergence_rad/2, label = tname)
@@ -224,6 +225,20 @@ class MPlotter(declarative.OverridableObject):
                     lw = .5,
                 ),
             ))
+        for wdesc in sys.extra_descriptions():
+            all_desc_by_z.append((
+                wdesc.z, wdesc.get('width_m', None),
+                wdesc.str,
+                dict(
+                    color = wdesc.get('color', ),
+                    #ls = '--',
+                    lw = .5,
+                ),
+                dict(
+                    color = wdesc.get('color', 'brown'),
+                    lw = .5,
+                ),
+            ))
 
         none_to_zero = lambda v : v if v is not None else 0
         all_desc_by_z.sort(key = lambda v: tuple(none_to_zero(x) for x in v[:2]))
@@ -267,7 +282,16 @@ class MPlotter(declarative.OverridableObject):
             #    ha="right", va="bottom",
             #    bbox=self.bbox_args,
             #)
-            if width is not None and width > .001:
+            if width is not None and abs(width) > .001:
+                an = F.ax_top.annotate(
+                    desc,
+                    xy=(z_unit * (z + width), 1), xycoords=F.ax_top.get_xaxis_transform(),
+                    xytext=(0, 15 + fsize_sep*idx), textcoords=OffsetFrom(F.ax_top.bbox, (1, 1), "points"),
+                    ha = "right", va = "bottom",
+                    bbox = self.bbox_args,
+                    arrowprops = arrowkw,
+                    alpha = 0,
+                )
                 F.width.axvline(z_unit * float(z), **lkw)
                 F.width.axvline(z_unit * float(z + width), **lkw)
                 F.iROC.axvline(z_unit * float(z), **lkw)
@@ -301,13 +325,22 @@ class MPlotter(declarative.OverridableObject):
             #    ha="left", va="bottom",
             #    bbox=self.bbox_args,
             #)
-            if width is not None and width > .001:
+            if width is not None and abs(width) > .001:
                 F.width.axvline(z_unit * float(z), **lkw)
                 F.width.axvline(z_unit * float(z + width), **lkw)
                 F.iROC.axvline(z_unit * float(z), **lkw)
                 F.iROC.axvline(z_unit * float(z + width), **lkw)
                 F.Gouy.axvline(z_unit * float(z), **lkw)
                 F.Gouy.axvline(z_unit * float(z + width), **lkw)
+                an = F.ax_top.annotate(
+                    desc,
+                    xy=(z_unit * (z + width), -.12), xycoords=F.ax_bottom.get_xaxis_transform(),
+                    xytext=(0, -34 - fsize_sep*idx), textcoords=OffsetFrom(F.ax_bottom.bbox, (0, 0), "points"),
+                    ha="left", va="bottom",
+                    bbox=self.bbox_args,
+                    arrowprops = arrowkw,
+                    alpha = 0,
+                )
             else:
                 F.width.axvline(z_unit * float(z), **lkw)
                 F.iROC.axvline(z_unit * float(z), **lkw)

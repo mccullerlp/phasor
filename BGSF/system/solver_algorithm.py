@@ -8,7 +8,7 @@ import copy
 from collections import defaultdict
 import declarative
 
-#from ..utilities.print import pprint
+from ..utilities.print import pprint
 
 from ..base import (
     DictKey,
@@ -203,6 +203,11 @@ class SystemSolver(object):
             N = N - 1
         )
         solution_vector_prev = solution_bunch_prev.solution
+        #print("MAP: ", N - 1)
+        #try:
+        #    pprint(solution_bunch_prev.solution._data_map)
+        #except Exception as e:
+        #    print(e)
         field_space = self.matrix_algorithm.field_space
         malgo = self.matrix_algorithm
 
@@ -247,13 +252,15 @@ class SystemSolver(object):
         for node, val in solution_dict.items():
             solution_vector_kv[node] = val
 
+        delta_v, k_worst = self.delta_v_compute(
+            solution_vector_prev,
+            solution_vector_kv,
+        )
         solution_bunch = declarative.Bunch(
-            source   = source_vector,
-            solution = solution_vector_kv,
-            delta_v  = self.delta_v_compute(
-                solution_vector_prev,
-                solution_vector_kv,
-            ),
+            source      = source_vector,
+            solution    = solution_vector_kv,
+            delta_v     = delta_v,
+            k_worst     = k_worst,
             AC_solution = solution_bunch.AC_edge_map,
             AC_seq      = solution_bunch.AC_seq,
             AC_req      = solution_bunch.AC_req,
@@ -274,6 +281,7 @@ class SystemSolver(object):
             solution_vector
     ):
         delta_v_rel_max = 0
+        k_worst = None
         for k, v in solution_vector.items():
             v_prev = solution_vector_prev.get(k, 0)
             v = np.asarray(v)
@@ -283,8 +291,13 @@ class SystemSolver(object):
             v_nz = (av_maxel != 0)
             minel = avdiff[v_nz] / av_maxel[v_nz]
             if len(minel) > 0:
-                delta_v_rel_max = max(delta_v_rel_max, np.max(minel))
-        return delta_v_rel_max
+                #minel[av_maxel < 1e-18] = 0
+                local_max = np.max(minel)
+                #print("DELTA V: ", k, local_max, minel, v, v_prev)
+                delta_v_rel_max = max(delta_v_rel_max, local_max)
+                if delta_v_rel_max == local_max:
+                    k_worst = k, abs(v)
+        return delta_v_rel_max, k_worst
 
     def driven_solution_get(self, readout_set = 'all', N=None):
         if N is None:
@@ -448,7 +461,9 @@ class SystemSolver(object):
                     "WARNING: DELTA V MAX: ",
                     sbunch.delta_v,
                     " AT ORDER: ",
-                    len(self.driven_solution_bunches)
+                    len(self.driven_solution_bunches),
+                    " Worst k: ",
+                    sbunch.k_worst,
                 )
 
         if len(self.driven_solution_bunches) == to_order:
@@ -511,6 +526,21 @@ class SystemSolver(object):
         vals.sort()
         for val in vals:
             print(val)
+
+    def coupling_matrix_get(
+            self,
+            select_from = DictKey(),
+            select_to   = DictKey(),
+            drive_set   = 'all',
+            readout_set = 'all',
+            N           = -1,
+    ):
+        solution_bunch = self.coupling_solution_get(
+            drive_set   = drive_set,
+            readout_set = readout_set,
+            N           = N,
+        )
+        return solution_bunch.coupling_matrix
 
     def coupling_matrix_inv_print(
             self,

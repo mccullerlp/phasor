@@ -1,7 +1,8 @@
 
 
 from .mixer import (
-    Mixer
+    Mixer,
+    Modulator,
 )
 
 from .signal_generator import (
