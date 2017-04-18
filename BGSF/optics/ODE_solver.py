@@ -89,6 +89,12 @@ class ExpMatCoupling(FactorCouplingBase):
     tups represent series multiplication, the first term is a raw number coefficient and any further are keys in the source
     vector
     """
+    floating_req_set = None
+    #holds a list of 3-tuples, each one carrying an in-set, out-set, and coupling-func
+    #it behaves as though all in-set is connected to out-set for requirements analysis
+    #but then during coupling matrix construction, only the edges returned from coupling-func
+    #will be used
+    floating_in_out_func_pairs = None
 
     #must redefine since it was a property
     edges_req_pkset_dict = None
@@ -98,7 +104,6 @@ class ExpMatCoupling(FactorCouplingBase):
         in_map,
         out_map,
         N_ode = 1,
-        symplectify = True,
     ):
         self.N_ode     = N_ode
         self.dLt       = dLt
@@ -106,6 +111,7 @@ class ExpMatCoupling(FactorCouplingBase):
         self.in_map    = in_map
         self.solution  = dict()
         self.vals_prev = dict()
+        self.vals_inj  = dict()
 
         #make the internal solution have no action initially (so that cavity feedback converges faster)
         for pk_internal, pk_in in self.in_map.items():
@@ -117,19 +123,17 @@ class ExpMatCoupling(FactorCouplingBase):
         self.edges_NZ_pkset_dict = {}
         self.edges_pkpk_dict = {}
         self.edges_req_pkset_dict = {}
+
         def gen_edge_func(pk_in, pk_out):
             return lambda sV, sB: self.edge_func(pk_in, pk_out, sV, sB)
+
+        self.floating_req_set = frozenset(self.in_map.values())
+        ins = set(self.in_map.values())
+        outs = set([pkt for pkt in self.out_map.values() if pkt is not None])
+        self.floating_in_out_func_pairs = [(ins, outs, self.edge_mat_func)]
+
         def gen_src_func_out(pk_out):
             return lambda sV, sB: self.source_func_out(pk_out, sV, sB)
-
-        for pk_out in self.out_map.values():
-            if pk_out is None:
-                continue
-            for pk_in in self.in_map.values():
-                self.edges_NZ_pkset_dict[(pk_in, pk_out)] = frozenset()
-                self.edges_pkpk_dict[(pk_in, pk_out)] = gen_edge_func(pk_in, pk_out)
-                self.edges_req_pkset_dict[(pk_in, pk_out)] = frozenset(self.in_map.values())
-
         self.sources_pk_dict = {}
         self.sources_NZ_pkset_dict = {}
         for pk_out in self.out_map.values():
@@ -203,13 +207,13 @@ class ExpMatCoupling(FactorCouplingBase):
             self.generate_solution(sol_vector)
         return
 
-    def edge_func(self, pk_in, pk_out, sol_vector, sB):
+    def edge_mat_func(self, sol_vector, sB):
         self.update_solution(sol_vector)
-        return self.solution.get((pk_in, pk_out), 0)
+        return self.solution
 
     def source_func_out(self, pk_out, sol_vector, sB):
         self.update_solution(sol_vector)
-        return self.solution.get(pk_out, 0)
+        return self.vals_inj.get(pk_out, 0)
 
     def generate_solution(self, sol_vector):
         pks = self.pks
@@ -238,6 +242,7 @@ class ExpMatCoupling(FactorCouplingBase):
             #TODO debug statements
             #print("NOT ZEROS")
             pass
+        #print("SOLVING ", self.pks)
 
         pk_original = pkv.copy()
 
@@ -372,9 +377,7 @@ class ExpMatCoupling(FactorCouplingBase):
                         dMexp_s1[idx_pk][idx_in] += vec_val
             #print("FULLSKIP: ", fullskip, fullskip / len(dLt_idx_list))
 
-        solution = dict()
         self.vals_prev = dict()
-
         #inject subtracted values at input to remove the DC values an only get the derivative
         for idx_in in range(len(pks)):
             pkin = self.in_map[pks[idx_in]]
@@ -386,6 +389,7 @@ class ExpMatCoupling(FactorCouplingBase):
         #dval_out holds the product of the input through the derivative matrix
         #this way it can cancel the forward propagation so that the output is correct assuming
         #the inputs do not change
+        solution = dict()
         dval_out = collections.defaultdict(lambda : 0)
         for idx_out, in_map in dMexp_s1.items():
             for idx_in, edge in in_map.items():
@@ -401,7 +405,9 @@ class ExpMatCoupling(FactorCouplingBase):
                 prod = (edge * val_orig)
                 if np.any(prod != 0):
                     dval_out[idx_out] += prod
+        self.solution = solution
 
+        vals_inj = dict()
         for idx_out in range(len(pks)):
             pkout = self.out_map[pks[idx_out]]
             if pkout is None:
@@ -409,10 +415,11 @@ class ExpMatCoupling(FactorCouplingBase):
             val = pkv[idx_out]
             altered_val = val - dval_out.get(idx_out, 0)
             #print("ALT: ", pkout, altered_val)
-            solution[pkout] = altered_val
+            vals_inj[pkout] = altered_val
+        self.vals_inj = vals_inj
 
-        self.solution = solution
-
+        #print("DONE SOLVING ")
+        return
 
 
 

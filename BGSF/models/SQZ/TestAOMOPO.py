@@ -10,6 +10,7 @@ from ... import readouts
 #from ... import system
 
 from .AOM import AOM2XaLIGO
+from .OPO import OPOaLIGO
 
 
 class AOMnOPOTestStand(optics.OpticalCouplerBase):
@@ -22,7 +23,7 @@ class AOMnOPOTestStand(optics.OpticalCouplerBase):
         return val
 
     @declarative.dproperty
-    def PSLR(self, val = None):
+    def PSL_CLF(self, val = None):
         val = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = 1,
@@ -36,6 +37,7 @@ class AOMnOPOTestStand(optics.OpticalCouplerBase):
             F = self.system.F_carrier_1064,
             power_W = 1,
             multiple = 1,
+            phase_deg = 45,
         )
         return val
 
@@ -47,7 +49,7 @@ class AOMnOPOTestStand(optics.OpticalCouplerBase):
     @declarative.dproperty
     def hPD_R(self, val = None):
         val = optics.HiddenVariableHomodynePD(
-            source_port = self.PSLRs.Fr.o,
+            source_port = self.ditherPMRead.Bk.o,
             include_quanta = True,
         )
         return val
@@ -84,20 +86,8 @@ class AOMnOPOTestStand(optics.OpticalCouplerBase):
         return val
 
     def __build__(self):
-        super(AOM2XTestStand, self).__build__()
+        super(AOMnOPOTestStand, self).__build__()
 
-        self.PSLR.Fr.bond_sequence(
-            self.aoms.Fr,
-        )
-
-        self.aoms.Bk.bond_sequence(
-            self.PD_R.Fr,
-            #self.hPD_R.Fr,
-        )
-        return
-
-    def __build__(self):
-        super(OPOTestStand, self).__build__()
         self.my.PSLG = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = .02,
@@ -110,15 +100,11 @@ class AOMnOPOTestStand(optics.OpticalCouplerBase):
             multiple = 2,
             phase_deg = 90,
         )
-        self.my.PSLRs = optics.Laser(
-            F = self.system.F_carrier_1064,
-            power_W = 1,
-            multiple = 1,
-            phase_deg = 45,
-        )
 
-        self.my.PD_R = optics.MagicPD()
         self.my.PD_G = optics.MagicPD()
+        self.my.PD_CLF  = optics.MagicPD(
+            include_readouts = True,
+        )
 
         self.my.opo = OPOaLIGO()
 
@@ -138,26 +124,10 @@ class AOMnOPOTestStand(optics.OpticalCouplerBase):
             )
 
         self.my.ditherPM = optics.PM()
-        if self.include_PM:
-            self.ditherPM.Drv.bond(self.generateF_PM.Out)
-
         self.my.ditherPMRead = optics.PM()
-        if self.include_PM:
-            self.ditherPMRead.Drv.bond(self.generateF_PMRead.Out)
-
-        self.PSLRs.Fr.bond(self.my.ditherPMRead.Fr)
-        self.my.hPD_R = optics.HiddenVariableHomodynePD(
-            source_port = self.ditherPMRead.Bk.o,
-            include_quanta = True,
-        )
         self.my.hPD_G = optics.HiddenVariableHomodynePD(
             source_port = self.PSLGs.Fr.o,
             include_quanta = True,
-        )
-
-        self.PSLG.Fr.bond_sequence(
-            self.ditherPM.Fr,
-            self.opo.M1.BkA,
         )
 
         self.my.mDC_readout = optics.HarmonicMirror(
@@ -170,9 +140,33 @@ class AOMnOPOTestStand(optics.OpticalCouplerBase):
             AOI_deg = 45,
         )
 
+        self.PSL_CLF.Fr.bond_sequence(
+            self.aoms.Fr,
+        )
+
+        self.aoms.Bk.bond_sequence(
+            self.opo.M2.BkA,
+        )
+
+        if self.include_PM:
+            self.ditherPM.Drv.bond(self.generateF_PM.Out)
+
+        if self.include_PM:
+            self.ditherPMRead.Drv.bond(self.generateF_PMRead.Out)
+
+        self.PSLRs.Fr.bond(self.my.ditherPMRead.Fr)
+        self.PSLG.Fr.bond_sequence(
+            self.ditherPM.Fr,
+            self.opo.M1.BkA,
+        )
         self.opo.M1.BkB.bond_sequence(
             self.my.mDC_readout.FrA,
         )
+
+        self.opo.M2.BkB.bond_sequence(
+            self.PD_CLF.Fr,
+        )
+
         self.my.mDC_readout.FrB.bond_sequence(
             self.PD_G.Fr,
             self.hPD_G.Fr,
@@ -180,10 +174,6 @@ class AOMnOPOTestStand(optics.OpticalCouplerBase):
         self.my.mDC_readout.BkA.bond_sequence(
             self.PD_R.Fr,
             self.hPD_R.Fr,
-        )
-
-        self.my.DC_R = readouts.DCReadout(
-            port = self.PD_R.Wpd.o,
         )
         self.my.DC_G = readouts.DCReadout(
             port = self.PD_G.Wpd.o,
@@ -217,31 +207,6 @@ class AOMnOPOTestStand(optics.OpticalCouplerBase):
                     GQ = self.hPD_G.rtQuantumQ.o,
                 )
             )
-
-    def full_noise_matrix(self, lst = ['RI', 'RQ', 'GI', 'GQ'], display = True):
-        arr = np.zeros((len(lst), len(lst)))
-        for idx_L, NL in enumerate(lst):
-            for idx_R, NR in enumerate(lst):
-                val = self.AC_N.CSD[(NL, NR)].real
-                print(NL, NR, val)
-                arr[idx_L, idx_R] = val
-        #clean up the presentation
-        arr[arr < 1e-10] = 0
-        if display:
-            try:
-                import tabulate
-                tabular_data = [[label] + list(td) for label, td in zip(lst, arr)]
-                print(tabulate.tabulate(tabular_data, headers = lst))
-            except ImportError:
-                print(lst, arr)
-        return lst, arr
-
-
-class OPOTestStandBackScatter(optics.OpticalCouplerBase):
-    """
-    Shows the backscatter performance, also with AC drive
-    """
-
 
 
 

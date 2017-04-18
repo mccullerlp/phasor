@@ -159,8 +159,9 @@ class SystemSolver(object):
         malgo                = self.matrix_algorithm
         field_space          = self.matrix_algorithm.field_space
         coupling_matrix      = KeyMatrix(field_space, field_space)
+
         #generate only the edges needed
-        for pkfrom, seq_set in list(seq.items()):
+        for pkfrom, seq_set in seq.items():
             for pkto in seq_set:
                 try:
                     factor_func_list = malgo.coupling_matrix_inj_funclist[pkfrom, pkto]
@@ -181,6 +182,8 @@ class SystemSolver(object):
                     #pto, kto     = pkto
                     #assert(pto not in self.system.bond_pairs[pfrom])
                     if not factor_func_list:
+                        #TODO prevent filling if zeros?
+                        continue
                         coupling_matrix[pkfrom, pkto] = 0
                         continue
                     factor_func = factor_func_list[0]
@@ -194,10 +197,29 @@ class SystemSolver(object):
                             solution_bunch_prev
                         )
                         #print('multi-edge: ', pkto, factor_func)
-                    coupling_matrix[pkfrom, pkto] = val
+                    if np.any(val != 0):
+                        coupling_matrix[pkfrom, pkto] = val
+
+        #now generate the floating edge couplings
+        #must happen after the other edge generation since the linkages are otherwise
+        #missing (to be filled in here) from req and seq
+        for inj in malgo.floating_in_out_func_pair_injlist:
+            for ins, outs, func in inj.floating_in_out_func_pairs:
+                submatrix = func(
+                    solution_vector_prev,
+                    solution_bunch_prev
+                )
+                for (pkf, pkt), edge in submatrix.items():
+                    assert(pkf in ins)
+                    assert(pkt in outs)
+                    coupling_matrix[pkf, pkt] = edge
+                    seq[pkf].add(pkt)
+                    req[pkt].add(pkf)
+
         return coupling_matrix
 
     def _perturbation_iterate(self, N):
+        print("PERTURB: ", N)
         solution_bunch_prev = self.driven_solution_get(
             readout_set = 'perturbative',
             N = N - 1
@@ -236,13 +258,14 @@ class SystemSolver(object):
 
         #TODO purging should no longer be necessary
         #print("PERTURBER RUNNING: ")
+        print("COUPLING_SIZE: ", len(coupling_matrix))
         solution_bunch = push_solve_inplace(
             seq           = seq,
             req           = req,
+            edge_map      = dict(coupling_matrix.items()),
             outputs_set   = outputs_set.union(self.matrix_algorithm.AC_out_all),
             inputs_map    = source_vector,
             inputs_AC_set = self.matrix_algorithm.AC_in_all,
-            edge_map      = dict(coupling_matrix.items()),
             purge_in      = True,
             purge_out     = True,
         )
@@ -523,7 +546,7 @@ class SystemSolver(object):
             N           = N,
         )
         vals = []
-        for (key_from, key_to), value in list(solution_bunch.coupling_matrix.items()):
+        for (key_from, key_to), value in solution_bunch.coupling_matrix.items():
             dk_from = key_from[0] | key_from[1]
             dk_to = key_to[0] | key_to[1]
             if dk_from.contains(select_from) and dk_to.contains(select_to):
@@ -566,7 +589,7 @@ class SystemSolver(object):
         )
         rt_inv = solution_bunch.coupling_matrix_inv
         vals = []
-        for (key_from, key_to), value in list(rt_inv.items()):
+        for (key_from, key_to), value in rt_inv.items():
             dk_from = key_from[0] | key_from[1]
             dk_to = key_to[0] | key_to[1]
             if dk_from.contains(select_from) and dk_to.contains(select_to):

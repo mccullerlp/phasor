@@ -17,7 +17,7 @@ from ..base import (
 
 def print_seq(seq, edge_map):
     print("Sequential Edges")
-    for node, seq_set in list(seq.items()):
+    for node, seq_set in seq.items():
         plist = []
         print(node)
         for snode in seq_set:
@@ -29,7 +29,7 @@ def print_seq(seq, edge_map):
 
 def print_req(req, edge_map):
     print("Requisite Edges")
-    for node, seq_set in list(req.items()):
+    for node, seq_set in req.items():
         plist = []
         print(node)
         for rnode in seq_set:
@@ -41,14 +41,14 @@ def print_req(req, edge_map):
 
 
 def check_seq_req_balance(seq, req, edge_map = None):
-    for node, seq_set in list(seq.items()):
+    for node, seq_set in seq.items():
         for snode in seq_set:
             assert(node in req[snode])
             if edge_map and (node, snode) not in edge_map:
-                warnings.warn(repr((node, snode), 'not in edge map'))
+                warnings.warn(repr((node, snode)) + 'not in edge map')
                 edge_map[node, snode] = 0
 
-    for node, req_set in list(req.items()):
+    for node, req_set in req.items():
         for rnode in req_set:
             assert(node in seq[rnode])
 
@@ -93,7 +93,7 @@ def mgraph_simplify_inplace(
     pqueue = HeapPriorityQueue()
     pqueue_loop = HeapPriorityQueue()
 
-    for node in list(seq.keys()):
+    for node in seq.keys():
         if not seq[node] or not req[node]:
             #then this is an edge node and exempt
             continue
@@ -142,7 +142,6 @@ def mgraph_simplify_inplace(
         #else:
         #    print("Reducing: ", node)
 
-        #print("simplifying node: ", node)
         for snode in seq[node]:
             sedge = edge_map[node, snode]
             for rnode in req[node]:
@@ -267,6 +266,25 @@ def purge_subgraph_inplace(
     return
 
 
+def pre_purge_inplace(seq, req, edge_map):
+    print("PRE-PURGING")
+    total_N = 0
+    purge_N = 0
+    #actually needs to list this as seq is mutating
+    for inode, smap in list(seq.items()):
+        for snode in list(smap):
+            total_N += 1
+            if (inode, snode) not in edge_map:
+                #if purge_N % 100:
+                #    print("DEL: ", inode, snode)
+                purge_N += 1
+                smap.remove(snode)
+    for snode, rmap in (req.items()):
+        for inode in list(rmap):
+            if (inode, snode) not in edge_map:
+                rmap.remove(inode)
+    print("FRAC REMOVED: ", purge_N / total_N, purge_N)
+
 def inverse_solve_inplace(
     seq, req,
     edge_map,
@@ -275,8 +293,9 @@ def inverse_solve_inplace(
     purge_in = True,
     purge_out = True,
 ):
-    #first dress the nodes
+    pre_purge_inplace(seq, req, edge_map)
 
+    #first dress the nodes
     wrapped_inodes = set()
     for inode in inputs_set:
         winode = ('INPUT', inode)
@@ -349,11 +368,13 @@ def push_solve_inplace(
     purge_in = True,
     purge_out = True,
 ):
+    pre_purge_inplace(seq, req, edge_map)
+
     #first dress the nodes. The source vectors is converted into edges with a special
     #source node
     #the inputs are from the special state (with implicit vector value of '1')
     VACUUM_STATE = DictKey(special = 'vacuum')
-    for inode, val in list(inputs_map.items()):
+    for inode, val in inputs_map.items():
         seq[VACUUM_STATE].add(inode)
         req[inode].add(VACUUM_STATE)
         edge_map[VACUUM_STATE, inode] = val

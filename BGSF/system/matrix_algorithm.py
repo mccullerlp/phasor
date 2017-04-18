@@ -47,10 +47,12 @@ class MatrixBuildAlgorithm(object):
             field_space = system.field_space_proto.copy()
         self.field_space                 = field_space
 
-        self.source_vector_injlist        = defaultdict(list)
-        self.source_vector_inj_funclist   = defaultdict(list)
-        self.coupling_matrix_injlist      = defaultdict(list)
-        self.coupling_matrix_inj_funclist = defaultdict(list)
+        self.source_vector_injlist             = defaultdict(list)
+        self.source_vector_inj_funclist        = defaultdict(list)
+        self.coupling_matrix_injlist           = defaultdict(list)
+        self.coupling_matrix_inj_funclist      = defaultdict(list)
+        self.floating_in_out_func_pair_injlist = []
+        self.floating_req_set_injlist          = []
         self.all_injections = list()
 
         self.noise_pk_set = set()
@@ -76,10 +78,12 @@ class MatrixBuildAlgorithm(object):
         self.field_space.freeze()
 
         #freeze the lists
-        self.source_vector_injlist        = dict(list(self.source_vector_injlist.items()))
-        self.source_vector_inj_funclist   = dict(list(self.source_vector_inj_funclist.items()))
-        self.coupling_matrix_injlist      = dict(list(self.coupling_matrix_injlist.items()))
-        self.coupling_matrix_inj_funclist = dict(list(self.coupling_matrix_inj_funclist.items()))
+        self.source_vector_injlist             = dict(self.source_vector_injlist.items())
+        self.source_vector_inj_funclist        = dict(self.source_vector_inj_funclist.items())
+        self.coupling_matrix_injlist           = dict(self.coupling_matrix_injlist.items())
+        self.coupling_matrix_inj_funclist      = dict(self.coupling_matrix_inj_funclist.items())
+        self.floating_in_out_func_pair_injlist = tuple(self.floating_in_out_func_pair_injlist)
+        self.floating_req_set_injlist          = tuple(self.floating_req_set_injlist)
 
     def _setup_system(self):
         for el in self.system.elements:
@@ -177,7 +181,20 @@ class MatrixBuildAlgorithm(object):
 
     def injection_insert(self, inj_obj):
         self.all_injections.append(inj_obj)
-        for (pkf, pkt), func in list(inj_obj.edges_pkpk_dict.items()):
+        if inj_obj.floating_in_out_func_pairs is not None:
+            self.floating_in_out_func_pair_injlist.append(inj_obj)
+            for ins, outs, func in inj_obj.floating_in_out_func_pairs:
+                for pkt in ins:
+                    self.field_space.keys_add(pkt)
+                for pkf in ins:
+                    self.field_space.keys_add(pkf)
+
+        if inj_obj.floating_req_set is not None:
+            self.floating_req_set_injlist.append(inj_obj)
+            for pkf in inj_obj.floating_req_set:
+                self.field_space.keys_add(pkf)
+
+        for (pkf, pkt), func in inj_obj.edges_pkpk_dict.items():
             pto, kto = pkt
             ptofull = self.port_cplgs.get(pto, declarative.NOARG)
             if ptofull is declarative.NOARG:
@@ -196,7 +213,7 @@ class MatrixBuildAlgorithm(object):
 
             self.field_space.keys_add(pkf)
             self.field_space.keys_add(pkt)
-        for pks, func in list(inj_obj.sources_pk_dict.items()):
+        for pks, func in inj_obj.sources_pk_dict.items():
             psrc , ksrc = pks
             ptofull = self.port_cplgs.get(psrc, declarative.NOARG)
             if ptofull is declarative.NOARG:
@@ -236,6 +253,9 @@ class MatrixBuildAlgorithm(object):
         subgraph_set_pending = set()
         subgraph_set_pending2 = set()
 
+        #holds nodes used for in-out-func couplings which will be purged after graph simplification
+        virtual_nodes = set()
+
         #if a node hits order 0, then it should be in the subgraph set
         node_sourcing_order = dict()
         #if an edge hits order 0, then it should be in seq/req and should influence the sparsity graph
@@ -253,7 +273,7 @@ class MatrixBuildAlgorithm(object):
             self.bonds_trivial[pkfrom][pkto] = val
 
         #Setup all of the bond linkages first
-        for pfrom, pto_dict in list(self.system.bond_pairs.items()):
+        for pfrom, pto_dict in self.system.bond_pairs.items():
             pfrom_orig = pfrom
             for pto, val in pto_dict.items():
                 while True:
@@ -273,9 +293,27 @@ class MatrixBuildAlgorithm(object):
                 for kkey in self.port_set_get(pfrom_orig):
                     bond_trivial((pfrom, kkey), (pto, kkey), val)
 
+        #now all of the forced NZ requirements:
+        for inj in self.floating_req_set_injlist:
+            outputs_set.update(inj.floating_req_set)
+
+        #now couple to all of the in-out pairs via virtual nodes for the subgraph detection
+        for idx_inj, inj in enumerate(self.floating_in_out_func_pair_injlist):
+            for idx, (ins, outs, func) in enumerate(inj.floating_in_out_func_pairs):
+                #I wish these were more abstract, but the deepcopy later
+                #can mess with using the inj object itself. Could use str(inj) if debugging
+                vnode = (idx_inj, idx)
+                virtual_nodes.add(vnode)
+                for pkt in ins:
+                    seq[pkt].add(vnode)
+                    req[vnode].add(pkt)
+                for pkf in outs:
+                    seq[vnode].add(pkf)
+                    req[pkf].add(vnode)
+
         #begin the linkage algorithm
         source_invlist = defaultdict(list)
-        for pkto, injlist in list(self.source_vector_injlist.items()):
+        for pkto, injlist in self.source_vector_injlist.items():
             order_list = []
             any_order0 = False
             for inj in injlist:
@@ -296,7 +334,7 @@ class MatrixBuildAlgorithm(object):
                 inputs_set.add(pkto)
 
         edge_invlist = defaultdict(list)
-        for (pkfrom, pkto), injlist in list(self.coupling_matrix_injlist.items()):
+        for (pkfrom, pkto), injlist in self.coupling_matrix_injlist.items():
             any_order0 = False
             order_list = []
             for inj in injlist:
@@ -387,6 +425,27 @@ class MatrixBuildAlgorithm(object):
             seq = seq_perturb,
             req = req_perturb,
         )
+
+        #now purge all virtual nodes
+        #from both seq req sets
+        def remove_vnode(vnode, req, seq):
+            for pkt in seq[vnode]:
+                req[pkt].remove(vnode)
+            for pkf in req[vnode]:
+                seq[pkf].remove(vnode)
+            del seq[vnode]
+            del req[vnode]
+        for vnode in virtual_nodes:
+            remove_vnode(
+                vnode,
+                req,
+                seq
+            )
+            remove_vnode(
+                vnode,
+                req_perturb,
+                seq_perturb
+            )
 
         return declarative.Bunch(
             inputs_set = inputs_set,

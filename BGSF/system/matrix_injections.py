@@ -28,6 +28,15 @@ class FactorCouplingBase(object):
     def sources_req_pkset_dict(self):
         return self.sources_NZ_pkset_dict
 
+
+    #just a list of direct source node requirements.
+    floating_req_set = None
+    #holds a list of 3-tuples, each one carrying an in-set, out-set, and coupling-func
+    #it behaves as though all in-set is connected to out-set for requirements analysis
+    #but then during coupling matrix construction, only the edges returned from coupling-func
+    #will be used
+    floating_in_out_func_pairs = None
+
     AC_ins_pk  = ()
     AC_outs_pk = ()
 

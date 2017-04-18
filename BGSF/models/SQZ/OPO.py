@@ -16,6 +16,7 @@ def dist_m_from_XY_mm(A, B):
 
 
 #FROM dcc E1600051, and T1700104
+#OLD version is E1000023
 class OPOaLIGO(optics.OpticalCouplerBase):
 
     @declarative.dproperty
@@ -45,11 +46,13 @@ class OPOaLIGO(optics.OpticalCouplerBase):
                 mirror_H1 = optics.Mirror(
                     T_hr = 1 - .875,
                     flip_sign = True,
-                    L_hr = .001
+                    phase_deg = 0,
+                    L_hr = .001,
                 ),
                 mirror_H2 = optics.Mirror(
                     T_hr = 1 - .875,
-                    L_hr = .001,
+                    #T_hr = 1 - .70,
+                    L_hr = .0001,
                 ),
                 AOI_deg = -6,
             )
@@ -72,7 +75,7 @@ class OPOaLIGO(optics.OpticalCouplerBase):
         if val is None:
             val = optics.HarmonicMirror(
                 mirror_H1 = optics.Mirror(
-                    T_hr = 0,#1 - .9985,
+                    T_hr = 1 - .9985,
                 ),
                 mirror_H2 = optics.Mirror(
                     T_hr = 1 - .999,
@@ -98,7 +101,7 @@ class OPOaLIGO(optics.OpticalCouplerBase):
         if val is None:
             val = optics.HarmonicMirror(
                 mirror_H1 = optics.Mirror(
-                    T_hr = 0,#1 - .9985,
+                    T_hr = 1 - .9985,
                     flip_sign = True,
                 ),
                 mirror_H2 = optics.Mirror(
@@ -124,7 +127,7 @@ class OPOaLIGO(optics.OpticalCouplerBase):
     def ktp(self, val = None):
         if val is None:
             val = optics.NonlinearCrystal(
-                nlg = .0015,
+                nlg = .00175,
                 length_mm = 10,
                 N_ode = 10,
             )
@@ -147,7 +150,7 @@ class OPOaLIGO(optics.OpticalCouplerBase):
         if val is None:
             val = optics.HarmonicMirror(
                 mirror_H1 = optics.Mirror(
-                    T_hr = 0,#1 - .9985,
+                    T_hr = 1 - .9985,
                 ),
                 mirror_H2 = optics.Mirror(
                     T_hr = 1 - .999,
