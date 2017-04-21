@@ -68,10 +68,15 @@ from .selective_mirrors import (
 from .modulators import (
     AM,
     PM,
+    AMPM,
 )
 
 from .AOM import (
-    AOM
+    AOM,
+)
+
+from .AOMBasic import (
+    AOMBasic,
 )
 
 from .hidden_variable_homodyne import (

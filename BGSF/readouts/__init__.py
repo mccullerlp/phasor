@@ -12,6 +12,7 @@ from .DC import (
 from .AC import (
     ACReadout,
     ACReadoutCLG,
+    ACReadoutLG,
 )
 
 from .noise import (

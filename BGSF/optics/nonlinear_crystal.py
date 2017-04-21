@@ -153,7 +153,6 @@ class NonlinearCrystal(
 
         for port in self.ports_optical:
             dLt = collections.defaultdict(list)
-            ddlt = collections.defaultdict(lambda : collections.defaultdict(list))
             out_map = dict()
             in_map = dict()
             portO = tmap[port]
@@ -208,45 +207,38 @@ class NonlinearCrystal(
                             )
                         else:
                             dLt[(port.i, kto)].append(
-                                (n * G / 2, (port.i, kfrom2), (port.i, kfrom))
+                                (n * G, (port.i, kfrom2), (port.i, kfrom))
                             )
-                        ddlt[(port.i, kto)][(port.i, kfrom)].append(
-                            (n * G, (port.i, kfrom2))
-                        )
                         in_map[(port.i, kfrom)] = (port.i, kfrom)
                         out_map[(port.i, kto)] = (portO.o, kto)
                         #print("JOIN: ", kfrom, kfrom2, kto)
 
                     #in the difference case there can also be conjugate generation, so try the other difference as well
-                    if qkey2 != qkey:
-                        #note the reversal from above
-                        okeyO = okey2 - okey
-                        ckeyO = ckey2 - ckey
-                        #note using qkey2 and negating the gain for the alternate out conjugation
-                        kto = barekey | ports.DictKey({
-                            ports.OpticalFreqKey   : okeyO,
-                            ports.ClassicalFreqKey : ckeyO,
-                            ports.QuantumKey       : qkey2,
-                        })
+                    #if qkey2 != qkey:
+                    #    #note the reversal from above
+                    #    okeyO = okey2 - okey
+                    #    ckeyO = ckey2 - ckey
+                    #    #note using qkey2 and negating the gain for the alternate out conjugation
+                    #    kto = barekey | ports.DictKey({
+                    #        ports.OpticalFreqKey   : okeyO,
+                    #        ports.ClassicalFreqKey : ckeyO,
+                    #        ports.QuantumKey       : qkey2,
+                    #    })
 
-                        if kto in matrix_algorithm.port_set_get(portO.o):
-                            F_list = list(okeyO.F_dict.items())
-                            if len(F_list) > 1:
-                                raise RuntimeError("Can't Currently do nonlinear optics on multiply composite wavelengths")
-                            F, n = F_list[0]
+                    #    if kto in matrix_algorithm.port_set_get(portO.o):
+                    #        F_list = list(okeyO.F_dict.items())
+                    #        if len(F_list) > 1:
+                    #            raise RuntimeError("Can't Currently do nonlinear optics on multiply composite wavelengths")
+                    #        F, n = F_list[0]
 
-                            dLt[(port.i, kto)].append(
-                                (-n * G / 2, (port.i, kfrom2), (port.i, kfrom))
-                            )
-                            ddlt[(port.i, kto)][(port.i, kfrom)].append(
-                                (-n * G, (port.i, kfrom2))
-                            )
-                            in_map[(port.i, kfrom)] = (port.i, kfrom)
-                            out_map[(port.i, kto)] = (portO.o, kto)
-                            #print("JOIN2: ", kfrom, kfrom2, kto)
+                    #        dLt[(port.i, kto)].append(
+                    #            (-n * G / 2, (port.i, kfrom2), (port.i, kfrom))
+                    #        )
+                    #        in_map[(port.i, kfrom)] = (port.i, kfrom)
+                    #        out_map[(port.i, kto)] = (portO.o, kto)
+                    #        #print("JOIN2: ", kfrom, kfrom2, kto)
 
             #pprint(dLt)
-            #pprint(ddlt)
             matrix_algorithm.injection_insert(
                 ODE_solver.ExpMatCoupling(
                     dLt         = dLt,

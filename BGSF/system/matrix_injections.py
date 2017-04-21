@@ -203,3 +203,73 @@ class TripletCoupling(FactorCouplingBase):
         return val
 
 
+class TripletNormCoupling(FactorCouplingBase):
+    __slots__ = (
+        'pkfrom1',
+        'pkfrom2',
+        'pkto',
+        'pknorm',
+        'pknorm_func',
+        'cplg',
+        'edges_pkpk_dict',
+        'edges_NZ_pkset_dict',
+        'edges_req_pkset_dict',
+        'sources_pk_dict',
+        'sources_NZ_pkset_dict',
+        'sources_req_pkset_dict',
+    )
+
+    def __init__(
+            self,
+            pkfrom1,
+            pkfrom2,
+            pkto,
+            pknorm,
+            cplg,
+            pknorm_func = lambda val : val,
+    ):
+        self.pkfrom1     = pkfrom1
+        self.pkfrom2     = pkfrom2
+        self.pkto        = pkto
+        self.cplg        = cplg
+        self.pknorm      = pknorm
+        self.pknorm_func = pknorm_func
+
+        self.sources_pk_dict = {
+            self.pkto : self.source_func
+        }
+        self.sources_NZ_pkset_dict = {
+            self.pkto : frozenset([self.pkfrom1, self.pkfrom2]),
+        }
+        self.sources_req_pkset_dict = {
+            self.pkto : frozenset([self.pkfrom1, self.pkfrom2, self.pknorm]),
+        }
+        self.edges_pkpk_dict = {
+            (self.pkfrom1, self.pkto) : self.edge1_func,
+            (self.pkfrom2, self.pkto) : self.edge2_func,
+        }
+        self.edges_NZ_pkset_dict = {
+            (self.pkfrom1, self.pkto) : frozenset([self.pkfrom2]),
+            (self.pkfrom2, self.pkto) : frozenset([self.pkfrom1]),
+        }
+        self.edges_req_pkset_dict = {
+            (self.pkfrom1, self.pkto) : frozenset([self.pkfrom2, self.pknorm]),
+            (self.pkfrom2, self.pkto) : frozenset([self.pkfrom1, self.pknorm]),
+        }
+
+    def edge1_func(self, sol_vector, sB):
+        val = self.cplg * sol_vector.get(self.pkfrom2, 0) / self.pknorm_func(sol_vector.get(self.pknorm, 1e12))
+        return val
+
+    def edge2_func(self, sol_vector, sB):
+        val = self.cplg * sol_vector.get(self.pkfrom1, 0) / self.pknorm_func(sol_vector.get(self.pknorm, 1e12))
+        return val
+
+    def source_func(self, sol_vector, sB):
+        val = -self.cplg
+        val = val * sol_vector.get(self.pkfrom1, 0)
+        val = val * sol_vector.get(self.pkfrom2, 0)
+        val = val / self.pknorm_func(sol_vector.get(self.pknorm, 1e12))
+        return val
+
+

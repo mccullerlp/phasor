@@ -28,6 +28,15 @@ from .matrix_injections import (
     TripletCoupling,
 )
 
+
+def setdict_copy(orig):
+    duplicate = defaultdict(set)
+    for k, vset in orig.items():
+        duplicate[k] = set(vset)
+    return duplicate
+
+
+
 class MatrixBuildAlgorithm(object):
 
     def __init__(
@@ -409,8 +418,8 @@ class MatrixBuildAlgorithm(object):
             else:
                 subgraph_set_pending2.clear()
 
-        seq_perturb = copy.deepcopy(seq)
-        req_perturb = copy.deepcopy(req)
+        seq_perturb = setdict_copy(seq)
+        req_perturb = setdict_copy(req)
         check_seq_req_balance(
             seq_perturb,
             req_perturb,

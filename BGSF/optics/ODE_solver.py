@@ -386,6 +386,20 @@ class ExpMatCoupling(FactorCouplingBase):
             if np.any(val != 0):
                 self.vals_prev[pkin] = val
 
+        #print("START EDGES")
+        #for idx_out in range(len(pks)):
+        #    for idx_in in range(len(pks)):
+        #        edge = dMexp_s1.get(idx_out, dict()).get(idx_in, None)
+        #        if edge is not None:
+        #            pkin = self.in_map[pks[idx_in]]
+        #            pkout = self.out_map[pks[idx_out]]
+        #            if idx_in == idx_out:
+        #                edge = edge + 1
+
+        #            print("IN: ", pkin[1])
+        #            print("  OUT: ", pkout[1])
+        #            print("EDGE: ", edge)
+        #print("DONE EDGES")
         #dval_out holds the product of the input through the derivative matrix
         #this way it can cancel the forward propagation so that the output is correct assuming
         #the inputs do not change

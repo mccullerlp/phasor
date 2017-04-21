@@ -3,14 +3,14 @@
 """
 from __future__ import (division, print_function)
 #from BGSF.utilities.print import print
-import numpy as np
+#import numpy as np
 import declarative
 import collections
 
 from . import bases
 from . import ports
 from . import ODE_solver
-from ..utilities.print import pprint
+#from ..utilities.print import pprint
 
 
 class AOM(
@@ -201,7 +201,7 @@ class AOM(
 
         for portset in [
             {self.FrA : 1, self.FrB : -1},
-            #{self.BkA : -1, self.BkB : 1},
+            {self.BkA : -1, self.BkB : 1},
         ]:
             dLt = collections.defaultdict(list)
             out_map = dict()

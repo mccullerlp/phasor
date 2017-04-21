@@ -28,11 +28,11 @@ class TransferFunctionSISOBase(SignalElementBase):
 
     @declarative.dproperty
     def In(self):
-        return ports.SignalInPort(sname = 'In', pchain = lambda : self.Out)
+        return ports.SignalInPort(pchain = lambda : self.Out)
 
     @declarative.dproperty
     def Out(self):
-        return ports.SignalOutPort(sname = 'Out', pchain = lambda : self.In)
+        return ports.SignalOutPort(pchain = lambda : self.In)
 
     def filter_func(self, freq):
         return 0
@@ -87,6 +87,14 @@ class TransferFunctionSISO(TransferFunctionSISOBase):
         freq = np.asarray(freq)
         rval = self.filter(freq)
         return rval
+
+
+class Gain(TransferFunctionSISOBase):
+    def gain(self, val = 1):
+        return val
+
+    def filter_func(self, freq):
+        return self.gain
 
 
 class TransferFunctionSISOMechSingleResonance(TransferFunctionSISOBase):

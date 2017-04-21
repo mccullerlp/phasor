@@ -31,7 +31,7 @@ def generate_ax(ax_group = None):
 def generate_stacked_plot_ax(
     name_use_list,
     gs_base = gridspec.GridSpec(1, 1)[0],
-    heights_phys_in_default = 2,
+    heights_phys_in_default = 1.5,
     heights_phys_in = {},
     height_ratios = {},
     width_ratios = [1],
@@ -41,15 +41,20 @@ def generate_stacked_plot_ax(
     width_phys_in = 6,
     fig = None,
     ax_group = None,
-    hspace = 0.0,
+    hspace = 0.2,
     **kwargs
 ):
     view_names = []
     height_ratio_list  = []
     height_phys_in = 0
+    autocalls = dict()
     for name, b_use in name_use_list:
-        if not b_use:
-            continue
+        if callable(name):
+            autocalls[name] = b_use
+            name = name.__name__
+        else:
+            if not b_use:
+                continue
         height_ratio = height_ratios.get(name, 1)
         height_ratio_list.append(height_ratio)
         height_phys_in += height_ratio * heights_phys_in.get(name, heights_phys_in_default)
@@ -108,4 +113,9 @@ def generate_stacked_plot_ax(
             axB['ax_bottom'] = ax_local
             axB['ax_top']    = ax_top
             axB['ax_list']   = ax_list
+    for call, cparams in autocalls.items():
+        call(
+            axB[call.__name__],
+            **cparams
+        )
     return axB

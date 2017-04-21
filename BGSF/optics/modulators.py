@@ -66,6 +66,10 @@ class Optical2PortModulator(
 
 
 class PM(Optical2PortModulator):
+    @declarative.mproperty
+    def DrvPM(self):
+        return self.Drv
+
     def system_setup_coupling(self, matrix_algorithm):
         cmap = {
             self.Fr : (self.Bk, 1),
@@ -100,6 +104,10 @@ class PM(Optical2PortModulator):
 
 
 class AM(Optical2PortModulator):
+    @declarative.mproperty
+    def DrvAM(self):
+        return self.Drv
+
     def system_setup_coupling(self, matrix_algorithm):
         cmap = {
             self.Fr : (self.Bk, 1),
@@ -132,44 +140,26 @@ class AM(Optical2PortModulator):
                 )
         return
 
-#TODO
-class AOM(
+
+class AMPM(
     bases.OpticalCouplerBase,
     bases.SystemElementBase,
 ):
-
-    @declarative.dproperty
-    def shift_direction(self, val = 'up'):
-        assert(val in ['up', 'dn'])
-        return val
-
-    @declarative.dproperty
-    def drive_PWR_nominal(self, val = 1):
-        return val
-
-    @declarative.dproperty
-    def efficiency_nominal(self, val = 1):
-        return val
-
-    @declarative.dproperty
-    def isolation(self, val = 1):
-        return val
-
     @declarative.dproperty
     def Fr(self):
-        return ports.OpticalPort(sname = 'Fr', pchain = 'Bk')
+        return ports.OpticalPort(pchain = 'Bk')
 
     @declarative.dproperty
     def Bk(self):
-        return ports.OpticalPort(sname = 'Bk', pchain = 'Fr')
+        return ports.OpticalPort(pchain = 'Fr')
 
     @declarative.dproperty
-    def Drv(self):
-        return ports.SignalInPort(sname = 'Drv')
+    def DrvAM(self):
+        return ports.SignalInPort()
 
     @declarative.dproperty
-    def BA(self):
-        return ports.SignalOutPort(sname = 'BA')
+    def DrvPM(self):
+        return ports.SignalInPort()
 
     @declarative.mproperty
     def ports_optical(self):
@@ -201,13 +191,22 @@ class AOM(
             self.ports_optical,
             self.ports_optical,
             pmap,
-            self.Drv.i,
-            self.BA.o,
+            self.DrvAM.i,
+            None,
+        )
+
+        nonlinear_utilities.ports_fill_2optical_2classical(
+            self.system,
+            ports_algorithm,
+            self.ports_optical,
+            self.ports_optical,
+            pmap,
+            self.DrvPM.i,
+            None,
         )
         return
 
     def system_setup_coupling(self, matrix_algorithm):
-        epsilon = sin**2(pi / 2 * P_in / P_nom)
         cmap = {
             self.Fr : (self.Bk, 1),
             self.Bk : (self.Fr, 1),
@@ -228,14 +227,28 @@ class AOM(
                     matrix_algorithm,
                     pfrom, kfrom,
                     ptoOpt,
-                    self.Drv.i,
-                    self.BA.o,
+                    self.DrvPM.i,
+                    None,
+                    std_cplg,
+                    std_cplgC,
+                    self.symbols.i / 2,
+                    -self.symbols.i / 2,
+                    1 / self.symbols.c_m_s,
+                    1 / self.symbols.c_m_s,
+                )
+                nonlinear_utilities.modulations_fill_2optical_2classical(
+                    self.system,
+                    matrix_algorithm,
+                    pfrom, kfrom,
+                    ptoOpt,
+                    self.DrvAM.i,
+                    None,
                     std_cplg,
                     std_cplgC,
                     1 / 2,
                     1 / 2,
                     self.symbols.i / self.symbols.c_m_s,
                     -self.symbols.i / self.symbols.c_m_s,
+                    include_through_coupling = False,
                 )
         return
-

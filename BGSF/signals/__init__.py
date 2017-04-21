@@ -20,12 +20,14 @@ from .amplifiers import (
 
 from .RMS import (
     RMSMixer,
+    MeanSquareMixer,
 )
 
 
 from .siso_filter import (
     TransferFunctionSISO,
     TransferFunctionSISOMechSingleResonance,
+    Gain,
 )
 
 from .mimo_filter import (

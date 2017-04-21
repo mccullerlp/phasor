@@ -81,29 +81,31 @@ def ports_fill_2optical_2classical(
                 fdiff = kfrom2[ports.ClassicalFreqKey] - kfrom1[ports.ClassicalFreqKey]
             if system.reject_classical_frequency_order(fdiff):
                 continue
-            ports_algorithm.port_coupling_needed(
-                out_port_classical,
-                ports.DictKey({ports.ClassicalFreqKey: fdiff})
-            )
+            if out_port_classical is not None:
+                ports_algorithm.port_coupling_needed(
+                    out_port_classical,
+                    ports.DictKey({ports.ClassicalFreqKey: fdiff})
+                )
 
     for port in ports_out_optical:
         pto = port.o
-        for kto, lkfrom in ports_algorithm.symmetric_update(pto, out_port_classical):
-            if kto.contains(ports.LOWER):
-                ffromOptP = kto[ports.ClassicalFreqKey] - lkfrom[ports.ClassicalFreqKey]
-            else:
-                ffromOptP = kto[ports.ClassicalFreqKey] + lkfrom[ports.ClassicalFreqKey]
-            if system.reject_classical_frequency_order(ffromOptP):
-                continue
-            for pfromOpt in pmap[pto]:
-                ports_algorithm.port_coupling_needed(
-                    pfromOpt,
-                    kto.without_keys(ports.ClassicalFreqKey) | ports.DictKey({ports.ClassicalFreqKey: ffromOptP})
-                )
-                ports_algorithm.port_coupling_needed(
-                    pfromOpt,
-                    kto.without_keys(ports.ClassicalFreqKey) | ports.DictKey({ports.ClassicalFreqKey: ffromOptP})
-                )
+        if out_port_classical is not None:
+            for kto, lkfrom in ports_algorithm.symmetric_update(pto, out_port_classical):
+                if kto.contains(ports.LOWER):
+                    ffromOptP = kto[ports.ClassicalFreqKey] - lkfrom[ports.ClassicalFreqKey]
+                else:
+                    ffromOptP = kto[ports.ClassicalFreqKey] + lkfrom[ports.ClassicalFreqKey]
+                if system.reject_classical_frequency_order(ffromOptP):
+                    continue
+                for pfromOpt in pmap[pto]:
+                    ports_algorithm.port_coupling_needed(
+                        pfromOpt,
+                        kto.without_keys(ports.ClassicalFreqKey) | ports.DictKey({ports.ClassicalFreqKey: ffromOptP})
+                    )
+                    ports_algorithm.port_coupling_needed(
+                        pfromOpt,
+                        kto.without_keys(ports.ClassicalFreqKey) | ports.DictKey({ports.ClassicalFreqKey: ffromOptP})
+                    )
 
 
 def modulations_fill_2optical_2classical(
@@ -119,6 +121,7 @@ def modulations_fill_2optical_2classical(
     CLcplgC,
     BAcplg,
     BAcplgC,
+    include_through_coupling = True,
 ):
     if ptoOpt is not None and in_port_classical is not None:
         lkfroms = matrix_algorithm.port_set_get(in_port_classical)
@@ -197,7 +200,7 @@ def modulations_fill_2optical_2classical(
                     (ptoOpt.o, ktoOptN),
                     StdcplgC * CLcplgC
                 )
-    if ptoOpt is not None:
+    if ptoOpt is not None and include_through_coupling:
         if kfrom.contains(ports.LOWER):
             matrix_algorithm.port_coupling_insert(
                 pfrom.i, kfrom, ptoOpt.o, kfrom,
@@ -209,7 +212,10 @@ def modulations_fill_2optical_2classical(
                 StdcplgC,
             )
 
-    lktos = matrix_algorithm.port_set_get(out_port_classical)
+    if ptoOpt is not None and out_port_classical is not None:
+        lktos = matrix_algorithm.port_set_get(out_port_classical)
+    else:
+        lktos = []
     lkto_completed = set()
     for lkto in lktos:
         #must check and reject already completed ones as the inject generates more lktos

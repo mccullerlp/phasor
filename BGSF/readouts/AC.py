@@ -212,3 +212,129 @@ class ACReadoutCLG(base.SystemElementBase):
         return eachCSD
 
 
+class ACReadoutLG(base.SystemElementBase):
+    @decl.dproperty
+    def port_set(self, val = 'AC'):
+        val = self.ooa_params.setdefault('port_set', val)
+        return val
+
+    def __init__(
+        self,
+        portAct   = None,
+        portSense = None,
+        portDrv   = None,
+        include_noise = True,
+        **kwargs
+    ):
+        super(ACReadoutLG, self).__init__(**kwargs)
+        self.portAct   = portAct
+        self.portSense = portSense
+        if portDrv is not None:
+            self.portDrv   = portDrv
+        elif portAct is not None:
+            self.portDrv   = portAct
+        elif portSense is not None:
+            self.portDrv   = portSense
+
+        #TODO: make this adjustable
+        self.F_sep = self.system.F_AC
+
+        self.keyP = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({self.F_sep : 1})})
+        self.keyN = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({self.F_sep : -1})})
+
+        if include_noise:
+            if self.portAct is not None:
+                self.my.noiseAct = NoiseReadout(
+                    portN = self.portAct,
+                )
+            if self.portSense is not None:
+                self.my.noiseSense = NoiseReadout(
+                    portN = self.portSense,
+                )
+        else:
+            self.noise = None
+        return
+
+    def system_setup_ports_initial(self, system):
+        portsets = [self.port_set, 'AC_sensitivitys', 'readouts']
+        if self.portAct is not None:
+            system.readout_port_needed(self.portAct, self.keyP, portsets)
+            system.readout_port_needed(self.portAct, self.keyN, portsets)
+            system.drive_port_needed(self.portAct, self.keyP, portsets)
+            system.drive_port_needed(self.portAct, self.keyN, portsets)
+        if self.portSense is not None:
+            system.readout_port_needed(self.portSense, self.keyP, portsets)
+            system.readout_port_needed(self.portSense, self.keyN, portsets)
+            system.drive_port_needed(self.portSense, self.keyP, portsets)
+            system.drive_port_needed(self.portSense, self.keyN, portsets)
+        if self.portDrv is not None:
+            system.drive_port_needed(self.portDrv, self.keyP, portsets)
+            system.drive_port_needed(self.portDrv, self.keyN, portsets)
+        return
+
+    @decl.mproperty
+    def F_Hz(self):
+        return self.F_sep.F_Hz
+
+    @decl.mproperty
+    def CLG(self):
+        if self.portSense is not None:
+            port = self.portSense
+        else:
+            port = self.portAct
+
+        pk_NP = (port, self.keyP)
+        #pk_NN = (self.portD, self.keyN)
+
+        pk_DrP = (port, self.keyP)
+        pk_DrN = (port, self.keyN)
+
+        cbunch = self.system.solution.coupling_solution_get(
+            drive_set = self.port_set,
+            readout_set = self.port_set,
+        )
+
+        coupling_matrix_inv = cbunch.coupling_matrix_inv
+        N_tot = (
+            + coupling_matrix_inv.get((pk_DrP, pk_NP), 0)
+            + coupling_matrix_inv.get((pk_DrN, pk_NP), 0)
+        )
+        #print("NTOT: ", N_tot)
+        #print("DOT: ", D_tot)
+        #The factor of 2 captures the missing readout power from the negative frequencies
+        return N_tot
+
+    @decl.mproperty
+    def OLG(self):
+        return (self.CLG - 1) / self.CLG
+
+    @decl.mproperty
+    def GPlant(self):
+        pk_NP = (self.portSense, self.keyP)
+        #pk_NN = (self.portD, self.keyN)
+        pk_DP = (self.portAct, self.keyP)
+        #pk_DN = (self.portAct, self.keyN)
+
+        pk_DrP = (self.portDrv, self.keyP)
+        pk_DrN = (self.portDrv, self.keyN)
+
+        cbunch = self.system.solution.coupling_solution_get(
+            drive_set = self.port_set,
+            readout_set = self.port_set,
+        )
+
+        coupling_matrix_inv = cbunch.coupling_matrix_inv
+        N_tot = (
+            + coupling_matrix_inv.get((pk_DrP, pk_NP), 0)
+            + coupling_matrix_inv.get((pk_DrN, pk_NP), 0)
+        )
+        D_tot = (
+            + coupling_matrix_inv.get((pk_DrP, pk_DP), 0)
+            + coupling_matrix_inv.get((pk_DrN, pk_DP), 0)
+            #+ coupling_matrix_inv.get((pk_DrP, pk_DN), 0)
+            #+ coupling_matrix_inv.get((pk_DrN, pk_DN), 0)
+        )
+        #print("NTOT: ", N_tot)
+        #print("DOT: ", D_tot)
+        #The factor of 2 captures the missing readout power from the negative frequencies
+        return N_tot / D_tot

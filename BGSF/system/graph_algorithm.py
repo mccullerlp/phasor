@@ -267,7 +267,7 @@ def purge_subgraph_inplace(
 
 
 def pre_purge_inplace(seq, req, edge_map):
-    print("PRE-PURGING")
+    #print("PRE-PURGING")
     total_N = 0
     purge_N = 0
     #actually needs to list this as seq is mutating
@@ -283,7 +283,7 @@ def pre_purge_inplace(seq, req, edge_map):
         for inode in list(rmap):
             if (inode, snode) not in edge_map:
                 rmap.remove(inode)
-    print("FRAC REMOVED: ", purge_N / total_N, purge_N)
+    #print("FRAC REMOVED: ", purge_N / total_N, purge_N)
 
 def inverse_solve_inplace(
     seq, req,

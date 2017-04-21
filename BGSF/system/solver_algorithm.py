@@ -26,6 +26,13 @@ from .graph_algorithm import (
 )
 
 
+def setdict_copy(orig):
+    duplicate = defaultdict(set)
+    for k, vset in orig.items():
+        duplicate[k] = set(vset)
+    return duplicate
+
+
 class SystemSolver(object):
     field_space_proto = KVSpace('ports', dtype=np.complex128)
     #TODO, I loath how the iterative state is stored for this object, clean it up...
@@ -61,8 +68,8 @@ class SystemSolver(object):
         ]
         self.coupling_solution_bunches = defaultdict(dict)
 
-        self.drive_pk_sets      = copy.deepcopy(ports_algorithm.drive_pk_sets)
-        self.readout_pk_sets    = copy.deepcopy(ports_algorithm.readout_pk_sets)
+        self.drive_pk_sets      = setdict_copy(ports_algorithm.drive_pk_sets)
+        self.readout_pk_sets    = setdict_copy(ports_algorithm.readout_pk_sets)
 
         #build the special sets
         #TODO these special sets should be protected during the ports_algorithm
@@ -219,7 +226,7 @@ class SystemSolver(object):
         return coupling_matrix
 
     def _perturbation_iterate(self, N):
-        print("PERTURB: ", N)
+        #print("PERTURB: ", N)
         solution_bunch_prev = self.driven_solution_get(
             readout_set = 'perturbative',
             N = N - 1
@@ -236,11 +243,11 @@ class SystemSolver(object):
         csgb = malgo.coherent_subgraph_bunch
         #TODO, fix the perturb version
         if (not self.matrix_algorithm.AC_out_all) and (not self.matrix_algorithm.AC_in_all):
-            seq = copy.deepcopy(csgb.seq_perturb)
-            req = copy.deepcopy(csgb.req_perturb)
+            seq = setdict_copy(csgb.seq_perturb)
+            req = setdict_copy(csgb.req_perturb)
         else:
-            seq = copy.deepcopy(csgb.seq_full)
-            req = copy.deepcopy(csgb.req_full)
+            seq = setdict_copy(csgb.seq_full)
+            req = setdict_copy(csgb.req_full)
 
         coupling_matrix = self._edge_matrix_generate(
             seq = seq,
@@ -258,7 +265,7 @@ class SystemSolver(object):
 
         #TODO purging should no longer be necessary
         #print("PERTURBER RUNNING: ")
-        print("COUPLING_SIZE: ", len(coupling_matrix))
+        #print("COUPLING_SIZE: ", len(coupling_matrix))
         solution_bunch = push_solve_inplace(
             seq           = seq,
             req           = req,
@@ -363,8 +370,8 @@ class SystemSolver(object):
 
         csgb = malgo.coherent_subgraph_bunch
         #use the full edge list
-        seq = copy.deepcopy(csgb.seq_full)
-        req = copy.deepcopy(csgb.req_full)
+        seq = setdict_copy(csgb.seq_full)
+        req = setdict_copy(csgb.req_full)
 
         coupling_matrix = self._edge_matrix_generate(
             seq                  = seq,
@@ -444,8 +451,8 @@ class SystemSolver(object):
 
         csgb = malgo.coherent_subgraph_bunch
         #use the full edge list
-        seq = copy.deepcopy(csgb.seq_full)
-        req = copy.deepcopy(csgb.req_full)
+        seq = setdict_copy(csgb.seq_full)
+        req = setdict_copy(csgb.req_full)
 
         coupling_matrix = self._edge_matrix_generate(
             seq                  = seq,
@@ -494,8 +501,8 @@ class SystemSolver(object):
                     sbunch.delta_v,
                     " AT ORDER: ",
                     len(self.driven_solution_bunches),
-                    " Worst k: ",
-                    sbunch.k_worst,
+                    #" Worst k: ",
+                    #sbunch.k_worst,
                 )
 
         if len(self.driven_solution_bunches) == to_order:

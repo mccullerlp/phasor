@@ -49,13 +49,68 @@ class AOM2VCO(optics.OpticalCouplerBase):
             )
         self.Fr = self.AOM1.FrA
         self.Bk = self.AOM1.BkB
-        self.Bk2 = self.AOM1.BkA
 
     @declarative.dproperty
     def AOM1(self, val = None):
         val = optics.AOM(
             N_ode = 5,
         )
+        return val
+
+    @declarative.dproperty
+    def F_AOM1(self):
+        val = base.Frequency(
+            F_Hz  = 100e6,
+            order = 1,
+        )
+        return val
+
+    @declarative.dproperty
+    def VCO_AOM1(self):
+        val = VCO(
+            f_dict = {
+                self.F_AOM1 : 1,
+            }
+        )
+        return val
+
+    @declarative.dproperty
+    def F_AOM2(self):
+        val = base.Frequency(
+            F_Hz  = 1e3,
+            order = 1,
+        )
+        return val
+
+    @declarative.dproperty
+    def VCO_AOM2(self):
+        val = VCO(
+            f_dict = {
+                #self.F_AOM2 : 1,
+                self.system.F_AC : 1,
+            }
+        )
+        return val
+
+
+class AOM2VCOBasic(optics.OpticalCouplerBase):
+    VCO2_use = False
+
+    def __build__(self):
+        super(AOM2VCOBasic, self).__build__()
+        self.AOM1.Drv.bond(
+            self.VCO_AOM1.Out,
+        )
+        if self.VCO2_use:
+            self.VCO_AOM1.modulate.Mod_amp.bond(
+                self.VCO_AOM2.Out
+            )
+        self.Fr = self.AOM1.Fr
+        self.Bk = self.AOM1.Bk
+
+    @declarative.dproperty
+    def AOM1(self, val = None):
+        val = optics.AOMBasic()
         return val
 
     @declarative.dproperty
@@ -256,3 +311,48 @@ class AOMTestStand(optics.OpticalCouplerBase):
         self.my.DC_R2 = readouts.DCReadout(
             port = self.PD_R2.Wpd.o,
         )
+
+
+class AOMTestStandBasic(optics.OpticalCouplerBase):
+    def __build__(self):
+        super(AOMTestStandBasic, self).__build__()
+        self.my.PSL = optics.Laser(
+            F = self.system.F_carrier_1064,
+            power_W = 1,
+            multiple = 1,
+        )
+        self.my.F_LO = base.Frequency(
+            F_Hz  = 200e6,
+            order = 1,
+        )
+
+        self.my.PD_R1 = optics.MagicPD()
+
+        self.my.LO = signals.SignalGenerator(
+            F         = self.F_LO,
+            amplitude = 1,
+        )
+
+        self.my.aom = optics.AOMBasic()
+        self.aom.Drv.bond(self.LO.Out)
+
+        self.PSL.Fr.bond_sequence(
+            self.aom.Fr,
+        )
+        self.aom.Bk.bond(self.PD_R1.Fr)
+
+        self.my.DC_R1 = readouts.DCReadout(
+            port = self.PD_R1.Wpd.o,
+        )
+        self.my.DC_Drv = readouts.DCReadout(
+            port = self.aom.Drv_Pwr.MS.o,
+        )
+
+
+class AOM2VCOTestStandBasic(AOM2VCOTestStand):
+    @declarative.dproperty
+    def aoms(self, val = None):
+        val = AOM2VCOBasic(
+            VCO2_use = self.VCO2_use,
+        )
+        return val

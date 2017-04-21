@@ -8,102 +8,8 @@ from ... import optics
 from ... import base
 from ... import signals
 from ... import readouts
+from .VCO import VCO
 #from ... import system
-
-class VCOTest(optics.OpticalCouplerBase):
-    f_dict = None
-
-    @declarative.dproperty
-    def F_AOM1(self):
-        val = base.Frequency(
-            F_Hz  = 200e6,
-            order = 1,
-        )
-        return val
-
-    @declarative.dproperty
-    def generate(self):
-        val = signals.SignalGenerator(
-            F = self.F_AOM1,
-            amplitude = 1,
-        )
-        return val
-
-    @declarative.dproperty
-    def modulate(self):
-        val = signals.Modulator()
-        return val
-
-    @declarative.dproperty
-    def mix(self):
-        val = signals.Mixer()
-        return val
-
-    @declarative.dproperty
-    def AC_I(self, val = None):
-        val = readouts.ACReadout(
-            portN = self.mix.R_I.o,
-            portD  = self.modulate.Mod_amp.i,
-        )
-        return val
-
-    @declarative.dproperty
-    def AC_IQ(self, val = None):
-        val = readouts.ACReadout(
-            portN = self.mix.R_Q.o,
-            portD  = self.modulate.Mod_amp.i,
-        )
-        return val
-
-    @declarative.dproperty
-    def AC_QI(self, val = None):
-        val = readouts.ACReadout(
-            portN = self.mix.R_Q.o,
-            portD  = self.modulate.Mod_amp.i,
-        )
-        return val
-
-    @declarative.dproperty
-    def AC_Q(self, val = None):
-        val = readouts.ACReadout(
-            portN = self.mix.R_Q.o,
-            portD  = self.modulate.Mod_phase.i,
-        )
-        return val
-
-    def __build__(self):
-        super(VCOTest, self).__build__()
-        self.generate.Out.bond(
-            self.modulate.In,
-        )
-        self.mix.LO.bond(self.generate.Out)
-        self.modulate.Out.bond(
-            self.mix.I,
-        )
-
-
-class VCO(optics.OpticalCouplerBase):
-    f_dict = None
-
-    @declarative.dproperty
-    def generate(self):
-        val = signals.SignalGenerator(
-            f_dict = self.f_dict,
-            amplitude = 1,
-        )
-        return val
-
-    @declarative.dproperty
-    def modulate(self):
-        val = signals.Modulator()
-        return val
-
-    def __build__(self):
-        super(VCO, self).__build__()
-        self.generate.Out.bond(
-            self.modulate.In,
-        )
-        self.Out = self.modulate.Out
 
 #FROM dcc E0900492
 class AOM2XaLIGO(optics.OpticalCouplerBase):
@@ -150,11 +56,12 @@ class AOM2XaLIGO(optics.OpticalCouplerBase):
         return val
 
     @declarative.dproperty
-    def F_CLF(self):
-        val = base.Frequency(
-            F_Hz  = 3.14e6,
-            order = 1,
-        )
+    def F_CLF(self, val = None):
+        if val is None:
+            val = base.Frequency(
+                F_Hz  = 3.14e6,
+                order = 1,
+            )
         return val
 
     @declarative.dproperty
@@ -249,3 +156,38 @@ class AOM2XTestStand(optics.OpticalCouplerBase):
             #self.hPD_R.Fr,
         )
         return
+
+
+#FROM dcc E0900492
+class AOM1XBasic(optics.OpticalCouplerBase):
+
+    def __build__(self):
+        super(AOM2XaLIGO, self).__build__()
+        self.AOM1.Drv.bond(
+            self.VCO_AOM1.Out,
+        )
+        self.Fr = self.AOM1.Fr
+        self.Bk = self.AOM1.Bk
+
+    @declarative.dproperty
+    def AOM1(self, val = None):
+        val = optics.AOMBasic()
+        return val
+
+    @declarative.dproperty
+    def VCO_AOM1(self):
+        val = VCO(
+            f_dict = {
+                self.F_CLF : 1,
+            }
+        )
+        return val
+
+    @declarative.dproperty
+    def F_CLF(self, val = None):
+        if val is None:
+            val = base.Frequency(
+                F_Hz  = 3.14e6,
+                order = 1,
+            )
+        return val

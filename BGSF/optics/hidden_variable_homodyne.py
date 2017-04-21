@@ -512,7 +512,8 @@ def ports_fill_2optical_2classical_hdyne(
 ):
     for pfrom in ports_in_optical:
         if out_port_classical is not None:
-            for kfrom, lkto in ports_algorithm.symmetric_update(pfrom, out_port_classical.o):
+            #needs a list here to decouple port_coupling_needed from using the same port
+            for kfrom, lkto in list(ports_algorithm.symmetric_update(pfrom, out_port_classical.o)):
                 if kfrom.contains(ports.LOWER):
                     fnew = kfrom[ports.ClassicalFreqKey] - lkto[ports.ClassicalFreqKey]
                     qKey = ports.RAISE
