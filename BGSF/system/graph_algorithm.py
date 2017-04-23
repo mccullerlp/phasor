@@ -104,10 +104,10 @@ def mgraph_simplify_inplace(
         if pqueue:
             cost, node = pqueue.pop()
             #move to other queue if self-edge node
-            if node in seq[node]:
-                cost = generate_node_cost(node)
-                pqueue_loop.push((cost, node))
-                continue
+            #if node in seq[node]:
+            #    cost = generate_node_cost(node)
+            #    pqueue_loop.push((cost, node))
+            #    continue
         else:
             cost, node = pqueue_loop.pop()
 

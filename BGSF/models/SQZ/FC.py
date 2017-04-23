@@ -103,7 +103,8 @@ class ELFTestStand(optics.OpticalCouplerBase):
     @declarative.dproperty
     def F_ELF(self):
         val = base.Frequency(
-            F_Hz  = (1 + 0e-6) * self.symbols.c_m_s / (2*16),
+            #F_Hz  = (1 + 1.5e-6) * self.symbols.c_m_s / (2*16),
+            F_Hz  = (1) * self.symbols.c_m_s / (2*16),
             order = 1,
         )
         return val
@@ -221,7 +222,7 @@ class ELFTestStand(optics.OpticalCouplerBase):
     @declarative.dproperty
     def FC_Pend_M(self):
         return mechanical.Mass(
-            mass_kg = 1, #.0885
+            mass_kg = .0885
         )
 
     @declarative.dproperty
@@ -259,11 +260,11 @@ class ELFTestStand(optics.OpticalCouplerBase):
 
         #the first two are force-too-disp
         return signals.SRationalFilter(
-            poles_r = (-30, -30, -30),
-            zeros_r = (-3, -3, -100, -100, -100),
-            #poles_c = (Px, Px, ),
-            #zeros_c = (Zx, Zx, ),
-            gain    = -2 / 1e4,
+            poles_r = (-1e3,),
+            zeros_r = (-100, -60,),
+            poles_c = (2*Px, Px,  -1500+1500j),
+            zeros_c = (2*Zx, Zx, ),
+            gain    = -2 / 2e3,
             no_DC   = True,
             F_cutoff = 1e6,
         )
@@ -363,7 +364,12 @@ class ELFTestStand(optics.OpticalCouplerBase):
 
         Q3 = -.1 + 1j
         self.my.ground_spec = signals.SRationalFilter(
-            poles_c = (1*Q3, 3*Q3, 7*Q3, 11*Q3),
+            poles_c = (
+                #1*Q3,
+                3*Q3,
+                7*Q3,
+                #11*Q3
+            ),
             poles_r = (-1, -1),
             gain = 2e-8,
         )
@@ -378,12 +384,22 @@ class ELFTestStand(optics.OpticalCouplerBase):
             portD = self.ground_spec.Out.o,
         )
 
+        self.my.AC_FC_force = readouts.ACReadout(
+            portN = self.ActuatorFC.F.i,
+            portD = self.ground_spec.Out.o,
+        )
+
         self.my.AC_hdyne_dispI = readouts.ACReadout(
             portN = self.hdyne_backscatter.rtQuantumI.o,
             portD = self.ground_spec.In.i,
         )
         self.my.AC_hdyne_dispQ = readouts.ACReadout(
             portN = self.hdyne_backscatter.rtQuantumQ.o,
+            portD = self.ground_spec.In.i,
+        )
+
+        self.my.AC_ground = readouts.ACReadout(
+            portN = self.ground_spec.Out.o,
             portD = self.ground_spec.In.i,
         )
 
