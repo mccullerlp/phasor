@@ -229,16 +229,37 @@ class ELFTestStand(optics.OpticalCouplerBase):
             f_dict = {self.F_ELF : 1},
         )
 
+    #@declarative.dproperty
+    #def VCO_RELF(self):
+    #    return VCO(
+    #        f_dict = {self.F_RELF : 1}
+    #    )
+
     @declarative.dproperty
-    def VCO_RELF(self):
-        return VCO(
-            f_dict = {self.F_RELF : 1}
+    def AOM_GEN_ELF(self):
+        val = optics.AOMBasic()
+        return val
+
+    @declarative.dproperty
+    def BS_ELF(self):
+        return optics.Mirror(
+            T_hr = .5,
+            AOI_deg = 45,
         )
 
     @declarative.dproperty
-    def AOM_GEN_CLF(self):
-        val = optics.AOMBasic()
-        return val
+    def BS_PSL_Beat(self):
+        return optics.Mirror(
+            T_hr = 20e-3,
+            AOI_deg = 45,
+        )
+
+    @declarative.dproperty
+    def BS_PSL_Beat12(self):
+        return optics.Mirror(
+            T_hr = .5,
+            AOI_deg = 45,
+        )
 
     @declarative.dproperty
     def BS_Beat(self):
@@ -248,14 +269,18 @@ class ELFTestStand(optics.OpticalCouplerBase):
         )
 
     @declarative.dproperty
-    def BS_PSL_Beat(self):
+    def BeatPD(self):
+        return optics.MagicPD()
+
+    @declarative.dproperty
+    def BS_Beat2(self):
         return optics.Mirror(
-            T_hr = 10e-3,
+            T_hr = .5,
             AOI_deg = 45,
         )
 
     @declarative.dproperty
-    def BeatPD(self):
+    def BeatPD2(self):
         return optics.MagicPD()
 
     @declarative.dproperty
@@ -263,7 +288,7 @@ class ELFTestStand(optics.OpticalCouplerBase):
         return signals.Mixer()
 
     @declarative.dproperty
-    def Mix_RELF(self):
+    def Mix_ELF2(self):
         return signals.Mixer()
 
     @declarative.dproperty
@@ -321,6 +346,26 @@ class ELFTestStand(optics.OpticalCouplerBase):
             F_cutoff = 1e6,
         )
 
+    @declarative.dproperty
+    def FeedbackELF2NPROFM(self):
+        #the first two are force-too-disp
+        return signals.SRationalFilter(
+            poles_r = (-1, -1, -1,),
+            zeros_r = (-1000, -10000),
+            gain    = 1 / .001250474,
+            gain_F_Hz = 1e5,
+            no_DC   = True,
+            F_cutoff = 1e6,
+        )
+
+    @declarative.dproperty
+    def FC_FM_loop(self):
+        return readouts.ACReadoutLG(
+            portAct   = self.FeedbackELF2NPROFM.Out.o,
+            portSense = self.FeedbackELF2NPROFM.In.i,
+            portDrv   = self.FeedbackELF2NPROFM.Out.o,
+        )
+
     def __build__(self):
         super(ELFTestStand, self).__build__()
 
@@ -328,19 +373,20 @@ class ELFTestStand(optics.OpticalCouplerBase):
             self.FC.Fr,
         )
 
-        self.AOM_GEN_CLF.Drv.bond(
+        self.AOM_GEN_ELF.Drv.bond(
             self.VCO_ELF.Out,
         )
 
-        #self.AOM_GEN_CLF.Drv.bond(
+        #self.AOM_GEN_ELF.Drv.bond(
         #    self.VCO_RELF.Out,
         #)
 
         self.PSL_SQZ.Fr.bond_sequence(
             #self.faraday_elfs.P0,
-            self.AOM_GEN_CLF.Fr,
+            self.AOM_GEN_ELF.Fr,
         )
-        self.AOM_GEN_CLF.Bk.bond_sequence(
+        self.AOM_GEN_ELF.Bk.bond_sequence(
+            self.BS_ELF.FrA,
             self.faraday_elfs.P0,
         )
 
@@ -352,10 +398,19 @@ class ELFTestStand(optics.OpticalCouplerBase):
             self.BeatPD.Fr,
         )
 
+        self.BS_ELF.FrB.bond_sequence(
+            self.BS_Beat2.FrA,
+            self.BeatPD2.Fr,
+        )
+
         self.BS_backscatter.FrB.bond_sequence(
             self.BS_PSL_Beat.FrA,
             self.beat_rotator.Fr,
+            self.BS_PSL_Beat12.FrA,
             self.BS_Beat.BkB,
+        )
+        self.BS_PSL_Beat12.FrB.bond_sequence(
+            self.BS_Beat2.BkB,
         )
 
         self.PSL_IFO.Fr.bond_sequence(
@@ -387,22 +442,27 @@ class ELFTestStand(optics.OpticalCouplerBase):
             port = self.Mix_ELF.R_Q.o
         )
 
-        self.Mix_RELF.LO.bond(
-            self.VCO_RELF.Out,
+        self.Mix_ELF2.LO.bond(
+            self.VCO_ELF.Out,
         )
-        self.Mix_RELF.I.bond(
-            self.BeatPD.Wpd,
+        self.Mix_ELF2.I.bond(
+            self.BeatPD2.Wpd,
         )
-        self.my.DC_RELF_I = readouts.DCReadout(
-            port = self.Mix_RELF.R_I.o
+        self.my.DC_ELF2_I = readouts.DCReadout(
+            port = self.Mix_ELF2.R_I.o
         )
-        self.my.DC_RELF_Q = readouts.DCReadout(
-            port = self.Mix_RELF.R_Q.o
+        self.my.DC_ELF2_Q = readouts.DCReadout(
+            port = self.Mix_ELF2.R_Q.o
         )
 
         self.Mix_ELF.R_Q.bond_sequence(
             self.FeedbackFC.In,
             self.ActuatorFC.F,
+        )
+
+        self.Mix_ELF2.R_Q.bond_sequence(
+            self.FeedbackELF2NPROFM.In,
+            self.PSL_SQZ.noise_mod.DrvPM,
         )
 
         self.Ground.A.bond(self.FC_Pend_d.A)
@@ -460,6 +520,15 @@ class ELFTestStand(optics.OpticalCouplerBase):
             portN = self.hdyne_backscatter.rtQuantumQ.o,
             #portD = self.PSL_SQZ.noise_mod.DrvPM.i,
             portD = self.PSL_SQZ.FM_SPEC.In.i,
+        )
+
+        self.my.AC_ELF2 = readouts.ACReadout(
+            portN = self.Mix_ELF2.R_Q.o,
+            portD = self.PSL_SQZ.FM_SPEC.In.i,
+        )
+        self.my.AC_ELF2_IFO= readouts.ACReadout(
+            portN = self.Mix_ELF2.R_Q.o,
+            portD = self.PSL_IFO.FM_SPEC.In.i,
         )
 
 

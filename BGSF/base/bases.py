@@ -102,7 +102,8 @@ class NoiseBase(SystemElementBase):
     def name_noise(self, val = None):
         if val is None:
             return self.name_system
-        return val
+        else:
+            return val + '[{0}]'.format(self.name_system)
     pass
 
 

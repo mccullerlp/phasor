@@ -158,7 +158,7 @@ class Modulator(bases.SignalElementBase):
                         (self.Out.o, kto),
                         1 / 4,
                     )
-            for kfrom2 in matrix_algorithm.port_set_get(self.Mod_amp.i):
+            for kfrom2 in matrix_algorithm.port_set_get(self.Mod_phase.i):
                 f1 = kfrom1[ports.ClassicalFreqKey]
                 f2 = kfrom2[ports.ClassicalFreqKey]
                 f_new = f1 + f2
