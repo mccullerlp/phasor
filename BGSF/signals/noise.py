@@ -23,6 +23,11 @@ sided_conversions = {
 }
 
 class WhiteNoise(bases.SignalElementBase):
+
+    @decl.mproperty
+    def name_noise(self):
+        return self.name_system
+
     @decl.dproperty
     def port(self, val):
         #self.system.own_port_virtual(self, val.i)

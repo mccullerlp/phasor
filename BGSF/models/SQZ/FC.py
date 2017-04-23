@@ -158,7 +158,7 @@ class ELFTestStand(optics.OpticalCouplerBase):
     def PSL_SQZ(self):
         return optics.Laser(
             F = self.system.F_carrier_1064,
-            power_W = 10e-3,
+            power_W = 5e-3,
             multiple = 1,
             phase_deg = 0,
             polarization = 'P',
@@ -235,7 +235,7 @@ class ELFTestStand(optics.OpticalCouplerBase):
     @declarative.dproperty
     def FC_Pend_d(self):
         return mechanical.SeriesDamper(
-            resistance_Ns_m = .01
+            resistance_Ns_m = 1e-3
         )
 
     @declarative.dproperty
@@ -260,11 +260,11 @@ class ELFTestStand(optics.OpticalCouplerBase):
 
         #the first two are force-too-disp
         return signals.SRationalFilter(
-            poles_r = (-1e3,),
-            zeros_r = (-100, -60,),
-            poles_c = (2*Px, Px,  -1500+1500j),
-            zeros_c = (2*Zx, Zx, ),
-            gain    = -2 / 2e3,
+            poles_r = (-1e3, -1, -1,),
+            zeros_r = (-100, -60, -100, -100,),
+            poles_c = (8*Px,  -2000+2000j, -50+150j),
+            zeros_c = (8*Zx,  -150+150j),
+            gain    = -2 / 2e4 / 4.85075673233e-5,
             no_DC   = True,
             F_cutoff = 1e6,
         )
@@ -365,10 +365,10 @@ class ELFTestStand(optics.OpticalCouplerBase):
         Q3 = -.1 + 1j
         self.my.ground_spec = signals.SRationalFilter(
             poles_c = (
-                #1*Q3,
+                1*Q3,
                 3*Q3,
                 7*Q3,
-                #11*Q3
+                11*Q3
             ),
             poles_r = (-1, -1),
             gain = 2e-8,
