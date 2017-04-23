@@ -98,6 +98,11 @@ class CouplerBase(SystemElementBase):
 
 
 class NoiseBase(SystemElementBase):
+    @decl.mproperty
+    def name_noise(self, val = None):
+        if val is None:
+            return self.name_system
+        return val
     pass
 
 

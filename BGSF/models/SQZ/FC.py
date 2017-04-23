@@ -76,7 +76,7 @@ class FilterCavity16m(optics.OpticalCouplerBase):
         except Exception as E:
             print(repr(E))
 
-class ELFTestStand(optics.OpticalCouplerBase):
+class NPRO(optics.OpticalCouplerBase):
 
     @declarative.dproperty
     def laser(self, val = None):
@@ -89,6 +89,53 @@ class ELFTestStand(optics.OpticalCouplerBase):
             )
         else:
             return val
+
+    @declarative.dproperty
+    def noise_mod(self):
+        return optics.AMPM()
+
+    @declarative.dproperty
+    def AM_SPEC(self):
+        return signals.SRationalFilter(
+            poles_c = (-1e6 + 1.8e6j,),
+            gain = 1e-7,
+        )
+
+    @declarative.dproperty
+    def FM_SPEC(self):
+        return signals.SRationalFilter(
+            poles_r = (-1e-4, -1e-4),
+            gain = 1e4,
+            gain_F_Hz = 1,
+        )
+
+    @declarative.dproperty
+    def noise_FM(self):
+        return signals.WhiteNoise(
+            name_noise = 'NPRO FM',
+            sided = 'single',
+            port = self.FM_SPEC.In,
+        )
+
+    @declarative.dproperty
+    def noise_AM(self):
+        return signals.WhiteNoise(
+            name_noise = 'NPRO AM',
+            sided = 'single',
+            port = self.AM_SPEC.In,
+        )
+
+    def __build__(self):
+        try:
+            super(NPRO, self).__build__()
+            self.laser.Fr.bond(self.noise_mod.Fr)
+            self.Fr = self.noise_mod.Bk
+
+            self.noise_mod.DrvAM.bond(self.AM_SPEC.Out)
+            self.noise_mod.DrvPM.bond(self.FM_SPEC.Out)
+            return
+        except Exception as E:
+            print(repr(E))
 
 
 class ELFTestStand(optics.OpticalCouplerBase):
@@ -119,11 +166,13 @@ class ELFTestStand(optics.OpticalCouplerBase):
 
     @declarative.dproperty
     def PSL_IFO(self):
-        return optics.Laser(
-            F = self.system.F_carrier_1064,
-            power_W = 1,
-            multiple = 1,
-            phase_deg = 0,
+        return NPRO(
+            laser = optics.Laser(
+                F = self.system.F_carrier_1064,
+                power_W = 1,
+                multiple = 1,
+                phase_deg = 0,
+            )
         )
 
     @declarative.dproperty
@@ -156,12 +205,14 @@ class ELFTestStand(optics.OpticalCouplerBase):
 
     @declarative.dproperty
     def PSL_SQZ(self):
-        return optics.Laser(
-            F = self.system.F_carrier_1064,
-            power_W = 5e-3,
-            multiple = 1,
-            phase_deg = 0,
-            polarization = 'P',
+        return NPRO(
+            laser = optics.Laser(
+                F = self.system.F_carrier_1064,
+                power_W = 5e-3,
+                multiple = 1,
+                phase_deg = 0,
+                polarization = 'P',
+            )
         )
 
     @declarative.dproperty
@@ -264,7 +315,8 @@ class ELFTestStand(optics.OpticalCouplerBase):
             zeros_r = (-100, -60, -100, -100,),
             poles_c = (8*Px,  -2000+2000j, -50+150j),
             zeros_c = (8*Zx,  -150+150j),
-            gain    = -2 / 2e4 / 4.85075673233e-5,
+            gain    = -2 / 2e4 / 4.85075673233e-5 / 61.8415,
+            gain_F_Hz = 1e3,
             no_DC   = True,
             F_cutoff = 1e6,
         )
@@ -376,6 +428,7 @@ class ELFTestStand(optics.OpticalCouplerBase):
         self.my.noise = signals.WhiteNoise(
             port = self.ground_spec.In,
             sided = 'single',
+            name_noise = 'Seismic Stack',
         )
         self.ground_spec.Out.bond(self.Ground.d)
 
@@ -401,6 +454,12 @@ class ELFTestStand(optics.OpticalCouplerBase):
         self.my.AC_ground = readouts.ACReadout(
             portN = self.ground_spec.Out.o,
             portD = self.ground_spec.In.i,
+        )
+
+        self.my.AC_FM = readouts.ACReadout(
+            portN = self.hdyne_backscatter.rtQuantumQ.o,
+            #portD = self.PSL_SQZ.noise_mod.DrvPM.i,
+            portD = self.PSL_SQZ.FM_SPEC.In.i,
         )
 
 

@@ -22,12 +22,7 @@ sided_conversions = {
     "double" :       1,
 }
 
-class WhiteNoise(bases.SignalElementBase):
-
-    @decl.mproperty
-    def name_noise(self):
-        return self.name_system
-
+class WhiteNoise(bases.SignalElementBase, bases.NoiseBase):
     @decl.dproperty
     def port(self, val):
         #self.system.own_port_virtual(self, val.i)
@@ -46,7 +41,11 @@ class WhiteNoise(bases.SignalElementBase):
         return 1
 
     def system_setup_noise(self, matrix_algorithm):
+        #print("SETUP NOISE: ", self.name_noise)
+        #print("NOISE PORT: ", self.port.i)
+        #print("HMM: ", matrix_algorithm.port_cplgs[self.port.i])
         for k1 in matrix_algorithm.port_set_get(self.port.i):
+            #print("KEY: ", k1)
             freq = k1[ports.ClassicalFreqKey]
             k2 = k1.without_keys(ports.ClassicalFreqKey) | ports.DictKey({ports.ClassicalFreqKey : -freq})
             matrix_algorithm.noise_pair_insert(
@@ -55,5 +54,6 @@ class WhiteNoise(bases.SignalElementBase):
         return
 
     def noise_2pt_expectation(self, p1, k1, p2, k2):
+        #print("APPLY NOISE: ", self.name_noise)
         Fsq_Hz = 1 / self.conversion
         return Fsq_Hz

@@ -17,6 +17,8 @@ def ports_fill_2optical_2classical(
         in_port_classical,
         out_port_classical,
 ):
+    #there are 4**2/2 matches amongst opt_in, out_out, cls_in, cls_out
+
     for port in ports_in_optical:
         pfrom = port.i
         for ptoOpt in pmap[pfrom]:
@@ -54,8 +56,6 @@ def ports_fill_2optical_2classical(
                 ports_algorithm.port_coupling_needed(pfrom, kfrom2)
                 pass
 
-    for port in ports_in_optical:
-        pfrom = port.i
         def subset_second(pool2):
             setdict = dict()
             for kfrom2 in pool2:
@@ -84,6 +84,42 @@ def ports_fill_2optical_2classical(
             if out_port_classical is not None:
                 ports_algorithm.port_coupling_needed(
                     out_port_classical,
+                    ports.DictKey({ports.ClassicalFreqKey: fdiff})
+                )
+
+        ptoOpt = pmap[pfrom]
+        def subset_second(pool2):
+            setdict = dict()
+            for kfrom2 in pool2:
+                kfrom1_sm = kfrom2.without_keys(ports.ClassicalFreqKey, ports.QuantumKey)
+                if kfrom2.contains(ports.RAISE):
+                    kfrom1_sm = kfrom1_sm | ports.RAISE
+                elif kfrom2.contains(ports.LOWER):
+                    kfrom1_sm = kfrom1_sm | ports.LOWER
+                group = setdict.setdefault(kfrom1_sm, [])
+                group.append(kfrom2)
+            def subset_func(kfrom1):
+                kfrom1_sm = kfrom1.without_keys(ports.ClassicalFreqKey)
+                return setdict.get(kfrom1_sm, [])
+            return subset_func
+        for kfrom1, kfrom2 in ports_algorithm.symmetric_update(
+                pfrom,
+                ptoOpt,
+                subset_second = subset_second
+        ):
+            if kfrom1.contains(ports.LOWER):
+                if not kfrom2.contains(ports.LOWER):
+                    continue
+                fdiff = kfrom2[ports.ClassicalFreqKey] - kfrom1[ports.ClassicalFreqKey]
+            elif kfrom1.contains(ports.RAISE):
+                if not kfrom2.contains(ports.RAISE):
+                    continue
+                fdiff = kfrom1[ports.ClassicalFreqKey] - kfrom2[ports.ClassicalFreqKey]
+            if system.reject_classical_frequency_order(fdiff):
+                continue
+            if in_port_classical is not None:
+                ports_algorithm.port_coupling_needed(
+                    in_port_classical,
                     ports.DictKey({ports.ClassicalFreqKey: fdiff})
                 )
 

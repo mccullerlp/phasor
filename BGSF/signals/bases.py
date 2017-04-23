@@ -8,6 +8,7 @@ import declarative as decl
 from ..base import (
     CouplerBase,
     SystemElementBase,
+    NoiseBase,
     OOA_ASSIGN,
 )
 

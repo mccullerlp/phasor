@@ -226,11 +226,20 @@ class SRationalFilter(SZPCascade):
     def gain(desc):
         return unitless_refval_attribute(desc)
 
+    @declarative.dproperty
+    def gain_F_Hz(desc, val = 0):
+            return val
+
     def filter_func(self, freq):
         pre = self.gain.val
         if self.delay_s.val is not None:
             pre *= self.symbols.math.exp(self.symbols.i2pi * freq * self.delay_s.val)
-        return super(SRationalFilter, self).filter_func(freq) * pre
+        xfer = super(SRationalFilter, self).filter_func(freq) * pre
+
+        if self.gain_F_Hz != 0:
+            xfer = xfer / abs(super(SRationalFilter, self).filter_func(self.gain_F_Hz))
+
+        return xfer
 
     @declarative.mproperty
     def fitter_data(self):
