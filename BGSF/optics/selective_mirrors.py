@@ -11,7 +11,6 @@ from . import ports
 from . import selectors
 
 
-
 class MirrorSelectionStack(
     ports.OpticalDegenerate4PortMixin,
     selectors.OpticalSelectionStack,
@@ -93,6 +92,15 @@ class PolarizingMirror(MirrorSelectionStack):
         )
 
 
+class PolarizingSelector(selectors.GenericSelector):
+    @declarative.dproperty
+    def select_map(self):
+        return dict(
+            S = ports.PolS,
+            P = ports.PolP,
+        )
+
+
 class HarmonicMirror(MirrorSelectionStack):
     @declarative.dproperty
     def kH1(self):
@@ -131,3 +139,21 @@ class HarmonicMirror(MirrorSelectionStack):
             mirror_H1 = self.kH1,
             mirror_H2 = self.kH2,
         )
+
+
+class HarmonicSelector(selectors.GenericSelector):
+    @declarative.dproperty
+    def kH1(self):
+        return ports.DictKey({ports.OpticalFreqKey : self.system.FD_carrier_1064})
+
+    @declarative.dproperty
+    def kH2(self):
+        return ports.DictKey({ports.OpticalFreqKey : 2 * self.system.FD_carrier_1064})
+
+    @declarative.dproperty
+    def select_map(self):
+        return dict(
+            H1 = self.kH1,
+            H2 = self.kH2,
+        )
+

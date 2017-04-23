@@ -43,8 +43,6 @@ class SystemSolver(object):
         system,
         ports_algorithm,
         matrix_algorithm,
-        max_N       = 100,
-        warning_N   = 20,
         max_epsilon = 1e-4,
         **kwargs
     ):
@@ -90,8 +88,8 @@ class SystemSolver(object):
         #TODO
         #self.drive_pk_sets['noise'].update(csgb.inputs_set)
 
-        self.max_N       = max_N
-        self.warning_N   = warning_N
+        self.max_N       = self.system.max_N
+        self.warning_N   = self.system.warning_N
         self.max_epsilon = max_epsilon
 
         self._setup_views()
@@ -318,7 +316,9 @@ class SystemSolver(object):
             v_prev = np.asarray(v_prev)
             av_maxel = np.maximum(abs(v), abs(v_prev))
             avdiff = abs(v - v_prev)
-            v_nz = (av_maxel != 0)
+            #TODO make the scaling for minimum elements aware of the scale of
+            #rounding error
+            v_nz = (av_maxel != 0) & (av_maxel > 1e-16)
             minel = avdiff[v_nz] / av_maxel[v_nz]
             if len(minel) > 0:
                 #minel[av_maxel < 1e-18] = 0
@@ -485,25 +485,31 @@ class SystemSolver(object):
         return solution_bunch
 
     def solve(self, order = None):
-        if order is None:
-            to_order = self.max_N
+        if self.system.exact_order is not None:
+            while len(self.driven_solution_bunches) <= self.system.exact_order:
+                self.driven_solution_bunches.append(dict())
+                sbunch = self._perturbation_iterate(N = len(self.driven_solution_bunches) - 1)
         else:
-            to_order = order
 
-        while len(self.driven_solution_bunches) <= to_order:
-            self.driven_solution_bunches.append(dict())
-            sbunch = self._perturbation_iterate(N = len(self.driven_solution_bunches) - 1)
-            if order is None and sbunch.delta_v < self.max_epsilon:
-                break
-            if order is None and len(self.driven_solution_bunches) > self.warning_N:
-                print(
-                    "WARNING: DELTA V MAX: ",
-                    sbunch.delta_v,
-                    " AT ORDER: ",
-                    len(self.driven_solution_bunches),
-                    #" Worst k: ",
-                    #sbunch.k_worst,
-                )
+            if order is None:
+                to_order = self.max_N
+            else:
+                to_order = order
+
+            while len(self.driven_solution_bunches) <= to_order:
+                self.driven_solution_bunches.append(dict())
+                sbunch = self._perturbation_iterate(N = len(self.driven_solution_bunches) - 1)
+                if order is None and sbunch.delta_v < self.max_epsilon:
+                    break
+                if order is None and len(self.driven_solution_bunches) > self.warning_N:
+                    print(
+                        "WARNING: DELTA V MAX: ",
+                        sbunch.delta_v,
+                        " AT ORDER: ",
+                        len(self.driven_solution_bunches),
+                        " Worst k: ",
+                        sbunch.k_worst[0], np.max(sbunch.k_worst[1]),
+                    )
 
         if len(self.driven_solution_bunches) == to_order:
             #append one last dictionary for this set of solutions to use the previous

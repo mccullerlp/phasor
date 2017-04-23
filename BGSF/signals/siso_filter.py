@@ -19,11 +19,14 @@ from .bases import (
 
 
 class TransferFunctionSISOBase(SignalElementBase):
-    max_freq = None
-
     @declarative.dproperty
     def no_DC(self, val = False):
         val = self.ooa_params.setdefault('no_DC', val)
+        return val
+
+    @declarative.dproperty
+    def F_cutoff(self, val = float('inf')):
+        val = self.ooa_params.setdefault('F_cutoff', val)
         return val
 
     @declarative.dproperty
@@ -48,18 +51,20 @@ class TransferFunctionSISOBase(SignalElementBase):
 
     def system_setup_ports(self, ports_algorithm):
         for kfrom in ports_algorithm.port_update_get(self.In.i):
-            if self.system.classical_frequency_test_max(kfrom, self.max_freq):
+            if self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey]) > self.F_cutoff:
                 continue
             ports_algorithm.port_coupling_needed(self.Out.o, kfrom)
         for kto in ports_algorithm.port_update_get(self.Out.o):
-            if self.system.classical_frequency_test_max(kto, self.max_freq):
+            if self.system.classical_frequency_extract_center(kto[ports.ClassicalFreqKey]) > self.F_cutoff:
                 continue
             ports_algorithm.port_coupling_needed(self.In.i, kto)
         return
 
     def system_setup_coupling(self, matrix_algorithm):
         for kfrom in matrix_algorithm.port_set_get(self.In.i):
-            if self.system.classical_frequency_test_max(kfrom, self.max_freq):
+            if self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey]) > self.F_cutoff:
+                continue
+            if self.no_DC and self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey]) == 0:
                 continue
             freq = self.system.classical_frequency_extract(kfrom)
             pgain = self.filter_func_run(freq)

@@ -58,11 +58,13 @@ from .polarization import (
     QuarterWavePlate,
     UnmountedQuarterWavePlate,
     UnmountedHalfWavePlate,
-    PolarizingMirror,
 )
 
 from .selective_mirrors import (
     HarmonicMirror,
+    HarmonicSelector,
+    PolarizingMirror,
+    PolarizingSelector,
 )
 
 from .modulators import (

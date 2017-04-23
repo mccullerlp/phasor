@@ -209,7 +209,10 @@ class MatrixBuildAlgorithm(object):
             if ptofull is declarative.NOARG:
                 print("Missing Connection:", pto, kto)
             else:
-                assert(kto in ptofull)
+                if (kto not in ptofull):
+                    raise RuntimeError(
+                        "kto ({0}) missing in ports of {1}".format(kto, pto)
+                    )
 
             self.coupling_matrix_injlist[pkf, pkt].append(inj_obj)
             self.coupling_matrix_inj_funclist[pkf, pkt].append(func)

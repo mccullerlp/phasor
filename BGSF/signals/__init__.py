@@ -37,3 +37,7 @@ from .mimo_filter import (
 from .ZPSOS import (
     SRationalFilter,
 )
+
+from .noise import (
+    WhiteNoise
+)

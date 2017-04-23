@@ -50,17 +50,15 @@ class AOMBasic(
             self.Bk.o: self.Fr.i,
         }
 
-        for kfrom in ports_algorithm.port_update_get(self.Drv.i):
-            print("FROM ", self.Drv.i, kfrom)
-            drv_ckey = kfrom[ports.ClassicalFreqKey]
-            for port, direction in [
-                (self.Fr.i, 1),
-                (self.Bk.i, -1),
-                (self.Fr.o, 1),
-                (self.Bk.o, -1),
-            ]:
+        for port, direction in [
+            (self.Fr.i, 1),
+            (self.Bk.i, -1),
+            (self.Fr.o, 1),
+            (self.Bk.o, -1),
+        ]:
+            for kfrom in ports_algorithm.port_update_get(self.Drv.i):
+                drv_ckey = kfrom[ports.ClassicalFreqKey]
                 for kfrom2 in ports_algorithm.port_full_get(port):
-                    print('from: ', port, kfrom2)
                     barekey = kfrom2.without_keys(ports.OpticalFreqKey, ports.ClassicalFreqKey, ports.QuantumKey)
                     okey = kfrom2[ports.OpticalFreqKey]
                     ckey = kfrom2[ports.ClassicalFreqKey]
@@ -78,14 +76,6 @@ class AOMBasic(
                         if neg * nkey * direction <= 0:
                             continue
 
-                        print("IIns: ",
-                            tmap[port],
-                            barekey | ports.DictKey({
-                                ports.OpticalFreqKey   : okey,
-                                ports.ClassicalFreqKey : ckeyO,
-                                ports.QuantumKey       : qkey
-                            })
-                              )
                         ports_algorithm.port_coupling_needed(
                             tmap[port],
                             barekey | ports.DictKey({
@@ -95,19 +85,13 @@ class AOMBasic(
                             })
                         )
 
-        for port, direction in [
-            (self.Fr.i, 1),
-            (self.Bk.i, -1),
-            (self.Fr.o, 1),
-            (self.Bk.o, -1),
-        ]:
             for kfrom in ports_algorithm.port_update_get(port):
                 okey = kfrom[ports.OpticalFreqKey]
                 ckey = kfrom[ports.ClassicalFreqKey]
                 qkey = kfrom[ports.QuantumKey]
                 barekey = kfrom.without_keys(ports.OpticalFreqKey, ports.ClassicalFreqKey, ports.QuantumKey)
 
-                for kfrom in ports_algorithm.port_update_get(self.Drv.i):
+                for kfrom in ports_algorithm.port_full_get(self.Drv.i):
                     drv_ckey = kfrom[ports.ClassicalFreqKey]
                     if qkey == ports.LOWER[ports.QuantumKey]:
                         neg = 1
@@ -197,12 +181,6 @@ class AOMBasic(
                             ports.QuantumKey       : qkey,
                         })
 
-                        pprint(dict(
-                            pkfrom1 = (port.i, kfrom),
-                            pkfrom2 = (self.Drv.i, kfrom2),
-                            pkto    = (tmap[port].o, kto),
-                            pknorm  = pknorm,
-                        ))
                         matrix_algorithm.injection_insert(
                             TripletNormCoupling(
                                 pkfrom1 = (port.i, kfrom),

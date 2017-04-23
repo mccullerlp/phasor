@@ -116,7 +116,7 @@ class PortUpdatesAlgorithm(object):
         ptofull = self.port_cplgs.get(pto, declarative.NOARG)
         ptoupdate = self.port_cplgs_update.get((self._current_element, pto), declarative.NOARG)
         if ptofull is declarative.NOARG:
-            print("Missing Connection:", kto)
+            print("Missing Connection: ", kto, " for ", pto)
         else:
             if kto not in ptofull and kto not in ptoupdate:
                 owner = self.system.port_owners[pto]

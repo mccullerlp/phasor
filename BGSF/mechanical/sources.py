@@ -270,7 +270,7 @@ class ForceSourceBalanced(smatrix.SMatrix2PortBase):
         return
 
     def system_setup_ports(self, ports_algorithm):
-        super(DisplacementSourceBalanced, self).system_setup_ports(ports_algorithm)
+        super(ForceSourceBalanced, self).system_setup_ports(ports_algorithm)
         for port2 in [self.A, self.B]:
             for kfrom in ports_algorithm.port_update_get(self.F.i):
                 ports_algorithm.port_coupling_needed(port2.o, kfrom)
@@ -280,7 +280,7 @@ class ForceSourceBalanced(smatrix.SMatrix2PortBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         #TODO setup DC
-        super(DisplacementSourceBalanced, self).system_setup_coupling(matrix_algorithm)
+        super(ForceSourceBalanced, self).system_setup_coupling(matrix_algorithm)
 
         matrix_algorithm.coherent_sources_insert(
             self.A.o,

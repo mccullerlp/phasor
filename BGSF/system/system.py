@@ -66,6 +66,9 @@ class SystemSymbols(Element):
 
 
 class BGSystem(RootElement):
+    exact_order = None
+    max_N = 100
+    warning_N = 20
 
     _frozen = False
 
@@ -257,6 +260,8 @@ class BGSystem(RootElement):
         #TODO put this logic in a subobject
         freq_Hz = 0
         for F, n in list(ekey.F_dict.items()):
+            if len(np.array(F.F_center_Hz).shape) > 0:
+                print("Weird F_center_Hz shape: ", F, n, F.F_center_Hz)
             freq_Hz += n * F.F_center_Hz
         return freq_Hz
 

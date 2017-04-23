@@ -44,7 +44,6 @@ class Frequency(
 
     def __init__(
             self,
-            F_center_Hz = None,
             F_width_Hz  = 0,
             order       = None,
             **kwargs

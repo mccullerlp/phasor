@@ -8,9 +8,11 @@ import declarative
 
 #import numpy as np
 
+from BGSF import base
 from BGSF import system
 from BGSF import readouts
 from BGSF import optics
+from BGSF import signals
 from BGSF.optics.nonlinear_crystal import NonlinearCrystal
 from BGSF.utilities.print import pprint
 from BGSF.optics.models import AOMTestStand
@@ -74,13 +76,40 @@ def test_AOMBasic():
         ooa_params = db,
     )
     sys.my.test = AOMTestStand.AOMTestStandBasic()
+
+    sys.my.F_LO2 = base.Frequency(
+        F_Hz  = 250e6,
+        order = 1,
+    )
+    sys.my.LO2 = signals.SignalGenerator(
+        F         = sys.F_LO2,
+        amplitude = 1,
+    )
+    sys.test.aom.Drv.bond(sys.LO2.Out)
+
+    db = sys.ooa_shadow()
+
+    np_test.assert_almost_equal(sys.test.DC_Drv.DC_readout, (sys.LO2.amplitude**2 + sys.test.LO.amplitude**2)/2, 2)
+    np_test.assert_almost_equal(sys.test.DC_R1.DC_readout, 1, 2)
+
+    return sys
+
+
+def test_AOMBasic_PWR2():
+    db = declarative.DeepBunch()
+    db.test.LO.phase.val = 0
+    db.test.LO.phase.units = 'deg'
+    db.test.LO.amplitude = np.linspace(.1, 1, 100)
+    sys = system.BGSystem(
+        ooa_params = db,
+    )
+    sys.my.test = AOMTestStand.AOMTestStandBasic()
     db = sys.ooa_shadow()
 
     np_test.assert_almost_equal(sys.test.DC_Drv.DC_readout, db.test.LO.amplitude**2/2, 2)
     np_test.assert_almost_equal(sys.test.DC_R1.DC_readout, 1, 2)
 
     return sys
-
 
 
 def test_AOMBasic_derivative():

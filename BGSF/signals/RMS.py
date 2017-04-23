@@ -33,7 +33,8 @@ class MeanSquareMixer(bases.SignalElementBase):
             return val
 
     def system_setup_ports(self, ports_algorithm):
-        for kfrom in ports_algorithm.port_update_get(self.I.i):
+        #needs to isolate with list since port_coupling_needed is called on self.I.i
+        for kfrom in list(ports_algorithm.port_update_get(self.I.i)):
             f_key = kfrom[ports.ClassicalFreqKey]
             kfromN = kfrom.replace_keys({ports.ClassicalFreqKey: -f_key})
             if self.system.reject_classical_frequency_order(-f_key):

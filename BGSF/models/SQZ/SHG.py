@@ -315,16 +315,7 @@ class SHG_w_PDH(optics.OpticalCouplerBase):
 
     @declarative.dproperty
     def DC_SHG_G(self, val = None):
-        val = optics.HarmonicMirror(
-            mirror_H1 = optics.Mirror(
-                T_hr = 1,
-                L_hr = 0,
-            ),
-            mirror_H2 = optics.Mirror(
-                T_hr = 0,
-            ),
-            AOI_deg = 45,
-        )
+        val = optics.HarmonicSelector()
         return val
 
     @declarative.dproperty
@@ -378,50 +369,50 @@ class SHG_w_PDH(optics.OpticalCouplerBase):
         )
 
     def __build__(self):
-        try:
-            super(SHG_w_PDH, self).__build__()
+        super(SHG_w_PDH, self).__build__()
 
-            self.faraday.P1.bond_sequence(
-                self.Mod_PDH.Fr,
-                self.DC_SHG_G.BkA,
-                self.SHG.Fr,
-            )
+        self.faraday.P1.bond_sequence(
+            self.Mod_PDH.Fr,
+            self.DC_SHG_G.Bk_H1,
+        )
 
-            self.SHG.Bk.bond_sequence(
-                self.TransPD.Fr
-            )
+        self.DC_SHG_G.Fr.bond_sequence(
+            self.SHG.Fr,
+        )
 
-            self.PDH_Mix.LO.bond(
-                self.PDH_LO.Out
-            )
-            self.PDH_Mix.I.bond(
-                self.TransPD.Wpd
-            )
+        self.SHG.Bk.bond_sequence(
+            self.TransPD.Fr
+        )
 
-            self.PDH_LO.Out.bond_sequence(
-                self.PDH_SB_amp.In,
-                self.Mod_PDH.DrvPM,
-            )
+        self.PDH_Mix.LO.bond(
+            self.PDH_LO.Out
+        )
+        self.PDH_Mix.I.bond(
+            self.TransPD.Wpd
+        )
 
-            self.PDH_SB_amp.Out.bond_sequence(
-                self.PDH_SB_ratAM.In,
-                self.Mod_PDH.DrvAM,
-            )
+        self.PDH_LO.Out.bond_sequence(
+            self.PDH_SB_amp.In,
+            self.Mod_PDH.DrvPM,
+        )
 
-            self.PDH_Mix.R_I.bond_sequence(
-                self.Feedback.In,
-                self.Actuator.d,
-            )
+        self.PDH_SB_amp.Out.bond_sequence(
+            self.PDH_SB_ratAM.In,
+            self.Mod_PDH.DrvAM,
+        )
 
-            self.Actuator.A.bond(
-                self.SHG.M1.Z
-            )
+        self.PDH_Mix.R_I.bond_sequence(
+            self.Feedback.In,
+            self.Actuator.d,
+        )
 
-            self.Fr = self.faraday.P0
-            self.BkR = self.faraday.P2
-            self.BkG = self.DC_SHG_G.FrB
-        except Exception as E:
-            print(repr(E))
+        self.Actuator.A.bond(
+            self.SHG.M1.Z
+        )
+
+        self.Fr = self.faraday.P0
+        self.BkR = self.faraday.P2
+        self.BkG = self.DC_SHG_G.Bk_H2
 
 
 class SHGPDHTestStand(optics.OpticalCouplerBase):
