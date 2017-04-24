@@ -156,12 +156,16 @@ class AutoPlotSaver(declarative.OverridableObject):
 
 asavefig = AutoPlotSaver()
 
-def patchify_axes(ax, plotname):
+def patchify_axes(ax, plotname, check_log_Y = False):
     oldplot = getattr(ax, plotname)
 
     def plot(X, Y, *args, **kwargs):
         Y = np.asarray(Y)
         b = np.broadcast(X, Y)
+
+        if check_log_Y and np.all(Y <= 0):
+            return
+
         if b.shape != Y.shape:
             Y = np.ones(X.shape) * Y
         return oldplot(X, Y, *args, **kwargs)
@@ -171,8 +175,8 @@ def patchify_axes(ax, plotname):
 
 def patch_axes(ax):
     patchify_axes(ax, 'plot')
-    patchify_axes(ax, 'loglog')
-    patchify_axes(ax, 'semilogy')
+    patchify_axes(ax, 'loglog', check_log_Y = True)
+    patchify_axes(ax, 'semilogy', check_log_Y = True)
     patchify_axes(ax, 'semilogx')
 
 def mplfigB(

@@ -102,12 +102,24 @@ class NPRO(optics.OpticalCouplerBase):
         )
 
     @declarative.dproperty
-    def FM_SPEC(self):
-        return signals.SRationalFilter(
-            poles_r = (-1e-4, -1e-4),
-            gain = 1e4,
-            gain_F_Hz = 1,
-        )
+    def FM_SPEC(self, val = None):
+        if val is None:
+            return signals.SRationalFilter(
+                poles_r = (-1e-4, ),
+                gain = 1e4,
+                gain_F_Hz = 1,
+            )
+        return val
+
+    @declarative.dproperty
+    def FM2PM(self, val = None):
+        if val is None:
+            return signals.SRationalFilter(
+                poles_r = (-1e-4,),
+                gain = 1,
+                gain_F_Hz = 1,
+            )
+        return val
 
     @declarative.dproperty
     def noise_FM(self):
@@ -132,7 +144,8 @@ class NPRO(optics.OpticalCouplerBase):
             self.Fr = self.noise_mod.Bk
 
             self.noise_mod.DrvAM.bond(self.AM_SPEC.Out)
-            self.noise_mod.DrvPM.bond(self.FM_SPEC.Out)
+            self.FM2PM.In.bond(self.FM_SPEC.Out)
+            self.noise_mod.DrvPM.bond(self.FM2PM.Out)
             return
         except Exception as E:
             print(repr(E))
@@ -157,14 +170,6 @@ class ELFTestStand(optics.OpticalCouplerBase):
         return val
 
     @declarative.dproperty
-    def F_RELF(self):
-        val = base.Frequency(
-            F_Hz  = self.symbols.c_m_s / (2*16)  * 3/4,
-            order = 1,
-        )
-        return val
-
-    @declarative.dproperty
     def PSL_IFO(self):
         return NPRO(
             laser = optics.Laser(
@@ -172,13 +177,20 @@ class ELFTestStand(optics.OpticalCouplerBase):
                 power_W = 1,
                 multiple = 1,
                 phase_deg = 0,
-            )
+            ),
+            #from G1501370
+            FM_SPEC = signals.SRationalFilter(
+                poles_r   = (-1e4, ),
+                zeros_r   = (-1e2, ),
+                gain      = 1e-4,
+                gain_F_Hz = 1e4,
+            ),
         )
 
     @declarative.dproperty
     def BS_backscatter(self):
         return optics.Mirror(
-            T_hr = 1e-6,
+            T_hr = .1e-6,
             AOI_deg = 45,
         )
 
@@ -229,12 +241,6 @@ class ELFTestStand(optics.OpticalCouplerBase):
             f_dict = {self.F_ELF : 1},
         )
 
-    #@declarative.dproperty
-    #def VCO_RELF(self):
-    #    return VCO(
-    #        f_dict = {self.F_RELF : 1}
-    #    )
-
     @declarative.dproperty
     def AOM_GEN_ELF(self):
         val = optics.AOMBasic()
@@ -262,6 +268,35 @@ class ELFTestStand(optics.OpticalCouplerBase):
         )
 
     @declarative.dproperty
+    def BS_MZ1(self):
+        return optics.Mirror(
+            T_hr = .5,
+            AOI_deg = 45,
+        )
+
+    @declarative.dproperty
+    def BS_MZ2(self):
+        return optics.Mirror(
+            T_hr = .5,
+            AOI_deg = 45,
+        )
+
+    @declarative.dproperty
+    def M_MZ(self):
+        return optics.Mirror(
+            T_hr = 0,
+            AOI_deg = 45,
+            phase_deg = 45,
+        )
+
+    @declarative.dproperty
+    def BS_MZ_PO(self):
+        return optics.Mirror(
+            T_hr = 0,
+            AOI_deg = 45,
+        )
+
+    @declarative.dproperty
     def BS_Beat(self):
         return optics.Mirror(
             T_hr = .5,
@@ -284,6 +319,14 @@ class ELFTestStand(optics.OpticalCouplerBase):
         return optics.MagicPD()
 
     @declarative.dproperty
+    def MZPD(self):
+        return optics.MagicPD()
+
+    @declarative.dproperty
+    def MZPD2(self):
+        return optics.MagicPD()
+
+    @declarative.dproperty
     def Mix_ELF(self):
         return signals.Mixer()
 
@@ -298,7 +341,7 @@ class ELFTestStand(optics.OpticalCouplerBase):
     @declarative.dproperty
     def FC_Pend_M(self):
         return mechanical.Mass(
-            mass_kg = .0885
+            mass_kg = 1, #.0885
         )
 
     @declarative.dproperty
@@ -311,7 +354,7 @@ class ELFTestStand(optics.OpticalCouplerBase):
     @declarative.dproperty
     def FC_Pend_d(self):
         return mechanical.SeriesDamper(
-            resistance_Ns_m = 1e-3
+            resistance_Ns_m = 1e-2
         )
 
     @declarative.dproperty
@@ -323,6 +366,14 @@ class ELFTestStand(optics.OpticalCouplerBase):
         return readouts.ACReadoutLG(
             portAct   = self.FC.M2.Z.d.o,
             portSense = self.FeedbackFC.In.i,
+            portDrv   = self.ActuatorFC.F.i,
+        )
+
+    @declarative.dproperty
+    def FCMZ_length_loop(self):
+        return readouts.ACReadoutLG(
+            portAct   = self.FC.M2.Z.d.o,
+            portSense = self.FeedbackMZFC.In.i,
             portDrv   = self.ActuatorFC.F.i,
         )
 
@@ -340,7 +391,27 @@ class ELFTestStand(optics.OpticalCouplerBase):
             zeros_r = (-100, -60, -100, -100,),
             poles_c = (8*Px,  -2000+2000j, -50+150j),
             zeros_c = (8*Zx,  -150+150j),
-            gain    = -2 / 2e4 / 4.85075673233e-5 / 61.8415,
+            gain    = 0 * -2 / 2e4 / 4.85075673233e-5 / 61.8415 / .5012,
+            gain_F_Hz = 1e3,
+            no_DC   = True,
+            F_cutoff = 1e6,
+        )
+
+    @declarative.dproperty
+    def FeedbackMZFC(self):
+        Px = (-60 + 120j)
+        Zx = (-50 + 70j)
+
+        Px2 = (-10 + 30j)
+        Zx2 = (-30 + 30j)
+
+        #the first two are force-too-disp
+        return signals.SRationalFilter(
+            poles_r = (-1e3, -1, -1,),
+            zeros_r = (-100, -60, -100, -100,),
+            poles_c = (8*Px,  -2000+2000j, -50+150j),
+            zeros_c = (8*Zx,  -150+150j),
+            gain    = -2 / 2e4 / 4.85075673233e-5 / 61.8415 / .250602,
             gain_F_Hz = 1e3,
             no_DC   = True,
             F_cutoff = 1e6,
@@ -350,8 +421,10 @@ class ELFTestStand(optics.OpticalCouplerBase):
     def FeedbackELF2NPROFM(self):
         #the first two are force-too-disp
         return signals.SRationalFilter(
-            poles_r = (-1, -1, -1,),
-            zeros_r = (-1000, -10000),
+            #butterworth compensation good but too aggressive for the simulation
+            poles_r = (-1, -1, -1,),  # -1, -1),
+            #zeros_r = ()
+            zeros_c = (-20000 + 20000j,),  # -1000 + 1000j,),
             gain    = 1 / .001250474,
             gain_F_Hz = 1e5,
             no_DC   = True,
@@ -377,23 +450,52 @@ class ELFTestStand(optics.OpticalCouplerBase):
             self.VCO_ELF.Out,
         )
 
-        #self.AOM_GEN_ELF.Drv.bond(
-        #    self.VCO_RELF.Out,
+        #self.my.BS_SQZ = optics.Mirror(
+        #    T_hr = 1 - 5e-3,
+        #    AOI_deg = 45,
         #)
 
+        self.PSL_IFO.Fr.bond_sequence(
+            #self.BS_SQZ.FrA,
+            self.BS_backscatter.FrA,
+            self.faraday_backscatter.P0,
+        )
+
+        #self.my.rot_SQZ = optics.PolarizationRotator(rotate_deg = 90)
+        #self.BS_SQZ.FrB.bond_sequence(
+        #    self.rot_SQZ.Fr,
         self.PSL_SQZ.Fr.bond_sequence(
             #self.faraday_elfs.P0,
             self.AOM_GEN_ELF.Fr,
         )
         self.AOM_GEN_ELF.Bk.bond_sequence(
             self.BS_ELF.FrA,
+            self.BS_MZ1.FrA,
             self.faraday_elfs.P0,
+        )
+
+        self.BS_MZ1.FrB.bond_sequence(
+            self.M_MZ.FrA,
+        )
+        self.M_MZ.FrB.bond_sequence(
+            self.BS_MZ2.BkB,
+        )
+        self.BS_MZ2.BkA.bond_sequence(
+            self.MZPD.Fr,
+        )
+        self.BS_MZ2.FrB.bond_sequence(
+            self.MZPD2.Fr,
         )
 
         self.faraday_elfs.P1.bond_sequence(
             self.FC_pol_inj.Bk_P,
         )
         self.faraday_elfs.P2.bond_sequence(
+            self.BS_MZ_PO.FrA,
+            self.BS_MZ2.FrA,
+        )
+
+        self.BS_MZ_PO.FrB.bond_sequence(
             self.BS_Beat.FrA,
             self.BeatPD.Fr,
         )
@@ -413,16 +515,30 @@ class ELFTestStand(optics.OpticalCouplerBase):
             self.BS_Beat2.BkB,
         )
 
-        self.PSL_IFO.Fr.bond_sequence(
-            self.BS_backscatter.FrA,
-            self.faraday_backscatter.P0,
-        )
-
         self.faraday_backscatter.P1.bond_sequence(
             self.FC_pol_inj.Bk_S,
         )
+
+        self.my.M_hdyne = optics.Mirror(
+            T_hr = 0,
+            phase_deg = 00,
+            AOI_deg = 45,
+        )
         self.faraday_backscatter.P2.bond_sequence(
+            self.M_hdyne.FrA,
+        )
+        self.my.BS_backscatter_read = optics.Mirror(
+            T_hr = .5,
+            AOI_deg = 45,
+        )
+        self.my.pd_backscatter = optics.MagicPD()
+        self.M_hdyne.FrB.bond_sequence(
             self.hdyne_backscatter.Fr,
+            self.BS_backscatter_read.FrA,
+            self.pd_backscatter.Fr,
+        )
+        self.BS_backscatter_read.BkB.bond_sequence(
+            self.BS_PSL_Beat.FrB,
         )
 
         self.my.DC_BeatPD = readouts.DCReadout(
@@ -454,9 +570,17 @@ class ELFTestStand(optics.OpticalCouplerBase):
         self.my.DC_ELF2_Q = readouts.DCReadout(
             port = self.Mix_ELF2.R_Q.o
         )
+        self.my.DC_MZ = readouts.DCReadout(
+            port = self.MZPD.Wpd.o,
+        )
 
         self.Mix_ELF.R_Q.bond_sequence(
             self.FeedbackFC.In,
+            self.ActuatorFC.F,
+        )
+
+        self.MZPD.Wpd.bond_sequence(
+            self.FeedbackMZFC.In,
             self.ActuatorFC.F,
         )
 
@@ -529,6 +653,24 @@ class ELFTestStand(optics.OpticalCouplerBase):
         self.my.AC_ELF2_IFO= readouts.ACReadout(
             portN = self.Mix_ELF2.R_Q.o,
             portD = self.PSL_IFO.FM_SPEC.In.i,
+        )
+
+        self.my.AC_MZPD = readouts.ACReadout(
+            portN = self.MZPD.Wpd.o,
+            #portD = self.PSL_SQZ.noise_mod.DrvPM.i,
+            portD = self.PSL_SQZ.FM_SPEC.In.i,
+        )
+
+        self.my.AC_MZPD2 = readouts.ACReadout(
+            portN = self.MZPD.Wpd.o,
+            #portD = self.PSL_SQZ.noise_mod.DrvPM.i,
+            portD = self.PSL_SQZ.FM_SPEC.In.i,
+        )
+
+        self.my.AC_backscatter = readouts.ACReadout(
+            portN = self.pd_backscatter.Wpd.o,
+            #portD = self.PSL_SQZ.noise_mod.DrvPM.i,
+            portD = self.PSL_SQZ.FM_SPEC.In.i,
         )
 
 

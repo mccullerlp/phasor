@@ -35,7 +35,7 @@ class VCO(optics.OpticalCouplerBase):
     def FM_SPEC(self):
         #FROM G1000703
         return signals.SRationalFilter(
-            poles_r = (-1e-4, -1e-4),
+            poles_r = (-1e-4,),
             zeros_r = (-1e5, ),
             gain = 10**(-160/20.),
             gain_F_Hz = 1e5,

@@ -2,57 +2,14 @@
 """
 """
 from __future__ import (division, print_function)
-import numpy as np
-
-from ..system.matrix_injections import (
-    FactorCouplingBase,
-)
 
 from .. import readouts
+from ..system.matrix_injections import TripletNormCoupling
 
 from . import ports
 from . import bases
+
 #from . import vacuum
-
-
-class HomodyneCoupling(FactorCouplingBase):
-    #reset since the base is an @property
-    edges_req_pkset_dict = None
-
-    def __init__(
-            self,
-            pkfrom,
-            pkto,
-            pksrc,
-            pknorm,
-            cplg,
-            norm_root = True
-    ):
-        self.pkfrom    = pkfrom
-        self.pkto      = pkto
-        self.pksrc     = pksrc
-        self.pknorm    = pknorm
-        self.cplg      = cplg
-        self.norm_root = norm_root
-
-        self.edges_pkpk_dict = {
-            (self.pkfrom, self.pkto) : self.edge_func,
-        }
-        self.edges_NZ_pkset_dict = {
-            (self.pkfrom, self.pkto) : frozenset(),
-        }
-        self.edges_req_pkset_dict = {
-            (self.pkfrom, self.pkto) : frozenset([self.pksrc, self.pknorm]),
-        }
-
-    def edge_func(self, sol_vector, sB):
-        normalization_PWR = sol_vector.get(self.pknorm, 1)
-        source            = sol_vector.get(self.pksrc, 0)
-        if self.norm_root:
-            normalized_gain = source * self.cplg / np.sqrt(normalization_PWR)
-        else:
-            normalized_gain = source * self.cplg / normalization_PWR
-        return normalized_gain
 
 
 class HiddenVariableHomodynePD(
@@ -188,7 +145,6 @@ class HiddenVariableHomodynePD(
                 out_port_classical = self.RadQ,
             )
 
-
         ports_fill_2optical_2classical_hdyne(
             system = self.system,
             ports_algorithm = ports_algorithm,
@@ -236,7 +192,7 @@ class HiddenVariableHomodynePD(
                     Stdcplg, StdcplgC,
                     norm_port,
                     as_quanta,
-                    norm_root = True,
+                    norm_func = lambda v : v**.5,
             ):
                 lktos = matrix_algorithm.port_set_get(out_port_classical.o)
                 lkto_completed = set()
@@ -284,46 +240,46 @@ class HiddenVariableHomodynePD(
                     if kfrom.contains(ports.LOWER):
                         #TODO Check factor of 2 overcounting here between raising and lowering
                         if ktoOptP is not None:
-                            inj = HomodyneCoupling(
-                                pkfrom      = (self.Fr.i,            ktoOptP),
+                            inj = TripletNormCoupling(
+                                pkfrom1     = (self.Fr.i,            ktoOptP),
+                                pkfrom2     = optCplgC,
                                 pkto        = (out_port_classical.o, lkto),
-                                pksrc       = optCplgC,
                                 pknorm      = norm_port,
                                 cplg        = Stdcplg / 2 * cplg_adjust,
-                                norm_root   = norm_root,
+                                pknorm_func = norm_func,
                             )
                             matrix_algorithm.injection_insert(inj)
                         if lktoN != lkto and ktoOptN is not None:
-                            inj = HomodyneCoupling(
-                                pkfrom      = (self.Fr.i, ktoOptN),
+                            inj = TripletNormCoupling(
+                                pkfrom1     = (self.Fr.i, ktoOptN),
+                                pkfrom2     = optCplgC,
                                 pkto        = (out_port_classical.o, lktoN),
-                                pksrc       = optCplgC,
                                 pknorm      = norm_port,
                                 cplg        = Stdcplg / 2 * cplg_adjust,
-                                norm_root   = norm_root,
+                                pknorm_func = norm_func,
                             )
                             matrix_algorithm.injection_insert(inj)
                     elif kfrom.contains(ports.RAISE):
                         #TODO Check factor of 2 overcounting here between raising and lowering
                         # because of conjugation issues, the frequencies are reversed in the lktos for the optical ports.RAISE operators
                         if ktoOptP is not None:
-                            inj = HomodyneCoupling(
-                                pkfrom      = (self.Fr.i, ktoOptP),
+                            inj = TripletNormCoupling(
+                                pkfrom1      = (self.Fr.i, ktoOptP),
+                                pkfrom2     = optCplgC,
                                 pkto        = (out_port_classical.o, lktoN),
-                                pksrc       = optCplgC,
                                 pknorm      = norm_port,
                                 cplg        = StdcplgC / 2 * cplg_adjust,
-                                norm_root   = norm_root,
+                                pknorm_func = norm_func,
                             )
                             matrix_algorithm.injection_insert(inj)
                         if lktoN != lkto and ktoOptN is not None:
-                            inj = HomodyneCoupling(
-                                pkfrom      = (self.Fr.i, ktoOptN),
+                            inj = TripletNormCoupling(
+                                pkfrom1     = (self.Fr.i, ktoOptN),
+                                pkfrom2     = optCplgC,
                                 pkto        = (out_port_classical.o, lkto),
-                                pksrc       = optCplgC,
                                 pknorm      = norm_port,
                                 cplg        = StdcplgC / 2 * cplg_adjust,
-                                norm_root   = norm_root,
+                                pknorm_func = norm_func,
                             )
                             matrix_algorithm.injection_insert(inj)
                     else:
@@ -335,7 +291,6 @@ class HiddenVariableHomodynePD(
                 StdcplgC,
                 norm_port = self.PWR_tot.pk_WpdDC,
                 as_quanta = False,
-                norm_root = True,
             )
             insert_coupling(
                 self.rtWpdQ,
@@ -343,7 +298,6 @@ class HiddenVariableHomodynePD(
                 -self.symbols.i * StdcplgC,
                 norm_port = self.PWR_tot.pk_WpdDC,
                 as_quanta = False,
-                norm_root = True,
             )
             if self.include_quanta:
                 insert_coupling(
@@ -352,7 +306,6 @@ class HiddenVariableHomodynePD(
                     StdcplgC,
                     norm_port = self.PWR_tot.pk_WpdDC,
                     as_quanta = True,
-                    norm_root = True,
                 )
                 insert_coupling(
                     self.rtQuantumQ,
@@ -360,7 +313,6 @@ class HiddenVariableHomodynePD(
                     -self.symbols.i * StdcplgC,
                     norm_port = self.PWR_tot.pk_WpdDC,
                     as_quanta = True,
-                    norm_root = True,
                 )
             if self.include_relative:
                 insert_coupling(
@@ -369,7 +321,7 @@ class HiddenVariableHomodynePD(
                     StdcplgC,
                     norm_port = self.PWR_tot.pk_WpdDC,
                     as_quanta = False,
-                    norm_root = False,
+                    norm_func = lambda v : v,
                 )
                 insert_coupling(
                     self.RadQ,
@@ -377,7 +329,7 @@ class HiddenVariableHomodynePD(
                     -self.symbols.i * StdcplgC,
                     norm_port = self.PWR_tot.pk_WpdDC,
                     as_quanta = False,
-                    norm_root = False,
+                    norm_func = lambda v : v,
                 )
 
         for kfrom in matrix_algorithm.port_set_get(self.Bk.i):
@@ -609,42 +561,46 @@ def modulations_fill_2optical_2classical_hdyne(
         if kfrom.contains(ports.LOWER):
             #TODO Check factor of 2 overcounting here between raising and lowering
             if ktoOptP is not None:
-                inj = HomodyneCoupling(
-                    pkfrom      = (pfrom, ktoOptP),
+                inj = TripletNormCoupling(
+                    pkfrom1     = (pfrom, ktoOptP),
+                    pkfrom2     = optCplgC,
                     pkto        = (out_port_classical.o, lkto),
-                    pksrc       = optCplgC,
                     pknorm      = pknorm,
                     cplg        = Stdcplg / 2,
+                    pknorm_func = lambda v : v**.5,
                 )
                 matrix_algorithm.injection_insert(inj)
             if lktoN != lkto and ktoOptN is not None:
-                inj = HomodyneCoupling(
-                    pkfrom      = (pfrom, ktoOptN),
+                inj = TripletNormCoupling(
+                    pkfrom1     = (pfrom, ktoOptN),
+                    pkfrom2     = optCplgC,
                     pkto        = (out_port_classical.o, lktoN),
-                    pksrc       = optCplgC,
                     pknorm      = pknorm,
                     cplg        = Stdcplg / 2,
+                    pknorm_func = lambda v : v**.5,
                 )
                 matrix_algorithm.injection_insert(inj)
         elif kfrom.contains(ports.RAISE):
             #TODO Check factor of 2 overcounting here between raising and lowering
             # because of conjugation issues, the frequencies are reversed in the lktos for the optical ports.RAISE operators
             if ktoOptP is not None:
-                inj = HomodyneCoupling(
-                    pkfrom      = (pfrom, ktoOptP),
+                inj = TripletNormCoupling(
+                    pkfrom1     = (pfrom, ktoOptP),
+                    pkfrom2     = optCplgC,
                     pkto        = (out_port_classical.o, lktoN),
-                    pksrc       = optCplgC,
                     pknorm      = pknorm,
                     cplg        = StdcplgC / 2,
+                    pknorm_func = lambda v : v**.5,
                 )
                 matrix_algorithm.injection_insert(inj)
             if lktoN != lkto and ktoOptN is not None:
-                inj = HomodyneCoupling(
-                    pkfrom      = (pfrom, ktoOptN),
+                inj = TripletNormCoupling(
+                    pkfrom1     = (pfrom, ktoOptN),
+                    pkfrom2     = optCplgC,
                     pkto        = (out_port_classical.o, lkto),
-                    pksrc       = optCplgC,
                     pknorm      = pknorm,
                     cplg        = StdcplgC / 2,
+                    pknorm_func = lambda v : v**.5,
                 )
                 matrix_algorithm.injection_insert(inj)
         else:
