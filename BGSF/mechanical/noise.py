@@ -22,7 +22,7 @@ sided_conversions = {
     "double" :       1,
 }
 
-class ForceFluctuation(elements.MechanicalNoiseBase, elements.MechanicalElementBase):
+class DisplacementFluctuation(elements.MechanicalNoiseBase, elements.MechanicalElementBase):
 
     @decl.dproperty
     def port(self, val):
@@ -43,7 +43,7 @@ class ForceFluctuation(elements.MechanicalNoiseBase, elements.MechanicalElementB
     def conversion(self):
         return sided_conversions[self.sided]
 
-    def Fsq_Hz_by_freq(self, F):
+    def dsq_Hz_by_freq(self, F):
         return 0
 
     def system_setup_ports(self, ports_algorithm):
@@ -86,15 +86,19 @@ class ForceFluctuation(elements.MechanicalNoiseBase, elements.MechanicalElementB
 
     def noise_2pt_expectation(self, p1, k1, p2, k2):
         freq = k1[ports.ClassicalFreqKey].frequency()
-        Fsq_Hz = self.Fsq_Hz_by_freq(freq) / self.conversion
-        return Fsq_Hz
+        dsq_Hz = self.dsq_Hz_by_freq(freq) / self.conversion
+        return dsq_Hz
 
 
-class DisplacementFluctuation(elements.MechanicalNoiseBase, elements.MechanicalElementBase):
+class ForceFluctuation(elements.MechanicalNoiseBase, elements.MechanicalElementBase):
 
     @decl.dproperty
-    def port(self, val):
-        self.system.own_port_virtual(self, val.i)
+    def portA(self, val):
+        self.system.own_port_virtual(self, val.o)
+        return val
+
+    @decl.dproperty
+    def portB(self, val):
         self.system.own_port_virtual(self, val.o)
         return val
 
@@ -111,35 +115,32 @@ class DisplacementFluctuation(elements.MechanicalNoiseBase, elements.MechanicalE
     def conversion(self):
         return sided_conversions[self.sided]
 
-    def dsq_Hz_by_freq(self, F):
+    def Fsq_Hz_by_freq(self, F):
         return 0
 
     def system_setup_ports(self, ports_algorithm):
-        for kto in ports_algorithm.port_update_get(self.port.i):
+        for kto in ports_algorithm.port_update_get(self.portA.o):
             ports_algorithm.port_coupling_needed(self.p_virt.o, kto)
-        for kto in ports_algorithm.port_update_get(self.port.o):
+        for kto in ports_algorithm.port_update_get(self.portB.o):
             ports_algorithm.port_coupling_needed(self.p_virt.o, kto)
         for kfrom in ports_algorithm.port_update_get(self.p_virt.o):
-            ports_algorithm.port_coupling_needed(self.port.o, kfrom)
-            ports_algorithm.port_coupling_needed(self.port.i, kfrom)
+            ports_algorithm.port_coupling_needed(self.portB.o, kfrom)
+            ports_algorithm.port_coupling_needed(self.portA.o, kfrom)
         return
 
     def system_setup_coupling(self, matrix_algorithm):
-        #TODO: double check that porto needs to be used
-        #porto_use = self.system.ports_post_get(self.port.o)
-        porto_use = self.port.o  # self.system.ports_post_get(self.port.o)
         for kfrom in matrix_algorithm.port_set_get(self.p_virt.o):
             matrix_algorithm.port_coupling_insert(
                 self.p_virt.o,
                 kfrom,
-                self.port.i,
+                self.portA.o,
                 kfrom,
                 1/2,
             )
             matrix_algorithm.port_coupling_insert(
                 self.p_virt.o,
                 kfrom,
-                porto_use,
+                self.portB.o,
                 kfrom,
                 1/2,
             )
@@ -155,7 +156,7 @@ class DisplacementFluctuation(elements.MechanicalNoiseBase, elements.MechanicalE
 
     def noise_2pt_expectation(self, p1, k1, p2, k2):
         freq = k1[ports.ClassicalFreqKey].frequency()
-        dsq_Hz = self.dsq_Hz_by_freq(freq) / self.conversion
-        return (self.zM_termination)**2 * dsq_Hz
+        Fsq_Hz = self.Fsq_Hz_by_freq(freq) / self.conversion
+        return (self.zM_termination)**2 * Fsq_Hz
 
 

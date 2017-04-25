@@ -93,8 +93,12 @@ class VoltageFluctuation(elements.ElectricalNoiseBase, elements.ElectricalElemen
 class CurrentFluctuation(elements.ElectricalNoiseBase, elements.ElectricalElementBase):
 
     @decl.dproperty
-    def port(self, val):
-        self.system.own_port_virtual(self, val.i)
+    def portA(self, val):
+        self.system.own_port_virtual(self, val.o)
+        return val
+
+    @decl.dproperty
+    def portB(self, val):
         self.system.own_port_virtual(self, val.o)
         return val
 
@@ -115,24 +119,24 @@ class CurrentFluctuation(elements.ElectricalNoiseBase, elements.ElectricalElemen
         return 0
 
     def system_setup_ports(self, ports_algorithm):
-        for kto in ports_algorithm.port_update_get(self.port.i):
+        for kto in ports_algorithm.port_update_get(self.portA.o):
             ports_algorithm.port_coupling_needed(self.p_virt.o, kto)
-        for kto in ports_algorithm.port_update_get(self.port.o):
+        for kto in ports_algorithm.port_update_get(self.portB.o):
             ports_algorithm.port_coupling_needed(self.p_virt.o, kto)
         for kfrom in ports_algorithm.port_update_get(self.p_virt.o):
-            ports_algorithm.port_coupling_needed(self.port.o, kfrom)
-            ports_algorithm.port_coupling_needed(self.port.i, kfrom)
+            ports_algorithm.port_coupling_needed(self.portB.o, kfrom)
+            ports_algorithm.port_coupling_needed(self.portA.o, kfrom)
         return
 
     def system_setup_coupling(self, matrix_algorithm):
         #TODO: double check that porto needs to be used
-        #porto_use = self.system.ports_post_get(self.port.o)
-        porto_use = self.port.o  # self.system.ports_post_get(self.port.o)
+        #porto_use = self.system.ports_post_get(self.portB.o)
+        porto_use = self.portB.o  # self.system.ports_post_get(self.portB.o)
         for kfrom in matrix_algorithm.port_set_get(self.p_virt.o):
             matrix_algorithm.port_coupling_insert(
                 self.p_virt.o,
                 kfrom,
-                self.port.i,
+                self.portA.o,
                 kfrom,
                 1/2,
             )
