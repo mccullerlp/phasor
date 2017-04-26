@@ -23,9 +23,11 @@ class DamperBase(object):
     def mobility_by_freq(self, F):
         return self.symbols.i2pi * F * self.resistance_Ns_m
 
+    include_johnson_noise = True
+
     @decl.dproperty
     def johnson_noise(self):
-        if self.system.include_johnson_noise:
+        if self.include_johnson_noise and self.system.include_johnson_noise:
             return noise.DisplacementFluctuation(
                 port = self.A,
                 dsq_Hz_by_freq = lambda F : 4 * self.symbols.temp_K * self.symbols.kB_J_K / (self.resistance_Ns_m * (2 * self.symbols.pi * F)**2),
@@ -47,10 +49,12 @@ class SpringBase(object):
             return lambda F : val
         return val
 
+    include_johnson_noise = True
+
     @decl.dproperty
     def johnson_noise(self):
         if self.loss_angle_by_freq is not None:
-            if self.system.include_johnson_noise:
+            if self.include_johnson_noise and self.system.include_johnson_noise:
                 #this formula is the conversion of loss angle to equivalent viscous damping
                 return noise.DisplacementFluctuation(
                     port = self.A,
@@ -61,7 +65,10 @@ class SpringBase(object):
 
     def mobility_by_freq(self, F):
         #TODO
-        return self.elasticity_N_m
+        if self.loss_angle_by_freq is not None:
+            return self.elasticity_N_m * (1 + self.symbols.i * self.loss_angle_by_freq(F))
+        else:
+            return self.elasticity_N_m
 
 
 class MassBase(object):

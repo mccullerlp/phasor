@@ -2,73 +2,210 @@
 """
 """
 from __future__ import (division, print_function)
+import declarative
+import numpy as np
 
 from ... import optics
 from ... import signals
 from ... import readouts
+from ... import mechanical
 from ... import base
 
 
-class QuadMirrorBasic(base.SystemElementBase):
-    def __init__(
-            self,
-            T_hr,
-            L_hr,
-            AOI_deg = 0,
-            **kwargs
-    ):
-        super(QuadMirrorBasic, self).__init__(**kwargs)
-        base.OOA_ASSIGN(self).resonance_F_Hz = .45
-        base.OOA_ASSIGN(self).resonance_FWHM_Hz = .05
-        #base.OOA_ASSIGN(self).resonance_FWHM_Hz = .45
-        base.OOA_ASSIGN(self).mass_kg = 40
+def pendulum_k(
+    length_m,
+    mass_kg,
+    r_fiber_m,
+    Ymod,
+    theta,
+    N_wires = 2,
+):
+    mgl = mass_kg * 9.81 * length_m
+    k_pendL = mass_kg * 9.81 / length_m
+    #FROM P930018 eq. 6
+    T = mass_kg * 9.81
+    Y = 200e9
+    I = np.pi * r_fiber_m**4 / 2
+    theta_pen = theta * N_wires * (T * Ymod * I)**.5 / (2 * mgl)
+    return k_pendL, theta_pen
 
-        self.my.mirror = optics.Mirror(
-            T_hr            = T_hr,
-            L_hr            = L_hr,
-            AOI_deg         = AOI_deg,
-        )
-        self.my.quad_xfer = signals.TransferFunctionSISOMechSingleResonance(
-            mass_kg   = self.mass_kg,
-            center_Hz = self.resonance_F_Hz,
-            FWHM_Hz   = self.resonance_FWHM_Hz,
-            no_DC     = True,
+
+class QuadSusp(optics.OpticalCouplerBase):
+    ln = .445
+    l1 = .311
+    l2 = .342
+    l3 = .602
+    mn = 21.949
+    m1 = 22.338
+    m2 = 39.63
+    m3 = 39.6
+    rn = 1.1e-3/2
+    r1 = .711e-3/2
+    r2 = .635e-3/2
+    r3 = .0006/2
+    Yn = 212e9
+    Y1 = 212e9
+    Y2 = 212e9
+    Y3 = 72e9
+    thetan = 4e-4
+    theta1 = 4e-4
+    theta2 = 4e-4
+    theta3 = 1e-6
+
+    @declarative.dproperty
+    def Platform(self):
+        return mechanical.TerminatorShorted()
+
+    @declarative.dproperty
+    def ActuatorF(self):
+        return mechanical.ForceSourceBalanced()
+
+    @declarative.dproperty
+    def ActuatorD(self):
+        return mechanical.DisplacementSourceBalanced()
+
+    @declarative.dproperty
+    def Mn(self):
+        return mechanical.Mass(
+            mass_kg = self.mn
         )
 
-        self.my.pos_amp = signals.SummingAmplifier(
-            port_gains = dict(
-                mech = 1,
-                actuator = 1,
-            )
+    @declarative.dproperty
+    def M1(self):
+        return mechanical.Mass(
+            mass_kg = self.m1
         )
 
-        self.my.force_amp = signals.SummingAmplifier(
-            port_gains = dict(
-                optical  = 1,
-                actuator = 1,
-            )
+    @declarative.dproperty
+    def M2(self):
+        return mechanical.Mass(
+            mass_kg = self.m2
         )
 
-        self.actuate_force_N = self.force_amp.actuator
-        self.actuate_pos_m   = self.pos_amp.actuator
-        self.testpoint_pos_m = self.pos_amp.O
+    @declarative.dproperty
+    def M3(self):
+        return mechanical.Mass(
+            mass_kg = self.m3
+        )
 
-        self.system.bond(self.force_amp.O, self.quad_xfer.In)
-        self.system.bond(self.quad_xfer.Out, self.pos_amp.mech)
-        self.system.bond(self.pos_amp.O, self.mirror.posZ)
-        self.system.bond(self.mirror.forceZ, self.force_amp.optical)
+    @declarative.dproperty
+    def Pendn(self):
+        k, theta = pendulum_k(
+            mass_kg   = self.Mn.mass_kg,
+            length_m  = self.ln,
+            r_fiber_m = self.rn,
+            Ymod      = self.Yn,
+            theta     = self.thetan,
+        )
+        return mechanical.SeriesSpring(
+            elasticity_N_m     = k,
+            loss_angle_by_freq = theta,
+        )
 
-        self.my.mirror_ACCLG = readouts.ACReadoutCLG(
-            portN = self.mirror.posZ.i,
-            portD = self.mirror.forceZ.o,
+    @declarative.dproperty
+    def Pend1(self):
+        k, theta = pendulum_k(
+            mass_kg   = self.M1.mass_kg,
+            length_m  = self.l1,
+            r_fiber_m = self.r1,
+            Ymod      = self.Y1,
+            theta     = self.theta1,
         )
-        self.my.mirror_AC = readouts.ACReadout(
-            portN = self.mirror.posZ.i,
-            portD = self.mirror.forceZ.o,
+        return mechanical.SeriesSpring(
+            elasticity_N_m     = k,
+            loss_angle_by_freq = theta,
         )
-        self.my.mirror_DC = readouts.DCReadout(
-            port = self.mirror.posZ.i,
+
+    @declarative.dproperty
+    def Pend2(self):
+        k, theta = pendulum_k(
+            mass_kg   = self.M2.mass_kg,
+            length_m  = self.l2,
+            r_fiber_m = self.r2,
+            Ymod      = self.Y2,
+            theta     = self.theta2,
         )
+        return mechanical.SeriesSpring(
+            elasticity_N_m     = k,
+            loss_angle_by_freq = theta,
+        )
+
+    @declarative.dproperty
+    def Pend3(self):
+        k, theta = pendulum_k(
+            mass_kg   = self.M3.mass_kg,
+            length_m  = self.l3,
+            r_fiber_m = self.r3,
+            Ymod      = self.Y3,
+            theta     = self.theta3,
+        )
+        return mechanical.SeriesSpring(
+            elasticity_N_m     = k,
+            loss_angle_by_freq = theta,
+        )
+
+    @declarative.dproperty
+    def PendDn(self):
+        return mechanical.SeriesDamper(
+            resistance_Ns_m = .1,
+            include_johnson_noise = False,
+        )
+
+    @declarative.dproperty
+    def PendD1(self):
+        return mechanical.SeriesDamper(
+            resistance_Ns_m = .1,
+            include_johnson_noise = False,
+        )
+
+    @declarative.dproperty
+    def PendD2(self):
+        return mechanical.SeriesDamper(
+            resistance_Ns_m = .1,
+            include_johnson_noise = False,
+        )
+
+    @declarative.dproperty
+    def PendD3(self):
+        return mechanical.SeriesDamper(
+            resistance_Ns_m = .1,
+            include_johnson_noise = False,
+        )
+
+
+    def __build__(self):
+        try:
+            super(QuadSusp, self).__build__()
+
+            self.Platform.A.bond(self.ActuatorF.A)
+
+            self.Pendn.A.bond(self.Platform.A)
+            self.Pend1.A.bond(self.Pendn.B)
+            self.Pend2.A.bond(self.Pend1.B)
+            self.Pend3.A.bond(self.Pend2.B)
+
+            self.Pendn.B.bond(self.Mn.A)
+            self.Pend1.B.bond(self.M1.A)
+            self.Pend2.B.bond(self.M2.A)
+            self.Pend3.B.bond(self.M3.A)
+
+            self.PendDn.A.bond(self.Pendn.A)
+            self.PendD1.A.bond(self.Pend1.A)
+            self.PendD2.A.bond(self.Pend2.A)
+            self.PendD3.A.bond(self.Pend3.A)
+
+            self.PendDn.B.bond(self.Pendn.B)
+            self.PendD1.B.bond(self.Pend1.B)
+            self.PendD2.B.bond(self.Pend2.B)
+            self.PendD3.B.bond(self.Pend3.B)
+
+            self.ActuatorF.B.bond(self.M3.A)
+            self.ActuatorD.A.bond(self.ActuatorF.B)
+
+            self.B_platform = self.Platform.A
+            self.A_mirror = self.ActuatorD.B
+        except Exception as E:
+            print(repr(E))
 
 
 class LIGODetector(base.SystemElementBase):
@@ -106,34 +243,42 @@ class LIGODetector(base.SystemElementBase):
         #Rpr2 = -4.555
         #Rsr = -5.6938      	# radius of curvature of signal recycling mirrors
 
-        self.my.BS = QuadMirrorBasic(
+        self.my.BS = optics.Mirror(
             T_hr = 0.5,
             L_hr = 37.5e-6 if not self.lossless else 0,
             AOI_deg = 45,
             #facing_cardinal = 'NW',
         )
-        self.my.IX = QuadMirrorBasic(
+        self.my.IX_sus = QuadSusp()
+        self.my.IX = optics.Mirror(
             T_hr = 14e-3,
             L_hr = 0 if not self.lossless else 0,
             #facing_cardinal = 'E',
         )
-        self.my.EX = QuadMirrorBasic(
+        self.IX_sus.A_mirror.bond(self.IX.Z)
+        self.my.EX_sus = QuadSusp()
+        self.my.EX = optics.Mirror(
             T_hr = 5e-6,
             L_hr = 100e-6 if not self.lossless else 0,
             #facing_cardinal = 'W',
             AOI_deg = (1 if self.misalign_EX else 0),
         )
-        self.my.IY = QuadMirrorBasic(
+        self.EX_sus.A_mirror.bond(self.EX.Z)
+        self.my.IY_sus = QuadSusp()
+        self.my.IY = optics.Mirror(
             T_hr = 14e-3,
             L_hr = 0 if not self.lossless else 0,
             #facing_cardinal = 'N',
         )
-        self.my.EY = QuadMirrorBasic(
+        self.IY_sus.A_mirror.bond(self.IY.Z)
+        self.my.EY_sus = QuadSusp()
+        self.my.EY = optics.Mirror(
             T_hr = 5e-6,
             L_hr = 100e-6 if not self.lossless else 0,
             #facing_cardinal = 'S',
             AOI_deg = (1 if self.misalign_EY else 0),
         )
+        self.EY_sus.A_mirror.bond(self.EY.Z)
         if not self.missing_PR:
             self.my.PR = optics.Mirror(
                 T_hr = 30e-3,
@@ -154,7 +299,8 @@ class LIGODetector(base.SystemElementBase):
         )
         if not self.missing_SR:
             self.my.SR = optics.Mirror(
-                T_hr = 350e-3,
+                #T_hr = 350e-3,
+                T_hr = 200e-3,
                 L_hr = 37.5e-6 if not self.lossless else 0,
                 #facing_cardinal = 'S',
                 AOI_deg = (5 if self.misalign_SR else 0),
@@ -196,23 +342,23 @@ class LIGODetector(base.SystemElementBase):
             self.S_PR_PR2.Fr,
             self.PR2.BkA,
             self.S_PR2_BS.Fr,
-            self.BS.mirror.FrA,
+            self.BS.FrA,
             self.S_BS_IX.Fr,
-            self.IX.mirror.Fr,
+            self.IX.Fr,
             self.XarmPD.Bk,
             self.S_IX_EX.Fr,
-            self.EX.mirror.Bk,
+            self.EX.Bk,
             self.XtransPD.Fr,
         )
         self.system.bond_sequence(
             self.SR.Fr,
             self.S_BS_SR.Fr,
-            self.BS.mirror.BkB,
+            self.BS.BkB,
             self.S_BS_IY.Fr,
-            self.IY.mirror.Fr,
+            self.IY.Fr,
             self.YarmPD.Fr,
             self.S_IY_EY.Fr,
-            self.EY.mirror.Bk,
+            self.EY.Bk,
             self.YtransPD.Fr,
         )
 
@@ -251,8 +397,8 @@ class LIGODetector(base.SystemElementBase):
                 EY = +1 / 2,
             )
         )
-        self.system.bond(self.actuate_DARM_m.EX, self.EX.actuate_pos_m)
-        self.system.bond(self.actuate_DARM_m.EY, self.EY.actuate_pos_m)
+        self.system.bond(self.actuate_DARM_m.EX, self.EX_sus.ActuatorD.d)
+        self.system.bond(self.actuate_DARM_m.EY, self.EY_sus.ActuatorD.d)
 
         self.my.actuate_DARM_N = signals.DistributionAmplifier(
             port_gains = dict(
@@ -260,8 +406,8 @@ class LIGODetector(base.SystemElementBase):
                 EY = +1 / 2,
             )
         )
-        self.system.bond(self.actuate_DARM_N.EX, self.EX.actuate_force_N)
-        self.system.bond(self.actuate_DARM_N.EY, self.EY.actuate_force_N)
+        self.system.bond(self.actuate_DARM_N.EX, self.EX_sus.ActuatorF.F)
+        self.system.bond(self.actuate_DARM_N.EY, self.EY_sus.ActuatorF.F)
 
         self.my.actuate_CARM_m = signals.DistributionAmplifier(
             port_gains = dict(
@@ -269,8 +415,8 @@ class LIGODetector(base.SystemElementBase):
                 EY = 1,
             )
         )
-        self.system.bond(self.actuate_CARM_m.EX, self.EX.actuate_pos_m)
-        self.system.bond(self.actuate_CARM_m.EY, self.EY.actuate_pos_m)
+        self.system.bond(self.actuate_CARM_m.EX, self.EX_sus.ActuatorD.d)
+        self.system.bond(self.actuate_CARM_m.EY, self.EY_sus.ActuatorD.d)
 
         self.my.actuate_CARM_N = signals.DistributionAmplifier(
             port_gains = dict(
@@ -278,8 +424,8 @@ class LIGODetector(base.SystemElementBase):
                 EY = 1,
             )
         )
-        self.system.bond(self.actuate_CARM_N.EX, self.EX.actuate_force_N)
-        self.system.bond(self.actuate_CARM_N.EY, self.EY.actuate_force_N)
+        self.system.bond(self.actuate_CARM_N.EX, self.EX_sus.ActuatorF.F)
+        self.system.bond(self.actuate_CARM_N.EY, self.EY_sus.ActuatorF.F)
 
         self.my.testpoint_DARM_pos_m = signals.SummingAmplifier(
             port_gains = dict(
@@ -287,8 +433,8 @@ class LIGODetector(base.SystemElementBase):
                 EY = +1,
             )
         )
-        self.system.bond(self.EX.testpoint_pos_m, self.testpoint_DARM_pos_m.EX)
-        self.system.bond(self.EY.testpoint_pos_m, self.testpoint_DARM_pos_m.EY)
+        self.system.bond(self.EX.Z.d, self.testpoint_DARM_pos_m.EX)
+        self.system.bond(self.EY.Z.d, self.testpoint_DARM_pos_m.EY)
 
         self.my.testpoint_CARM_pos_m = signals.SummingAmplifier(
             port_gains = dict(
@@ -296,8 +442,8 @@ class LIGODetector(base.SystemElementBase):
                 EY = +1 / 2,
             )
         )
-        self.system.bond(self.EX.testpoint_pos_m, self.testpoint_CARM_pos_m.EX)
-        self.system.bond(self.EY.testpoint_pos_m, self.testpoint_CARM_pos_m.EY)
+        self.system.bond(self.EX.Z.d, self.testpoint_CARM_pos_m.EX)
+        self.system.bond(self.EY.Z.d, self.testpoint_CARM_pos_m.EY)
 
         #since it is facing east
         self.INPUT_ATTACH_POINT = self.REFLPD.Bk
@@ -380,6 +526,7 @@ class LIGOOutputHomodyne(base.SystemElementBase):
         self.my.ASPDHD_lossless = optics.HiddenVariableHomodynePD(
             source_port     = input_obj.PSL.Fr.o,
             phase_deg       = 90,
+            include_quanta  = True,
             #facing_cardinal = 'N',
         )
 
@@ -395,6 +542,7 @@ class LIGOOutputHomodyne(base.SystemElementBase):
         self.my.ASPDHD = optics.HiddenVariableHomodynePD(
             source_port     = input_obj.PSL.Fr.o,
             phase_deg       = 90,
+            include_quanta  = True,
             #facing_cardinal = 'N',
         )
 
@@ -421,6 +569,16 @@ class LIGOOutputHomodyne(base.SystemElementBase):
         self.my.ASPDHDll_AC = readouts.HomodyneACReadout(
             portNI = self.ASPDHD_lossless.rtWpdI.o,
             portNQ = self.ASPDHD_lossless.rtWpdQ.o,
+            portD = LIGO_obj.actuate_DARM_m.I.i,
+        )
+        self.my.qASPDHD_AC = readouts.HomodyneACReadout(
+            portNI = self.ASPDHD.rtQuantumI.o,
+            portNQ = self.ASPDHD.rtQuantumQ.o,
+            portD = LIGO_obj.actuate_DARM_m.I.i,
+        )
+        self.my.qASPDHDll_AC = readouts.HomodyneACReadout(
+            portNI = self.ASPDHD_lossless.rtQuantumI.o,
+            portNQ = self.ASPDHD_lossless.rtQuantumQ.o,
             portD = LIGO_obj.actuate_DARM_m.I.i,
         )
 

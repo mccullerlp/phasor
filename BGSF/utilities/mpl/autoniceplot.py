@@ -10,6 +10,8 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
+from .colors import color_array
+
 try:
     org_mode
 except NameError:
@@ -217,6 +219,9 @@ def mplfigB(
             else:
                 sharex = None
             ax = axB.fig.add_subplot(Nrows, Ncols, idx_row + idx_col*Nrows + 1, sharex = sharex)
+            ax.set_prop_cycle(
+                color = color_array
+            )
             patch_axes(ax)
             ax_list.append(ax)
             ax.grid(b=True)

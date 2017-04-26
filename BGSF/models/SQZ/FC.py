@@ -283,8 +283,8 @@ class ELFTestStand(optics.OpticalCouplerBase):
     @declarative.dproperty
     def F_ELF(self):
         val = base.Frequency(
-            #F_Hz  = (1 + 1.5e-6) * self.symbols.c_m_s / (2*16),
-            F_Hz  = (1) * self.symbols.c_m_s / (2*16),
+            F_Hz  = (1 + 1.5e-6) * self.symbols.c_m_s / (2*16),
+            #F_Hz  = (1) * self.symbols.c_m_s / (2*16),
             order = 1,
         )
         return val
@@ -340,7 +340,7 @@ class ELFTestStand(optics.OpticalCouplerBase):
         return NPRO(
             laser = optics.Laser(
                 F = self.system.F_carrier_1064,
-                power_W = 10e-3,
+                power_W = 100e-3,
                 multiple = 1,
                 phase_deg = 0,
                 polarization = 'P',
@@ -390,7 +390,8 @@ class ELFTestStand(optics.OpticalCouplerBase):
     @declarative.dproperty
     def BS_MZ1(self):
         return optics.Mirror(
-            T_hr = .5,
+            T_hr = 1,
+            #T_hr = .5,
             AOI_deg = 45,
         )
 
@@ -473,7 +474,7 @@ class ELFTestStand(optics.OpticalCouplerBase):
             zeros_r = (-100, -60, -100,),
             poles_c = (3*Px, -2000+2000j,),
             zeros_c = (3*Zx, -15+15j,),
-            gain    = -1 / 1e4 / 0.00067199505194 / 2 / 1.43 / 3.1758,
+            gain    = 0 * -1 / 1e4 / 0.00067199505194 / 2 / 1.43 / 3.1758,
             gain_F_Hz = 1e3,
             no_DC   = True,
             F_cutoff = 1e6,
@@ -662,6 +663,11 @@ class ELFTestStand(optics.OpticalCouplerBase):
             self.PSL_SQZ.noise_mod.DrvPM,
         )
 
+        self.my.AC_OptoMech = readouts.ACReadout(
+            portN = self.FC.M2.Z.d.o,
+            portD = self.FC.M2_sus.Actuator.F.i,
+        )
+
         self.my.AC_FC_length = readouts.ACReadout(
             portN = self.FC.M2.Z.d.o,
             portD = self.FC.M2_sus.Platform.In_seismic.i,
@@ -702,12 +708,6 @@ class ELFTestStand(optics.OpticalCouplerBase):
         )
 
         self.my.AC_MZPD = readouts.ACReadout(
-            portN = self.MZPD.Wpd.o,
-            #portD = self.PSL_SQZ.noise_mod.DrvPM.i,
-            portD = self.PSL_SQZ.FM_SPEC.In.i,
-        )
-
-        self.my.AC_MZPD2 = readouts.ACReadout(
             portN = self.MZPD.Wpd.o,
             #portD = self.PSL_SQZ.noise_mod.DrvPM.i,
             portD = self.PSL_SQZ.FM_SPEC.In.i,
