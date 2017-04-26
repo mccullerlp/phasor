@@ -33,13 +33,23 @@ class VCO(optics.OpticalCouplerBase):
 
     @declarative.dproperty
     def FM_SPEC(self):
-        #FROM G1000703
+        #FROM http://emvogil-3.mit.edu/ilog/pub/ilog.cgi?group=lasti&task=view&date_to_view=03/31/2017&anchor_to_scroll_to=2017:04:03:13:08:27-sgras
         return signals.SRationalFilter(
             poles_r = (-1e-4,),
-            zeros_r = (-1e5, ),
-            gain = 10**(-160/20.),
-            gain_F_Hz = 1e5,
+            zeros_r = (-1e4, ),
+            gain = 1e-3,
+            gain_F_Hz = 1,
         )
+
+    #@declarative.dproperty
+    #def FM_SPEC(self):
+    #    #FROM https://awiki.ligo-wa.caltech.edu/aLIGO/RfDesign
+    #    return signals.SRationalFilter(
+    #        poles_r = (-1e-4,),
+    #        zeros_r = (-1e4,),
+    #        gain = 4e-4,
+    #        gain_F_Hz = 10,
+    #    )
 
     @declarative.dproperty
     def noise_FM(self):

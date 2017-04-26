@@ -11,14 +11,16 @@ from ... import readouts
 from ... import mechanical
 #from ... import system
 
-from .AOM import AOM1XBasic
-from .OPO import OPOaLIGO
-from .SHG import SHGaLIGO
 from .VCO import VCO
 
 
 #From E1500445
 class FilterCavity16m(optics.OpticalCouplerBase):
+
+    @declarative.dproperty
+    def M1_sus(self):
+        val = HTTSSusp()
+        return val
 
     @declarative.dproperty
     def M1(self, val = None):
@@ -58,6 +60,11 @@ class FilterCavity16m(optics.OpticalCouplerBase):
             )
         return val
 
+    @declarative.dproperty
+    def M2_sus(self):
+        val = HTTSSusp()
+        return val
+
     def __build__(self):
         try:
             super(FilterCavity16m, self).__build__()
@@ -72,6 +79,9 @@ class FilterCavity16m(optics.OpticalCouplerBase):
             )
             self.Fr = self.M1.Bk
             self.Bk = self.M2.Bk
+
+            self.M1_sus.A_mirror.bond(self.M1.Z)
+            self.M2_sus.A_mirror.bond(self.M2.Z)
             return
         except Exception as E:
             print(repr(E))
@@ -151,6 +161,116 @@ class NPRO(optics.OpticalCouplerBase):
             print(repr(E))
 
 
+class GroundStack(optics.OpticalCouplerBase):
+    @declarative.dproperty
+    def Ground(self):
+        return mechanical.DisplacementSource()
+
+    def __build__(self):
+        super(GroundStack, self).__build__()
+        Q3 = -.2 + 1j
+        self.my.ground_spec = signals.SRationalFilter(
+            poles_r = (-1, -1),
+            gain = 2e-8,
+            gain_F_Hz = 1
+        )
+        self.my.stack_spec = signals.SRationalFilter(
+            poles_c = (
+                1*Q3,
+                3*Q3,
+                7*Q3,
+                11*Q3
+            ),
+            gain = 1,
+        )
+        self.my.ground_noise = signals.WhiteNoise(
+            port = self.ground_spec.In,
+            sided = 'single',
+            name_noise = 'Seismic Stack',
+        )
+        self.ground_spec.Out.bond(
+            self.stack_spec.In,
+        )
+
+        self.stack_spec.Out.bond(
+            self.Ground.d
+        )
+
+        self.In_seismic = self.stack_spec.In
+        self.Out_platform = self.stack_spec.Out
+        self.A = self.Ground.A
+
+
+class HTTSSusp(optics.OpticalCouplerBase):
+    @declarative.dproperty
+    def Platform(self):
+        return GroundStack()
+
+    @declarative.dproperty
+    def Actuator(self):
+        return mechanical.ForceSourceBalanced()
+
+    @declarative.dproperty
+    def FC_Pend_M(self):
+        return mechanical.Mass(
+            mass_kg = .0885
+        )
+
+    @declarative.dproperty
+    def FC_Pend_k(self):
+        l_pend = .14
+        mgl = self.FC_Pend_M.mass_kg * 9.81 * l_pend
+        k_pendL = self.FC_Pend_M.mass_kg * 9.81 / l_pend
+        #FROM P930018 eq. 6
+        T = self.FC_Pend_M.mass_kg * 9.81
+        Y = 200e9
+        r = 127e-6
+        I = self.symbols.pi * r**4 / 2
+        theta_pen = 5e-4 * 2 * (T * Y * I)**.5 / (2 * mgl)
+        return mechanical.SeriesSpring(
+            elasticity_N_m = k_pendL,
+            loss_angle_by_freq = theta_pen,
+        )
+
+    @declarative.dproperty
+    def FC_Pend_d(self):
+        return mechanical.SeriesDamper(
+            resistance_Ns_m = 0e-3
+        )
+
+    def __build__(self):
+        try:
+            super(HTTSSusp, self).__build__()
+            self.Platform.A.bond(self.Actuator.A)
+
+            self.Actuator.A.bond(self.FC_Pend_k.A)
+            #self.Actuator.A.bond(self.FC_Pend_d.A)
+
+            self.Actuator.B.bond(self.FC_Pend_k.B)
+            #self.Actuator.B.bond(self.FC_Pend_d.B)
+            self.Actuator.B.bond(self.FC_Pend_M.A)
+
+            self.B_platform = self.Actuator.A
+            self.A_mirror = self.Actuator.B
+
+            #self.my.force2 = mechanical.ForceFluctuation(
+            #    portA = self.FC_Pend_k.A,
+            #    portB = self.FC_Pend_k.B,
+            #    Fsq_Hz_by_freq = lambda F : 1,
+            #    sided = 'single',
+            #)
+            #self.my.disp2 = mechanical.DisplacementFluctuation(
+            #    #port = self.FC.M2.Z,
+            #    port = self.FC_Pend_k.A,
+            #    #port = self.FC_Pend_M.A,
+            #    dsq_Hz_by_freq = lambda F : 1,
+            #    sided = 'single',
+            #)
+        except Exception as E:
+            print(repr(E))
+
+
+
 class ELFTestStand(optics.OpticalCouplerBase):
     """
     Shows the Squeezing performance
@@ -220,7 +340,7 @@ class ELFTestStand(optics.OpticalCouplerBase):
         return NPRO(
             laser = optics.Laser(
                 F = self.system.F_carrier_1064,
-                power_W = 1e-3,
+                power_W = 10e-3,
                 multiple = 1,
                 phase_deg = 0,
                 polarization = 'P',
@@ -323,10 +443,6 @@ class ELFTestStand(optics.OpticalCouplerBase):
         return optics.MagicPD()
 
     @declarative.dproperty
-    def MZPD2(self):
-        return optics.MagicPD()
-
-    @declarative.dproperty
     def Mix_ELF(self):
         return signals.Mixer()
 
@@ -335,64 +451,17 @@ class ELFTestStand(optics.OpticalCouplerBase):
         return signals.Mixer()
 
     @declarative.dproperty
-    def ActuatorFC(self):
-        return mechanical.ForceSourceBalanced()
-
-    @declarative.dproperty
-    def FC_Pend_M(self):
-        return mechanical.Mass(
-            mass_kg = .0885
-        )
-
-    @declarative.dproperty
-    def FC_Pend_k(self):
-        l_pend = .14
-        mgl = self.FC_Pend_M.mass_kg * 9.81 * l_pend
-        k_pendL = self.FC_Pend_M.mass_kg * 9.81 / l_pend
-        #FROM P930018 eq. 6
-        T = self.FC_Pend_M.mass_kg * 9.81
-        Y = 200e9
-        r = 127e-6
-        I = self.symbols.pi * r**4 / 2
-        theta_pen = 1e-3 * 2 * (T * Y * I)**.5 / (2 * mgl)
-        return mechanical.SeriesSpring(
-            elasticity_N_m = k_pendL,
-            loss_angle_by_freq = theta_pen,
-        )
-
-    @declarative.dproperty
-    def FC_Pend_d(self):
-        return mechanical.SeriesDamper(
-            resistance_Ns_m = 0e-3
-        )
-
-    @declarative.dproperty
-    def Ground(self):
-        return mechanical.DisplacementSource()
-
-    @declarative.dproperty
     def FC_length_loop(self):
         return readouts.ACReadoutLG(
-            portAct   = self.FC.M2.Z.d.o,
+            portAct   = self.FC.M1.Z.d.o,
             portSense = self.FeedbackFC.In.i,
-            portDrv   = self.ActuatorFC.F.i,
-        )
-
-    @declarative.dproperty
-    def FCMZ_length_loop(self):
-        return readouts.ACReadoutLG(
-            portAct   = self.FC.M2.Z.d.o,
-            portSense = self.FeedbackMZFC.In.i,
-            portDrv   = self.ActuatorFC.F.i,
+            portDrv   = self.FC.M1_sus.Actuator.F.i,
         )
 
     @declarative.dproperty
     def FeedbackFC(self):
         Px = (-60 + 120j)
         Zx = (-50 + 70j)
-
-        Px2 = (-10 + 30j)
-        Zx2 = (-30 + 30j)
 
         #the first two are force-too-disp
         return signals.SRationalFilter(
@@ -404,27 +473,7 @@ class ELFTestStand(optics.OpticalCouplerBase):
             zeros_r = (-100, -60, -100,),
             poles_c = (3*Px, -2000+2000j,),
             zeros_c = (3*Zx, -15+15j,),
-            gain    = -1 / 1e4 / 0.00067199505194 / 2 / 1.43,
-            gain_F_Hz = 1e3,
-            no_DC   = True,
-            F_cutoff = 1e6,
-        )
-
-    @declarative.dproperty
-    def FeedbackMZFC(self):
-        Px = (-60 + 120j)
-        Zx = (-50 + 70j)
-
-        Px2 = (-10 + 30j)
-        Zx2 = (-30 + 30j)
-
-        #the first two are force-too-disp
-        return signals.SRationalFilter(
-            poles_r = (-1e3, -1, -1, -.1, -.1),
-            zeros_r = (-100, -60, -100, -100,),
-            poles_c = (-2000+2000j,),
-            zeros_c = (-150+150j, -15+15j, ),
-            gain    = -1 / 1e4,
+            gain    = -1 / 1e4 / 0.00067199505194 / 2 / 1.43 / 3.1758,
             gain_F_Hz = 1e3,
             no_DC   = True,
             F_cutoff = 1e6,
@@ -438,7 +487,7 @@ class ELFTestStand(optics.OpticalCouplerBase):
             poles_r = (-1, -1, -1,),  # -1, -1),
             #zeros_r = ()
             zeros_c = (-20000 + 20000j,),  # -1000 + 1000j,),
-            gain    = 1 / .001250474 / .44665,
+            gain    = 1 / .001250474 / .44665 / 3.1758,
             gain_F_Hz = 1e5,
             no_DC   = True,
             F_cutoff = 1e6,
@@ -459,8 +508,21 @@ class ELFTestStand(optics.OpticalCouplerBase):
             self.FC.Fr,
         )
 
+        self.my.amp_spec = signals.SRationalFilter(
+            poles_c = (),
+            poles_r = (),
+            gain = 1.7e-11,
+        )
+        self.my.amp_noise = signals.WhiteNoise(
+            port = self.amp_spec.In,
+            sided = 'single',
+            name_noise = 'AOM amplifier',
+        )
         self.AOM_GEN_ELF.Drv.bond(
             self.VCO_ELF.Out,
+        )
+        self.AOM_GEN_ELF.Drv.bond(
+            self.amp_spec.Out,
         )
 
         #self.my.BS_SQZ = optics.Mirror(
@@ -497,9 +559,6 @@ class ELFTestStand(optics.OpticalCouplerBase):
         )
         self.BS_MZ2.BkA.bond_sequence(
             self.MZPD.Fr,
-        )
-        self.BS_MZ2.FrB.bond_sequence(
-            self.MZPD2.Fr,
         )
 
         self.faraday_elfs.P1.bond_sequence(
@@ -591,12 +650,11 @@ class ELFTestStand(optics.OpticalCouplerBase):
 
         self.Mix_ELF.R_Q.bond_sequence(
             self.FeedbackFC.In,
-            self.ActuatorFC.F,
+            self.FC.M1_sus.Actuator.F,
         )
 
         self.MZPD.Wpd.bond_sequence(
-            self.FeedbackMZFC.In,
-            self.ActuatorFC.F,
+            self.FeedbackFC.In,
         )
 
         self.Mix_ELF2.R_Q.bond_sequence(
@@ -604,55 +662,28 @@ class ELFTestStand(optics.OpticalCouplerBase):
             self.PSL_SQZ.noise_mod.DrvPM,
         )
 
-        #self.Ground.A.bond(self.FC_Pend_d.A)
-        self.Ground.A.bond(self.FC_Pend_k.A)
-        self.Ground.A.bond(self.ActuatorFC.A)
-
-        self.FC.M2.Z.bond(self.ActuatorFC.B)
-        self.FC.M2.Z.bond(self.FC_Pend_k.B)
-        self.FC.M2.Z.bond(self.FC_Pend_d.B)
-        self.FC.M2.Z.bond(self.FC_Pend_M.A)
-
-        Q3 = -.1 + 1j
-        self.my.ground_spec = signals.SRationalFilter(
-            poles_c = (
-                1*Q3,
-                3*Q3,
-                7*Q3,
-                11*Q3
-            ),
-            poles_r = (-1, -1),
-            gain = 2e-8,
-        )
-        self.my.ground_noise = signals.WhiteNoise(
-            port = self.ground_spec.In,
-            sided = 'single',
-            name_noise = 'Seismic Stack',
-        )
-        self.ground_spec.Out.bond(self.Ground.d)
-
         self.my.AC_FC_length = readouts.ACReadout(
             portN = self.FC.M2.Z.d.o,
-            portD = self.ground_spec.Out.o,
+            portD = self.FC.M2_sus.Platform.In_seismic.i,
         )
 
         self.my.AC_FC_force = readouts.ACReadout(
-            portN = self.ActuatorFC.F.i,
-            portD = self.ground_spec.Out.o,
+            portN = self.FC.M1_sus.Actuator.F.i,
+            portD = self.FC.M2_sus.Platform.In_seismic.i,
         )
 
         self.my.AC_hdyne_dispI = readouts.ACReadout(
             portN = self.hdyne_backscatter.rtQuantumI.o,
-            portD = self.ground_spec.In.i,
+            portD = self.FC.M2_sus.Platform.In_seismic.i,
         )
         self.my.AC_hdyne_dispQ = readouts.ACReadout(
             portN = self.hdyne_backscatter.rtQuantumQ.o,
-            portD = self.ground_spec.In.i,
+            portD = self.FC.M2_sus.Platform.In_seismic.i,
         )
 
         self.my.AC_ground = readouts.ACReadout(
-            portN = self.ground_spec.Out.o,
-            portD = self.ground_spec.In.i,
+            portN = self.FC.M1_sus.Platform.Out_platform.o,
+            portD = self.FC.M2_sus.Platform.In_seismic.i,
         )
 
         self.my.AC_FM = readouts.ACReadout(
@@ -665,7 +696,7 @@ class ELFTestStand(optics.OpticalCouplerBase):
             portN = self.Mix_ELF2.R_Q.o,
             portD = self.PSL_SQZ.FM_SPEC.In.i,
         )
-        self.my.AC_ELF2_IFO= readouts.ACReadout(
+        self.my.AC_ELF2_IFO = readouts.ACReadout(
             portN = self.Mix_ELF2.R_Q.o,
             portD = self.PSL_IFO.FM_SPEC.In.i,
         )
@@ -703,19 +734,6 @@ class ELFTestStand(optics.OpticalCouplerBase):
         #DONT INCLUDE, it goes in the same as the SQZ NPRO NOISE and it ruins the spectrum
         #self.AOM_FIBER.DrvPM.bond_sequence(
         #    self.fiber_spec.Out
-        #)
-        #self.my.force2 = mechanical.ForceFluctuation(
-        #    portA = self.FC_Pend_k.A,
-        #    portB = self.FC_Pend_k.B,
-        #    Fsq_Hz_by_freq = lambda F : 1,
-        #    sided = 'single',
-        #)
-        #self.my.disp2 = mechanical.DisplacementFluctuation(
-        #    #port = self.FC.M2.Z,
-        #    port = self.FC_Pend_k.A,
-        #    #port = self.FC_Pend_M.A,
-        #    dsq_Hz_by_freq = lambda F : 1,
-        #    sided = 'single',
         #)
 
 

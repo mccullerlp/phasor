@@ -132,9 +132,11 @@ class MatrixBuildAlgorithm(object):
     def noise_pair_insert(self, p1, k1, p2, k2, genfunc):
         #print('noise pair: ', p1, k2, p2, k2)
         ptofull1 = self.port_cplgs.get(p1.purge_keys(PostBondKey), declarative.NOARG)
-        assert(k1 in ptofull1)
+        if (k1 not in ptofull1):
+            raise RuntimeError("k1 [{0}] missing for port p1 [{1}]".format(k1, p1))
         ptofull2 = self.port_cplgs.get(p2.purge_keys(PostBondKey), declarative.NOARG)
-        assert(k2 in ptofull2)
+        if (k2 not in ptofull2):
+            raise RuntimeError("k2 [{0}] missing for port p2 [{1}]".format(k2, p2))
 
         self.field_space.keys_add((p1, k1))
         self.field_space.keys_add((p2, k2))

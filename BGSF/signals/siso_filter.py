@@ -51,13 +51,13 @@ class TransferFunctionSISOBase(SignalElementBase):
 
     def system_setup_ports(self, ports_algorithm):
         for kfrom in ports_algorithm.port_update_get(self.In.i):
-            if self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey]) > self.F_cutoff:
+            if abs(self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey])) > self.F_cutoff:
                 continue
             if self.no_DC and self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey]) == 0:
                 continue
             ports_algorithm.port_coupling_needed(self.Out.o, kfrom)
         for kto in ports_algorithm.port_update_get(self.Out.o):
-            if self.system.classical_frequency_extract_center(kto[ports.ClassicalFreqKey]) > self.F_cutoff:
+            if abs(self.system.classical_frequency_extract_center(kto[ports.ClassicalFreqKey])) > self.F_cutoff:
                 continue
             if self.no_DC and self.system.classical_frequency_extract_center(kto[ports.ClassicalFreqKey]) == 0:
                 continue
@@ -66,7 +66,7 @@ class TransferFunctionSISOBase(SignalElementBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         for kfrom in matrix_algorithm.port_set_get(self.In.i):
-            if self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey]) > self.F_cutoff:
+            if abs(self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey])) > self.F_cutoff:
                 continue
             if self.no_DC and self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey]) == 0:
                 continue
