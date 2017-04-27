@@ -17,8 +17,13 @@ def gensys(
         F_AC_Hz,
         loss_EM = 0,
         loss_BS = 0,
+        detune_frac = .0001,
 ):
-    sys = system.BGSystem()
+    db = declarative.DeepBunch()
+    db.environment.F_AC.order = 1
+    sys = system.BGSystem(
+        ooa_params = db
+    )
     sys = sys
     sys.my.PSL = optics.Laser(
         F = sys.F_carrier_1064,
@@ -42,7 +47,7 @@ def gensys(
 
     sys.my.sX = optics.Space(
         L_m = 1,
-        L_detune_m = 1064e-9 / 8 * .01,
+        L_detune_m = 1064e-9 / 4 * detune_frac,
     )
     sys.my.sY = optics.Space(
         L_m = 1,
@@ -50,6 +55,12 @@ def gensys(
     )
 
     sys.my.symPD = optics.MagicPD()
+    sys.my.ASPDHD = optics.HiddenVariableHomodynePD(
+        source_port     = sys.PSL.Fr.o,
+        phase_deg       = 90,
+        #include_quanta  = True,
+        #facing_cardinal = 'N',
+    )
     sys.my.asymPD = optics.PD()
 
     sys.bond_sequence(
@@ -61,6 +72,7 @@ def gensys(
     )
     sys.bond_sequence(
         sys.asymPD.Fr,
+        sys.ASPDHD.Bk,
         sys.mBS.BkB,
         sys.sY.Fr,
         sys.mY.Fr,
@@ -75,6 +87,15 @@ def gensys(
     sys.my.asym_drive = readouts.ACReadout(
         portD = sys.mX.Z.d.o,
         portN = sys.asymPD.Wpd.o,
+    )
+    sys.my.asymHD_drive = readouts.ACReadout(
+        portD = sys.mX.Z.d.o,
+        portN = sys.ASPDHD.rtWpdI.o,
+    )
+    sys.my.asymHDHD_drive = readouts.HomodyneACReadout(
+        portD = sys.mX.Z.d.o,
+        portNI = sys.ASPDHD.rtWpdI.o,
+        portNQ = sys.ASPDHD.rtWpdI.o,
     )
     return declarative.Bunch(locals())
 
@@ -95,9 +116,11 @@ def test_mich():
 
     ptot = sys.sym_DC.DC_readout + sys.asym_DC.DC_readout
     pfrac = sys.asym_DC.DC_readout / ptot
+    print("pfrac", pfrac)
     sense = (pfrac * (1-pfrac))**.5 * 4 * np.pi * sys.F_carrier_1064.iwavelen_m
 
     AC = sys.asym_drive.AC_sensitivity
+    print("sense", sense)
     print("AC mag rel expect:", abs(AC) / sense)
     np_test.assert_almost_equal(abs(AC) / sense, 1, 5)
     print("AC phase :", np.angle(AC, deg = True))
@@ -106,10 +129,22 @@ def test_mich():
     N_expect = (2 * sys.asym_DC.DC_readout * E1064_J)**.5
     AC_noise = sys.asym_drive.AC_ASD
     print("ACnoise", AC_noise)
-    print("ACnoise_rel", (N_expect / AC_noise)**2)
+    print("ACnoise_rel", (AC_noise / N_expect)**2)
+
+    for source, psd in sys.asym_drive.AC_PSD_by_source.items():
+        print(source, psd)
+
     np_test.assert_almost_equal(N_expect / AC_noise, 1, 3)
 
     print("ACnoise m_rtHz", sys.asym_drive.AC_noise_limited_sensitivity)
+
+    print("ACnoise m_rtHz", sys.asymHD_drive.AC_noise_limited_sensitivity)
+    srel = 4 * np.pi * sys.F_carrier_1064.iwavelen_m / (2 * ptot * E1064_J)**.5
+    np_test.assert_almost_equal(sys.asymHD_drive.AC_noise_limited_sensitivity * srel, 1, 3)
+
+    srel = 4 * np.pi * sys.F_carrier_1064.iwavelen_m / (2 * ptot * E1064_J)**.5
+    print("ACnoise m_rtHz", sys.asymHDHD_drive.AC_noise_limited_sensitivity)
+    np_test.assert_almost_equal(sys.asymHDHD_drive.AC_noise_limited_sensitivity * srel, 1, 3)
     #sys.port_set_print(b.mBS.BkB.i)
     #sys.port_set_print(b.vterm.Fr.o)
     #sys.coupling_matrix_inv_print(select_to = b.asymPD.Wpd.o)
@@ -125,6 +160,7 @@ def test_mich_lossy():
         #F_AC_Hz = logspaced(.001, 1e6, 10),
         F_AC_Hz = np.array([0, 10, 100]),
         loss_EM = .2,
+        detune_frac = np.array([0.001, 0.01, 0.1, .5, .9]),
         #loss_BS = .2,
     )
     sys = b.sys

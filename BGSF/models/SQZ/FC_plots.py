@@ -9,18 +9,29 @@ from BGSF.utilities.mpl import (
 )
 
 
-def angle(Y, deg = True):
+def angle(
+        Y,
+        center_idx = None,
+        unwrap = True,
+        deg = True
+):
     if not np.asarray(Y).shape:
         return np.angle(Y, deg = deg)
-    uw = np.unwrap(np.angle(Y))
-    if np.max(uw) > np.pi and np.min(uw) > 0:
-        uw = uw - 2*np.pi
-    if np.min(uw) > .95 * np.pi:
-        uw = uw - 2*np.pi
-    if np.min(uw) < 2*np.pi:
-        uw = uw + 2*np.pi
-    if np.max(uw) > 2*np.pi:
-        uw = uw - 2*np.pi
+    if unwrap:
+        uw = np.unwrap(np.angle(Y))
+        if center_idx is None:
+            if np.max(uw) > np.pi and np.min(uw) > 0:
+                uw = uw - 2*np.pi
+            if np.min(uw) > .95 * np.pi:
+                uw = uw - 2*np.pi
+            if np.min(uw) < 2*np.pi:
+                uw = uw + 2*np.pi
+            if np.max(uw) > 2*np.pi:
+                uw = uw - 2*np.pi
+        else:
+            uw -= (2 * np.pi) * (uw[center_idx] // (2 * np.pi))
+    else:
+        uw = np.angle(Y)
     if deg:
         return 180 / np.pi * uw
     else:
@@ -53,49 +64,15 @@ class ACReadoutPlots(declarative.OverridableObject):
             color_CLG     = 'red',
             color_plant   = 'blue',
             label_plant   = 'Plant',
+            unwrap        = True,
             ugf_line      = True,
             preferred_UGF = None,
     ):
-
-        ax_mag.set_ylabel("Gain")
-        ax_mag.loglog(
-            self.X.val,
-            abs(readout.GPlant),
-            color = color_plant,
-        )
-        ax_phase.semilogx(
-            self.X.val,
-            angle(readout.GPlant, deg = self.deg),
-            color = color_plant,
-            label = label_plant,
-        )
-        ax_mag.loglog(
-            self.X.val,
-            abs(readout.CLG),
-            color = color_CLG,
-        )
-        ax_phase.semilogx(
-            self.X.val,
-            angle(readout.CLG, deg = self.deg),
-            color = color_CLG,
-            label = 'CLG'
-        )
-        ax_mag.loglog(
-            self.X.val,
-            abs(readout.OLG),
-            color = color_OLG,
-        )
-        ax_phase.semilogx(
-            self.X.val,
-            angle(readout.OLG, deg = self.deg),
-            color = color_OLG,
-            label = 'OLG'
-        )
-
         if ugf_line and np.asarray(readout.OLG).shape:
             abs_OLG = abs(readout.OLG)
             OLG_sides = (abs_OLG > 1)
             OLG_crossings = (OLG_sides[1:] ^ OLG_sides[:-1])
+            ugf_idx = None
             for idx in np.argwhere(OLG_crossings):
                 if ax_mag:
                     ax_mag.axvline(
@@ -109,6 +86,57 @@ class ACReadoutPlots(declarative.OverridableObject):
                         color = color_OLG,
                         ls = '--'
                     )
+                ugf_idx = idx
+
+        ax_mag.set_ylabel("Gain")
+        ax_mag.loglog(
+            self.X.val,
+            abs(readout.GPlant),
+            color = color_plant,
+        )
+        ax_phase.semilogx(
+            self.X.val,
+            angle(
+                readout.GPlant,
+                center_idx = ugf_idx,
+                unwrap = unwrap,
+                deg = self.deg
+            ),
+            color = color_plant,
+            label = label_plant,
+        )
+        ax_mag.loglog(
+            self.X.val,
+            abs(readout.CLG),
+            color = color_CLG,
+        )
+        ax_phase.semilogx(
+            self.X.val,
+            angle(
+                readout.CLG,
+                center_idx = ugf_idx,
+                unwrap = unwrap,
+                deg = self.deg
+            ),
+            color = color_CLG,
+            label = 'CLG'
+        )
+        ax_mag.loglog(
+            self.X.val,
+            abs(readout.OLG),
+            color = color_OLG,
+        )
+        ax_phase.semilogx(
+            self.X.val,
+            angle(
+                readout.OLG,
+                center_idx = ugf_idx,
+                unwrap = unwrap,
+                deg = self.deg
+            ),
+            color = color_OLG,
+            label = 'OLG'
+        )
 
         ax_phase.legend(loc = 'upper right', fontsize = 6)
         if preferred_UGF is not None and np.asarray(readout.OLG).shape:

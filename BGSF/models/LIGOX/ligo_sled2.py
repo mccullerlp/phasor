@@ -249,9 +249,11 @@ class LIGODetector(base.SystemElementBase):
             AOI_deg = 45,
             #facing_cardinal = 'NW',
         )
-        self.my.IX_sus = QuadSusp()
+        self.my.IX_sus = QuadSusp(
+            m3 = .1,
+        )
         self.my.IX = optics.Mirror(
-            T_hr = 14e-3,
+            T_hr = .1e-3,
             L_hr = 0 if not self.lossless else 0,
             #facing_cardinal = 'E',
         )
@@ -264,9 +266,11 @@ class LIGODetector(base.SystemElementBase):
             AOI_deg = (1 if self.misalign_EX else 0),
         )
         self.EX_sus.A_mirror.bond(self.EX.Z)
-        self.my.IY_sus = QuadSusp()
+        self.my.IY_sus = QuadSusp(
+            m3 = .1,
+        )
         self.my.IY = optics.Mirror(
-            T_hr = 14e-3,
+            T_hr = .1e-3,
             L_hr = 0 if not self.lossless else 0,
             #facing_cardinal = 'N',
         )
@@ -281,8 +285,8 @@ class LIGODetector(base.SystemElementBase):
         self.EY_sus.A_mirror.bond(self.EY.Z)
         if not self.missing_PR:
             self.my.PR = optics.Mirror(
-                T_hr = 30e-3,
-                L_hr = 37.5e-6 if not self.lossless else 0,
+                T_hr = 1,#30e-3,
+                L_hr = 0,#37.5e-6 if not self.lossless else 0,
                 #facing_cardinal = 'E',
                 AOI_deg = (5 if self.misalign_PR else 0),
             )
@@ -300,7 +304,7 @@ class LIGODetector(base.SystemElementBase):
         if not self.missing_SR:
             self.my.SR = optics.Mirror(
                 #T_hr = 350e-3,
-                T_hr = 200e-3,
+                T_hr = .1e-3,
                 L_hr = 37.5e-6 if not self.lossless else 0,
                 #facing_cardinal = 'S',
                 AOI_deg = (5 if self.misalign_SR else 0),
@@ -400,15 +404,6 @@ class LIGODetector(base.SystemElementBase):
         self.system.bond(self.actuate_DARM_m.EX, self.EX_sus.ActuatorD.d)
         self.system.bond(self.actuate_DARM_m.EY, self.EY_sus.ActuatorD.d)
 
-        self.my.actuate_DARM_h = signals.DistributionAmplifier(
-            port_gains = dict(
-                EX = -self.larm_m / 2,
-                EY = +self.larm_m / 2,
-            )
-        )
-        self.system.bond(self.actuate_DARM_h.EX, self.EX_sus.ActuatorD.d)
-        self.system.bond(self.actuate_DARM_h.EY, self.EY_sus.ActuatorD.d)
-
         self.my.actuate_DARM_N = signals.DistributionAmplifier(
             port_gains = dict(
                 EX = -1 / 2,
@@ -464,28 +459,6 @@ class LIGODetector(base.SystemElementBase):
 class LIGOInputBasic(base.SystemElementBase):
     def __init__(self, **kwargs):
         super(LIGOInputBasic, self).__init__(**kwargs)
-        self.my.F9 = base.Frequency(
-            F_Hz  = 9099471,
-            order = 0,
-        )
-        self.my.F45 = base.Frequency(
-            F_Hz  = 45497355,
-            order = 0,
-        )
-        self.my.generateF9 = signals.SignalGenerator(
-            F = self.F9,
-            harmonic_gains = {3 : 1},
-        )
-        self.my.generateF45 = signals.SignalGenerator(
-            F = self.F45,
-            harmonic_gains = {3 : 1},
-        )
-        self.my.EOM_drive = signals.SummingAmplifier(
-            port_gains = dict(
-                index_9  = .1,
-                index_45 = .1,
-            )
-        )
 
         self.my.PSL = optics.Laser(
             F = self.system.F_carrier_1064,
@@ -513,7 +486,7 @@ class LIGOOutputBasic(base.SystemElementBase):
         )
         self.my.ASPD_AC = readouts.ACReadout(
             portN = self.ASPD.Wpd.o,
-            portD = LIGO_obj.actuate_DARM_h.I.i,
+            portD = LIGO_obj.actuate_DARM_m.I.i,
         )
 
         self.OUTPUT_ATTACH_POINT = self.ASPD.Fr
@@ -560,50 +533,41 @@ class LIGOOutputHomodyne(base.SystemElementBase):
         )
         self.my.ASPDHD_AC_I = readouts.ACReadout(
             portN = self.ASPDHD.rtWpdI.o,
-            portD = LIGO_obj.actuate_DARM_h.I.i,
+            portD = LIGO_obj.actuate_DARM_m.I.i,
         )
         self.my.ASPDHD_DC_Q = readouts.DCReadout(
             port = self.ASPDHD.rtWpdQ.o,
         )
         self.my.ASPDHD_AC_Q = readouts.ACReadout(
             portN = self.ASPDHD.rtWpdQ.o,
-            portD = LIGO_obj.actuate_DARM_h.I.i,
+            portD = LIGO_obj.actuate_DARM_m.I.i,
         )
 
-        self.my.ASPDHDm_AC = readouts.HomodyneACReadout(
+        self.my.ASPDHD_AC = readouts.HomodyneACReadout(
             portNI = self.ASPDHD.rtWpdI.o,
             portNQ = self.ASPDHD.rtWpdQ.o,
             portD = LIGO_obj.actuate_DARM_m.I.i,
         )
-        self.my.ASPDHD_AC = readouts.HomodyneACReadout(
-            portNI = self.ASPDHD.rtWpdI.o,
-            portNQ = self.ASPDHD.rtWpdQ.o,
-            portD = LIGO_obj.actuate_DARM_h.I.i,
-        )
         self.my.ASPDHDll_AC = readouts.HomodyneACReadout(
             portNI = self.ASPDHD_lossless.rtWpdI.o,
             portNQ = self.ASPDHD_lossless.rtWpdQ.o,
-            portD = LIGO_obj.actuate_DARM_h.I.i,
+            portD = LIGO_obj.actuate_DARM_m.I.i,
         )
         self.my.qASPDHD_AC = readouts.HomodyneACReadout(
             portNI = self.ASPDHD.rtQuantumI.o,
             portNQ = self.ASPDHD.rtQuantumQ.o,
-            portD = LIGO_obj.actuate_DARM_h.I.i,
+            portD = LIGO_obj.actuate_DARM_m.I.i,
         )
         self.my.qASPDHDll_AC = readouts.HomodyneACReadout(
             portNI = self.ASPDHD_lossless.rtQuantumI.o,
             portNQ = self.ASPDHD_lossless.rtQuantumQ.o,
-            portD = LIGO_obj.actuate_DARM_h.I.i,
+            portD = LIGO_obj.actuate_DARM_m.I.i,
         )
 
         self.my.ASPD_DC = readouts.DCReadout(
             port = self.ASPD.Wpd.o,
         )
         self.my.ASPD_AC = readouts.ACReadout(
-            portN = self.ASPD.Wpd.o,
-            portD = LIGO_obj.actuate_DARM_h.I.i,
-        )
-        self.my.ASPDm_AC = readouts.ACReadout(
             portN = self.ASPD.Wpd.o,
             portD = LIGO_obj.actuate_DARM_m.I.i,
         )

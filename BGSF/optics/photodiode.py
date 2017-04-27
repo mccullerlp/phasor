@@ -22,7 +22,9 @@ class PD(
 
     @decl.dproperty
     def _fluct(self):
-        return vacuum.OpticalVacuumFluctuation(port = self.Fr)
+        return vacuum.OpticalVacuumFluctuation(
+            port = self.Fr,
+        )
 
     @decl.dproperty
     def include_readouts(self, val = False):
@@ -41,11 +43,11 @@ class PD(
 
     @decl.dproperty
     def Fr(self):
-        return ports.OpticalPort(sname = 'Fr')
+        return ports.OpticalPort()
 
     @decl.dproperty
     def Wpd(self):
-        return ports.SignalOutPort(sname = 'Wpd')
+        return ports.SignalOutPort()
 
     @decl.dproperty
     def BA(self):
@@ -141,7 +143,7 @@ class MagicPD(
             self.system,
             ports_algorithm,
             [self.Fr],
-            [self.Fr],
+            [self.Bk],
             pmap,
             None,
             self.Wpd.o,

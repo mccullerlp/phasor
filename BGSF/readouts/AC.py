@@ -189,7 +189,7 @@ class ACReadoutCLG(base.SystemElementBase):
         #print("NTOT: ", N_tot)
         #print("DOT: ", D_tot)
         #The factor of 2 captures the missing readout power from the negative frequencies
-        return 2 * N_tot
+        return N_tot
 
     @decl.mproperty
     def AC_noise_limited_sensitivity(self):

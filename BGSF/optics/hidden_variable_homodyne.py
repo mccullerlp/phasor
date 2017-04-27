@@ -2,6 +2,7 @@
 """
 """
 from __future__ import (division, print_function)
+import numpy as np
 
 from .. import readouts
 from ..system.matrix_injections import TripletNormCoupling
@@ -171,16 +172,16 @@ class HiddenVariableHomodynePD(
     def system_setup_coupling(self, matrix_algorithm):
         for kfrom in matrix_algorithm.port_set_get(self.source_port):
             #TODO put this into the system
-            if self.phase_deg == 0:
+            if np.all(self.phase_deg == 0):
                 Stdcplg            = 1
                 StdcplgC           = 1
-            elif self.phase_deg in (90, -270):
+            elif np.all(abs(self.phase_deg + 90) == 180):
                 Stdcplg            = self.symbols.i
                 StdcplgC           = -self.symbols.i
-            elif self.phase_deg in (-180,180):
-                Stdcplg            = 1
-                StdcplgC           = 1
-            elif self.phase_deg in (-90, 270):
+            elif np.all(abs(self.phase_deg) == 180):
+                Stdcplg            = -1
+                StdcplgC           = -1
+            elif np.all(abs(self.phase_deg - 90) == 180):
                 Stdcplg            = -self.symbols.i
                 StdcplgC           = self.symbols.i
             else:

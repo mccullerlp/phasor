@@ -248,7 +248,7 @@ def modulations_fill_2optical_2classical(
                 StdcplgC,
             )
 
-    if ptoOpt is not None and out_port_classical is not None:
+    if out_port_classical is not None:
         lktos = matrix_algorithm.port_set_get(out_port_classical)
     else:
         lktos = []

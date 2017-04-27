@@ -211,6 +211,10 @@ class HTTSSusp(optics.OpticalCouplerBase):
         return mechanical.ForceSourceBalanced()
 
     @declarative.dproperty
+    def ActuatorD(self):
+        return mechanical.DisplacementSourceBalanced()
+
+    @declarative.dproperty
     def FC_Pend_M(self):
         return mechanical.Mass(
             mass_kg = .0885
@@ -249,9 +253,10 @@ class HTTSSusp(optics.OpticalCouplerBase):
             self.Actuator.B.bond(self.FC_Pend_k.B)
             #self.Actuator.B.bond(self.FC_Pend_d.B)
             self.Actuator.B.bond(self.FC_Pend_M.A)
+            self.Actuator.B.bond(self.ActuatorD.A)
 
             self.B_platform = self.Actuator.A
-            self.A_mirror = self.Actuator.B
+            self.A_mirror = self.ActuatorD.B
 
             #self.my.force2 = mechanical.ForceFluctuation(
             #    portA = self.FC_Pend_k.A,
@@ -283,8 +288,8 @@ class ELFTestStand(optics.OpticalCouplerBase):
     @declarative.dproperty
     def F_ELF(self):
         val = base.Frequency(
-            F_Hz  = (1 + 1.5e-6) * self.symbols.c_m_s / (2*16),
-            #F_Hz  = (1) * self.symbols.c_m_s / (2*16),
+            #F_Hz  = (1 + 1.5e-6) * self.symbols.c_m_s / (2*16),
+            F_Hz  = (1) * self.symbols.c_m_s / (2*16),
             order = 1,
         )
         return val
@@ -340,7 +345,7 @@ class ELFTestStand(optics.OpticalCouplerBase):
         return NPRO(
             laser = optics.Laser(
                 F = self.system.F_carrier_1064,
-                power_W = 100e-3,
+                power_W = 10e-3,
                 multiple = 1,
                 phase_deg = 0,
                 polarization = 'P',
@@ -474,7 +479,7 @@ class ELFTestStand(optics.OpticalCouplerBase):
             zeros_r = (-100, -60, -100,),
             poles_c = (3*Px, -2000+2000j,),
             zeros_c = (3*Zx, -15+15j,),
-            gain    = 0 * -1 / 1e4 / 0.00067199505194 / 2 / 1.43 / 3.1758,
+            gain    = -1 / 1e4 / 0.00067199505194 / 2 / 1.43 / 3.1758 * .707117,
             gain_F_Hz = 1e3,
             no_DC   = True,
             F_cutoff = 1e6,
@@ -685,6 +690,11 @@ class ELFTestStand(optics.OpticalCouplerBase):
         self.my.AC_hdyne_dispQ = readouts.ACReadout(
             portN = self.hdyne_backscatter.rtQuantumQ.o,
             portD = self.FC.M2_sus.Platform.In_seismic.i,
+        )
+
+        self.my.AC_hdyne_L = readouts.ACReadout(
+            portN = self.hdyne_backscatter.rtQuantumQ.o,
+            portD = self.FC.M1_sus.ActuatorD.d.i,
         )
 
         self.my.AC_ground = readouts.ACReadout(

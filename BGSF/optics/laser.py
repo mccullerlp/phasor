@@ -49,7 +49,9 @@ class Laser(
     @decl.dproperty
     def _fluct(self):
         #TODO add realistic laser noise
-        return vacuum.OpticalVacuumFluctuation(port = self.Fr)
+        return vacuum.OpticalVacuumFluctuation(
+            port = self.Fr
+        )
 
     multiple = 1
 
@@ -76,6 +78,12 @@ class Laser(
         return
 
     def system_setup_ports(self, ports_algorithm):
+        #TODO should separate "wanted" ports from "driven ports"
+        #Must move inputs to outputs for AC sidebands
+        for kto in ports_algorithm.port_update_get(self.Fr.o):
+            ports_algorithm.port_coupling_needed(self.Fr.i, kto)
+        for kfrom in ports_algorithm.port_update_get(self.Fr.i):
+            ports_algorithm.port_coupling_needed(self.Fr.o, kfrom)
         return
 
     def system_setup_coupling(self, matrix_algorithm):

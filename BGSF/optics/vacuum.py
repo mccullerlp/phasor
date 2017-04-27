@@ -21,7 +21,13 @@ class VacuumTerminator(
     def _fluct(self):
         return OpticalVacuumFluctuation(port = self.Fr)
 
-    def system_setup_ports(self, system):
+    def system_setup_ports(self, ports_algorithm):
+        #TODO should separate "wanted" ports from "driven ports"
+        #Must move inputs to outputs for AC sidebands
+        for kto in ports_algorithm.port_update_get(self.Fr.o):
+            ports_algorithm.port_coupling_needed(self.Fr.i, kto)
+        for kfrom in ports_algorithm.port_update_get(self.Fr.i):
+            ports_algorithm.port_coupling_needed(self.Fr.o, kfrom)
         return
 
 
@@ -34,6 +40,7 @@ class OpticalVacuumFluctuation(
 
     def system_setup_noise(self, matrix_algorithm):
         for k1 in matrix_algorithm.port_set_get(self.port.o):
+            #print(self, k1)
             if k1.subkey_has(ports.LOWER):
                 k2 = k1.without_keys(ports.QuantumKey) | ports.RAISE
             else:

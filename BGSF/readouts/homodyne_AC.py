@@ -304,7 +304,7 @@ class HomodyneACReadoutBase(base.SystemElementBase):
             + coupling_matrix_inv.get((pk_DrP, pk_DP), 0)
             + coupling_matrix_inv.get((pk_DrN, pk_DP), 0)
         )
-        return 2 * N_tot / D_tot
+        return N_tot / D_tot
 
 
 class HomodyneNoiseReadout(noise.NoiseReadout):

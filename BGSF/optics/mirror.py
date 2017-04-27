@@ -105,12 +105,12 @@ class Mirror(
 
     @declarative.dproperty
     def _LFr(self):
-        if not self.is_4_port:
+        if self._has_loss and not self.is_4_port:
             return ports.OpticalPort(sname = 'LFr')
 
     @declarative.dproperty
     def _LBk(self):
-        if not self.is_4_port:
+        if self._has_loss and not self.is_4_port:
             return ports.OpticalPort(sname = 'LBk')
 
     @declarative.dproperty
@@ -161,39 +161,40 @@ class Mirror(
 
     @declarative.dproperty
     def _LFrA(self):
-        if self.is_4_port:
+        if self._has_loss and self.is_4_port:
             return ports.OpticalPort(sname = 'LFrA' )
         else:
             return self._LFr
 
     @declarative.dproperty
     def _LFrB(self):
-        if self.is_4_port:
+        if self._has_loss and self.is_4_port:
             return ports.OpticalPort(sname = 'LFrB' )
         else:
             return self._LFr
 
     @declarative.dproperty
     def _LBkA(self):
-        if self.is_4_port:
+        if self._has_loss and self.is_4_port:
             return ports.OpticalPort(sname = 'LBkA' )
         else:
             return self._LBk
 
     @declarative.dproperty
     def _LBkB(self):
-        if self.is_4_port:
+        if self._has_loss and self.is_4_port:
             return ports.OpticalPort(sname = 'LBkB' )
         else:
             return self._LBk
 
     @declarative.dproperty
     def _link(self):
-        self.system.bond(self._LFrA, self._LFrA_vac.Fr)
-        self.system.bond(self._LBkA, self._LBkA_vac.Fr)
-        if self.is_4_port:
-            self.system.bond(self._LFrB, self._LFrB_vac.Fr)
-            self.system.bond(self._LBkB, self._LBkB_vac.Fr)
+        if self._has_loss:
+            self.system.bond(self._LFrA, self._LFrA_vac.Fr)
+            self.system.bond(self._LBkA, self._LBkA_vac.Fr)
+            if self.is_4_port:
+                self.system.bond(self._LFrB, self._LFrB_vac.Fr)
+                self.system.bond(self._LBkB, self._LBkB_vac.Fr)
 
     @declarative.mproperty
     def ports_select(self):
@@ -223,6 +224,10 @@ class Mirror(
             self._LFrB,
             self._LBkB,
         ])
+
+    @declarative.mproperty
+    def _has_loss(self):
+        return np.any(self.L_hr != 0) or np.any(self.L_t != 0)
 
     def system_setup_ports(self, ports_algorithm):
         tmap = {
@@ -265,25 +270,28 @@ class Mirror(
             for kfrom in ports_algorithm.port_update_get(port.i):
                 ports_algorithm.port_coupling_needed(port.o, kfrom)
                 ports_algorithm.port_coupling_needed(tmap[port].o, kfrom)
-                ports_algorithm.port_coupling_needed(lmap[port].o, kfrom)
+                if self._has_loss:
+                    ports_algorithm.port_coupling_needed(lmap[port].o, kfrom)
                 ports_algorithm.port_coupling_needed(rmap[port].o, kfrom)
                 if self.R_backscatter != 0:
                     ports_algorithm.port_coupling_needed(rBSmap[port].o, kfrom)
             for kto in ports_algorithm.port_update_get(port.o):
                 ports_algorithm.port_coupling_needed(port.i, kto)
                 ports_algorithm.port_coupling_needed(tmap[port].i, kto)
-                ports_algorithm.port_coupling_needed(lmap[port].i, kto)
+                if self._has_loss:
+                    ports_algorithm.port_coupling_needed(lmap[port].i, kto)
                 ports_algorithm.port_coupling_needed(rmap[port].i, kto)
                 if self.R_backscatter != 0:
                     ports_algorithm.port_coupling_needed(rBSmap[port].i, kto)
 
-        for port in self.ports_optical_loss:
-            for kfrom in ports_algorithm.port_update_get(port.i):
-                ports_algorithm.port_coupling_needed(port.o, kfrom)
-                ports_algorithm.port_coupling_needed(lmap[port].o, kfrom)
-            for kto in ports_algorithm.port_update_get(port.o):
-                ports_algorithm.port_coupling_needed(port.o, kto)
-                ports_algorithm.port_coupling_needed(lmap[port].i, kto)
+        if self._has_loss:
+            for port in self.ports_optical_loss:
+                for kfrom in ports_algorithm.port_update_get(port.i):
+                    ports_algorithm.port_coupling_needed(port.o, kfrom)
+                    ports_algorithm.port_coupling_needed(lmap[port].o, kfrom)
+                for kto in ports_algorithm.port_update_get(port.o):
+                    ports_algorithm.port_coupling_needed(port.o, kto)
+                    ports_algorithm.port_coupling_needed(lmap[port].i, kto)
 
         ports_fill_2optical_2classical(
             self.system,
@@ -378,16 +386,17 @@ class Mirror(
                     cplg,
                 )
 
-                val = lmap.get(port, None)
-                if val is not None:
-                    pto, cplg = val
-                    matrix_algorithm.port_coupling_insert(
-                        port.i,
-                        kfrom,
-                        pto.o,
-                        kfrom,
-                        cplg,
-                    )
+                if self._has_loss:
+                    val = lmap.get(port, None)
+                    if val is not None:
+                        pto, cplg = val
+                        matrix_algorithm.port_coupling_insert(
+                            port.i,
+                            kfrom,
+                            pto.o,
+                            kfrom,
+                            cplg,
+                        )
 
                 iwavelen_m, freq = self.system.optical_frequency_extract(kfrom)
                 index_coupling  = -2 * coupling * self.symbols.pi * 2 * iwavelen_m
@@ -445,16 +454,17 @@ class Mirror(
         #to keep the matrix with loss ports unitary
         #really we need some phases
         #but if loss ports only keep incoherent noise, this will work
-        for port in self.ports_optical_loss:
-            pto, cplg = lmap.get(port)
-            for kfrom in matrix_algorithm.port_set_get(port.i):
-                matrix_algorithm.port_coupling_insert(
-                    port.i,
-                    kfrom,
-                    pto.o,
-                    kfrom,
-                    cplg,
-                )
+        if self._has_loss:
+            for port in self.ports_optical_loss:
+                pto, cplg = lmap.get(port)
+                for kfrom in matrix_algorithm.port_set_get(port.i):
+                    matrix_algorithm.port_coupling_insert(
+                        port.i,
+                        kfrom,
+                        pto.o,
+                        kfrom,
+                        cplg,
+                    )
         return
 
 
