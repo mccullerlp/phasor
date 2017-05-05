@@ -160,6 +160,9 @@ class HomodyneACReadoutBase(base.SystemElementBase):
         Imin           = NIQ[0, 0] - abs(NIQ[1, 0])**2 / NIQ[1, 1]
         Qmin           = NIQ[1, 1] - abs(NIQ[1, 0])**2 / NIQ[0, 0]
         return declarative.Bunch(
+            I    = self.AC_CSD_IQ[0, 0],
+            Q    = self.AC_CSD_IQ[1, 1],
+            IQ   = self.AC_CSD_IQ[0, 1],
             min  = min_eig,
             max  = max_eig,
             Imin = Imin,

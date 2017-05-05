@@ -101,7 +101,7 @@ class OPOaLIGO(optics.OpticalCouplerBase):
         if val is None:
             val = optics.HarmonicMirror(
                 mirror_H1 = optics.Mirror(
-                    T_hr = 1 - .9985,
+                    T_hr = 1 - .9999,
                     flip_sign = True,
                 ),
                 mirror_H2 = optics.Mirror(
@@ -150,7 +150,7 @@ class OPOaLIGO(optics.OpticalCouplerBase):
         if val is None:
             val = optics.HarmonicMirror(
                 mirror_H1 = optics.Mirror(
-                    T_hr = 1 - .9985,
+                    T_hr = 1 - .9999,
                 ),
                 mirror_H2 = optics.Mirror(
                     T_hr = 1 - .999,
