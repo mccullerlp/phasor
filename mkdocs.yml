@@ -1,11 +1,11 @@
 site_name: Python Declarative
 pages:
-    - Home: index.md
     - Overview: README.md
+    - Mode Matching: alm.md
 theme: readthedocs
 site_dir: build/site/
 use_directory_urls: false
-dev_addr: 127.0.0.1:7999
+dev_addr: 127.0.0.1:7998
 extra_css: [default.css]
 markdown_extensions:
     #- codehilite
