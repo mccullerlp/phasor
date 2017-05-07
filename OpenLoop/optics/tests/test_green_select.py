@@ -11,13 +11,13 @@ from declarative.bunch import (
 
 #import numpy as np
 
-from BGSF import system
-from BGSF import readouts
-from BGSF import optics
-from BGSF.optics.nonlinear_crystal import NonlinearCrystal
-from BGSF.utilities.print import pprint
+from OpenLoop import system
+from OpenLoop import readouts
+from OpenLoop import optics
+from OpenLoop.optics.nonlinear_crystal import NonlinearCrystal
+from OpenLoop.utilities.print import pprint
 
-#from BGSF.utilities.np import logspaced
+#from OpenLoop.utilities.np import logspaced
 
 
 def test_split():
@@ -133,7 +133,7 @@ def test_split():
 
 
 def test_aom():
-    from BGSF.optics.models.AOMTestStand import AOMTestStand
+    from OpenLoop.optics.models.AOMTestStand import AOMTestStand
     db = DeepBunch()
     sys = system.BGSystem(
         ooa_params = db,

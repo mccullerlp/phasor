@@ -3,7 +3,7 @@
 from __future__ import print_function, division
 import pytest
 
-from BGSF.utilities.mpl.autoniceplot import (
+from OpenLoop.utilities.mpl.autoniceplot import (
     #AutoPlotSaver,
     #mplfigB,
     asavefig,
@@ -11,13 +11,13 @@ from BGSF.utilities.mpl.autoniceplot import (
 
 import os.path as path
 
-import BGSF.fitting.casadi as FIT
+import OpenLoop.fitting.casadi as FIT
 #from YALL.alm.beam import *
-from BGSF.alm.measurements import CRootSystem
-import BGSF.alm.beam as CB
-#from BGSF.alm.beam_param import ComplexBeamParam
-#import BGSF.alm.system as CS
-from BGSF.alm.mplot import MPlotter
+from OpenLoop.alm.measurements import CRootSystem
+import OpenLoop.alm.beam as CB
+#from OpenLoop.alm.beam_param import ComplexBeamParam
+#import OpenLoop.alm.system as CS
+from OpenLoop.alm.mplot import MPlotter
 
 mplot = MPlotter()
 asavefig.org_subfolder = path.join(path.dirname(__file__), 'tests')

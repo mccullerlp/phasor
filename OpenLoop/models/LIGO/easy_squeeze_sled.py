@@ -13,7 +13,7 @@ from ... import base
 
 from . import IFO_modulators
 
-#from BGSF.utilities.np import logspaced
+#from OpenLoop.utilities.np import logspaced
 
 class EasySqueezeSetup(base.SystemElementBase):
     def __init__(self, **kwargs):

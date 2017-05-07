@@ -4,8 +4,8 @@ from __future__ import absolute_import
 #from builtins import object
 
 import numpy as np
-from BGSF.math.complex import Complex
-import BGSF.math.dispatched as dmath
+from OpenLoop.math.complex import Complex
+import OpenLoop.math.dispatched as dmath
 from .utils import str_m
 
 class ComplexBeamParam(object):

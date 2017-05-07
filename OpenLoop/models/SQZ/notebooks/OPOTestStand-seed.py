@@ -17,10 +17,10 @@ from declarative.bunch import (
 
 #import numpy as np
 
-from BGSF import system
-from BGSF import readouts
-from BGSF import optics
-from BGSF.utilities.print import pprint
+from OpenLoop import system
+from OpenLoop import readouts
+from OpenLoop import optics
+from OpenLoop.utilities.print import pprint
 
 
 # In[116]:
@@ -41,7 +41,7 @@ db.test.generateF_PM.amplitude = 0#np.linspace(0, .3, 20)
 sys = system.BGSystem(
     ooa_params = db,
 )
-from BGSF.models.SQZ.OPO import OPOTestStand
+from OpenLoop.models.SQZ.OPO import OPOTestStand
 sys.my.test = OPOTestStand()
 db = sys.ooa_shadow()
 solve = sys.test.opo.DC.DC_readout
@@ -75,7 +75,7 @@ db.test.generateF_PM.amplitude = 0#np.linspace(0, .3, 20)
 sys2 = system.BGSystem(
     ooa_params = db,
 )
-from BGSF.models.SQZ.OPO import OPOTestStand
+from OpenLoop.models.SQZ.OPO import OPOTestStand
 sys2.my.test = OPOTestStand()
 db = sys2.ooa_shadow()
 solve = sys2.test.opo.DC.DC_readout

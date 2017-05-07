@@ -4,7 +4,7 @@ from __future__ import division, print_function
 import numpy as np
 import declarative
 
-#import BGSF.numerics.dispatched as dmath
+#import OpenLoop.numerics.dispatched as dmath
 #import sympy
 
 

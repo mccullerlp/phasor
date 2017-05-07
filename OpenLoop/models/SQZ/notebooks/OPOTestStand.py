@@ -17,10 +17,10 @@ from declarative.bunch import (
 
 #import numpy as np
 
-from BGSF import system
-from BGSF import readouts
-from BGSF import optics
-from BGSF.utilities.print import pprint
+from OpenLoop import system
+from OpenLoop import readouts
+from OpenLoop import optics
+from OpenLoop.utilities.print import pprint
 
 
 # In[2]:
@@ -36,7 +36,7 @@ db.test.generateF_PM.amplitude = 0#np.linspace(0, .3, 20)
 sys = system.BGSystem(
     ooa_params = db,
 )
-from BGSF.models.SQZ.OPO import OPOTestStand
+from OpenLoop.models.SQZ.OPO import OPOTestStand
 sys.my.test = OPOTestStand()
 db = sys.ooa_shadow()
 #print(sys.test.ktp.ooa_as_yaml())
@@ -91,7 +91,7 @@ db.test.generateF_PM.amplitude = 0#np.linspace(0, .3, 20)
 sys = system.BGSystem(
     ooa_params = db,
 )
-from BGSF.models.SQZ.OPO import OPOTestStand
+from OpenLoop.models.SQZ.OPO import OPOTestStand
 sys.my.test = OPOTestStand()
 db = sys.ooa_shadow()
 #print(sys.test.ktp.ooa_as_yaml())
@@ -132,7 +132,7 @@ db.test.generateF_PM.amplitude = 0#np.linspace(0, .3, 20)
 sys = system.BGSystem(
     ooa_params = db,
 )
-from BGSF.models.SQZ.OPO import OPOTestStand
+from OpenLoop.models.SQZ.OPO import OPOTestStand
 sys.my.test = OPOTestStand()
 db = sys.ooa_shadow()
 #print(sys.test.ktp.ooa_as_yaml())

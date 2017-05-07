@@ -3,7 +3,7 @@
 from __future__ import (division, print_function)
 
 #import declarative as decl
-#from BGSF import electronics
+#from OpenLoop import electronics
 
 from .. import opamps
 

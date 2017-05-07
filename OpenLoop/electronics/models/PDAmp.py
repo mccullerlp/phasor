@@ -4,8 +4,8 @@ from __future__ import (division, print_function)
 
 import declarative as decl
 
-from BGSF import electronics
-from BGSF import readouts
+from OpenLoop import electronics
+from OpenLoop import readouts
 from . import vendor_opamps
 
 

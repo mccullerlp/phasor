@@ -3,7 +3,7 @@
 import declarative
 import numpy as np
 
-from BGSF.utilities.mpl import (
+from OpenLoop.utilities.mpl import (
     generate_stacked_plot_ax,
     #mplfigB,
 )

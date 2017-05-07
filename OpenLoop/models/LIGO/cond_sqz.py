@@ -68,7 +68,7 @@ from .IFO_modulators import (
     MZModulator,
 )
 
-#from BGSF.utilities.np import logspaced
+#from OpenLoop.utilities.np import logspaced
 
 
 class CondSqueezeSetup(base.SystemElementBase):

@@ -3,12 +3,12 @@
 from __future__ import print_function, division
 
 import declarative
-from BGSF import optics
-from BGSF import base
-from BGSF import signals
-from BGSF import system
-from BGSF import readouts
-from BGSF.models.LIGO import ligo_sled
+from OpenLoop import optics
+from OpenLoop import base
+from OpenLoop import signals
+from OpenLoop import system
+from OpenLoop import readouts
+from OpenLoop.models.LIGO import ligo_sled
 
 
 def test_LIGO_basic():

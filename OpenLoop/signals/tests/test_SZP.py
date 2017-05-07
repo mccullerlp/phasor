@@ -5,11 +5,11 @@ from __future__ import (division, print_function)
 import numpy as np
 import numpy.testing as test
 
-import BGSF.signals as signals
-import BGSF.readouts as readouts
-import BGSF.system as system
+import OpenLoop.signals as signals
+import OpenLoop.readouts as readouts
+import OpenLoop.system as system
 
-from BGSF.utilities.np import logspaced
+from OpenLoop.utilities.np import logspaced
 
 
 def test_Xfer():
@@ -53,8 +53,8 @@ def test_XFer_fit():
     )
     print(sys.X1.ooa_as_yaml())
 
-    import BGSF.fitting.casadi as FIT
-    import BGSF.fitting.casadi.transfer_functions as FIT_TF
+    import OpenLoop.fitting.casadi as FIT
+    import OpenLoop.fitting.casadi.transfer_functions as FIT_TF
     froot = FIT.FitterRoot()
     froot.my.sym = FIT.FitterSym()
     froot.systems.xfer = sys

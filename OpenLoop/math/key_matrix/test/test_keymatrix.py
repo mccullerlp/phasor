@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from BGSF.math.key_matrix import keymatrix
+from OpenLoop.math.key_matrix import keymatrix
 
 
 @pytest.mark.skip("Need to revisit")

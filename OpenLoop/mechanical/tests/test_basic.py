@@ -4,9 +4,9 @@ from __future__ import (division, print_function)
 #import pytest
 import numpy.testing as test
 
-import BGSF.mechanical as mechanical
-import BGSF.readouts as readouts
-import BGSF.system as system
+import OpenLoop.mechanical as mechanical
+import OpenLoop.readouts as readouts
+import OpenLoop.system as system
 
 
 def test_F():

@@ -8,7 +8,7 @@ import numpy as np
 from collections import defaultdict
 import declarative
 
-from BGSF.utilities.priority_queue import HeapPriorityQueue
+from OpenLoop.utilities.priority_queue import HeapPriorityQueue
 
 from ..base import (
     DictKey,

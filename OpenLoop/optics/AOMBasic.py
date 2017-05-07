@@ -3,7 +3,7 @@
 """
 from __future__ import (division, print_function)
 import numpy as np
-#from BGSF.utilities.print import print
+#from OpenLoop.utilities.print import print
 import declarative
 
 from . import bases

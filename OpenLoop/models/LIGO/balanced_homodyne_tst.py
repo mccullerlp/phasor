@@ -12,7 +12,7 @@ from ... import base
 from . import IFO_modulators
 from . import direct_homodyne
 
-#from BGSF.utilities.np import logspaced
+#from OpenLoop.utilities.np import logspaced
 
 
 class BHDTestSled(base.SystemElementBase):

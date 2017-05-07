@@ -18,13 +18,13 @@ from .utils import (
     #np_check_sorted,
 )
 
-#from BGSF.utilities.mpl.autoniceplot import (
+#from OpenLoop.utilities.mpl.autoniceplot import (
 #    AutoPlotSaver,
 #    mplfigB,
 #    asavefig,
 #)
 
-from BGSF.utilities.mpl.stacked_plots import (
+from OpenLoop.utilities.mpl.stacked_plots import (
     generate_stacked_plot_ax,
 )
 

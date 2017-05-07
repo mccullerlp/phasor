@@ -5,7 +5,7 @@ from __future__ import division, print_function
 import declarative
 import numpy as np
 
-from BGSF.utilities.np import logspaced
+from OpenLoop.utilities.np import logspaced
 
 #import matplotlib.patches as mplpatch
 import matplotlib.transforms as mpltrans

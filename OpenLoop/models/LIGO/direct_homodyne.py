@@ -2,7 +2,7 @@
 """
 """
 from __future__ import division, print_function
-#from BGSF.utilities.np import logspaced
+#from OpenLoop.utilities.np import logspaced
 
 #import numpy as np
 #import declarative

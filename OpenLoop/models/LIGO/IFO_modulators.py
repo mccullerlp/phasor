@@ -10,7 +10,7 @@ from ...import optics
 from ...import signals
 from ...import base
 
-#from BGSF.utilities.np import logspaced
+#from OpenLoop.utilities.np import logspaced
 
 class MichelsonModulator(base.SystemElementBase):
     def __init__(self, **kwargs):

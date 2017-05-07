@@ -8,16 +8,16 @@ import declarative
 
 #import numpy as np
 
-from BGSF import base
-from BGSF import system
-from BGSF import readouts
-from BGSF import optics
-from BGSF import signals
-from BGSF.optics.nonlinear_crystal import NonlinearCrystal
-from BGSF.utilities.print import pprint
-from BGSF.optics.models import AOMTestStand
+from OpenLoop import base
+from OpenLoop import system
+from OpenLoop import readouts
+from OpenLoop import optics
+from OpenLoop import signals
+from OpenLoop.optics.nonlinear_crystal import NonlinearCrystal
+from OpenLoop.utilities.print import pprint
+from OpenLoop.optics.models import AOMTestStand
 
-#from BGSF.utilities.np import logspaced
+#from OpenLoop.utilities.np import logspaced
 
 
 

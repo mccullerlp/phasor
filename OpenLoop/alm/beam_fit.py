@@ -10,7 +10,7 @@ from .beam_param import (
     ComplexBeamParam
 )
 
-from BGSF.utilities.mpl.autoniceplot import (
+from OpenLoop.utilities.mpl.autoniceplot import (
     #AutoPlotSaver,
     mplfigB,
     #asavefig,

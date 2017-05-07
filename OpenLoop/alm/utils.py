@@ -4,7 +4,7 @@
 from __future__ import division, print_function
 #from builtins import range
 import numpy as np
-from BGSF.math.complex import Complex
+from OpenLoop.math.complex import Complex
 
 
 class TargetIdx(tuple):

@@ -3,7 +3,7 @@
 """
 from __future__ import division
 from __future__ import print_function
-#from BGSF.utilities.print import print
+#from OpenLoop.utilities.print import print
 
 import declarative as decl
 

@@ -8,7 +8,7 @@ have measurement objects inject objects into the solver, so that the solver stat
 have coherent measurement systems able to run the solver independently to generate system-altering measurements
 """
 from __future__ import (division, print_function)
-from BGSF.utilities.print import print
+from OpenLoop.utilities.print import print
 from collections import defaultdict
 from declarative import bunch
 

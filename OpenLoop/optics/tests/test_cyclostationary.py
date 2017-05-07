@@ -6,12 +6,12 @@ from __future__ import (division, print_function)
 import numpy.testing as np_test
 import declarative
 
-from BGSF import system
-from BGSF import optics
-from BGSF import readouts
-from BGSF import signals
+from OpenLoop import system
+from OpenLoop import optics
+from OpenLoop import readouts
+from OpenLoop import signals
 
-#from BGSF.utilities.np import logspaced
+#from OpenLoop.utilities.np import logspaced
 
 
 #http://journals.aps.org/pra/pdf/10.1103/PhysRevA.43.5022
@@ -133,7 +133,7 @@ def test_cyclostationary():
     sys.solution.solution_vector_print(select_to = b.sled.mixer.R_Q.o)
 
     #TODO isolate this test
-    #from BGSF.system_graphs import (
+    #from OpenLoop.system_graphs import (
     #    coherent_sparsity_graph
     #)
 

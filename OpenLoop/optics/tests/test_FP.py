@@ -6,11 +6,11 @@ import numpy.testing as np_test
 import pytest
 import declarative
 
-from BGSF.utilities.print import pprint
+from OpenLoop.utilities.print import pprint
 
-from BGSF import system
-from BGSF import optics
-from BGSF import readouts
+from OpenLoop import system
+from OpenLoop import optics
+from OpenLoop import readouts
 
 
 def gensys(
@@ -122,11 +122,11 @@ def test_FP_base():
     #    select_to = b.etm.Fr.o,
     #)
 
-    #from BGSF.optics.dictionary_keys import (
+    #from OpenLoop.optics.dictionary_keys import (
     #    DictKey,
     #    FrequencyKey,
     #)
-    #from BGSF.optics.optical_elements import (
+    #from OpenLoop.optics.optical_elements import (
     #    OpticalFreqKey, ClassicalFreqKey,
     #    LOWER, RAISE,
     #)
@@ -149,7 +149,7 @@ def test_FP_base():
     AC = sys.ETM_Drive.AC_sensitivity
     print("AC:", AC)
 
-    #from BGSF.utilities.mpl.autoniceplot import (mplfigB)
+    #from OpenLoop.utilities.mpl.autoniceplot import (mplfigB)
     #F = mplfigB(Nrows = 2)
     #F.ax0.loglog(sys.F_AC_Hz, abs(AC))
     #F.ax1.semilogx(sys.F_AC_Hz, np.angle(AC))
