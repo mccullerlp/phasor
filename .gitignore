@@ -21,6 +21,10 @@ _old/
 .ipynb_checkpoints
 *.ipynb
 
+*.jpg
+*.tar.gz
+*.tar.*
+*.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

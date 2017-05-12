@@ -14,10 +14,10 @@ from . import ports
 class Mixer(bases.SignalElementBase):
     def __build__(self):
         super(Mixer, self).__build__()
-        self.my.LO  = ports.SignalInPort(sname = 'LO')
-        self.my.I   = ports.SignalInPort(sname = 'I')
-        self.my.R_I = ports.SignalOutPort(sname = 'R_I')
-        self.my.R_Q = ports.SignalOutPort(sname = 'R_Q')
+        self.my.LO  = ports.SignalInPort()
+        self.my.I   = ports.SignalInPort()
+        self.my.R_I = ports.SignalOutPort()
+        self.my.R_Q = ports.SignalOutPort()
         return
 
     def system_setup_ports(self, ports_algorithm):
