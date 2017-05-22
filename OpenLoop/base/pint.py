@@ -1,6 +1,6 @@
 """
 """
-from __future__ import division, print_function
+from __future__ import division, print_function, absolute_import
 import pint
 
 ureg = pint.UnitRegistry()

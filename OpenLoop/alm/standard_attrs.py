@@ -51,6 +51,7 @@ def generate_L_m():
             stems = ['L', 'length'],
             ooa_name = 'length',
             preferred_attr = 'L_preferred',
+            default_attr = '_length_default',
             prototypes = ['full', 'base'],
         )
     return L_m
@@ -65,6 +66,7 @@ def generate_R_m(variant = ''):
             stems = ['R{0}'.format(variant), 'ROC{0}'.format(variant)],
             ooa_name = 'ROC{0}'.format(variant),
             preferred_attr = 'ROC{0}_preferred'.format(variant),
+            default_attr = '_ROC_default',
             prototypes = ['full', 'base'],
         )
     return R_m

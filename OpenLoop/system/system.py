@@ -69,6 +69,7 @@ class BGSystem(RootElement):
     exact_order = None
     max_N = 100
     warning_N = 20
+    solver_Q_conditioning = True
 
     _frozen = False
 

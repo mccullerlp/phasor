@@ -471,6 +471,7 @@ class SystemSolver(object):
             edge_map      = dict(coupling_matrix.items()),
             purge_in      = True,
             purge_out     = True,
+            Q_conditioning = self.system.solver_Q_conditioning,
         )
 
         solution_bunch = declarative.Bunch(

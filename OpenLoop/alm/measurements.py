@@ -394,7 +394,10 @@ class CMeasurements(Element):
         N = len(self.beam_targets.tname)
         for idx in range(N):
             target = self.beam_targets.tname[idx]
-            z1 = self.beam_targets.z[idx]
+            if idx != 0:
+                z1 = self.beam_targets.z[idx]
+            else:
+                z1 = -float('inf')
             if idx + 1 == N:
                 z2 = float('inf')
             else:
