@@ -15,6 +15,8 @@ from .multimeter import (
 from .opamps import (
     OpAmp,
     VAmp,
+    ImperfectInAmp,
+    ImperfectOpAmp,
 )
 
 from .smatrix import (

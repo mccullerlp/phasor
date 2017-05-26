@@ -1,8 +1,9 @@
 """
 """
-from __future__ import division
+from __future__ import division, print_function
 #from builtins import range
 #from builtins import object
+import declarative
 
 import warnings
 import numpy as np
@@ -67,8 +68,11 @@ class KVSpace(object):
         for idx, key in enumerate(keylist):
             keymap[key] = idx
 
+
         self._key_map = keymap
-        self._key_map_inverse = np.array(keylist, dtype=object)
+        #the append is to force a 1D array even if all the keys are tuples
+        keylist.append(None)
+        self._key_map_inverse = np.asarray(keylist, dtype=object)[:-1]
         self._key_map_inverse.setflags(write = False)
         return
 
@@ -346,6 +350,15 @@ class KeyMatrix(KeyMatrixBase):
     def params_set(self, **kwargs):
         self._memoize_count += 1
         self.kw_params.update(kwargs)
+
+    @declarative.mproperty
+    def idx_dict(self):
+        newmap = dict()
+        for (k1, k2), edge in self._data_map.items():
+            k1 = self.vspace_from.key_map(k1)
+            k2 = self.vspace_to.key_map(k2)
+            newmap[k1, k2] = edge
+        return newmap
 
     @property
     def array(self):

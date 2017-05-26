@@ -22,7 +22,8 @@ class OpAmp(elements.ElectricalElementBase):
     def out(self):
         return ports.ElectricalPort(sname = 'out')
 
-    def gain_by_freq(self, F):
+    @staticmethod
+    def gain_by_freq(F):
         return 1
 
     def system_setup_ports(self, ports_algorithm):
@@ -105,7 +106,8 @@ class VAmp(elements.ElectricalElementBase):
     def out(self):
         return ports.ElectricalPort(sname = 'out')
 
-    def gain_by_freq(self, F):
+    @staticmethod
+    def gain_by_freq(F):
         return 1
 
     def system_setup_ports(self, ports_algorithm):
@@ -177,13 +179,16 @@ class VAmp(elements.ElectricalElementBase):
 
 
 class ImperfectOpAmp(OpAmp):
-    def V_spectrum_one_sided(self, F):
+    @staticmethod
+    def V_spectrum_one_sided(F):
         raise NotImplementedError()
 
-    def I_spectrum_one_sided(self, F):
+    @staticmethod
+    def I_spectrum_one_sided(F):
         raise NotImplementedError()
 
-    def gain_by_freq(self, F):
+    @staticmethod
+    def gain_by_freq(F):
         raise NotImplementedError()
 
     @decl.dproperty
@@ -215,7 +220,8 @@ class ImperfectInAmp(ImperfectOpAmp):
     def Vout_spectrum_one_sided(self, F):
         raise 0
 
-    def gain_by_freq(self, F):
+    @staticmethod
+    def gain_by_freq(F):
         raise NotImplementedError()
 
     @decl.dproperty

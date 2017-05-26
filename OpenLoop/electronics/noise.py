@@ -43,7 +43,8 @@ class VoltageFluctuation(elements.ElectricalNoiseBase, elements.ElectricalElemen
     def conversion(self):
         return sided_conversions[self.sided]
 
-    def Vsq_Hz_by_freq(self, F):
+    @staticmethod
+    def Vsq_Hz_by_freq(F):
         return 0
 
     def system_setup_ports(self, ports_algorithm):
@@ -93,13 +94,24 @@ class VoltageFluctuation(elements.ElectricalNoiseBase, elements.ElectricalElemen
 class CurrentFluctuation(elements.ElectricalNoiseBase, elements.ElectricalElementBase):
 
     @decl.dproperty
-    def portA(self, val):
-        self.system.own_port_virtual(self, val.o)
+    def port(self, val = None):
+        if val is not None:
+            self.system.own_port_virtual(self, val.o)
+            self.system.own_port_virtual(self, val.i)
         return val
 
     @decl.dproperty
-    def portB(self, val):
-        self.system.own_port_virtual(self, val.o)
+    def portA(self, val = None):
+        if val is None:
+            val = self.port.i
+        self.system.own_port_virtual(self, val)
+        return val
+
+    @decl.dproperty
+    def portB(self, val = None):
+        if val is None:
+            val = self.port.o
+        self.system.own_port_virtual(self, val)
         return val
 
     @decl.dproperty
@@ -115,28 +127,29 @@ class CurrentFluctuation(elements.ElectricalNoiseBase, elements.ElectricalElemen
     def conversion(self):
         return sided_conversions[self.sided]
 
-    def Isq_Hz_by_freq(self, F):
+    @staticmethod
+    def Isq_Hz_by_freq(F):
         return 0
 
     def system_setup_ports(self, ports_algorithm):
-        for kto in ports_algorithm.port_update_get(self.portA.o):
+        for kto in ports_algorithm.port_update_get(self.portA):
             ports_algorithm.port_coupling_needed(self.p_virt.o, kto)
-        for kto in ports_algorithm.port_update_get(self.portB.o):
+        for kto in ports_algorithm.port_update_get(self.portB):
             ports_algorithm.port_coupling_needed(self.p_virt.o, kto)
         for kfrom in ports_algorithm.port_update_get(self.p_virt.o):
-            ports_algorithm.port_coupling_needed(self.portB.o, kfrom)
-            ports_algorithm.port_coupling_needed(self.portA.o, kfrom)
+            ports_algorithm.port_coupling_needed(self.portB, kfrom)
+            ports_algorithm.port_coupling_needed(self.portA, kfrom)
         return
 
     def system_setup_coupling(self, matrix_algorithm):
         #TODO: double check that porto needs to be used
-        #porto_use = self.system.ports_post_get(self.portB.o)
-        porto_use = self.portB.o  # self.system.ports_post_get(self.portB.o)
+        #porto_use = self.system.ports_post_get(self.portB)
+        porto_use = self.portB  # self.system.ports_post_get(self.portB)
         for kfrom in matrix_algorithm.port_set_get(self.p_virt.o):
             matrix_algorithm.port_coupling_insert(
                 self.p_virt.o,
                 kfrom,
-                self.portA.o,
+                self.portA,
                 kfrom,
                 1/2,
             )
@@ -177,7 +190,8 @@ class VoltageFluctuation2(elements.ElectricalNoiseBase):
     def conversion(self):
         return sided_conversions[self.sided]
 
-    def Vsq_Hz_by_freq(self, F):
+    @staticmethod
+    def Vsq_Hz_by_freq(F):
         return 0
 
     def system_setup_noise(self, matrix_algorithm):
@@ -224,7 +238,8 @@ class CurrentFluctuation2(elements.ElectricalNoiseBase):
     def conversion(self):
         return sided_conversions[self.sided]
 
-    def Isq_Hz_by_freq(self, F):
+    @staticmethod
+    def Isq_Hz_by_freq(F):
         return 0
 
     def system_setup_noise(self, matrix_algorithm):

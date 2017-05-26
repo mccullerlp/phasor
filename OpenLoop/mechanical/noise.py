@@ -43,7 +43,8 @@ class DisplacementFluctuation(elements.MechanicalNoiseBase, elements.MechanicalE
     def conversion(self):
         return sided_conversions[self.sided]
 
-    def dsq_Hz_by_freq(self, F):
+    @staticmethod
+    def dsq_Hz_by_freq(F):
         return 0
 
     def system_setup_ports(self, ports_algorithm):
@@ -115,7 +116,8 @@ class ForceFluctuation(elements.MechanicalNoiseBase, elements.MechanicalElementB
     def conversion(self):
         return sided_conversions[self.sided]
 
-    def Fsq_Hz_by_freq(self, F):
+    @staticmethod
+    def Fsq_Hz_by_freq(F):
         return 0
 
     def system_setup_ports(self, ports_algorithm):

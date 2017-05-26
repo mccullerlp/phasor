@@ -9,7 +9,7 @@ import collections
 
 #import numpy as np
 
-from OpenLoop.system import graph_algorithm
+from OpenLoop.system import DAG_algorithm as graph_algorithm
 from OpenLoop.utilities.print import pprint
 
 #from OpenLoop.utilities.np import logspaced
@@ -17,6 +17,7 @@ from OpenLoop.utilities.print import pprint
 def isolve_mat(
         arr,
         Q_conditioning = True,
+        **kwargs
 ):
     arr = arr.astype(float)
     inputs_set = set(range(arr.shape[0]))
@@ -27,8 +28,8 @@ def isolve_mat(
     for idx_c in range(arr.shape[0]):
         for idx_r in range(arr.shape[1]):
             v = arr[idx_c, idx_r]
-            if idx_c == idx_r:
-                v = v - 1
+            #if idx_c == idx_r:
+            #    v = -v
             print(idx_c, idx_r, v)
             if v != 0:
                 edge_map[idx_c, idx_r] = -v
@@ -43,6 +44,7 @@ def isolve_mat(
         edge_map = edge_map,
         verbose = True,
         Q_conditioning = Q_conditioning,
+        **kwargs
     )
     arr2 = np.zeros_like(arr)
     for (idx_c, idx_r), v in sbunch.edge_map.items():
@@ -53,7 +55,7 @@ def check_arr(arr, **kwargs):
     pprint(arr)
     arr_inv = np.linalg.inv(arr)
     pprint(arr_inv)
-    arr_inv2 = isolve_mat(arr)
+    arr_inv2 = isolve_mat(arr, **kwargs)
     pprint(arr_inv2)
 
     #pprint(np.eye(arr.shape[0]) - np.dot(arr_inv, arr))
@@ -67,17 +69,25 @@ def check_arr(arr, **kwargs):
 
 
 def test_graph_solver0():
-    arr = np.array([[-1, 1.], [0, .9999]])
+    arr = np.array([[1, 0.], [0, 1]])
     check_arr(arr)
+#
+#def test_graph_solver01():
+#    arr = np.array([[1, 0], [1, 1]])
+#    check_arr(arr)
+#
+#def test_graph_solver02():
+#    arr = np.array([[1, -1.], [0, 1]])
+#    check_arr(arr)
 
 def test_graph_solver01():
     arr = np.array([[-.1, -1.], [0, 1]])
     check_arr(arr)
-
+#
 def test_graph_solver02():
     arr = np.array([[-1, 3.], [1, -1]])
     check_arr(arr)
-
+#
 def test_graph_solver03():
     arr = np.array([[2, 3., 0], [1, -1, 0], [0, 0, .1]])
     check_arr(arr)
@@ -90,8 +100,8 @@ def test_graph_solver2():
     #no c_edges
     arr = np.array([[.1, 0, 0], [1, 1, 0], [1, 1, 1]])
     check_arr(arr)
-
-
+#
+#
 def test_graph_solver_x():
     arr = np.array([[3, 1, 0], [0, .9999, 0], [0, 0, .9999]])
     check_arr(arr)
@@ -111,38 +121,49 @@ def test_graph_solver3c():
 def test_graph_solver4():
     arr = np.array([[.1, 1, 1], [1, 1, -1], [-1, 1, 1]])
     check_arr(arr)
-
-def test_graph_solver_rT():
-    arr = np.random.rand(10,10)
-    for idx in range(10):
-        arr[0:idx,idx] = 0
-    check_arr(arr)
 #
-def test_graph_solver_r3():
-    arr = np.random.rand(3,3)
-    check_arr(arr)
-
-def test_graph_solver_r4():
-    arr = np.random.rand(4, 4)
-    check_arr(arr, Q_conditioning = False)
-
-def test_graph_solver_r10():
-    arr = np.random.rand(10, 10)
-    check_arr(arr, Q_conditioning = True)
-
-
-#def test_graph_solver_rT2():
+#def test_graph_solver_rT():
 #    arr = np.random.rand(10,10)
 #    for idx in range(10):
-#        arr[idx + 1:,idx] = 0
+#        arr[0:idx,idx] = 0
 #    check_arr(arr)
-
-#def test_graph_solver_r4():
-#    arr = np.random.rand(10,10)
+##
+#def test_graph_solver_r3():
+#    arr = np.random.rand(3,3)
 #    check_arr(arr)
 #
-#    arr = np.random.rand(100,100)
-#    check_arr(arr)
+#def test_graph_solver_r4():
+#    arr = np.random.rand(4, 4)
+#    check_arr(arr, Q_conditioning = False)
+#
+#def test_graph_solver_r4():
+#    arr = np.random.rand(4, 4)
+#    check_arr(arr, Q_conditioning = False, sorted_order = True)
+#
+#def test_graph_solver_r10():
+#    arr = np.random.rand(10, 10)
+#    check_arr(arr, Q_conditioning = False)
+
+
+## Should tag as "slow"
+#def test_graph_solver_r100():
+#    arr = np.random.rand(300, 300)
+#    check_arr(arr, Q_conditioning = False)
+#    assert(False)
+#
+#
+##def test_graph_solver_rT2():
+##    arr = np.random.rand(10,10)
+##    for idx in range(10):
+##        arr[idx + 1:,idx] = 0
+##    check_arr(arr)
+#
+##def test_graph_solver_r4():
+##    arr = np.random.rand(10,10)
+##    check_arr(arr)
+##
+##    arr = np.random.rand(100,100)
+##    check_arr(arr)
 
 if __name__ == '__main__':
     test_graph_solver()

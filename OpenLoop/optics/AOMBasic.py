@@ -6,11 +6,11 @@ import numpy as np
 #from OpenLoop.utilities.print import print
 import declarative
 
-from . import bases
 from . import ports
-from .. import signals
+from . import bases
 from ..system.matrix_injections import TripletNormCoupling
 from ..utilities.print import pprint
+
 
 
 class AOMBasic(
@@ -31,6 +31,7 @@ class AOMBasic(
 
     @declarative.dproperty
     def Drv_Pwr(self):
+        from .. import signals
         return signals.MeanSquareMixer(
             I = self.Drv,
         )

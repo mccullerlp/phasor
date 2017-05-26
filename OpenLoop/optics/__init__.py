@@ -77,10 +77,6 @@ from .AOM import (
     AOM,
 )
 
-from .AOMBasic import (
-    AOMBasic,
-)
-
 from .hidden_variable_homodyne import (
     HiddenVariableHomodynePD,
 )
@@ -88,3 +84,8 @@ from .hidden_variable_homodyne import (
 from .nonlinear_crystal import (
     NonlinearCrystal,
 )
+
+from .AOMBasic import (
+    AOMBasic,
+)
+

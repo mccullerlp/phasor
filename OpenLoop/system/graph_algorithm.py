@@ -59,13 +59,6 @@ def mgraph_simplify_inplace(
     verbose = False,
     Q_conditioning = False,
 ):
-    #at this stage all of the alpha_reqs are only single move
-    req_alpha = defaultdict(set)
-    for node, rset in req.items():
-        winode = wrap_input_node(node)
-        if winode in rset:
-            req_alpha[node].add(winode)
-
     check_seq_req_balance(seq, req, edge_map)
     node_costs_invalid_in_queue = set()
     #this is just a heuristic
@@ -122,13 +115,14 @@ def mgraph_simplify_inplace(
                 cost = generate_node_cost(node)
                 cost, node = pqueue.pushpop((cost, node))
 
+            #doesn't do pre-densification
             #move to other queue if self-edge node
-            if node in seq[node]:
-                cost = generate_node_cost_loop(node)
-                pqueue_loop.push((cost, node))
-                if not pqueue:
-                    if verbose: print("pqueue_loop length: ", len(pqueue_loop))
-                continue
+            #if node in seq[node]:
+            #    cost = generate_node_cost_loop(node)
+            #    pqueue_loop.push((cost, node))
+            #    if not pqueue:
+            #        if verbose: print("pqueue_loop length: ", len(pqueue_loop))
+            #    continue
         else:
             cost, node = pqueue_loop.pop()
             #get new nodes to minimize cost at removal
@@ -143,7 +137,6 @@ def mgraph_simplify_inplace(
             if newcost != cost:
                 pqueue_loop.push((newcost, node))
                 continue
-            print("SOLVING LOOP ON: ", node)
 
         #newcost = generate_node_cost(node)
         #TODO, deal with bad loops
@@ -172,7 +165,6 @@ def mgraph_simplify_inplace(
         #else:
         #    print("Reducing: ", node)
 
-        #print("REQ: ", req_alpha)
         for snode in seq[node]:
             sedge = edge_map[node, snode]
             for rnode in req[node]:
@@ -201,8 +193,6 @@ def mgraph_simplify_inplace(
                     node_costs_invalid_in_queue.add(snode)
                     seq[rnode].add(snode)
                     req[snode].add(rnode)
-                    if rnode in req_alpha[node]:
-                        req_alpha[snode].add(rnode)
             req[snode].remove(node)
             del edge_map[node, snode]
         for rnode in req[node]:
@@ -210,7 +200,6 @@ def mgraph_simplify_inplace(
             seq[rnode].remove(node)
         del seq[node]
         del req[node]
-        del req_alpha[node]
     return
 
 

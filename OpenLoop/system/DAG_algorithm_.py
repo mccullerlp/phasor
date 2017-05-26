@@ -81,7 +81,7 @@ def condition_node(
     #print("SELF_EDGE C: ", np.max(1/abs(1 - self_edge)), np.max(totC), len(c_edges))
     #print('c_edges', c_edges)
 
-    a = -self_edge
+    a = 1 - self_edge
     y = a / abs(a)
     y = 1/a.conjugate()
     #y = self_edge / totC
@@ -174,8 +174,12 @@ def condition_node(
                 assert(snode != node)
                 if snode in seq[lnode] or snode == lnode:
                     edge2 = edge_map.get((lnode, snode), 0)
-                    lval = lval - edge * edge2
-                    d_mat[lnode, snode] = -edge2
+                    if snode == lnode:
+                        lval = lval + edge * (1 - edge2)
+                        d_mat[lnode, snode] = (1 - edge2)
+                    else:
+                        lval = lval - edge * edge2
+                        d_mat[lnode, snode] = -edge2
             scsd[lnode] = lval
         #print('d_mat: ', d_mat)
         #print('scsd: ', scsd)
@@ -193,10 +197,7 @@ def condition_node(
                 seq[bnode].add(cnode)
                 req[cnode].add(bnode)
                 #does not affect req_alpha
-                if bnode == cnode:
-                    edge_map[bnode, cnode] = edge_map.get((bnode, cnode), -1) + yc * cedge * bedge
-                else:
-                    edge_map[bnode, cnode] = edge_map.get((bnode, cnode), 0) + yc * cedge * bedge
+                edge_map[bnode, cnode] = edge_map.get((bnode, cnode), 0) + yc * cedge * bedge
 
         #edge_map[node, snode] = edge_map[node, snode] + (a - yc) * edge
 
@@ -313,9 +314,9 @@ def mgraph_simplify_inplace(
             pqueue.push((cost, node))
             continue
 
-        print("SOLVING ON: ", node)
+        #print("SOLVING ON: ", node)
         #Q-conditioning
-        if False and Q_conditioning and node in seq[node]:
+        if False and node in seq[node]:
             print("Q: ", Q_conditioning)
             condition_node(
                 seq       = seq,
@@ -327,6 +328,7 @@ def mgraph_simplify_inplace(
         #now check if it is a loop node, adjusting the action accordingly
         if node in seq[node]:
             self_edge = edge_map[node, node]
+            del edge_map[node, node]
             #assert(len(pqueue) == 0)
             #print("SELF_EDGE min: ", generate_node_cost_loop(node))
             CLG = -1 / self_edge
@@ -342,9 +344,6 @@ def mgraph_simplify_inplace(
         #    print("Reducing: ", node)
 
         #print("REQ: ", req_alpha)
-        if CLG is not None and np.any(abs(CLG) > 1e4):
-            print("BADNODE XXX:", node, )
-
         for snode in seq[node]:
             sedge = edge_map[node, snode]
             for rnode in req[node]:
@@ -363,15 +362,13 @@ def mgraph_simplify_inplace(
                         prod = (sedge * CLG)
                     else:
                         prod = (sedge * CLG * redge)
-                if np.any(abs(prod) > 1e4):
-                    print("BADNODE :", node, )
                 prev_edge = edge_map.get((rnode, snode), None)
                 if prev_edge is not None:
                     edge_map[(rnode, snode)] = prev_edge + prod
                     #TODO, should probably invalidate here, but its probably OK
                 else:
                     if rnode == snode:
-                        edge_map[(rnode, snode)] = prod - 1
+                        edge_map[(rnode, snode)] = prod + 1
                     else:
                         edge_map[(rnode, snode)] = prod
                     node_costs_invalid_in_queue.add(rnode)
