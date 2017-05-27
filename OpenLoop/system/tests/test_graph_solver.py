@@ -28,9 +28,6 @@ def isolve_mat(
     for idx_c in range(arr.shape[0]):
         for idx_r in range(arr.shape[1]):
             v = arr[idx_c, idx_r]
-            #if idx_c == idx_r:
-            #    v = -v
-            print(idx_c, idx_r, v)
             if v != 0:
                 edge_map[idx_c, idx_r] = -v
                 seq[idx_c].add(idx_r)

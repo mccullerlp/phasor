@@ -14,6 +14,13 @@ from ..base import (
     DictKey,
 )
 
+N_limit_rel = 100
+
+def abssq(arr):
+    return arr * arr.conjugate()
+
+def enorm(arr):
+    return np.max(abssq(arr))
 
 def print_seq(seq, edge_map):
     print("Sequential Edges")
@@ -193,10 +200,7 @@ def condition_node(
                 seq[bnode].add(cnode)
                 req[cnode].add(bnode)
                 #does not affect req_alpha
-                if bnode == cnode:
-                    edge_map[bnode, cnode] = edge_map.get((bnode, cnode), -1) + yc * cedge * bedge
-                else:
-                    edge_map[bnode, cnode] = edge_map.get((bnode, cnode), 0) + yc * cedge * bedge
+                edge_map[bnode, cnode] = edge_map.get((bnode, cnode), 0) + yc * cedge * bedge
 
         #edge_map[node, snode] = edge_map[node, snode] + (a - yc) * edge
 
@@ -208,17 +212,117 @@ def mgraph_simplify_inplace(
     Q_conditioning = False,
     sorted_order   = False,
 ):
+    check_seq_req_balance(seq, req, edge_map)
+
+    reqO = req
+    seqO = seq
+    req = dict(req)
+    seq = dict(seq)
+
     #at this stage all of the alpha_reqs are only single move
     req_alpha = defaultdict(set)
-    for node, rset in req.items():
-        winode = wrap_input_node(node)
-        if winode in rset:
-            req_alpha[node].add(winode)
+    seq_beta  = defaultdict(set)
+    beta_set  = set()
+    alpha_set = set()
+    for node in req:
+        if not seq[node]:
+            for rnode in req[node]:
+                seq_beta[rnode].add(node)
+                seq[rnode].remove(node)
+                beta_set.add(node)
+    for node in seq:
+        if not req[node]:
+            for snode in seq[node]:
+                req_alpha[snode].add(node)
+                req[snode].remove(node)
+                alpha_set.add(node)
 
-    check_seq_req_balance(seq, req, edge_map)
-    node_costs_invalid_in_queue = set()
-    #this is just a heuristic
+    #remove the alpha and beta nodes from the standard sets
+    for node in alpha_set:
+        del seq[node]
+        del req[node]
+    for node in beta_set:
+        del req[node]
+        del seq[node]
+
+    kwargs = dict(
+        seq                         = seq,
+        req                         = req,
+        req_alpha                   = req_alpha,
+        seq_beta                    = seq_beta,
+        edge_map                    = edge_map,
+    )
+
+    if sorted_order:
+        mgraph_simplify_sorted(**kwargs)
+    else:
+        if verbose: print("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
+        mgraph_simplify_trivial(**kwargs)
+        if verbose: print("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
+        mgraph_simplify_trivial(**kwargs)
+        if verbose: print("BADGUY STAGE, REMAINING {0}".format(len(req)))
+        mgraph_simplify_badguys(**kwargs)
+
+    #now reapply the seq and req lists
+    reqO.clear()
+    reqO.update(req_alpha)
+    seqO.clear()
+    seqO.update(seq_beta)
+    return
+
+
+def mgraph_simplify_sorted(
+    seq,
+    req,
+    seq_beta,
+    req_alpha,
+    edge_map,
+):
+    kwargs = dict(
+        seq                         = seq,
+        req                         = req,
+        req_alpha                   = req_alpha,
+        seq_beta                    = seq_beta,
+        edge_map                    = edge_map,
+    )
+
     def generate_node_cost(node):
+        return node
+
+    pqueue = HeapPriorityQueue()
+
+    for node in seq.keys():
+        cost = generate_node_cost(node)
+        pqueue.push((cost, node))
+
+    while req:
+        cost, node = pqueue.pop()
+
+        assert(np.isfinite(cost))
+
+        reduceLU(
+            node = node,
+            **kwargs
+        )
+
+
+
+def mgraph_simplify_trivial(
+    seq,
+    req,
+    seq_beta,
+    req_alpha,
+    edge_map,
+):
+    kwargs = dict(
+        seq                         = seq,
+        req                         = req,
+        req_alpha                   = req_alpha,
+        seq_beta                    = seq_beta,
+        edge_map                    = edge_map,
+    )
+
+    def generate_node_count_tup(node):
         s_n = 0
         s_n_full = 0
         for enode in seq[node]:
@@ -237,161 +341,307 @@ def mgraph_simplify_inplace(
                 r_n_full += 1
             else:
                 r_n_full += len(np.asanyarray(edge_val).flatten())
-        ##TODO, deal with bad loops
-        #self_edge = edge_map.get((node, node), None)
-        #if self_edge is not None:
-        #    if np.any(self_edge == 1):
-        #        return float('inf')
-        #    else:
-        #        return 10
-        return s_n * r_n_full + r_n * s_n_full
-
-    def generate_node_cost_loop(node):
-        self_edge = edge_map.get((node, node), None)
-        return 0#np.max(abs(1 - self_edge))
+        return (s_n * r_n, s_n * r_n_full + r_n * s_n_full)
 
     pqueue = HeapPriorityQueue()
-    nrem = list()
-    pqueue_loop = HeapPriorityQueue()
-
     for node in seq.keys():
-        if not seq[node] or not req[node]:
-            #then this is an edge node and exempt
-            continue
-        cost = generate_node_cost(node)
+        cost = generate_node_count_tup(node)
         pqueue.push((cost, node))
-        nrem.append(node)
-    nrem.sort()
-    if not sorted_order:
-        nrem = None
-    if verbose: print("pqueue length: ", len(pqueue))
-    nrem = None
 
-    while pqueue or pqueue_loop:
-        if pqueue:
-            if nrem:
-                node = nrem[0]
-                nrem = nrem[1:]
-                if not nrem:
-                    while pqueue:
-                        pqueue.pop()
-            else:
-                cost, node = pqueue.pop()
+    node_costs_invalid_in_queue = set()
 
-                #get new nodes to minimize cost at removal
-                while node in node_costs_invalid_in_queue:
-                    node_costs_invalid_in_queue.remove(node)
-                    cost = generate_node_cost(node)
-                    cost, node = pqueue.pushpop((cost, node))
+    while pqueue:
+        cost, node = pqueue.pop()
+        if node in node_costs_invalid_in_queue:
+            cost = generate_node_count_tup(node)
 
-                #move to other queue if self-edge node
-                #if node in seq[node]:
-                #    cost = generate_node_cost_loop(node)
-                #    pqueue_loop.push((cost, node))
-                #    if not pqueue:
-                #        if verbose: print("pqueue_loop length: ", len(pqueue_loop))
-                #    continue
+        edge_cost, arr_cost = cost
 
-        else:
-            cost, node = pqueue_loop.pop()
-            #get new nodes to minimize cost at removal
-            while node in node_costs_invalid_in_queue:
-                node_costs_invalid_in_queue.remove(node)
-                cost = generate_node_cost_loop(node)
-                cost, node = pqueue_loop.pushpop((cost, node))
-            newcost = generate_node_cost_loop(node)
-            #TODO, deal with bad loops
-            print(node, newcost, cost)
-            assert(np.isfinite(newcost))
-            if newcost != cost:
-                pqueue_loop.push((newcost, node))
+        self_edge = edge_map[node, node]
+        sedge_abssq = abssq(self_edge)
+
+        #check conditions for numerical stability, if they are bad, drop the node
+
+        badness = 0
+        #columns
+        for rnode in req[node]:
+            if rnode == node:
                 continue
-            print("SOLVING LOOP ON: ", node)
-
-        if not np.isfinite(cost) and pqueue:
-            assert(False)
-            pqueue.push((cost, node))
-            continue
-
-        print("SOLVING ON: ", node)
-        #Q-conditioning
-        if False and Q_conditioning and node in seq[node]:
-            print("Q: ", Q_conditioning)
-            condition_node(
-                seq       = seq,
-                req       = req,
-                req_alpha = req_alpha,
-                edge_map  = edge_map,
-                node      = node,
-            )
-        #now check if it is a loop node, adjusting the action accordingly
-        if node in seq[node]:
-            self_edge = edge_map[node, node]
-            #assert(len(pqueue) == 0)
-            #print("SELF_EDGE min: ", generate_node_cost_loop(node))
-            CLG = -1 / self_edge
-            #remove the self edge for the simplification stage
-            seq[node].remove(node)
-            req[node].remove(node)
-        else:
-            CLG = None
-
-        #if CLG is not None:
-        #    print("Popping : ", node)
-        #else:
-        #    print("Reducing: ", node)
-
-        #print("REQ: ", req_alpha)
-        if CLG is not None and np.any(abs(CLG) > 1e4):
-            print("BADNODE XXX:", node, )
+            edge = edge_map[rnode, node]
+            badness = max(badness, np.max(abssq(edge) / sedge_abssq))
 
         for snode in seq[node]:
-            sedge = edge_map[node, snode]
-            for rnode in req[node]:
-                redge = edge_map[rnode, node]
-                if CLG is None:
-                    if sedge is 1:
-                        prod = redge
-                    elif redge is 1:
-                        prod = sedge
-                    else:
-                        prod = (sedge * redge)
-                else:
-                    if sedge is 1:
-                        prod = (CLG * redge)
-                    elif redge is 1:
-                        prod = (sedge * CLG)
-                    else:
-                        prod = (sedge * CLG * redge)
-                if np.any(abs(prod) > 1e4):
-                    print("BADNODE :", node, )
-                prev_edge = edge_map.get((rnode, snode), None)
-                if prev_edge is not None:
-                    edge_map[(rnode, snode)] = prev_edge + prod
-                    #TODO, should probably invalidate here, but its probably OK
-                else:
-                    if rnode == snode:
-                        edge_map[(rnode, snode)] = prod - 1
-                    else:
-                        edge_map[(rnode, snode)] = prod
-                    node_costs_invalid_in_queue.add(rnode)
-                    node_costs_invalid_in_queue.add(snode)
-                    seq[rnode].add(snode)
-                    req[snode].add(rnode)
-                    if rnode in req_alpha[node]:
-                        req_alpha[snode].add(rnode)
-            req[snode].remove(node)
-            del edge_map[node, snode]
+            if snode == node:
+                continue
+            edge = edge_map[node, snode]
+            badness = max(badness, np.max(abssq(edge) / sedge_abssq))
+
+        #drop the node from the queue!
+        if badness > N_limit_rel:
+            continue
+
+        reduceLU(
+            node = node,
+            node_costs_invalid_in_queue = node_costs_invalid_in_queue,
+            **kwargs
+        )
+    return
+
+def mgraph_simplify_badguys(
+    seq,
+    req,
+    seq_beta,
+    req_alpha,
+    edge_map,
+    verbose = False,
+):
+    kwargs = dict(
+        seq                         = seq,
+        req                         = req,
+        req_alpha                   = req_alpha,
+        seq_beta                    = seq_beta,
+        edge_map                    = edge_map,
+    )
+    edge_norms = dict()
+
+    #this is just a heuristic
+    def generate_node_count(node):
+        s_n = len(seq[node])
+        r_n = len(req[node])
+        return s_n * r_n
+
+    def generate_node_count_arr(node):
+        s_n = 0
+        s_n_full = 0
+        for enode in seq[node]:
+            edge_val = edge_map[node, enode]
+            s_n += 1
+            if isinstance(edge_val, Number):
+                s_n_full += 1
+            else:
+                s_n_full += len(np.asanyarray(edge_val).flatten())
+        r_n = 0
+        r_n_full = 0
+        for enode in req[node]:
+            edge_val = edge_map[enode, node]
+            r_n += 1
+            if isinstance(edge_val, Number):
+                r_n_full += 1
+            else:
+                r_n_full += len(np.asanyarray(edge_val).flatten())
+        return s_n * r_n_full + r_n * s_n_full
+
+    def generate_row_cost(node):
+        tot_norm = 0
+        for snode in seq[node]:
+            norm = edge_norms.get((node, snode), None)
+            if norm is None:
+                norm = enorm(edge_map[node, snode])
+                edge_norms[node, snode] = norm
+            tot_norm = tot_norm + norm
+        return tot_norm
+
+    def generate_col_cost(node):
+        tot_norm = 0
         for rnode in req[node]:
-            del edge_map[rnode, node]
-            seq[rnode].remove(node)
-        del seq[node]
-        del req[node]
-        #nodes may not have alphas
-        try:
-            del req_alpha[node]
-        except KeyError:
-            pass
+            norm = edge_norms.get((node, rnode), None)
+            if norm is None:
+                norm = enorm(edge_map[node, rnode])
+                edge_norms[node, rnode] = norm
+            tot_norm = tot_norm + norm
+        return tot_norm
+    generate_node_cost = generate_row_cost
+
+    pqueue = HeapPriorityQueue()
+
+    for node in seq.keys():
+        cost = generate_node_cost(node)
+        pqueue.push((cost, node))
+    if verbose: print("pqueue length: ", len(pqueue))
+
+    while req:
+        #print("REQ: ", req)
+        #print("REQ_A: ", req_alpha)
+        #print("SEQ: ", seq)
+        #print("SEQ_B: ", seq_beta)
+        cost, node = pqueue.pop()
+
+        #get new nodes to minimize cost at removal
+        if False and node_costs_invalid_in_queue:
+            while node in node_costs_invalid_in_queue:
+                node_costs_invalid_in_queue.remove(node)
+                cost = generate_node_cost(node)
+                cost, node = pqueue.pushpop((cost, node))
+
+        #node must at least have a self-loop
+        areq_set = req_alpha[node]
+        min_rnode = None
+        min_rnode_cost = float('inf')
+        for rnode in req[node]:
+            if rnode in areq_set:
+                continue
+            rcost = generate_row_cost(rnode)
+            if rcost < min_rnode_cost:
+                min_rnode = rnode
+                min_rnode_cost = rcost
+        print("MIN_MAX: ", node, min_rnode)
+
+        #row norm
+        if len(seq[node]) > 1:
+            normr = 0
+            for snode in seq[node]:
+                normr += abs(edge_map[node, snode])**2
+            normr = normr ** .5
+            #row norm
+            normc = 0
+            for rnode in req[node]:
+                normc += abs(edge_map[rnode, node])**2
+            normc = normc ** .5
+
+            rel_r_to_c = np.count_nonzero(normr > normc) / len(normr)
+            print("REL LARGER: ", rel_r_to_c)
+
+            rvec = []
+            for idx, snode in enumerate(seq[node]):
+                if node == snode:
+                    rvec_self_idx = idx
+                rvec.append(np.max(abs(edge_map[node, snode] / normr)))
+
+            bignodes_r = np.array(rvec) >= 1./(len(seq[node]))**.5
+            rcount = np.count_nonzero(bignodes_r)
+            print("R: ", np.count_nonzero(bignodes_r), len(seq[node]), bignodes_r[rvec_self_idx], rel_r_to_c > .5)
+            cvec = []
+            for idx, rnode in enumerate(req[node]):
+                if node == rnode:
+                    cvec_self_idx = idx
+                cvec.append(np.max(abs(edge_map[rnode, node] / normc)))
+            bignodes_c = np.array(cvec) >= 1./(len(req[node]))**.5
+            ccount = np.count_nonzero(bignodes_c)
+            print("C: ", np.count_nonzero(bignodes_c), len(req[node]), bignodes_c[cvec_self_idx], rel_r_to_c < .5)
+
+            if node in seq[node]:
+                norma = abs(edge_map[node, node])
+                print("NORM: ", np.max(normr / norma), np.max(normc / norma))
+
+            if rel_r_to_c > .5:
+                print("Using ROW Operations")
+                if not bignodes_r[rvec_self_idx]:
+                    print("MUST PIVOT")
+                if rcount >= 2:
+                    print("MUST USE HOUSEHOLDER {0}x".format(rcount))
+                elif rcount == 1:
+                    print("DIRECT")
+            else:
+                print("Using COLUMN Operations")
+                if not bignodes_c[cvec_self_idx]:
+                    print("MUST PIVOT")
+                if ccount >= 2:
+                    print("MUST USE HOUSEHOLDER {0}x".format(ccount))
+                elif ccount == 1:
+                    print("DIRECT")
+        assert(np.isfinite(cost))
+
+        reduceLU(
+            node = node,
+            **kwargs
+        )
+
+def reduceLU(
+    seq,
+    req,
+    seq_beta,
+    req_alpha,
+    edge_map,
+    node,
+    node_costs_invalid_in_queue = None,
+):
+    self_edge = edge_map[node, node]
+
+    CLG = -1 / self_edge
+    #remove the self edge for the simplification stage
+    seq[node].remove(node)
+    req[node].remove(node)
+    del edge_map[node, node]
+
+    for snode in seq[node]:
+        sedge = edge_map[node, snode]
+        prod_L = sedge * CLG
+
+        for rnode in req[node]:
+            redge = edge_map[rnode, node]
+            prod = prod_L * redge
+
+            prev_edge = edge_map.get((rnode, snode), None)
+            if prev_edge is not None:
+                edge_map[(rnode, snode)] = prev_edge + prod
+            else:
+                edge_map[(rnode, snode)] = prod
+
+            seq.setdefault(rnode, set()).add(snode)
+            req.setdefault(snode, set()).add(rnode)
+
+        for rnode in req_alpha[node]:
+            redge = edge_map[rnode, node]
+            prod = prod_L * redge
+
+            prev_edge = edge_map.get((rnode, snode), None)
+            if prev_edge is not None:
+                edge_map[(rnode, snode)] = prev_edge + prod
+            else:
+                edge_map[(rnode, snode)] = prod
+
+            req_alpha.setdefault(snode, set()).add(rnode)
+
+    for snode in seq_beta[node]:
+        sedge = edge_map[node, snode]
+        prod_L = sedge * CLG
+
+        for rnode in req[node]:
+            redge = edge_map[rnode, node]
+            prod = prod_L * redge
+
+            prev_edge = edge_map.get((rnode, snode), None)
+            if prev_edge is not None:
+                edge_map[(rnode, snode)] = prev_edge + prod
+            else:
+                edge_map[(rnode, snode)] = prod
+
+            seq_beta.setdefault(rnode, set()).add(snode)
+
+        for rnode in req_alpha[node]:
+            redge = edge_map[rnode, node]
+            prod = prod_L * redge
+
+            prev_edge = edge_map.get((rnode, snode), None)
+            if prev_edge is not None:
+                edge_map[(rnode, snode)] = prev_edge + prod
+            else:
+                edge_map[(rnode, snode)] = prod
+
+            seq_beta.setdefault(rnode, set()).add(snode)
+            req_alpha.setdefault(snode, set()).add(rnode)
+
+    for snode in seq[node]:
+        if node_costs_invalid_in_queue:
+            node_costs_invalid_in_queue.add(snode)
+        del edge_map[node, snode]
+        req[snode].remove(node)
+    del seq[node]
+
+    for snode in seq_beta[node]:
+        del edge_map[node, snode]
+    del seq_beta[node]
+
+    for rnode in req[node]:
+        if node_costs_invalid_in_queue:
+            node_costs_invalid_in_queue.add(rnode)
+        del edge_map[rnode, node]
+        seq[rnode].remove(node)
+    del req[node]
+
+    for rnode in req_alpha[node]:
+        del edge_map[rnode, node]
+    del req_alpha[node]
     return
 
 
@@ -557,10 +807,10 @@ def inverse_solve_inplace(
 
     #simplify with the wrapped nodes
     mgraph_simplify_inplace(
-        seq      = seq,
-        req      = req,
-        edge_map = edge_map,
-        verbose  = verbose,
+        seq            = seq,
+        req            = req,
+        edge_map       = edge_map,
+        verbose        = verbose,
         Q_conditioning = Q_conditioning,
         **kwargs
     )
@@ -569,6 +819,7 @@ def inverse_solve_inplace(
     unwrapped_edge_map = dict()
     unwrapped_seq_map = defaultdict(set)
     unwrapped_req_map = defaultdict(set)
+
     for inode in inputs_set:
         winode = ('INPUT', inode)
         #Could get exceptions here if we don't purge and the input maps have spurious
