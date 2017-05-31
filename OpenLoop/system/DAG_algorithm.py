@@ -9,6 +9,7 @@ from collections import defaultdict
 import declarative
 
 from OpenLoop.utilities.priority_queue import HeapPriorityQueue
+from OpenLoop.utilities.print import pprint
 
 from ..base import (
     DictKey,
@@ -559,7 +560,7 @@ def mgraph_simplify_badguys(
                     print("PIVO: ", idx_pivot)
                     node_pivot = rvec_N[idx_pivot]
                     print("SWAP: ", node, node_pivot)
-                    pivotROW_OP(
+                    pivotCOL_OP(
                         node_costs_invalid_in_queue = node_costs_invalid_in_queue,
                         node1 = node,
                         node2 = node_pivot,
@@ -567,6 +568,7 @@ def mgraph_simplify_badguys(
                     )
                     node_costs_invalid_in_queue.add(node)
                     node_costs_invalid_in_queue.add(node_pivot)
+                    node = node_pivot
             elif rcount == 1:
                 print("DIRECT")
                 if rvec_self_idx is None or not bignodes_r[rvec_self_idx]:
@@ -578,7 +580,7 @@ def mgraph_simplify_badguys(
                     print("PIVO: ", idx_pivot)
                     node_pivot = rvec_N[idx_pivot]
                     print("SWAP: ", node, node_pivot)
-                    pivotROW_OP(
+                    pivotCOL_OP(
                         node_costs_invalid_in_queue = node_costs_invalid_in_queue,
                         node1 = node,
                         node2 = node_pivot,
@@ -586,6 +588,7 @@ def mgraph_simplify_badguys(
                     )
                     node_costs_invalid_in_queue.add(node)
                     node_costs_invalid_in_queue.add(node_pivot)
+                    node = node_pivot
                     #continue
         else:
             print("Using COLUMN Operations")
@@ -600,7 +603,7 @@ def mgraph_simplify_badguys(
                     print(idx_pivot)
                     node_pivot = cvec_N[idx_pivot]
                     print("SWAP: ", node, node_pivot)
-                    pivotCOL_OP(
+                    pivotROW_OP(
                         node_costs_invalid_in_queue = node_costs_invalid_in_queue,
                         node1 = node,
                         node2 = node_pivot,
@@ -612,6 +615,7 @@ def mgraph_simplify_badguys(
                 #make more efficient
                 nfrom = set(np.asarray(cvec_N)[bignodes_c])
                 nfrom.remove(node)
+                print("NFROM: ", nfrom, node)
                 householderREFL_COL_OP(
                     node_into = node,
                     nodes_from = nfrom,
@@ -628,7 +632,7 @@ def mgraph_simplify_badguys(
                     print(idx_pivot)
                     node_pivot = cvec_N[idx_pivot]
                     print("SWAP: ", node, node_pivot)
-                    pivotCOL_OP(
+                    pivotROW_OP(
                         node_costs_invalid_in_queue = node_costs_invalid_in_queue,
                         node1 = node,
                         node2 = node_pivot,
@@ -636,6 +640,7 @@ def mgraph_simplify_badguys(
                     )
                     node_costs_invalid_in_queue.add(node)
                     node_costs_invalid_in_queue.add(node_pivot)
+                    node = node_pivot
                     #continue
         assert(np.isfinite(cost))
 
@@ -738,39 +743,28 @@ def householderREFL_COL_OP(
     u_vec = dict()
     norm_sq = 0
 
-    print("SELF: ", edge_map[node_into, node_into][0])
-    for nfrom in nodes_from:
-        print("NFROM: ", nfrom, edge_map[node_into, nfrom][0])
-
     for node_from in nodes_from:
         edge = edge_map[node_into, node_from]
         norm_sq = norm_sq + abssq(edge)
         u_vec[node_from] = edge
 
-    if node_into in seq[node_into]:
-        edge = edge_map[node_into, node_into]
-        norm_rem_sq = norm_sq
-        norm_orig_sq = norm_sq + abssq(edge)
-        norm_orig = norm_orig_sq**.5
-        u_mod_edge = edge + norm_orig * edge / abs(edge)
-        norm_sq = norm_sq + abssq(u_mod_edge)
-        norm = norm_sq**.5
-        print("NORM_ORG", norm_orig[0])
-        edge_remem = edge
+    #this algorithm assumes that node_into also defines the column (so is on the "diagonal")
+    edge = edge_map[node_into, node_into]
+    norm_rem_sq = norm_sq
+    norm_orig_sq = norm_sq + abssq(edge)
+    norm_orig = norm_orig_sq**.5
+    u_mod_edge = edge + norm_orig * edge / abs(edge)
+    norm_sq = norm_sq + abssq(u_mod_edge)
+    norm = norm_sq**.5
+    #print("NORM_ORG", norm_orig[0])
+    edge_remem = edge
 
-        for k, u_edge in list(u_vec.items()):
-            u_vec[k] = u_edge / norm
-        u_vec[node_into] = u_mod_edge / norm
-    else:
-        norm = norm_sq**.5
-        u_mod_edge = norm
-        norm_sq = 2*norm_sq
-        norm = norm_sq**.5
+    for k, u_edge in list(u_vec.items()):
+        u_vec[k] = u_edge / norm
+    u_mod_edge = u_mod_edge / norm
+    u_vec[node_into] = u_mod_edge
 
-        for k, edge in list(u_vec.items()):
-            u_vec[k] = edge / norm
-
-        u_vec[node_into] = 1/2**.5
+    edge_inject = edge_remem - 2 * u_mod_edge * (u_mod_edge.conjugate() * edge_remem + norm_rem_sq / norm)
 
     #for k, edge in u_vec.items():
     #    print("UVEC: ", k , edge[0])
@@ -781,7 +775,11 @@ def householderREFL_COL_OP(
 
     fnode_edges = dict()
 
+    #these loops could probably be transposed
     for fnode, fnode_seq in seq.items():
+        #don't need to do the diagonal since that one is explicit later
+        #if fnode is node_into:
+        #    continue
         gen_edge = 0
         for k, edge in u_vec.items():
             if k in fnode_seq:
@@ -793,24 +791,48 @@ def householderREFL_COL_OP(
     for fnode, fedge in fnode_edges.items():
         for k, edge in u_vec.items():
             if fnode in req[k]:
-                edge_map2[fnode, k] = edge_map[fnode, k] - 2 * edge * fedge
+                edge_map[fnode, k] = edge_map[fnode, k] - 2 * edge * fedge
             else:
-                edge_map2[fnode, k] = - 2 * edge * fedge
-                #req[k].add(fnode)
-                #seq[fnode].add(k)
+                edge_map[fnode, k] = - 2 * edge * fedge
+                req[k].add(fnode)
+                seq[fnode].add(k)
+
+    #now do node_into column explicitely so we get the exact zeros/edge removal
+    edge_map[node_into, node_into] = edge_inject
+    for node_from in nodes_from:
+        seq[node_into].remove(node_from)
+        req[node_from].remove(node_into)
+        del edge_map[node_into, node_from]
 
     #now also apply to ALPHA
-    print("INTO: ", node_into)
-    print("FROM: ", nodes_from)
-    for k1k2, edge in list(edge_map2.items()):
-        edge_map2[k1k2] = edge[0]
-    print("EMAP: ", edge_map2)
-    print("SELF: ", edge_map2[node_into, node_into])
-    #print(edge_remem[0], edge_map[node_into, node_into][0])
-    #print("ECHECK: ", ((edge_map[node_into, node_into] - 2 * u_vec[node_into] * fnode_edges[node_into]))[0]),
-    print("ECHECK: ", ((edge_remem - 2 * u_vec[node_into] * (u_vec[node_into].conjugate() * edge_remem + norm_rem_sq / norm )))[0]),
-    for nfrom in nodes_from:
-        print("NFROM: ", nfrom, edge_map2[node_into, nfrom])
+    #This could probably be accelerated..
+    #gotta be careful with intermediates if trying a live update. Maybe could do a triangular loop?
+    edge_map2 = dict()
+    for k, edge in u_vec.items():
+        edge_c = edge.conjugate()
+        for rnode in req_alpha[k]:
+            edge_alpha = edge_map[rnode, k]
+            gain = -2 * edge_c * edge_alpha
+            for k_to, edge_to in u_vec.items():
+                edge_map2[rnode, k_to] = edge_map2.get((rnode, k_to), 0) + edge_to * gain
+
+    for (rnode, k_to), edge in edge_map2.items():
+        if rnode in req_alpha[k_to]:
+            edge_map[rnode, k_to] = edge_map[rnode, k_to] + edge
+        else:
+            edge_map[rnode, k_to] = edge
+            req_alpha[k_to].add(rnode)
+
+    #print("INTO: ", node_into)
+    #print("FROM: ", nodes_from)
+    #for k1k2, edge in list(edge_map2.items()):
+    #    edge_map2[k1k2] = edge[0]
+    #print("EMAP")
+    #pprint(edge_map2)
+    #print("SELF: ", edge_map2[node_into, node_into])
+    #print("ECHECK: ", edge_inject[0]),
+    #for nfrom in nodes_from:
+    #    print("NFROM: ", nfrom, edge_map2[node_into, nfrom])
     return
 
 def pivotROW_OP(

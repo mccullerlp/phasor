@@ -75,6 +75,7 @@ class CSystem(
                 if ch.loc_m.ref is not None:
                     loc_ch_list.append((ch.loc_m.ref, ch))
         loc_ch_list.sort()
+        #print(loc_ch_list)
         clist = [ch for loc, ch in loc_ch_list]
         return clist
 

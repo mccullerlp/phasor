@@ -159,10 +159,16 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
         def fitter_initial(ooa):
             for key in self.fitter_parameter:
                 ooa = ooa[key]
+            #gets the value purely from the ooa parameters
             val = ooa.get('ref', declarative.NOARG)
             if val is declarative.NOARG:
                 val = ooa.get('val', None)
-            return val
+            #should reflect the units that it wants
+            units_to = self.units
+            units_from = pint.ureg[ooa.units]
+            rescale = units_from / units_to
+            assert(rescale.unitless)
+            return val * rescale.to(pint.ureg.dimensionless).magnitude
 
         #TODO: fix name vs. name_global
         return [declarative.FrozenBunch(

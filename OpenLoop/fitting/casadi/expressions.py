@@ -148,21 +148,28 @@ class FitterExpression(FitterBase):
         for remapper in self.root.targets_recurse(VISIT.expression_remap):
             expr = remapper(expr)
 
-        N_total = N_expr * expr.shape[0] * expr.shape[1]
+        if expr.shape:
+            N_total = N_expr * expr.shape[0] * expr.shape[1]
 
-        onesA = casadi.MX.ones(expr.shape[0])
-        onesB = casadi.MX.ones(expr.shape[1])
+            onesA = casadi.MX.ones(expr.shape[0])
+            onesB = casadi.MX.ones(expr.shape[1])
 
-        #print("Final Ntotal T1: ", N_expr)
-        #print("Final Ntotal T2: ", N_total)
-        #print("FINAL EXPR: ", onesA.shape)
-        #print("FINAL EXPR: ", expr.shape)
-        #print("FINAL EXPR: ", casadi.dot(onesA, expr).shape)
-        #form the average
-        return declarative.Bunch(
-            expr = casadi.dot(casadi.dot(onesA, expr), onesB) / N_total,
-            expr_expanded = expr / N_expr,
-        )
+            #print("Final Ntotal T1: ", N_expr)
+            #print("Final Ntotal T2: ", N_total)
+            #print("FINAL EXPR: ", onesA.shape)
+            #print("FINAL EXPR: ", expr.shape)
+            #print("FINAL EXPR: ", casadi.dot(onesA, expr).shape)
+            #form the average
+            return declarative.Bunch(
+                expr = casadi.dot(casadi.dot(onesA, expr), onesB) / N_total,
+                expr_expanded = expr / N_expr,
+            )
+        else:
+            print("BAD")
+            return declarative.Bunch(
+                expr = expr / N_expr,
+                expr_expanded = expr / N_expr,
+            )
 
     print_level = 3
     def minimize_function(self):
