@@ -43,60 +43,56 @@ def rand_phase(N = 1):
 def randNZ(N = 1):
     return 1 - np.random.random()
 
+def mfunc_randargs(fname = None):
+    if fname is None:
+        names = [
+            'constant',
+            'cplx_constant',
+            'linear',
+            'cplx_linear',
+            'sine',
+            'exp',
+            'cplx_exp',
+        ]
+        fname = names[np.random.randint(0, len(names))]
+    if fname == 'constant':
+        return ('constant', randNZ(),)
+    if fname == 'cplx_constant':
+        return ('constant', rand_phase() * randNZ(),)
+    elif fname == 'linear':
+        return ('linear', randNZ(), randNZ())
+    elif fname == 'cplx_linear':
+        return ('linear', rand_phase() * randNZ(), rand_phase() * randNZ())
+    elif fname == 'sine':
+        #amplitude, freq, phase, const
+        return ('sine', randNZ(), 30 * np.random.random(), 2 * np.pi * np.random.random(), randNZ())
+    elif fname == 'exp':
+        #const, gain
+        return ('exp', randNZ(), 10 * np.random.random())
+    elif fname == 'cplx_exp':
+        #const, gain
+        return ('exp', randNZ(), 10 * np.random.random() * rand_phase())
+
+def mfunc(length, fname, *args):
+    if fname == 'constant':
+        val, = args
+        return val
+    elif fname == 'linear':
+        v1, v2 = args
+        X = np.linspace(0, 1, length)
+        return v1 + X * (v2 - v1)
+    elif fname == 'sine':
+        amp, F, phase, const = args
+        X = np.linspace(0, 1, length)
+        return amp * np.sin(X * F + phase) + const
+    elif fname == 'exp':
+        const, gain = args
+        X = np.linspace(0, 1, length)
+        return const * np.exp(X * gain)
+
 def test_sparse_SVD():
     N = 10
     length = 10
-    def mfunc_randargs(fname = None):
-        if fname is None:
-            names = [
-                'constant',
-                'cplx_constant',
-                'linear',
-                'cplx_linear',
-                'sine',
-                'exp',
-                'cplx_exp',
-            ]
-            fname = names[np.random.randint(0, len(names))]
-        if fname == 'constant':
-            return ('constant', randNZ(),)
-        if fname == 'cplx_constant':
-            return ('constant', rand_phase() * randNZ(),)
-        elif fname == 'linear':
-            return ('linear', randNZ(), randNZ())
-        elif fname == 'cplx_linear':
-            return ('linear', rand_phase() * randNZ(), rand_phase() * randNZ())
-        elif fname == 'sine':
-            #amplitude, freq, phase, const
-            return ('sine', randNZ(), 30 * np.random.random(), 2 * np.pi * np.random.random(), randNZ())
-        elif fname == 'exp':
-            #const, gain
-            return ('exp', randNZ(), 100 * np.random.random())
-        elif fname == 'cplx_exp':
-            #const, gain
-            return ('exp', randNZ(), 100 * np.random.random() * rand_phase())
-
-    print(mfunc_randargs())
-    print(mfunc_randargs())
-    print(mfunc_randargs())
-    print(mfunc_randargs())
-
-    def mfunc(length, fname, *args):
-        if fname == 'constant':
-            val, = args
-            return val
-        elif fname == 'linear':
-            v1, v2 = args
-            X = np.linspace(0, 1, length)
-            return v1 + X * (v2 - v1)
-        elif fname == 'sine':
-            amp, F, phase, const = args
-            X = np.linspace(0, 1, length)
-            return amp * np.sin(X * F + phase) + const
-        elif fname == 'exp':
-            const, gain = args
-            X = np.linspace(0, 1, length)
-            return const * np.exp(X * gain)
     print(mfunc(length, *mfunc_randargs()))
 
     edge_map = dict()
@@ -124,6 +120,68 @@ def test_sparse_SVD():
             np_test.assert_almost_equal(edge, 1)
         else:
             np_test.assert_almost_equal(edge, 0)
+    return
+
+def gen_rand_unitary(N = 10, length = 10):
+    edge_map = dict()
+    for idx in range(N):
+        to1 = idx
+        edge_map[idx, to1] = mfunc(length, *mfunc_randargs())
+
+        if np.random.randint(0, 3) == 0:
+            to2 = np.random.randint(0, N)
+            if to2 == to1:
+                if idx + 1 != N:
+                    to2 = to1 + 1
+                else:
+                    to2 = to1 - 1
+            edge_map[idx, to2] = mfunc(length, *mfunc_randargs())
+    sre1 = SRE_matrix_algorithms.edge_matrix_to_unitary_sre(edge_map)
+    return sre1
+
+def test_sparse_SVDinv():
+    N = 10
+    length = 10
+    U = gen_rand_unitary(N = N, length = length)
+    V = gen_rand_unitary(N = N, length = length)
+
+    seq = dict()
+    req = dict()
+    edge_map = dict()
+    for idx in range(N):
+        edge_map[idx, idx] = 10**(-5 * 10 * np.random.random())
+        seq[idx] = set([idx])
+        req[idx] = set([idx])
+    S = seq, req, edge_map
+
+    M = SRE_matrix_algorithms.matrix_mult_sre(
+        SRE_matrix_algorithms.matrix_mult_sre(U, S), V
+    )
+
+    SRE_matrix_algorithms.check_sre(M)
+
+    print("SPARSITY FRAC: ", SRE_matrix_algorithms.SRE_count_sparsity(M))
+
+    inputs_set = set(range(N))
+    outputs_set = set(range(N))
+
+    Mseq, Mreq, Medge_map = SRE_matrix_algorithms.copy_sre(M)
+    sbunch = DAG_algorithm.inverse_solve_inplace(
+        seq = Mseq,
+        req = Mreq,
+        edge_map = Medge_map,
+        inputs_set = inputs_set,
+        outputs_set = outputs_set,
+        verbose = True,
+    )
+
+    Minv = sbunch.seq, sbunch.req, sbunch.edge_map
+    SRE_matrix_algorithms.check_sre(M)
+    SRE_matrix_algorithms.check_sre(Minv)
+
+    Meye = SRE_matrix_algorithms.matrix_mult_sre(M, Minv)
+    pprint(Meye)
+    assert(False)
     return
 
 if __name__ == '__main__':

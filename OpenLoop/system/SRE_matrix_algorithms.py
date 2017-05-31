@@ -26,6 +26,8 @@ def matrix_mult_sre(sre1, sre2):
             e1 = edge_map1[k_from, k_mid]
             seq.setdefault(k_from, set())
             for k_to in mseq:
+                if k_to not in seq2[k_mid]:
+                    continue
                 e2 = edge_map2[k_mid, k_to]
                 if k_to in seq[k_from]:
                     edge_map[k_from, k_to] = edge_map[k_from, k_to] + e2 * e1
@@ -33,6 +35,29 @@ def matrix_mult_sre(sre1, sre2):
                     edge_map[k_from, k_to] = e2 * e1
                     seq[k_from].add(k_to)
                     req.setdefault(k_to, set()).add(k_from)
+
+    check_sre((seq, req, edge_map))
+    return seq, req, edge_map
+
+def check_sre(sre):
+    seq, req, edge_map = sre
+    for node in req:
+        for rnode in req[node]:
+            assert(node in seq[rnode])
+    for node in seq:
+        for snode in seq[node]:
+            assert(node in req[snode])
+            edge_map[node, snode]
+
+def copy_sre(sre):
+    Oseq, Oreq, Oedge_map = sre
+    seq = defaultdict(set)
+    req = defaultdict(set)
+    for k, s in Oseq.items():
+        seq[k] = set(s)
+    for k, s in Oreq.items():
+        req[k] = set(s)
+    edge_map = dict(Oedge_map)
     return seq, req, edge_map
 
 
