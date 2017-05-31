@@ -14,6 +14,7 @@ import pickle
 #import numpy as np
 
 from OpenLoop.system import DAG_algorithm
+from OpenLoop.system import SRE_matrix_algorithms
 from OpenLoop.utilities.print import pprint
 
 #from OpenLoop.utilities.np import logspaced
