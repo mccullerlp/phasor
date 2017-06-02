@@ -15,19 +15,19 @@ class Optical2PortModulator(
 ):
     @declarative.dproperty
     def Fr(self):
-        return ports.OpticalPort(sname = 'Fr', pchain = 'Bk')
+        return ports.OpticalPort(pchain = 'Bk')
 
     @declarative.dproperty
     def Bk(self):
-        return ports.OpticalPort(sname = 'Bk', pchain = 'Fr')
+        return ports.OpticalPort(pchain = 'Fr')
 
     @declarative.dproperty
     def Drv(self):
-        return ports.SignalInPort(sname = 'Drv')
+        return ports.SignalInPort()
 
     @declarative.dproperty
     def BA(self):
-        return ports.SignalOutPort(sname = 'BA')
+        return ports.SignalOutPort()
 
     @declarative.mproperty
     def ports_optical(self):
@@ -69,6 +69,20 @@ class PM(Optical2PortModulator):
     @declarative.mproperty
     def DrvPM(self):
         return self.Drv
+
+    @declarative.mproperty
+    def DrvFM(self):
+        return self.FM2PM.In
+
+    @declarative.dproperty
+    def FM2PM(self):
+        from .. import signals
+        return signals.Integrator()
+
+    @declarative.dproperty
+    def FM2PM_setup(self):
+        self.FM2PM.Out.bond(self.DrvPM)
+        return
 
     def system_setup_coupling(self, matrix_algorithm):
         cmap = {
@@ -160,6 +174,20 @@ class AMPM(
     @declarative.dproperty
     def DrvPM(self):
         return ports.SignalInPort()
+
+    @declarative.mproperty
+    def DrvFM(self):
+        return self.FM2PM.In
+
+    @declarative.dproperty
+    def FM2PM(self):
+        from .. import signals
+        return signals.Integrator()
+
+    @declarative.dproperty
+    def FM2PM_setup(self):
+        self.FM2PM.Out.bond(self.DrvPM)
+        return
 
     @declarative.mproperty
     def ports_optical(self):

@@ -210,7 +210,6 @@ def mgraph_simplify_inplace(
     seq, req,
     edge_map,
     verbose        = False,
-    Q_conditioning = False,
     sorted_order   = False,
 ):
     check_seq_req_balance(seq, req, edge_map)
@@ -560,7 +559,7 @@ def mgraph_simplify_badguys(
                     print("PIVO: ", idx_pivot)
                     node_pivot = rvec_N[idx_pivot]
                     print("SWAP: ", node, node_pivot)
-                    pivotCOL_OP(
+                    pivotROW_OP(
                         node_costs_invalid_in_queue = node_costs_invalid_in_queue,
                         node1 = node,
                         node2 = node_pivot,
@@ -580,7 +579,7 @@ def mgraph_simplify_badguys(
                     print("PIVO: ", idx_pivot)
                     node_pivot = rvec_N[idx_pivot]
                     print("SWAP: ", node, node_pivot)
-                    pivotCOL_OP(
+                    pivotROW_OP(
                         node_costs_invalid_in_queue = node_costs_invalid_in_queue,
                         node1 = node,
                         node2 = node_pivot,
@@ -603,7 +602,7 @@ def mgraph_simplify_badguys(
                     print(idx_pivot)
                     node_pivot = cvec_N[idx_pivot]
                     print("SWAP: ", node, node_pivot)
-                    pivotROW_OP(
+                    pivotCOL_OP(
                         node_costs_invalid_in_queue = node_costs_invalid_in_queue,
                         node1 = node,
                         node2 = node_pivot,
@@ -632,7 +631,7 @@ def mgraph_simplify_badguys(
                     print(idx_pivot)
                     node_pivot = cvec_N[idx_pivot]
                     print("SWAP: ", node, node_pivot)
-                    pivotROW_OP(
+                    pivotCOL_OP(
                         node_costs_invalid_in_queue = node_costs_invalid_in_queue,
                         node1 = node,
                         node2 = node_pivot,
@@ -650,7 +649,7 @@ def mgraph_simplify_badguys(
             **kwargs
         )
 
-def pivotCOL_OP(
+def pivotROW_OP(
     seq,
     req,
     seq_beta,
@@ -835,7 +834,7 @@ def householderREFL_COL_OP(
     #    print("NFROM: ", nfrom, edge_map2[node_into, nfrom])
     return
 
-def pivotROW_OP(
+def pivotCOL_OP(
     seq,
     req,
     seq_beta,
@@ -1130,9 +1129,21 @@ def inverse_solve_inplace(
     purge_in = True,
     purge_out = True,
     verbose = False,
-    Q_conditioning = False,
+    negative = False,
+    scattering = False,
     **kwargs
 ):
+    if scattering:
+        for node, nseq in seq.items():
+            if node in nseq:
+                edge_map[node, node] = 1 - edge_map[node, node]
+            else:
+                edge_map[node, node] = 1
+                nseq.add(node)
+                req[node].add(node)
+        #sign conventions reversed for scattering matrix
+        negative = not negative
+
     pre_purge_inplace(seq, req, edge_map)
 
     #first dress the nodes
@@ -1145,12 +1156,16 @@ def inverse_solve_inplace(
         edge_map[winode, inode] = 1
 
     wrapped_onodes = set()
+    if negative:
+        value = 1
+    else:
+        value = -1
     for onode in outputs_set:
         wonode = wrap_output_node(onode)
         wrapped_onodes.add(wonode)
         seq[onode].add(wonode)
         req[wonode].add(onode)
-        edge_map[onode, wonode] = 1
+        edge_map[onode, wonode] = value
 
     #purge_in = False
     #purge_out = False
@@ -1177,7 +1192,6 @@ def inverse_solve_inplace(
         req            = req,
         edge_map       = edge_map,
         verbose        = verbose,
-        Q_conditioning = Q_conditioning,
         **kwargs
     )
 
@@ -1211,8 +1225,21 @@ def push_solve_inplace(
     inputs_AC_set = frozenset(),
     purge_in = True,
     purge_out = True,
+    negative = False,
+    scattering = False,
 ):
     pre_purge_inplace(seq, req, edge_map)
+
+    if scattering:
+        for node, nseq in seq.items():
+            if node in nseq:
+                edge_map[node, node] = edge_map[node, node] - 1
+            else:
+                edge_map[node, node] = -1
+                nseq.add(node)
+                req[node].add(node)
+        #sign conventions reversed for scattering matrix
+        negative = not negative
 
     #first dress the nodes. The source vectors is converted into edges with a special
     #source node
@@ -1232,6 +1259,10 @@ def push_solve_inplace(
         req[inode].add(winode)
         edge_map[winode, inode] = 1
 
+    if negative:
+        value = 1
+    else:
+        value = -1
     wrapped_onodes = set()
     for onode in outputs_set:
         wonode = wrap_output_node(onode)
@@ -1239,7 +1270,7 @@ def push_solve_inplace(
         wrapped_onodes.add(wonode)
         seq[onode].add(wonode)
         req[wonode].add(onode)
-        edge_map[onode, wonode] = 1
+        edge_map[onode, wonode] = value
 
     #purge_in = False
     #purge_out = False

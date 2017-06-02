@@ -26,6 +26,7 @@ from .RMS import (
 
 from .siso_filter import (
     TransferFunctionSISO,
+    Integrator,
     TransferFunctionSISOMechSingleResonance,
     Gain,
 )

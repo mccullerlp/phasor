@@ -21,7 +21,6 @@ from OpenLoop.utilities.print import pprint
 
 def isolve_mat(
         arr,
-        Q_conditioning = True,
         **kwargs
 ):
     arr = arr.astype(float)
@@ -34,7 +33,7 @@ def isolve_mat(
         for idx_r in range(arr.shape[1]):
             v = arr[idx_c, idx_r]
             if v != 0:
-                edge_map[idx_c, idx_r] = -v
+                edge_map[idx_c, idx_r] = v
                 seq[idx_c].add(idx_r)
                 req[idx_r].add(idx_c)
 
@@ -45,7 +44,6 @@ def isolve_mat(
         outputs_set = outputs_set,
         edge_map = edge_map,
         verbose = True,
-        Q_conditioning = Q_conditioning,
         **kwargs
     )
     arr2 = np.zeros_like(arr)
@@ -84,16 +82,17 @@ def check_system(fname = './LIGOX_mat.pckl'):
         keys.add(k2)
         seq[k1].add(k2)
         req[k2].add(k1)
-        if k1 == k2:
-            mat_sub_one[k1, k2] = edge - 1
-        else:
-            mat_sub_one[k1, k2] = edge
+        mat_sub_one[k1, k2] = edge
+        #if k1 == k2:
+        #    mat_sub_one[k1, k2] = edge - 1
+        #else:
+        #    mat_sub_one[k1, k2] = edge
 
-    for k in keys:
-        if (k, k) not in mat_sub_one:
-            mat_sub_one[k, k] = -1
-            seq[k].add(k)
-            req[k].add(k)
+    #for k in keys:
+    #    if (k, k) not in mat_sub_one:
+    #        mat_sub_one[k, k] = -1
+    #        seq[k].add(k)
+    #        req[k].add(k)
 
     inputs_set = set([data.AC_index[0]])
     outputs_set = set([data.AC_index[1]])
@@ -105,6 +104,8 @@ def check_system(fname = './LIGOX_mat.pckl'):
         outputs_set = outputs_set,
         edge_map = mat_sub_one,
         verbose = True,
+        scattering = True,
+        #negative = True,
     )
 
     rel_data = sbunch.edge_map[data.AC_index]/data.AC_solution
@@ -196,21 +197,21 @@ def test_graph_solver4():
 #
 def test_graph_solver_r4():
     arr = np.random.rand(4, 4)
-    check_arr(arr, Q_conditioning = False)
+    check_arr(arr, )
 #
 #def test_graph_solver_r4():
 #    arr = np.random.rand(4, 4)
-#    check_arr(arr, Q_conditioning = False, sorted_order = True)
+#    check_arr(arr, sorted_order = True)
 #
 def test_graph_solver_r10():
     arr = np.random.rand(10, 10)
-    check_arr(arr, Q_conditioning = False)
+    check_arr(arr, )
 
 
 ## Should tag as "slow"
 #def test_graph_solver_r100():
 #    arr = np.random.rand(300, 300)
-#    check_arr(arr, Q_conditioning = False)
+#    check_arr(arr, )
 #    assert(False)
 #
 #

@@ -98,6 +98,17 @@ class TransferFunctionSISO(TransferFunctionSISOBase):
         return rval
 
 
+class Integrator(TransferFunctionSISOBase):
+    def filter_func(self, freq):
+        freq = np.asarray(freq)
+        return 1/freq
+
+    @declarative.dproperty
+    def no_DC(self, val = True):
+        val = self.ooa_params.setdefault('no_DC', val)
+        return val
+
+
 class Gain(TransferFunctionSISOBase):
     def gain(self, val = 1):
         return val

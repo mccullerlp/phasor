@@ -149,7 +149,7 @@ def test_sparse_SVDinv():
     req = dict()
     edge_map = dict()
     for idx in range(N):
-        edge_map[idx, idx] = 10**(-5 * 10 * np.random.random())
+        edge_map[idx, idx] = 10**(-5 + 10 * np.random.random())
         seq[idx] = set([idx])
         req[idx] = set([idx])
     S = seq, req, edge_map
@@ -173,6 +173,7 @@ def test_sparse_SVDinv():
         inputs_set = inputs_set,
         outputs_set = outputs_set,
         verbose = True,
+        negative = False,
     )
 
     Minv = sbunch.seq, sbunch.req, sbunch.edge_map
@@ -181,7 +182,11 @@ def test_sparse_SVDinv():
 
     Meye = SRE_matrix_algorithms.matrix_mult_sre(M, Minv)
     pprint(Meye)
-    assert(False)
+    for (k_t, k_f), edge in Meye[2].items():
+        if (k_t == k_f):
+            np_test.assert_almost_equal(edge - 1, 0)
+        else:
+            np_test.assert_almost_equal(edge, 0)
     return
 
 if __name__ == '__main__':

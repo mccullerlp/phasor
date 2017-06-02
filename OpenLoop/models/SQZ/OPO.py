@@ -18,6 +18,13 @@ def dist_m_from_XY_mm(A, B):
 #FROM dcc E1600051, and T1700104
 #OLD version is E1000023
 class OPOaLIGO(optics.OpticalCouplerBase):
+    @declarative.dproperty
+    def include_crystal(self, val = True):
+        """
+        """
+        val = self.ooa_params.setdefault('include_crystal', val)
+        return val
+
 
     @declarative.dproperty
     def M1_loc_XY_mm(self, val = (21.104, 18.258)):
@@ -180,10 +187,15 @@ class OPOaLIGO(optics.OpticalCouplerBase):
         self.M2.FrA.bond(self.S_1_2.Bk)
         self.M2.FrB.bond(self.S_2_3.Fr)
         self.M3.FrA.bond(self.S_2_3.Bk)
-        self.M3.FrB.bond(self.S_3_KTP.Fr)
-        self.ktp.Fr.bond(self.S_3_KTP.Bk)
-        self.ktp.Bk.bond(self.S_KTP_4.Fr)
-        self.M4.FrA.bond(self.S_KTP_4.Bk)
+        if self.include_crystal:
+            self.M3.FrB.bond(self.S_3_KTP.Fr)
+            self.ktp.Fr.bond(self.S_3_KTP.Bk)
+            self.ktp.Bk.bond(self.S_KTP_4.Fr)
+            self.M4.FrA.bond(self.S_KTP_4.Bk)
+        else:
+            self.M3.FrB.bond(self.S_3_KTP.Fr)
+            self.S_3_KTP.Bk.bond(self.S_KTP_4.Fr)
+            self.M4.FrA.bond(self.S_KTP_4.Bk)
         self.M4.FrB.bond(self.S_4_1.Fr)
         self.M1.FrA.bond(self.S_4_1.Bk)
 
@@ -199,11 +211,24 @@ class OPOTestStand(optics.OpticalCouplerBase):
     """
 
     @declarative.dproperty
-    def include_PM(self, val = True):
+    def include_PM(self, val = False):
         """
-        Number of iterations to use in the ODE solution
         """
         val = self.ooa_params.setdefault('include_PM', val)
+        return val
+
+    @declarative.dproperty
+    def include_PDH(self, val = False):
+        """
+        """
+        val = self.ooa_params.setdefault('include_PDH', val)
+        return val
+
+    @declarative.dproperty
+    def include_CLF(self, val = False):
+        """
+        """
+        val = self.ooa_params.setdefault('include_CLF', val)
         return val
 
     @declarative.dproperty
@@ -211,6 +236,14 @@ class OPOTestStand(optics.OpticalCouplerBase):
         val = base.Frequency(
             F_Hz  = 3.14e6,
             order = 2,
+        )
+        return val
+
+    @declarative.dproperty
+    def F_PDH(self):
+        val = base.Frequency(
+            F_Hz  = 80e6,
+            order = 1,
         )
         return val
 
@@ -271,6 +304,19 @@ class OPOTestStand(optics.OpticalCouplerBase):
                 amplitude = 0,
             )
 
+        if self.include_PDH:
+            self.my.generateF_PDH = signals.SignalGenerator(
+                F = self.F_PDH,
+                amplitude = 1,
+            )
+            self.my.PDH_amp = signals.DistributionAmplifier(
+                port_gains = dict(
+                    to_LO = 1,
+                    to_PM = 0.01,
+                ),
+            )
+            self.PDH_amp.In.bond(self.generateF_PDH.Out)
+
         self.my.ditherPM = optics.PM()
         if self.include_PM:
             self.ditherPM.Drv.bond(self.generateF_PM.Out)
@@ -278,6 +324,10 @@ class OPOTestStand(optics.OpticalCouplerBase):
         self.my.ditherPMRead = optics.PM()
         if self.include_PM:
             self.ditherPMRead.Drv.bond(self.generateF_PMRead.Out)
+
+        self.my.ditherPDH = optics.PM()
+        if self.include_PDH:
+            self.ditherPDH.Drv.bond(self.PDH_amp.to_PM)
 
         self.PSLRs.Fr.bond(self.my.ditherPMRead.Fr)
         self.my.hPD_R = optics.HiddenVariableHomodynePD(
@@ -291,6 +341,7 @@ class OPOTestStand(optics.OpticalCouplerBase):
 
         self.PSLG.Fr.bond_sequence(
             self.ditherPM.Fr,
+            self.ditherPDH.Fr,
             self.opo.M1.BkA,
         )
 
@@ -311,7 +362,7 @@ class OPOTestStand(optics.OpticalCouplerBase):
             self.opo.M2.BkA.bond_sequence(
                 self.my.PSLR_seed.Fr,
             )
-        if np.any(self.PSLR_clf.power_W.val != 0):
+        if self.include_CLF and np.any(self.PSLR_clf.power_W.val != 0):
             self.opo.M2.BkA.bond_sequence(
                 self.my.PSLR_clf.Fr,
             )
@@ -327,15 +378,16 @@ class OPOTestStand(optics.OpticalCouplerBase):
             self.hPD_R.Fr,
         )
 
-        self.my.signal_clf = signals.SignalGenerator(
-            F = self.F_CLF,
-            harmonic_gains = {
-                2 : 1,
-            }
-        )
-        self.my.mix_clf_2x = signals.Mixer()
-        self.mix_clf_2x.LO.bond(self.signal_clf.OutH2)
-        self.mix_clf_2x.I.bond(self.PD_CLF.Wpd)
+        if self.include_CLF:
+            self.my.signal_clf = signals.SignalGenerator(
+                F = self.F_CLF,
+                harmonic_gains = {
+                    2 : 1,
+                }
+            )
+            self.my.mix_clf_2x = signals.Mixer()
+            self.mix_clf_2x.LO.bond(self.signal_clf.OutH2)
+            self.mix_clf_2x.I.bond(self.PD_CLF.Wpd)
 
         self.my.DC_R = readouts.DCReadout(
             port = self.PD_R.Wpd.o,
@@ -344,36 +396,50 @@ class OPOTestStand(optics.OpticalCouplerBase):
             port = self.PD_G.Wpd.o,
         )
 
+        if self.include_PDH:
+            self.my.PDH_MIX = signals.Mixer()
+            self.PDH_MIX.LO.bond(self.PDH_amp.to_LO)
+            self.PDH_MIX.I.bond(self.PD_G.Wpd)
+            self.my.DC_PDH = readouts.DCReadout(
+                port = self.PDH_MIX.R_I.o,
+            )
+            self.my.AC_PDH_PM = readouts.ACReadout(
+                portN = self.PDH_MIX.R_I.o,
+                portD = self.ditherPM.DrvFM.i,
+            )
+
         self.my.DC_CLF = readouts.DCReadout(
             port = self.PD_CLF.Wpd.o,
         )
-        self.my.DCI_CLF = readouts.DCReadout(
-            port = self.mix_clf_2x.R_I.o,
-        )
-        self.my.DCQ_CLF = readouts.DCReadout(
-            port = self.mix_clf_2x.R_Q.o,
-        )
+        if self.include_CLF:
+            self.my.DCI_CLF = readouts.DCReadout(
+                port = self.mix_clf_2x.R_I.o,
+            )
+            self.my.DCQ_CLF = readouts.DCReadout(
+                port = self.mix_clf_2x.R_Q.o,
+            )
 
-        self.my.mix_clf_hdyne_1xI = signals.Mixer()
-        self.my.mix_clf_hdyne_1xQ = signals.Mixer()
-        self.mix_clf_hdyne_1xI.LO.bond(self.signal_clf.Out)
-        self.mix_clf_hdyne_1xI.I.bond(self.hPD_R.rtWpdI)
-        self.mix_clf_hdyne_1xQ.LO.bond(self.signal_clf.Out)
-        self.mix_clf_hdyne_1xQ.I.bond(self.hPD_R.rtWpdQ)
+        if self.include_CLF:
+            self.my.mix_clf_hdyne_1xI = signals.Mixer()
+            self.my.mix_clf_hdyne_1xQ = signals.Mixer()
+            self.mix_clf_hdyne_1xI.LO.bond(self.signal_clf.Out)
+            self.mix_clf_hdyne_1xI.I.bond(self.hPD_R.rtWpdI)
+            self.mix_clf_hdyne_1xQ.LO.bond(self.signal_clf.Out)
+            self.mix_clf_hdyne_1xQ.I.bond(self.hPD_R.rtWpdQ)
 
-        self.my.hDCAmpI_CLF = readouts.DCReadout(
-            port = self.mix_clf_hdyne_1xI.R_I.o,
-        )
-        self.my.hDCAmpQ_CLF = readouts.DCReadout(
-            port = self.mix_clf_hdyne_1xI.R_Q.o,
-        )
+            self.my.hDCAmpI_CLF = readouts.DCReadout(
+                port = self.mix_clf_hdyne_1xI.R_I.o,
+            )
+            self.my.hDCAmpQ_CLF = readouts.DCReadout(
+                port = self.mix_clf_hdyne_1xI.R_Q.o,
+            )
 
-        self.my.hDCPhaseI_CLF = readouts.DCReadout(
-            port = self.mix_clf_hdyne_1xQ.R_I.o,
-        )
-        self.my.hDCPhaseQ_CLF = readouts.DCReadout(
-            port = self.mix_clf_hdyne_1xQ.R_Q.o,
-        )
+            self.my.hDCPhaseI_CLF = readouts.DCReadout(
+                port = self.mix_clf_hdyne_1xQ.R_I.o,
+            )
+            self.my.hDCPhaseQ_CLF = readouts.DCReadout(
+                port = self.mix_clf_hdyne_1xQ.R_Q.o,
+            )
 
         if self.ooa_params.setdefault('include_AC', True):
             self.my.AC_G = readouts.HomodyneACReadout(

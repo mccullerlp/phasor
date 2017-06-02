@@ -146,6 +146,20 @@ class OPOPlotGroup(declarative.OverridableObject):
         axB.finalize()
         return axB
 
+    def initial_PDH_perf(self):
+        axB = generate_stacked_plot_ax(
+            name_use_list = (
+                (self.PDH_GAIN, dict()),
+                (self.GREFL_PWR, dict()),
+                (self.GCAV_PWR, dict()),
+                (self.SQZ, dict()),
+            ),
+            Nrows=2
+        )
+        axB.ax_bottom.set_xlabel(self.X.label)
+        axB.finalize()
+        return axB
+
     def CLF_DC(self, ax, color = 'red', **kw):
         if not ax: return
         ax.plot(

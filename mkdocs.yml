@@ -2,14 +2,18 @@ site_name: Python Declarative
 pages:
     - Overview: README.md
     - Mode Matching: alm.md
+    - Test: green_table_QUICK.md
 theme: readthedocs
 site_dir: build/site/
 use_directory_urls: false
 dev_addr: 127.0.0.1:7998
-extra_css: [default.css]
+extra_css:
+    - foundation.css
+extra_javascript:
+    - setup_highlight.js
 markdown_extensions:
     #- codehilite
-    #- fenced_code
+    - fenced_code
     - smarty
     - toc
     #- wikilinks

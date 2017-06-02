@@ -9,7 +9,7 @@ import collections
 import numpy as np
 
 from . import ports
-#from ..utilities.print import pprint
+from ..utilities.print import pprint
 
 from ..system.matrix_injections import (
     FactorCouplingBase,
@@ -405,12 +405,19 @@ class ExpMatCoupling(FactorCouplingBase):
         #the inputs do not change
         solution = dict()
         dval_out = collections.defaultdict(lambda : 0)
+
+        #alter the derivative matrix to pass through the direct values
+        for idx in range(len(pks)):
+            in_map = dMexp_s1.get(idx, None)
+            if in_map is None:
+                dMexp_s1[idx] = {idx : 1}
+                continue
+            in_map[idx] = in_map.get(idx, 0) + 1
+
         for idx_out, in_map in dMexp_s1.items():
             for idx_in, edge in in_map.items():
                 pkin = self.in_map[pks[idx_in]]
                 pkout = self.out_map[pks[idx_out]]
-                if idx_in == idx_out:
-                    edge = edge + 1
 
                 solution[pkin, pkout] = edge
 
@@ -428,7 +435,7 @@ class ExpMatCoupling(FactorCouplingBase):
                 continue
             val = pkv[idx_out]
             altered_val = val - dval_out.get(idx_out, 0)
-            #print("ALT: ", pkout, altered_val)
+            #print("ALT: ", pkout, val, dval_out.get(idx, 0), altered_val)
             vals_inj[pkout] = altered_val
         self.vals_inj = vals_inj
 
