@@ -1133,18 +1133,19 @@ def inverse_solve_inplace(
     scattering = False,
     **kwargs
 ):
+    pre_purge_inplace(seq, req, edge_map)
+
     if scattering:
-        for node, nseq in seq.items():
-            if node in nseq:
-                edge_map[node, node] = 1 - edge_map[node, node]
+        keys = set(seq.keys()) | set(req.keys())
+        for node in keys:
+            if node in seq[node]:
+                edge_map[node, node] = edge_map[node, node] - 1
             else:
-                edge_map[node, node] = 1
-                nseq.add(node)
+                edge_map[node, node] = -1
+                seq[node].add(node)
                 req[node].add(node)
         #sign conventions reversed for scattering matrix
         negative = not negative
-
-    pre_purge_inplace(seq, req, edge_map)
 
     #first dress the nodes
     wrapped_inodes = set()
@@ -1231,12 +1232,13 @@ def push_solve_inplace(
     pre_purge_inplace(seq, req, edge_map)
 
     if scattering:
-        for node, nseq in seq.items():
-            if node in nseq:
+        keys = set(seq.keys()) | set(req.keys())
+        for node in keys:
+            if node in seq[node]:
                 edge_map[node, node] = edge_map[node, node] - 1
             else:
                 edge_map[node, node] = -1
-                nseq.add(node)
+                seq[node].add(node)
                 req[node].add(node)
         #sign conventions reversed for scattering matrix
         negative = not negative
