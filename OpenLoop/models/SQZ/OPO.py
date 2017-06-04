@@ -403,9 +403,13 @@ class OPOTestStand(optics.OpticalCouplerBase):
             self.my.DC_PDH = readouts.DCReadout(
                 port = self.PDH_MIX.R_I.o,
             )
-            self.my.AC_PDH_PM = readouts.ACReadout(
+            self.my.AC_PDH_FM = readouts.ACReadout(
                 portN = self.PDH_MIX.R_I.o,
                 portD = self.ditherPM.DrvFM.i,
+            )
+            self.my.AC_PDH_PM = readouts.ACReadout(
+                portN = self.PDH_MIX.R_I.o,
+                portD = self.ditherPM.DrvPM.i,
             )
 
         self.my.DC_CLF = readouts.DCReadout(
