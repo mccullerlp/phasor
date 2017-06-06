@@ -30,6 +30,12 @@ class TransferFunctionSISOBase(SignalElementBase):
         return val
 
     @declarative.dproperty
+    def F_cutoff_low(self, val = 0):
+        #this is INCLUSIVE
+        val = self.ooa_params.setdefault('F_cutoff_low', val)
+        return val
+
+    @declarative.dproperty
     def In(self):
         return ports.SignalInPort(pchain = lambda : self.Out)
 
@@ -53,11 +59,15 @@ class TransferFunctionSISOBase(SignalElementBase):
         for kfrom in ports_algorithm.port_update_get(self.In.i):
             if abs(self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey])) > self.F_cutoff:
                 continue
+            if abs(self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey])) < self.F_cutoff_low:
+                continue
             if self.no_DC and self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey]) == 0:
                 continue
             ports_algorithm.port_coupling_needed(self.Out.o, kfrom)
         for kto in ports_algorithm.port_update_get(self.Out.o):
             if abs(self.system.classical_frequency_extract_center(kto[ports.ClassicalFreqKey])) > self.F_cutoff:
+                continue
+            if abs(self.system.classical_frequency_extract_center(kto[ports.ClassicalFreqKey])) < self.F_cutoff_low:
                 continue
             if self.no_DC and self.system.classical_frequency_extract_center(kto[ports.ClassicalFreqKey]) == 0:
                 continue
@@ -67,6 +77,8 @@ class TransferFunctionSISOBase(SignalElementBase):
     def system_setup_coupling(self, matrix_algorithm):
         for kfrom in matrix_algorithm.port_set_get(self.In.i):
             if abs(self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey])) > self.F_cutoff:
+                continue
+            if abs(self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey])) < self.F_cutoff_low:
                 continue
             if self.no_DC and self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey]) == 0:
                 continue

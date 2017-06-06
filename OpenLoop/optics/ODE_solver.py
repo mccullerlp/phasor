@@ -419,7 +419,8 @@ class ExpMatCoupling(FactorCouplingBase):
                 pkin = self.in_map[pks[idx_in]]
                 pkout = self.out_map[pks[idx_out]]
 
-                solution[pkin, pkout] = edge
+                if pkin is not None and pkout is not None:
+                    solution[pkin, pkout] = edge
 
                 #also compute dval_out
                 val_orig = pk_original[idx_in]

@@ -19,11 +19,11 @@ class AOMBasic(
 ):
     @declarative.dproperty
     def Fr(self):
-        return ports.OpticalPort()
+        return ports.OpticalPort(pchain = lambda : self.Bk)
 
     @declarative.dproperty
     def Bk(self):
-        return ports.OpticalPort()
+        return ports.OpticalPort(pchain = lambda : self.Fr)
 
     @declarative.dproperty
     def Drv(self):

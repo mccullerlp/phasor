@@ -278,9 +278,9 @@ class OPOTestStand(optics.OpticalCouplerBase):
             power_W = .0000,
             multiple = 1,
             phase_deg = 00,
-            classical_fdict = {
-                self.F_CLF : 1,
-            }
+            #classical_fdict = {
+            #    self.F_CLF : 1,
+            #}
         )
 
         self.my.PD_R = optics.MagicPD()
@@ -305,14 +305,14 @@ class OPOTestStand(optics.OpticalCouplerBase):
             )
 
         if self.include_PDH:
-            self.my.generateF_PDH = signals.SignalGenerator(
-                F = self.F_PDH,
+            self.my.generateF_PDH = VCO.VCO(
+                f_dict = {self.F_PDH : 1},
                 amplitude = 1,
             )
             self.my.PDH_amp = signals.DistributionAmplifier(
                 port_gains = dict(
                     to_LO = 1,
-                    to_PM = 0.01,
+                    to_PM = 0.1,
                 ),
             )
             self.PDH_amp.In.bond(self.generateF_PDH.Out)
@@ -363,8 +363,28 @@ class OPOTestStand(optics.OpticalCouplerBase):
                 self.my.PSLR_seed.Fr,
             )
         if self.include_CLF and np.any(self.PSLR_clf.power_W.val != 0):
+            #self.my.generateF_PDH = VCO.VCO(
+            #need to make this a VCO with a 2nd harmonic generator
+            self.my.signal_clf = signals.SignalGenerator(
+                F = self.F_CLF,
+                harmonic_gains = {
+                    2 : 1,
+                }
+            )
+            self.my.aom_clf = optics.AOMBasic()
+            self.my.aom_clf.Drv.bond(self.signal_clf.Out)
+
+            self.my.Mphase_clf = optics.Mirror(
+                phase_rad = 0,
+                AOI_deg = 45,
+                T_hr = 0,
+            )
+            self.my.PSLR_clf.Fr.bond_sequence(
+                self.aom_clf.Fr,
+                self.Mphase_clf.FrA,
+            )
             self.opo.M2.BkA.bond_sequence(
-                self.my.PSLR_clf.Fr,
+                self.Mphase_clf.FrB,
             )
         self.opo.M2.BkB.bond_sequence(
             self.PD_CLF.Fr,
@@ -373,18 +393,20 @@ class OPOTestStand(optics.OpticalCouplerBase):
             self.PD_G.Fr,
             self.hPD_G.Fr,
         )
+        self.my.Mphase_Rreadout = optics.Mirror(
+            phase_rad = 0,
+            AOI_deg = 45,
+            T_hr = 0,
+        )
         self.my.mDC_readout.BkA.bond_sequence(
+            self.Mphase_Rreadout.FrA,
+        )
+        self.Mphase_Rreadout.FrB.bond_sequence(
             self.PD_R.Fr,
             self.hPD_R.Fr,
         )
 
         if self.include_CLF:
-            self.my.signal_clf = signals.SignalGenerator(
-                F = self.F_CLF,
-                harmonic_gains = {
-                    2 : 1,
-                }
-            )
             self.my.mix_clf_2x = signals.Mixer()
             self.mix_clf_2x.LO.bond(self.signal_clf.OutH2)
             self.mix_clf_2x.I.bond(self.PD_CLF.Wpd)
@@ -416,12 +438,17 @@ class OPOTestStand(optics.OpticalCouplerBase):
             port = self.PD_CLF.Wpd.o,
         )
         if self.include_CLF:
-            self.my.DCI_CLF = readouts.DCReadout(
+            self.my.DCAmp_CLF = readouts.DCReadout(
                 port = self.mix_clf_2x.R_I.o,
             )
-            self.my.DCQ_CLF = readouts.DCReadout(
+            self.my.DCPhase_CLF = readouts.DCReadout(
                 port = self.mix_clf_2x.R_Q.o,
             )
+            #need the AOM VCO to work for this readout
+            #self.my.ACAmp_CLF = readouts.ACReadout(
+            #    portN = self.mix_clf_2x.R_I.o,
+            #    portD = self.,
+            #)
 
         if self.include_CLF:
             self.my.mix_clf_hdyne_1xI = signals.Mixer()
@@ -443,6 +470,10 @@ class OPOTestStand(optics.OpticalCouplerBase):
             )
             self.my.hDCPhaseQ_CLF = readouts.DCReadout(
                 port = self.mix_clf_hdyne_1xQ.R_Q.o,
+            )
+            self.my.hACAmpI_CLF = readouts.ACReadout(
+                portN = self.mix_clf_hdyne_1xI.R_I.o,
+                portD = self.ditherPM.DrvPM.i,
             )
 
         if self.ooa_params.setdefault('include_AC', True):

@@ -179,7 +179,7 @@ class OPOPlotGroup(declarative.OverridableObject):
 
     @declarative.mproperty
     def CLF_2x_phasor(self):
-        return self.sys.test.DCI_CLF.DC_readout + self.sys.test.DCQ_CLF.DC_readout*1j
+        return self.sys.test.DCAmp_CLF.DC_readout + self.sys.test.DCPhase_CLF.DC_readout*1j
 
     def CLF_2x_IQ_mag(
             self,

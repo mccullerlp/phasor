@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import division
-from __future__ import print_function
+from __future__ import division, print_function
 #from OpenLoop.utilities.print import print
+import declarative
 
 import numpy as np
 
@@ -12,13 +12,22 @@ from . import ports
 
 
 class Mixer(bases.SignalElementBase):
-    def __build__(self):
-        super(Mixer, self).__build__()
-        self.my.LO  = ports.SignalInPort()
-        self.my.I   = ports.SignalInPort()
-        self.my.R_I = ports.SignalOutPort()
-        self.my.R_Q = ports.SignalOutPort()
-        return
+
+    @declarative.dproperty
+    def LO(self):
+        return ports.SignalInPort()
+
+    @declarative.dproperty
+    def I(self):
+        return ports.SignalInPort()
+
+    @declarative.dproperty
+    def R_I(self):
+        return ports.SignalOutPort()
+
+    @declarative.dproperty
+    def R_Q(self):
+        return ports.SignalOutPort()
 
     def system_setup_ports(self, ports_algorithm):
         for kfrom1, kfrom2 in ports_algorithm.symmetric_update(self.LO.i, self.I.i):
@@ -89,13 +98,22 @@ class Mixer(bases.SignalElementBase):
 
 
 class Modulator(bases.SignalElementBase):
-    def __build__(self):
-        super(Modulator, self).__build__()
-        self.my.In = ports.SignalInPort()
-        self.my.Mod_amp   = ports.SignalInPort()
-        self.my.Mod_phase = ports.SignalInPort()
-        self.my.Out = ports.SignalOutPort()
-        return
+
+    @declarative.dproperty
+    def In(self):
+        return ports.SignalInPort()
+
+    @declarative.dproperty
+    def Mod_amp(self):
+        return ports.SignalInPort()
+
+    @declarative.dproperty
+    def Mod_phase(self):
+        return ports.SignalInPort()
+
+    @declarative.dproperty
+    def Out(self):
+        return ports.SignalOutPort()
 
     def system_setup_ports(self, ports_algorithm):
         for kfrom in ports_algorithm.port_update_get(self.In.i):
@@ -182,3 +200,78 @@ class Modulator(bases.SignalElementBase):
                         self.symbols.i * np.sign(freq_In) / 4,
                     )
         return
+
+
+class Harmonic2Generator(bases.SignalElementBase):
+    @declarative.dproperty
+    def not_ready(self):
+        raise NotImplementedError("Can't instantiate since this class isn't fully implemented")
+
+    def harmonicN(self, val = 2):
+        return val
+
+    @declarative.dproperty
+    def In(self):
+        return ports.SignalInPort()
+
+    @declarative.dproperty
+    def Out(self):
+        return ports.SignalOutPort()
+
+    def system_setup_ports(self, ports_algorithm):
+        for kfrom1 in ports_algorithm.port_update_get(self.In.i):
+            for kfrom2 in ports_algorithm.port_full_get(self.In.i):
+                f1 = kfrom1[ports.ClassicalFreqKey]
+                f2 = kfrom2[ports.ClassicalFreqKey]
+                f_new = self.harmonicN * f1 + f2
+                if self.system.reject_classical_frequency_order(f_new):
+                    continue
+                ports_algorithm.port_coupling_needed(self.R_I.o, ports.DictKey({ports.ClassicalFreqKey: f_new}))
+                ports_algorithm.port_coupling_needed(self.R_Q.o, ports.DictKey({ports.ClassicalFreqKey: f_new}))
+        return
+
+    def system_setup_coupling(self, matrix_algorithm):
+        #beware of combinatoric factors for high harmonics
+
+        #so far copied from Mixer
+        for kfrom1 in matrix_algorithm.port_set_get(self.LO.i):
+            for kfrom2 in matrix_algorithm.port_set_get(self.I.i):
+                f1 = kfrom1[ports.ClassicalFreqKey]
+                f2 = kfrom2[ports.ClassicalFreqKey]
+                f_new = f1 + f2
+                if self.system.reject_classical_frequency_order(f_new):
+                    continue
+
+                freq_LO = self.system.classical_frequency_extract(kfrom1)
+                kto = ports.DictKey({ports.ClassicalFreqKey: f_new})
+
+                if not f_new.DC_is():
+                    #TODO add inhomogenous term
+                    matrix_algorithm.nonlinear_triplet_insert(
+                        (self.LO.i,  kfrom1),
+                        (self.I.i,   kfrom2),
+                        (self.R_I.o, kto),
+                        1 / 2,
+                    )
+                    matrix_algorithm.nonlinear_triplet_insert(
+                        (self.LO.i,  kfrom1),
+                        (self.I.i,   kfrom2),
+                        (self.R_Q.o, kto),
+                        self.symbols.i * np.sign(freq_LO) / 2,
+                    )
+                else:
+                    #TODO add inhomogenous term
+                    matrix_algorithm.nonlinear_triplet_insert(
+                        (self.LO.i,  kfrom1),
+                        (self.I.i,   kfrom2),
+                        (self.R_I.o, kto),
+                        1 / 4,
+                    )
+                    matrix_algorithm.nonlinear_triplet_insert(
+                        (self.LO.i,  kfrom1),
+                        (self.I.i,   kfrom2),
+                        (self.R_Q.o, kto),
+                        self.symbols.i * np.sign(freq_LO) / 4,
+                    )
+        return
+

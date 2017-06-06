@@ -61,10 +61,15 @@ def test_AOM_derivative():
     np_test.assert_almost_equal(sys.test.DC_RR.DC_readout / X / Y**2, np.pi/4 * np.sin(X * np.pi), 1)
     np_test.assert_almost_equal(sys.test.AC_R.AC_sensitivity / X, sys.test.DC_RR.DC_readout / X / Y**2, 2)
 
-    np_test.assert_almost_equal(sys.test.AC_R_Q_phase.AC_sensitivity / (-.5), 1, 4)
     np_test.assert_almost_equal(sys.test.AC_R_I_phase.AC_sensitivity, 0)
     np_test.assert_almost_equal(sys.test.AC_R_Q_amp.AC_sensitivity, 0)
-    np_test.assert_almost_equal((sys.test.AC_R_I_amp.AC_sensitivity),  (X * np.sin(X * np.pi) / np.sin(X * np.pi/2)**2 / 4 * np.pi/2), 1)
+    np_test.assert_almost_equal((sys.test.AC_R_I_amp.AC_sensitivity),  (X * np.sin(X * np.pi) / np.sin(X * np.pi/2)**2 / 4 * np.pi), 1)
+
+
+    #can't (and shouldn't!) be able to directly detect phase noise
+    np_test.assert_almost_equal(sys.test.AC_R_Q_phase.AC_sensitivity, 0, 4)
+
+    #TODO: add homodyne detector to check that phase noise passes correctly
     return sys
 
 def test_AOMBasic():
@@ -132,10 +137,16 @@ def test_AOMBasic_derivative():
     #np_test.assert_almost_equal(sys.test.DC_RR.DC_readout / X / Y**2, np.pi/4 * np.sin(X * np.pi), 1)
     #np_test.assert_almost_equal(sys.test.AC_R.AC_sensitivity / X, sys.test.DC_RR.DC_readout / X / Y**2, 2)
 
-    np_test.assert_almost_equal(sys.test.AC_R_Q_phase.AC_sensitivity / (-.5), 1, 4)
     np_test.assert_almost_equal(sys.test.AC_R_I_phase.AC_sensitivity, 0)
     np_test.assert_almost_equal(sys.test.AC_R_Q_amp.AC_sensitivity, 0)
-    np_test.assert_almost_equal((sys.test.AC_R_I_amp.AC_sensitivity) / (.5), 1, 5)
+
+    #the AM sensitivity is direct in AOMbasic, so it has derivative of 1
+    np_test.assert_almost_equal((sys.test.AC_R_I_amp.AC_sensitivity), 1, 5)
+
+    #can't directly detect phase noise!
+    np_test.assert_almost_equal(sys.test.AC_R_Q_phase.AC_sensitivity, 0, 4)
+
+    #TODO add homodyne detector to test the proper phase noise
     return sys
 
 if __name__ == '__main__':
