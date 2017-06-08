@@ -514,8 +514,12 @@ def mgraph_simplify_badguys(
                 normc += abs(edge_map[node, snode])**2
             normc = normc ** .5
 
-            if np.asarray(normr).shape:
-                rel_r_to_c = np.count_nonzero(normr > normc) / len(np.asarray(normr))
+            print("SHAPE: ", np.asarray(normr).shape)
+            if np.asarray(normr).shape or np.asarray(normc).shape:
+                rel_r_to_c = np.asarray(np.count_nonzero(normr > normc))
+                print(rel_r_to_c)
+                rel_r_to_c = np.mean(rel_r_to_c)
+                print("SHAPE: ", rel_r_to_c.shape)
             else:
                 rel_r_to_c = normr > normc
             print("REL LARGER: ", rel_r_to_c)
@@ -587,7 +591,7 @@ def mgraph_simplify_badguys(
                         node_into = node,
                         nodes_from = nfrom,
                         node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-                        **kwargs,
+                        **kwargs
                     )
                 elif rcount == 1:
                     print("DIRECT")
@@ -644,7 +648,7 @@ def mgraph_simplify_badguys(
                         node_into = node,
                         nodes_from = nfrom,
                         node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-                        **kwargs,
+                        **kwargs
                     )
                 elif ccount == 1:
                     print("DIRECT")

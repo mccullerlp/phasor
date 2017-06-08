@@ -4,6 +4,7 @@ venv/
 build/
 dist/
 site/
+.tox/
 
 TAGS
 .cache

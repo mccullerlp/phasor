@@ -1,12 +1,14 @@
 """
-.. autoclass:: HeapPriorityQueue
 """
-from future import standard_library
-standard_library.install_aliases()
-#from builtins import object
 import heapq
-import queue
 import threading
+
+#python 2.7 compatibility
+try:
+    from queue import Empty
+except ImportError:
+    from Queue import Empty
+
 
 class HeapPriorityQueue(object):
     """
@@ -47,16 +49,13 @@ class HeapPriorityQueue(object):
         try:
             return self.heap[0]
         except IndexError:
-            raise queue.Empty()
+            raise Empty()
 
     def is_empty(self):
         """
         Returns True when empty
         """
         return not self.heap
-
-    def __bool__(self):
-        return bool(self.heap)
 
     def __bool__(self):
         return bool(self.heap)
@@ -73,7 +72,7 @@ class HeapPriorityQueue(object):
         try:
             return heapq.heappop(self.heap)
         except IndexError:
-            raise queue.Empty()
+            raise Empty()
 
     def push(self, item):
         """
@@ -136,7 +135,7 @@ class HeapPriorityQueueThreadsafe(object):
         try:
             return self.heap[0]
         except IndexError:
-            raise queue.Empty()
+            raise Empty()
 
     def is_empty(self):
         """
@@ -154,7 +153,7 @@ class HeapPriorityQueueThreadsafe(object):
             try:
                 return heapq.heappop(self.heap)
             except IndexError:
-                raise queue.Empty()
+                raise Empty()
 
     def push(self, item):
         """

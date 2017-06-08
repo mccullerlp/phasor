@@ -11,14 +11,13 @@ version = '1.0.0a1'
 
 
 setup(
-    name='declarative',
+    name='OpenLoop',
     version=version,
     url='',
     author='Lee McCuller',
     author_email='Lee.McCuller@gmail.com',
     description=(
-        'Collection of decorators and base classes to allow a declarative style of programming. Excellent for event-loop task registration.'
-        'Also included are nesting attribute-access dictionaries (Bunches) as well as value storage with callbacks. Relatively Magic-Free.'
+        'Scientific Modelling'
     ),
     license='Apache v2',
     packages=find_packages(exclude=['doc']),
@@ -31,7 +30,7 @@ setup(
         "test" : ["pytest"],
     },
     zip_safe=False,
-    keywords = 'declarative oop bunch callback attributes metaclass',
+    keywords = 'Controls Linear Physics',
     classifiers=[
         'Development Status :: 3 - Alpha ',
         'Intended Audience :: Developers',
@@ -40,10 +39,10 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
-        #'Programming Language :: Python :: 3',
-        #'Programming Language :: Python :: 3.4',
-        #'Programming Language :: Python :: 3.5',
-        #'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
 )
