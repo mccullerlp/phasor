@@ -7,9 +7,8 @@ from numbers import Number
 import numpy as np
 from collections import defaultdict
 import declarative
-import queue
 
-from OpenLoop.utilities.priority_queue import HeapPriorityQueue
+from OpenLoop.utilities.priority_queue import HeapPriorityQueue, Empty
 from OpenLoop.utilities.print import pprint
 
 from ..base import (
@@ -677,7 +676,7 @@ def mgraph_simplify_badguys(
                 node_costs_invalid_in_queue = node_costs_invalid_in_queue,
                 **kwargs
             )
-    except queue.Empty:
+    except Empty:
         assert(req)
 
 def pivotROW_OP(

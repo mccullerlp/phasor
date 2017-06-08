@@ -1,2 +1,2 @@
 
-from .heap_priority_queue import HeapPriorityQueue
+from .heap_priority_queue import HeapPriorityQueue, Empty

@@ -20,8 +20,8 @@ from ..math.key_matrix import (
     KeyMatrix,
 )
 
-#from .graph_algorithm import (
-from .DAG_algorithm import (
+from .graph_algorithm import (
+#from .DAG_algorithm import (
     push_solve_inplace,
     inverse_solve_inplace,
 )
