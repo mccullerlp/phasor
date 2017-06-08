@@ -9,6 +9,7 @@ import numpy as np
 
 from . import bases
 from . import ports
+from . import standard_attrs
 
 
 class Mixer(bases.SignalElementBase):
@@ -115,9 +116,15 @@ class Modulator(bases.SignalElementBase):
     def Out(self):
         return ports.SignalOutPort()
 
+    phase = standard_attrs.generate_rotate(name = 'phase')
+    _phase_default = ('phase_rad', 0)
+
     def system_setup_ports(self, ports_algorithm):
         for kfrom in ports_algorithm.port_update_get(self.In.i):
             ports_algorithm.port_coupling_needed(self.Out.o, kfrom)
+
+        for kto in ports_algorithm.port_update_get(self.Out.o):
+            ports_algorithm.port_coupling_needed(self.In.i, kto)
 
         for kfrom1, kfrom2 in ports_algorithm.symmetric_update(self.In.i, [self.Mod_amp.i, self.Mod_phase.i]):
             f1 = kfrom1[ports.ClassicalFreqKey]
@@ -148,10 +155,17 @@ class Modulator(bases.SignalElementBase):
     def system_setup_coupling(self, matrix_algorithm):
         for kfrom1 in matrix_algorithm.port_set_get(self.In.i):
             freq_In = self.system.classical_frequency_extract(kfrom1)
+            freq_center_In = self.system.classical_frequency_extract_center(kfrom1[ports.ClassicalFreqKey])
+            if freq_center_In > 0:
+                cplg = self.symbols.math.exp(self.symbols.i * self.phase_rad.val)
+            elif freq_center_In < 0:
+                cplg = self.symbols.math.exp(-self.symbols.i * self.phase_rad.val)
+            else:
+                cplg = 1
             matrix_algorithm.port_coupling_insert(
                 self.In.i,  kfrom1,
                 self.Out.o, kfrom1,
-                1
+                cplg
             )
             for kfrom2 in matrix_algorithm.port_set_get(self.Mod_amp.i):
                 f1 = kfrom1[ports.ClassicalFreqKey]
@@ -167,14 +181,14 @@ class Modulator(bases.SignalElementBase):
                         (self.In.i,  kfrom1),
                         (self.Mod_amp.i,   kfrom2),
                         (self.Out.o, kto),
-                        1 / 2,
+                        cplg / 2,
                     )
                 else:
                     matrix_algorithm.nonlinear_triplet_insert(
                         (self.In.i,  kfrom1),
                         (self.Mod_amp.i,   kfrom2),
                         (self.Out.o, kto),
-                        1 / 4,
+                        cplg / 4,
                     )
             for kfrom2 in matrix_algorithm.port_set_get(self.Mod_phase.i):
                 f1 = kfrom1[ports.ClassicalFreqKey]
@@ -190,14 +204,14 @@ class Modulator(bases.SignalElementBase):
                         (self.In.i,  kfrom1),
                         (self.Mod_phase.i,   kfrom2),
                         (self.Out.o, kto),
-                        self.symbols.i * np.sign(freq_In) / 2,
+                        cplg * self.symbols.i * np.sign(freq_In) / 2,
                     )
                 else:
                     matrix_algorithm.nonlinear_triplet_insert(
                         (self.In.i,  kfrom1),
                         (self.Mod_phase.i,   kfrom2),
                         (self.Out.o, kto),
-                        self.symbols.i * np.sign(freq_In) / 4,
+                        cplg * self.symbols.i * np.sign(freq_In) / 4,
                     )
         return
 

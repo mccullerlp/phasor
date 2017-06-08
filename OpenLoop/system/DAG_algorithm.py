@@ -7,6 +7,7 @@ from numbers import Number
 import numpy as np
 from collections import defaultdict
 import declarative
+import queue
 
 from OpenLoop.utilities.priority_queue import HeapPriorityQueue
 from OpenLoop.utilities.print import pprint
@@ -225,13 +226,13 @@ def mgraph_simplify_inplace(
     beta_set  = set()
     alpha_set = set()
     for node in req:
-        if not seq[node]:
+        if not seq.get(node, None):
             for rnode in req[node]:
                 seq_beta[rnode].add(node)
                 seq[rnode].remove(node)
                 beta_set.add(node)
     for node in seq:
-        if not req[node]:
+        if not req.get(node, None):
             for snode in seq[node]:
                 req_alpha[snode].add(node)
                 req[snode].remove(node)
@@ -464,204 +465,216 @@ def mgraph_simplify_badguys(
         pqueue.push((cost, node))
     if verbose: print("pqueue length: ", len(pqueue))
 
-    while req:
-        while node_costs_invalid_in_queue:
-            node = node_costs_invalid_in_queue.pop()
+    try:
+        while req:
+            while node_costs_invalid_in_queue:
+                node = node_costs_invalid_in_queue.pop()
+                if node not in seq:
+                    continue
+                cost = generate_node_cost(node)
+                pqueue.push((cost, node))
+            #print("REQ: ", req)
+            #print("REQ_A: ", req_alpha)
+            #print("SEQ: ", seq)
+            #print("SEQ_B: ", seq_beta)
+            cost, node = pqueue.pop()
             if node not in seq:
                 continue
-            cost = generate_node_cost(node)
-            pqueue.push((cost, node))
-        #print("REQ: ", req)
-        #print("REQ_A: ", req_alpha)
-        #print("SEQ: ", seq)
-        #print("SEQ_B: ", seq_beta)
-        cost, node = pqueue.pop()
-        if node not in seq:
-            continue
 
-        print("MY NODE: ", node)
-        new_cost = generate_node_cost(node)
-        while abs(abs(cost / new_cost) - 1) > .1:
-            cost, node = pqueue.pushpop((new_cost, node))
-            while node not in seq:
-                cost, node = pqueue.pop()
+            print("MY NODE: ", node)
             new_cost = generate_node_cost(node)
-            print("NCOST: ", node, new_cost)
+            while abs(abs(cost / new_cost) - 1) > .1:
+                cost, node = pqueue.pushpop((new_cost, node))
+                while node not in seq:
+                    cost, node = pqueue.pop()
+                new_cost = generate_node_cost(node)
+                print("NCOST: ", node, new_cost)
 
-        if node not in seq:
-            print("MY GOD: ", node)
+            if node not in seq:
+                print("MY GOD: ", node)
 
-        if node in seq[node]:
-            #node must at least have a self-loop
-            min_rnode = None
-            min_rnode_cost = float('inf')
-            for rnode in seq[node]:
-                rcost = generate_row_cost(rnode)
-                if rcost < min_rnode_cost:
-                    min_rnode = rnode
-                    min_rnode_cost = rcost
-            print("MIN_MAX: ", node, min_rnode)
+            if node in seq[node]:
+                #node must at least have a self-loop
+                min_rnode = None
+                min_rnode_cost = float('inf')
+                for rnode in seq[node]:
+                    rcost = generate_row_cost(rnode)
+                    if rcost < min_rnode_cost:
+                        min_rnode = rnode
+                        min_rnode_cost = rcost
+                print("MIN_MAX: ", node, min_rnode)
 
-        normr = 0
-        for rnode in req[node]:
-            normr += abs(edge_map[rnode, node])**2
-        normr = normr ** .5
-        #row norm
-        normc = 0
-        for snode in seq[node]:
-            normc += abs(edge_map[node, snode])**2
-        normc = normc ** .5
+            normr = 0
+            for rnode in req[node]:
+                normr += abs(edge_map[rnode, node])**2
+            normr = normr ** .5
+            #row norm
+            normc = 0
+            for snode in seq[node]:
+                normc += abs(edge_map[node, snode])**2
+            normc = normc ** .5
 
-        if np.asarray(normr).shape:
-            rel_r_to_c = np.count_nonzero(normr > normc) / len(np.asarray(normr))
-        else:
-            rel_r_to_c = normr > normc
-        print("REL LARGER: ", rel_r_to_c)
+            if np.asarray(normr).shape:
+                rel_r_to_c = np.count_nonzero(normr > normc) / len(np.asarray(normr))
+            else:
+                rel_r_to_c = normr > normc
+            print("REL LARGER: ", rel_r_to_c)
 
-        rvec = []
-        rvec_N = []
-        rvec_self_idx = None
-        for idx, rnode in enumerate(req[node]):
-            if node == rnode:
-                rvec_self_idx = idx
-            rvec.append(np.max(abs(edge_map[rnode, node] / normr)))
-            rvec_N.append(rnode)
+            rvec = []
+            rvec_N = []
+            rvec_self_idx = None
+            for idx, rnode in enumerate(req[node]):
+                if node == rnode:
+                    rvec_self_idx = idx
+                rvec.append(np.max(abs(edge_map[rnode, node] / normr)))
+                rvec_N.append(rnode)
 
-        print("RVEC: ", rvec)
-        bignodes_r = np.array(rvec) >= 1./(len(req[node]))**.5
-        rcount = np.count_nonzero(bignodes_r)
-        print("R: ", np.count_nonzero(bignodes_r), len(req[node]), bignodes_r[rvec_self_idx], rel_r_to_c > .5)
-        cvec = []
-        cvec_N = []
-        cvec_self_idx = None
-        for idx, snode in enumerate(seq[node]):
-            if node == snode:
-                cvec_self_idx = idx
-                print(cvec_self_idx, idx, node)
-            cvec.append(np.max(abs(edge_map[node, snode] / normc)))
-            cvec_N.append(snode)
-        print("CVEC: ", cvec)
-        bignodes_c = np.array(cvec) >= 1./(len(seq[node]))**.5
-        ccount = np.count_nonzero(bignodes_c)
-        print(bignodes_c, cvec_self_idx, ccount)
-        print("C: ", np.count_nonzero(bignodes_c), len(seq[node]), bignodes_c[cvec_self_idx], rel_r_to_c < .5)
+            print("RVEC: ", rvec)
+            bignodes_r = np.array(rvec) >= 1./(len(req[node]))**.5
+            rcount = np.count_nonzero(bignodes_r)
+            print("R: ", np.count_nonzero(bignodes_r), len(req[node]), bignodes_r[rvec_self_idx], rel_r_to_c > .5)
+            cvec = []
+            cvec_N = []
+            cvec_self_idx = None
+            for idx, snode in enumerate(seq[node]):
+                if node == snode:
+                    cvec_self_idx = idx
+                    print(cvec_self_idx, idx, node)
+                cvec.append(np.max(abs(edge_map[node, snode] / normc)))
+                cvec_N.append(snode)
+            print("CVEC: ", cvec)
+            bignodes_c = np.array(cvec) >= 1./(len(seq[node]))**.5
+            ccount = np.count_nonzero(bignodes_c)
+            print(bignodes_c, cvec_self_idx, ccount)
+            print("C: ", np.count_nonzero(bignodes_c), len(seq[node]), bignodes_c[cvec_self_idx], rel_r_to_c < .5)
 
-        if node in req[node]:
-            norma = abs(edge_map[node, node])
-            print("NORM: ", np.max(normr / norma), np.max(normc / norma))
+            if node in req[node]:
+                norma = abs(edge_map[node, node])
+                print("NORM: ", np.max(normr / norma), np.max(normc / norma))
 
-        if rel_r_to_c > .5:
-            print("Using ROW Operations")
-            if rcount >= 2:
-                print("MUST USE HOUSEHOLDER {0}x".format(rcount))
-                if rvec_self_idx is None or not bignodes_r[rvec_self_idx]:
-                    print("MUST PIVOT")
-                    idx_pivot = np.nonzero(bignodes_r)[0][0]
-                    print("SELF: ", rvec_self_idx)
-                    print("PIVO: ", idx_pivot)
-                    node_pivot = rvec_N[idx_pivot]
-                    print("SWAP: ", node, node_pivot)
-                    pivotROW_OP(
+            if rel_r_to_c > .5:
+                print("Using ROW Operations")
+                if rcount >= 2:
+                    print("MUST USE HOUSEHOLDER {0}x".format(rcount))
+                    if rvec_self_idx is None or not bignodes_r[rvec_self_idx]:
+                        print("MUST PIVOT")
+                        idx_pivot = np.nonzero(bignodes_r)[0][0]
+                        print("SELF: ", rvec_self_idx)
+                        print("PIVO: ", idx_pivot)
+                        node_pivot = rvec_N[idx_pivot]
+                        print("SWAP: ", node, node_pivot)
+                        pivotROW_OP(
+                            node_costs_invalid_in_queue = node_costs_invalid_in_queue,
+                            node1 = node,
+                            node2 = node_pivot,
+                            **kwargs
+                        )
+                        node_costs_invalid_in_queue.add(node)
+                        node_costs_invalid_in_queue.add(node_pivot)
+                        node = node_pivot
+                    #make more efficient
+                    nfrom = set()
+                    print(bignodes_r.shape)
+                    for idx in range(bignodes_r.shape[0]):
+                        if np.any(bignodes_r[idx]):
+                            nfrom.add(rvec_N[idx])
+                    print("NFROM: ", nfrom, node)
+                    nfrom.remove(node)
+                    for kf in nfrom:
+                        assert(node in seq[kf])
+                    print("NFROM: ", nfrom, node)
+                    householderREFL_ROW_OP(
+                        node_into = node,
+                        nodes_from = nfrom,
                         node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-                        node1 = node,
-                        node2 = node_pivot,
-                        **kwargs
+                        **kwargs,
                     )
-                    node_costs_invalid_in_queue.add(node)
-                    node_costs_invalid_in_queue.add(node_pivot)
-                    node = node_pivot
-                #make more efficient
-                nfrom = set(np.asarray(rvec_N)[bignodes_r])
-                nfrom.remove(node)
-                for kf in nfrom:
-                    assert(node in seq[kf])
-                print("NFROM: ", nfrom, node)
-                householderREFL_ROW_OP(
-                    node_into = node,
-                    nodes_from = nfrom,
-                    node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-                    **kwargs,
-                )
-            elif rcount == 1:
-                print("DIRECT")
-                if rvec_self_idx is None or not bignodes_r[rvec_self_idx]:
-                    print("MUST PIVOT")
-                    print('bignodes', bignodes_r)
-                    #could choose pivot node based on projected fill-in
-                    idx_pivot = np.nonzero(bignodes_r)[0][0]
-                    print("SELF: ", rvec_self_idx)
-                    print("PIVO: ", idx_pivot)
-                    node_pivot = rvec_N[idx_pivot]
-                    print("SWAP: ", node, node_pivot)
-                    pivotROW_OP(
+                elif rcount == 1:
+                    print("DIRECT")
+                    if rvec_self_idx is None or not bignodes_r[rvec_self_idx]:
+                        print("MUST PIVOT")
+                        print('bignodes', bignodes_r)
+                        #could choose pivot node based on projected fill-in
+                        idx_pivot = np.nonzero(bignodes_r)[0][0]
+                        print("SELF: ", rvec_self_idx)
+                        print("PIVO: ", idx_pivot)
+                        node_pivot = rvec_N[idx_pivot]
+                        print("SWAP: ", node, node_pivot)
+                        pivotROW_OP(
+                            node_costs_invalid_in_queue = node_costs_invalid_in_queue,
+                            node1 = node,
+                            node2 = node_pivot,
+                            **kwargs
+                        )
+                        node_costs_invalid_in_queue.add(node)
+                        node_costs_invalid_in_queue.add(node_pivot)
+                        node = node_pivot
+                        #continue
+            else:
+                print("Using COLUMN Operations")
+                print("bignodes_c[cvec_self_idx]", bignodes_c[cvec_self_idx])
+                if ccount >= 2:
+                    print("MUST USE HOUSEHOLDER {0}x".format(ccount))
+                    if cvec_self_idx is None or not bignodes_c[cvec_self_idx]:
+                        print("MUST PIVOT")
+                        print('bignodes', bignodes_c)
+                        #could choose pivot node based on projected fill-in
+                        idx_pivot = np.nonzero(bignodes_c)[0][0]
+                        print(idx_pivot)
+                        node_pivot = cvec_N[idx_pivot]
+                        print("SWAP: ", node, node_pivot)
+                        pivotCOL_OP(
+                            node_costs_invalid_in_queue = node_costs_invalid_in_queue,
+                            node1 = node,
+                            node2 = node_pivot,
+                            **kwargs
+                        )
+                        node_costs_invalid_in_queue.add(node)
+                        node_costs_invalid_in_queue.add(node_pivot)
+                        node = node_pivot
+                    #make more efficient
+                    nfrom = set()
+                    print(bignodes_c.shape)
+                    for idx in range(bignodes_c.shape[0]):
+                        if np.any(bignodes_c[idx]):
+                            nfrom.add(cvec_N[idx])
+                    print("NFROM: ", nfrom, node)
+                    nfrom.remove(node)
+                    householderREFL_COL_OP(
+                        node_into = node,
+                        nodes_from = nfrom,
                         node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-                        node1 = node,
-                        node2 = node_pivot,
-                        **kwargs
+                        **kwargs,
                     )
-                    node_costs_invalid_in_queue.add(node)
-                    node_costs_invalid_in_queue.add(node_pivot)
-                    node = node_pivot
-                    #continue
-        else:
-            print("Using COLUMN Operations")
-            print("bignodes_c[cvec_self_idx]", bignodes_c[cvec_self_idx])
-            if ccount >= 2:
-                print("MUST USE HOUSEHOLDER {0}x".format(ccount))
-                if cvec_self_idx is None or not bignodes_c[cvec_self_idx]:
-                    print("MUST PIVOT")
-                    print('bignodes', bignodes_c)
-                    #could choose pivot node based on projected fill-in
-                    idx_pivot = np.nonzero(bignodes_c)[0][0]
-                    print(idx_pivot)
-                    node_pivot = cvec_N[idx_pivot]
-                    print("SWAP: ", node, node_pivot)
-                    pivotCOL_OP(
-                        node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-                        node1 = node,
-                        node2 = node_pivot,
-                        **kwargs
-                    )
-                    node_costs_invalid_in_queue.add(node)
-                    node_costs_invalid_in_queue.add(node_pivot)
-                    node = node_pivot
-                #make more efficient
-                nfrom = set(np.asarray(cvec_N)[bignodes_c])
-                nfrom.remove(node)
-                print("NFROM: ", nfrom, node)
-                householderREFL_COL_OP(
-                    node_into = node,
-                    nodes_from = nfrom,
-                    node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-                    **kwargs,
-                )
-            elif ccount == 1:
-                print("DIRECT")
-                if cvec_self_idx is None or not bignodes_c[cvec_self_idx]:
-                    print("MUST PIVOT")
-                    print('bignodes', bignodes_c)
-                    #could choose pivot node based on projected fill-in
-                    idx_pivot = np.nonzero(bignodes_c)[0][0]
-                    print(idx_pivot)
-                    node_pivot = cvec_N[idx_pivot]
-                    print("SWAP: ", node, node_pivot)
-                    pivotCOL_OP(
-                        node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-                        node1 = node,
-                        node2 = node_pivot,
-                        **kwargs
-                    )
-                    node_costs_invalid_in_queue.add(node)
-                    node_costs_invalid_in_queue.add(node_pivot)
-                    node = node_pivot
-                    #continue
-        assert(np.isfinite(cost))
+                elif ccount == 1:
+                    print("DIRECT")
+                    if cvec_self_idx is None or not bignodes_c[cvec_self_idx]:
+                        print("MUST PIVOT")
+                        print('bignodes', bignodes_c)
+                        #could choose pivot node based on projected fill-in
+                        idx_pivot = np.nonzero(bignodes_c)[0][0]
+                        print(idx_pivot)
+                        node_pivot = cvec_N[idx_pivot]
+                        print("SWAP: ", node, node_pivot)
+                        pivotCOL_OP(
+                            node_costs_invalid_in_queue = node_costs_invalid_in_queue,
+                            node1 = node,
+                            node2 = node_pivot,
+                            **kwargs
+                        )
+                        node_costs_invalid_in_queue.add(node)
+                        node_costs_invalid_in_queue.add(node_pivot)
+                        node = node_pivot
+                        #continue
+            assert(np.isfinite(cost))
 
-        reduceLU(
-            node = node,
-            node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-            **kwargs
-        )
+            reduceLU(
+                node = node,
+                node_costs_invalid_in_queue = node_costs_invalid_in_queue,
+                **kwargs
+            )
+    except queue.Empty:
+        assert(req)
 
 def pivotROW_OP(
     seq,
@@ -1257,8 +1270,6 @@ def inverse_solve_inplace(
     scattering = False,
     **kwargs
 ):
-    pre_purge_inplace(seq, req, edge_map)
-
     if scattering:
         keys = set(seq.keys()) | set(req.keys())
         for node in keys:
@@ -1270,6 +1281,8 @@ def inverse_solve_inplace(
                 req[node].add(node)
         #sign conventions reversed for scattering matrix
         negative = not negative
+
+    pre_purge_inplace(seq, req, edge_map)
 
     #first dress the nodes
     wrapped_inodes = set()
@@ -1353,8 +1366,6 @@ def push_solve_inplace(
     negative = False,
     scattering = False,
 ):
-    pre_purge_inplace(seq, req, edge_map)
-
     if scattering:
         keys = set(seq.keys()) | set(req.keys())
         for node in keys:
@@ -1366,6 +1377,8 @@ def push_solve_inplace(
                 req[node].add(node)
         #sign conventions reversed for scattering matrix
         negative = not negative
+
+    pre_purge_inplace(seq, req, edge_map)
 
     #first dress the nodes. The source vectors is converted into edges with a special
     #source node

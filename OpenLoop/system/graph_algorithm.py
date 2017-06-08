@@ -323,7 +323,9 @@ def inverse_solve_inplace(
     purge_out = True,
     verbose = False,
     Q_conditioning = False,
+    scattering = True,
 ):
+    assert(scattering)
     pre_purge_inplace(seq, req, edge_map)
 
     #first dress the nodes
@@ -400,7 +402,9 @@ def push_solve_inplace(
     inputs_AC_set = frozenset(),
     purge_in = True,
     purge_out = True,
+    scattering = True,
 ):
+    assert(scattering)
     pre_purge_inplace(seq, req, edge_map)
 
     #first dress the nodes. The source vectors is converted into edges with a special

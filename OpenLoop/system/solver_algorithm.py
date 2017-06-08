@@ -20,7 +20,8 @@ from ..math.key_matrix import (
     KeyMatrix,
 )
 
-from .graph_algorithm import (
+#from .graph_algorithm import (
+from .DAG_algorithm import (
     push_solve_inplace,
     inverse_solve_inplace,
 )
@@ -273,6 +274,7 @@ class SystemSolver(object):
             inputs_AC_set = self.matrix_algorithm.AC_in_all,
             purge_in      = True,
             purge_out     = True,
+            scattering    = True,
         )
         solution_dict = solution_bunch.outputs_map
         solution_vector_kv = KeyVector(field_space)
@@ -395,6 +397,7 @@ class SystemSolver(object):
             edge_map      = dict(coupling_matrix.items()),
             purge_in      = True,
             purge_out     = True,
+            scattering    = True,
         )
         solution_dict = solution_bunch.outputs_map
         solution_vector_kv = KeyVector(field_space)
@@ -471,7 +474,8 @@ class SystemSolver(object):
             edge_map      = dict(coupling_matrix.items()),
             purge_in      = True,
             purge_out     = True,
-            Q_conditioning = self.system.solver_Q_conditioning,
+            #Q_conditioning = self.system.solver_Q_conditioning,
+            scattering    = True,
         )
 
         solution_bunch = declarative.Bunch(

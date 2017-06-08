@@ -7,6 +7,9 @@ from ... import optics
 from ... import base
 from ... import signals
 from ... import readouts
+
+from . import VCO
+from ..LIGO import ligo_sled
 #from ... import system
 
 
@@ -24,7 +27,6 @@ class OPOaLIGO(optics.OpticalCouplerBase):
         """
         val = self.ooa_params.setdefault('include_crystal', val)
         return val
-
 
     @declarative.dproperty
     def M1_loc_XY_mm(self, val = (21.104, 18.258)):
@@ -247,6 +249,8 @@ class OPOTestStand(optics.OpticalCouplerBase):
         )
         return val
 
+    use_hdyne = None
+
     def __build__(self):
         super(OPOTestStand, self).__build__()
         self.my.PSLG = optics.Laser(
@@ -273,16 +277,6 @@ class OPOTestStand(optics.OpticalCouplerBase):
             multiple = 1,
             phase_deg = 90,
         )
-        self.my.PSLR_clf = optics.Laser(
-            F = self.system.F_carrier_1064,
-            power_W = .0000,
-            multiple = 1,
-            phase_deg = 00,
-            #classical_fdict = {
-            #    self.F_CLF : 1,
-            #}
-        )
-
         self.my.PD_R = optics.MagicPD()
         self.my.PD_G = optics.MagicPD()
         self.my.PD_CLF = optics.MagicPD()
@@ -362,6 +356,18 @@ class OPOTestStand(optics.OpticalCouplerBase):
             self.opo.M2.BkA.bond_sequence(
                 self.my.PSLR_seed.Fr,
             )
+
+        #Fix this with the signal generator
+        self.my.PSLR_clf = optics.Laser(
+            F = self.system.F_carrier_1064,
+            power_W = .0000,
+            multiple = 1,
+            phase_deg = 00,
+            classical_fdict = {
+                self.F_CLF : 1,
+            }
+        )
+
         if self.include_CLF and np.any(self.PSLR_clf.power_W.val != 0):
             #self.my.generateF_PDH = VCO.VCO(
             #need to make this a VCO with a 2nd harmonic generator
@@ -372,7 +378,8 @@ class OPOTestStand(optics.OpticalCouplerBase):
                 }
             )
             self.my.aom_clf = optics.AOMBasic()
-            self.my.aom_clf.Drv.bond(self.signal_clf.Out)
+            #TODO fix this
+            #self.my.aom_clf.Drv.bond(self.signal_clf.Out)
 
             self.my.Mphase_clf = optics.Mirror(
                 phase_rad = 0,
@@ -380,7 +387,7 @@ class OPOTestStand(optics.OpticalCouplerBase):
                 T_hr = 0,
             )
             self.my.PSLR_clf.Fr.bond_sequence(
-                self.aom_clf.Fr,
+                #self.aom_clf.Fr,
                 self.Mphase_clf.FrA,
             )
             self.opo.M2.BkA.bond_sequence(
@@ -453,10 +460,19 @@ class OPOTestStand(optics.OpticalCouplerBase):
         if self.include_CLF:
             self.my.mix_clf_hdyne_1xI = signals.Mixer()
             self.my.mix_clf_hdyne_1xQ = signals.Mixer()
-            self.mix_clf_hdyne_1xI.LO.bond(self.signal_clf.Out)
-            self.mix_clf_hdyne_1xI.I.bond(self.hPD_R.rtWpdI)
-            self.mix_clf_hdyne_1xQ.LO.bond(self.signal_clf.Out)
-            self.mix_clf_hdyne_1xQ.I.bond(self.hPD_R.rtWpdQ)
+            #TODO phase up the mixers
+            self.my.rephase_hdyne = signals.Modulator()
+            self.rephase_hdyne.In.bond(self.signal_clf.Out)
+
+            if self.use_hdyne is None:
+                self.mix_clf_hdyne_1xI.I.bond(self.hPD_R.rtWpdI)
+                self.mix_clf_hdyne_1xQ.I.bond(self.hPD_R.rtWpdQ)
+            else:
+                self.mix_clf_hdyne_1xI.I.bond(self.use_hdyne.rtWpdI)
+                self.mix_clf_hdyne_1xQ.I.bond(self.use_hdyne.rtWpdQ)
+
+            self.mix_clf_hdyne_1xI.LO.bond(self.rephase_hdyne.Out)
+            self.mix_clf_hdyne_1xQ.LO.bond(self.rephase_hdyne.Out)
 
             self.my.hDCAmpI_CLF = readouts.DCReadout(
                 port = self.mix_clf_hdyne_1xI.R_I.o,
@@ -531,5 +547,30 @@ class OPOTestStandBackScatter(optics.OpticalCouplerBase):
     """
 
 
+class LIGOSQZOperation(base.SystemElementBase):
+    def __init__(self, **kwargs):
+        super(LIGOSQZOperation, self).__init__(**kwargs)
+        self.my.LIGO = ligo_sled.LIGODetector()
+        self.my.input  = ligo_sled.LIGOInputBasic()
 
+        self.my.output = ligo_sled.LIGOOutputHomodyne(
+            LIGO_obj  = self.LIGO,
+            input_obj = self.input,
+        )
 
+        self.system.bond_sequence(
+            self.input.INPUT_ATTACH_POINT,
+            self.LIGO.INPUT_ATTACH_POINT,
+        )
+
+        self.my.sqz_inject = optics.OpticalCirculator(
+            N_ports = 3,
+        )
+
+        self.LIGO.OUTPUT_ATTACH_POINT.bond(
+            self.sqz_inject.P0,
+        )
+
+        self.output.OUTPUT_ATTACH_POINT.bond(
+            self.sqz_inject.P1,
+        )
