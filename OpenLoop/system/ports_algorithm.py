@@ -2,7 +2,8 @@
 """
 """
 from __future__ import (division, print_function)
-#from builtins import object
+from ..utilities.future_from_2 import object
+
 from collections import defaultdict
 import declarative
 
