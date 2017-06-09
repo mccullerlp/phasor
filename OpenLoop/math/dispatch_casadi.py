@@ -5,12 +5,13 @@ import numpy as np
 import operator
 
 import casadi
+#import casadi.SX
 
 from .complex import Complex
 
 dispatched.module_by_typemodule[('casadi',)] = [casadi]
-dispatched.module_by_type[casadi.SX] = [casadi.SX]
 dispatched.module_by_type[casadi.MX] = [casadi.MX]
+dispatched.module_by_type[casadi.SX] = [casadi.SX]
 
 
 def fix_custom_complex(otype, opname, lambda_syntax):
