@@ -9,6 +9,9 @@ from setuptools import find_packages, setup
 
 version = '1.0.0a1'
 
+extra_install_requires = []
+if sys.version_info < (3,0):
+    extra_install_requires.append('future')
 
 setup(
     name='openLoop',
@@ -24,12 +27,23 @@ setup(
     #include_package_data=True,
     #scripts=[''],
     #entry_points={'console_scripts': ['',]},
-    setup_requires=['pytest-runner'],
-    tests_require=[
+    setup_requires = [
+        'pytest-runner'
+    ],
+    install_requires = [
+        'pint',
+        'numpy',
+        'scipy',
+        'matplotlib',
+        'IPython',
+        'pyyaml',
+        'declarative',
+    ] + extra_install_requires,
+    tests_require = [
         'pytest',
         'pytest-runner',
     ],
-    extras_require={
+    extras_require = {
         "fitting" : ["casadi"],
         "test" : ["pytest"],
     },
