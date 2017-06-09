@@ -3,7 +3,7 @@
 from __future__ import print_function, division
 import pytest
 
-from OpenLoop.utilities.mpl.autoniceplot import (
+from openLoop.utilities.mpl.autoniceplot import (
     #AutoPlotSaver,
     #mplfigB,
     asavefig,
@@ -13,12 +13,12 @@ import matplotlib as mpl
 import os.path as path
 
 #from YALL.alm.beam import *
-from OpenLoop.alm.measurements import CRootSystem
-import OpenLoop.alm.beam as CB
-import OpenLoop.alm.system as CS
-#from OpenLoop.alm.beam_param import ComplexBeamParam
-#import OpenLoop.alm.system as CS
-from OpenLoop.alm.mplot import MPlotter
+from openLoop.alm.measurements import CRootSystem
+import openLoop.alm.beam as CB
+import openLoop.alm.system as CS
+#from openLoop.alm.beam_param import ComplexBeamParam
+#import openLoop.alm.system as CS
+from openLoop.alm.mplot import MPlotter
 mplot = MPlotter()
 asavefig.org_subfolder = path.join(path.dirname(__file__), 'tests')
 

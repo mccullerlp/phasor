@@ -1,4 +1,4 @@
-# python-OpenLoop
+# python-openLoop
 
 Frequency-Domain Bond Graph modeling for OptoMechaTronics with control feedback, signal propagation and noise analysis. The noise
 analysis include quantum noise and squeezing for optical systems. 

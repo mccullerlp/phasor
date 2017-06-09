@@ -6,15 +6,15 @@ import pytest
 import declarative
 
 
-import OpenLoop.optics as optics
-import OpenLoop.readouts as readouts
-from OpenLoop import system
+import openLoop.optics as optics
+import openLoop.readouts as readouts
+from openLoop import system
 
 import unittest
 assertions = unittest.TestCase('__init__')
 
 
-#from OpenLoop.utilities.np import logspaced
+#from openLoop.utilities.np import logspaced
 
 def gensys():
     sys = system.BGSystem()
@@ -127,7 +127,7 @@ def test_mirror():
         readout_set = 'AC',
     )
 
-    #from OpenLoop.key_matrix import (
+    #from openLoop.key_matrix import (
     #    DictKey,
     #    FrequencyKey,
     #)
@@ -149,7 +149,7 @@ def test_mirror():
     #print("LSBRL: ", rt_inv.get((b.sys.etm.Fr.o, lsb_keyR), (b.sys.etm.Z.d.o, lcl_key), 0))
     #print("AC:", sys.AC_sensitivity('ETM_Drive'))
 
-    #from OpenLoop.utilities.mpl.autoniceplot import (mplfigB)
+    #from openLoop.utilities.mpl.autoniceplot import (mplfigB)
     #F = mplfigB(Nrows = 2)
     #F.ax0.loglog(sys.F_AC_Hz, abs(sys.AC_sensitivity('ETM_Drive')))
     #F.ax1.semilogx(sys.F_AC_Hz, np.angle(sys.AC_sensitivity('ETM_Drive')))

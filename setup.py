@@ -11,7 +11,7 @@ version = '1.0.0a1'
 
 
 setup(
-    name='OpenLoop',
+    name='openLoop',
     version=version,
     url='',
     author='Lee McCuller',

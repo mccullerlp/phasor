@@ -6,11 +6,11 @@ from numpy import testing as np_test
 import numpy as np
 import declarative
 
-from OpenLoop import system
-from OpenLoop import optics
-from OpenLoop import readouts
+from openLoop import system
+from openLoop import optics
+from openLoop import readouts
 
-#from OpenLoop.utilities.np import logspaced
+#from openLoop.utilities.np import logspaced
 
 
 def gensys(
@@ -149,7 +149,7 @@ def test_mich():
     #sys.port_set_print(b.vterm.Fr.o)
     #sys.coupling_matrix_inv_print(select_to = b.asymPD.Wpd.o)
 
-    #from OpenLoop.utilities.mpl.autoniceplot import (mplfigB)
+    #from openLoop.utilities.mpl.autoniceplot import (mplfigB)
     #F = mplfigB(Nrows = 2)
     #F.ax0.loglog(sys.F_AC_Hz, abs(AC))
     #F.ax1.semilogx(sys.F_AC_Hz, np.angle(AC, deg = True))
@@ -193,7 +193,7 @@ def test_mich_lossy():
     #sys.port_set_print(b.vterm.Fr.o)
     #sys.coupling_matrix_inv_print(select_to = b.asymPD.Wpd.o)
 
-    #from OpenLoop.utilities.mpl.autoniceplot import (mplfigB)
+    #from openLoop.utilities.mpl.autoniceplot import (mplfigB)
     #F = mplfigB(Nrows = 2)
     #F.ax0.loglog(sys.F_AC_Hz, abs(AC))
     #F.ax1.semilogx(sys.F_AC_Hz, np.angle(AC, deg = True))

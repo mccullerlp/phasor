@@ -6,10 +6,10 @@ import numpy.testing as test
 
 from declarative import Bunch
 
-import OpenLoop.electronics as electronics
-import OpenLoop.readouts as readouts
-import OpenLoop.system as system
-from OpenLoop.electronics.models.PDAmp import PDTransimpedance
+import openLoop.electronics as electronics
+import openLoop.readouts as readouts
+import openLoop.system as system
+from openLoop.electronics.models.PDAmp import PDTransimpedance
 
 
 #pytest.mark.parametrize('gain', [(1), (10), (100)])

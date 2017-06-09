@@ -4,9 +4,9 @@ from __future__ import (division, print_function)
 #import pytest
 import numpy.testing as test
 
-import OpenLoop.electronics as electronics
-import OpenLoop.readouts as readouts
-import OpenLoop.system as system
+import openLoop.electronics as electronics
+import openLoop.readouts as readouts
+import openLoop.system as system
 
 
 def test_V():

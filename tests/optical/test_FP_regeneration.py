@@ -6,11 +6,11 @@ import numpy.testing as np_test
 import pytest
 import declarative
 
-from OpenLoop.utilities.print import pprint
+from openLoop.utilities.print import pprint
 
-from OpenLoop import system
-from OpenLoop import optics
-from OpenLoop import readouts
+from openLoop import system
+from openLoop import optics
+from openLoop import readouts
 
 
 def gensys(

@@ -6,9 +6,9 @@ from unittest import TestCase, main
 
 #import numpy as np
 
-from OpenLoop import system
-from OpenLoop import optics
-from OpenLoop import readouts
+from openLoop import system
+from openLoop import optics
+from openLoop import readouts
 
 import pytest
 pytestmark = pytest.mark.skip('Faraday still WIP')

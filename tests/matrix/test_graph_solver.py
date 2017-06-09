@@ -5,7 +5,7 @@ from os import path
 import sys
 import pytest
 
-from OpenLoop.utilities.mpl import mplfigB
+from openLoop.utilities.mpl import mplfigB
 
 import numpy.testing as np_test
 import numpy as np
@@ -15,11 +15,11 @@ import pickle
 
 #import numpy as np
 
-from OpenLoop.system import DAG_algorithm
-from OpenLoop.system import SRE_matrix_algorithms
-from OpenLoop.utilities.print import pprint
+from openLoop.system import DAG_algorithm
+from openLoop.system import SRE_matrix_algorithms
+from openLoop.utilities.print import pprint
 
-#from OpenLoop.utilities.np import logspaced
+#from openLoop.utilities.np import logspaced
 
 def isolve_mat(
         arr,

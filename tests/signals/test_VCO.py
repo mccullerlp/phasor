@@ -6,10 +6,10 @@ import declarative
 #import numpy as np
 import numpy.testing as test
 
-import OpenLoop.signals as signals
-import OpenLoop.readouts as readouts
-import OpenLoop.system as system
-from OpenLoop import base
+import openLoop.signals as signals
+import openLoop.readouts as readouts
+import openLoop.system as system
+from openLoop import base
 
 
 class VCOTest(signals.SignalElementBase):
