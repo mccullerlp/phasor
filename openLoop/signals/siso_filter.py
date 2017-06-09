@@ -14,25 +14,25 @@ from . import ports
 
 from .bases import (
     SignalElementBase,
-    OOA_ASSIGN,
+    PTREE_ASSIGN,
 )
 
 
 class TransferFunctionSISOBase(SignalElementBase):
     @declarative.dproperty
     def no_DC(self, val = False):
-        val = self.ooa_params.setdefault('no_DC', val)
+        val = self.ctree.setdefault('no_DC', val)
         return val
 
     @declarative.dproperty
     def F_cutoff(self, val = float('inf')):
-        val = self.ooa_params.setdefault('F_cutoff', val)
+        val = self.ctree.setdefault('F_cutoff', val)
         return val
 
     @declarative.dproperty
     def F_cutoff_low(self, val = 0):
         #this is INCLUSIVE
-        val = self.ooa_params.setdefault('F_cutoff_low', val)
+        val = self.ctree.setdefault('F_cutoff_low', val)
         return val
 
     @declarative.dproperty
@@ -101,7 +101,7 @@ class TransferFunctionSISO(TransferFunctionSISOBase):
             **kwargs
     ):
         super(TransferFunctionSISO, self).__init__(**kwargs)
-        OOA_ASSIGN(self).filter = filter
+        PTREE_ASSIGN(self).filter = filter
         return
 
     def filter_func(self, freq):
@@ -117,7 +117,7 @@ class Integrator(TransferFunctionSISOBase):
 
     @declarative.dproperty
     def no_DC(self, val = True):
-        val = self.ooa_params.setdefault('no_DC', val)
+        val = self.ctree.setdefault('no_DC', val)
         return val
 
 
@@ -139,19 +139,19 @@ class TransferFunctionSISOMechSingleResonance(TransferFunctionSISOBase):
             **kwargs
     ):
         super(TransferFunctionSISOMechSingleResonance, self).__init__(**kwargs)
-        OOA_ASSIGN(self).mass_kg   = mass_kg
-        OOA_ASSIGN(self).center_Hz = center_Hz
+        PTREE_ASSIGN(self).mass_kg   = mass_kg
+        PTREE_ASSIGN(self).center_Hz = center_Hz
 
         if FWHM_Hz is not None:
-            OOA_ASSIGN(self).FWHM_Hz = FWHM_Hz
+            PTREE_ASSIGN(self).FWHM_Hz = FWHM_Hz
 
         if q_factor is not None:
-            OOA_ASSIGN(self).q_factor = q_factor
+            PTREE_ASSIGN(self).q_factor = q_factor
             _FWHM = self.center_Hz / self.q_factor
-            OOA_ASSIGN(self).FWHM_Hz = _FWHM
+            PTREE_ASSIGN(self).FWHM_Hz = _FWHM
         elif FWHM_Hz is not None:
             q_factor = self.center_Hz / self.FWHM_Hz
-            OOA_ASSIGN(self).q_factor = q_factor
+            PTREE_ASSIGN(self).q_factor = q_factor
         else:
             raise RuntimeError("Must specify at least q_factor or FWHM_Hz")
 

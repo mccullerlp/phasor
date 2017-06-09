@@ -14,7 +14,7 @@ from . import ports
 
 from .bases import (
     SystemElementBase,
-    OOA_ASSIGN,
+    PTREE_ASSIGN,
 )
 
 
@@ -29,8 +29,8 @@ class TransferFunctionMIMO(CouplerBase, SystemElementBase):
         self.I  = declarative.Bunch()
         self.O  = declarative.Bunch()
 
-        OOA_ASSIGN(self).max_freq = max_freq
-        OOA_ASSIGN(self).port_pair_xfers = port_pair_xfers
+        PTREE_ASSIGN(self).max_freq = max_freq
+        PTREE_ASSIGN(self).port_pair_xfers = port_pair_xfers
 
         for (iname, oname), xfer in list(self.port_pair_xfers.items()):
             if iname not in self.I:

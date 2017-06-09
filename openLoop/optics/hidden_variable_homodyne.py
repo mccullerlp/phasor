@@ -32,7 +32,7 @@ class HiddenVariableHomodynePD(
         self.include_relative = include_relative
 
         self.own.Fr    = ports.OpticalPort(sname = 'Fr', pchain = 'Bk')
-        bases.OOA_ASSIGN(self).phase_deg = phase_deg
+        bases.PTREE_ASSIGN(self).phase_deg = phase_deg
 
         self.own.Bk = ports.OpticalPort(sname = 'Bk', pchain = 'Fr')
         ##Only required if Bk isn't used (not a MagicPD)
@@ -61,7 +61,7 @@ class HiddenVariableHomodynePD(
             #include_quanta = self.include_quanta,
         )
 
-        bases.OOA_ASSIGN(self).include_readouts = include_readouts
+        bases.PTREE_ASSIGN(self).include_readouts = include_readouts
         if self.include_readouts:
             self.own.I_DC    = readouts.DCReadout(port = self.rtWpdI.o)
             self.own.Q_DC    = readouts.DCReadout(port = self.rtWpdQ.o)

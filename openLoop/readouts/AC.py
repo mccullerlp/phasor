@@ -18,7 +18,7 @@ class ACReadout(base.SystemElementBase):
 
     @decl.dproperty
     def port_set(self, val = 'AC'):
-        val = self.ooa_params.setdefault('port_set', val)
+        val = self.ctree.setdefault('port_set', val)
         return val
 
     def __init__(
@@ -127,7 +127,7 @@ class ACReadoutCLG(base.SystemElementBase):
 
     @decl.dproperty
     def port_set(self, val = 'AC'):
-        val = self.ooa_params.setdefault('port_set', val)
+        val = self.ctree.setdefault('port_set', val)
         return val
 
     def __init__(
@@ -215,7 +215,7 @@ class ACReadoutCLG(base.SystemElementBase):
 class ACReadoutLG(base.SystemElementBase):
     @decl.dproperty
     def port_set(self, val = 'AC'):
-        val = self.ooa_params.setdefault('port_set', val)
+        val = self.ctree.setdefault('port_set', val)
         return val
 
     def __init__(

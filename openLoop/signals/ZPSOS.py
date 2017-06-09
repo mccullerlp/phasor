@@ -21,24 +21,24 @@ from ..base.multi_unit_args import (
     generate_refval_attribute,
 )
 
-def ooa_root_grab(ooa_params, root_key, defaults):
+def ctree_root_grab(ctree, root_key, defaults):
         #only used if the ooa params are completely missing
-        ooa_roots = ooa_params[root_key]
-        if not ooa_roots:
+        ctree_roots = ctree[root_key]
+        if not ctree_roots:
             if isinstance(defaults, collections.Mapping):
                 roots = []
                 for idx, root in defaults.items():
-                    ooa_roots[str(idx)] = root
+                    ctree_roots[str(idx)] = root
                     roots.append(root)
                 return tuple(roots)
 
             else:
                 for idx, root in enumerate(defaults):
-                    ooa_roots[str(idx)] = root
+                    ctree_roots[str(idx)] = root
                 return tuple(defaults)
         else:
             rlist = []
-            for pkey, root in ooa_roots.items():
+            for pkey, root in ctree_roots.items():
                 rlist.append(root)
         return tuple(rlist)
 
@@ -48,7 +48,7 @@ class SZPCascade(siso_filter.TransferFunctionSISOBase):
     @declarative.dproperty
     def poles_r(self, plist = []):
         #only used if the ooa params are completely missing
-        poles = ooa_root_grab(self.ooa_params, 'poles_r', plist)
+        poles = ctree_root_grab(self.ctree, 'poles_r', plist)
         for root in poles:
             assert(root.imag == 0)
         return poles
@@ -56,28 +56,28 @@ class SZPCascade(siso_filter.TransferFunctionSISOBase):
     @declarative.dproperty
     def zeros_r(self, zlist = []):
         #only used if the ooa params are completely missing
-        zeros = ooa_root_grab(self.ooa_params, 'zeros_r', zlist)
+        zeros = ctree_root_grab(self.ctree, 'zeros_r', zlist)
         for root in zeros:
             assert(root.imag == 0)
-        #print(self.ooa_params['zeros_r'])
+        #print(self.ctree['zeros_r'])
         return zeros
 
     @declarative.dproperty
     def poles_c(self, plist = []):
         #only used if the ooa params are completely missing
-        poles = ooa_root_grab(self.ooa_params, 'poles_c', plist)
+        poles = ctree_root_grab(self.ctree, 'poles_c', plist)
         #print("POLES_C: ", poles)
         return poles
 
     @declarative.dproperty
     def zeros_c(self, zlist = []):
         #only used if the ooa params are completely missing
-        zeros = ooa_root_grab(self.ooa_params, 'zeros_c', zlist)
+        zeros = ctree_root_grab(self.ctree, 'zeros_c', zlist)
         return zeros
 
     @declarative.dproperty
     def preserve_plane(self, val = True):
-        val = self.ooa_params.setdefault('preserve_plane', val)
+        val = self.ctree.setdefault('preserve_plane', val)
         return val
 
     @declarative.mproperty
@@ -118,7 +118,7 @@ class SZPCascade(siso_filter.TransferFunctionSISOBase):
 
             if self.preserve_plane:
                 #get the initial value and create the constraint for it
-                if fitter_initial(self.root.ooa_params).real <= 0:
+                if fitter_initial(self.root.ctree).real <= 0:
                     lower_bound = -float('inf')
                     upper_bound = .0001
                 else:
@@ -140,19 +140,19 @@ class SZPCascade(siso_filter.TransferFunctionSISOBase):
                 lower_bound   = lower_bound,
                 upper_bound   = upper_bound,
             )
-        for pname, pval in self.ooa_params['zeros_r'].items():
+        for pname, pval in self.ctree['zeros_r'].items():
             fitters.append(
                 add_fit('zeros_r', pname)
             )
-        for pname, pval in self.ooa_params['poles_r'].items():
+        for pname, pval in self.ctree['poles_r'].items():
             fitters.append(
                 add_fit('poles_r', pname)
             )
-        for pname, pval in self.ooa_params['zeros_c'].items():
+        for pname, pval in self.ctree['zeros_c'].items():
             fitters.append(
                 add_fit('zeros_c', pname, usecomplex = True)
             )
-        for pname, pval in self.ooa_params['poles_c'].items():
+        for pname, pval in self.ctree['poles_c'].items():
             fitters.append(
                 add_fit('poles_c', pname, usecomplex = True)
             )
@@ -190,12 +190,12 @@ class SBQFCascade(siso_filter.TransferFunctionSISOBase):
 
     @declarative.dproperty
     def N_poles(self):
-        val = self.ooa_params.setdefault('N_poles', len(self.poles))
+        val = self.ctree.setdefault('N_poles', len(self.poles))
         return val
 
     @declarative.dproperty
     def N_zeros(self):
-        val = self.ooa_params.setdefault('N_zeros', len(self.poles))
+        val = self.ctree.setdefault('N_zeros', len(self.poles))
         return val
 
     @declarative.mproperty
@@ -216,7 +216,7 @@ class SRationalFilter(SZPCascade):
             desc,
             ubunch = units.time_small,
             stems = [name, ],
-            ooa_name = name,
+            ctree_name = name,
             preferred_attr = name,
             default_attr = '{0}_default'.format(name),
             prototypes = ['full', 'base'],

@@ -60,29 +60,29 @@ class TransLRTInner(Element):
 
     #TODO integrate or name this better
     @declarative.mproperty
-    def ooa_name(self, val):
+    def ctree_name(self, val):
         return val
 
     @declarative.dproperty
     def ref(self):
-        val = self.ooa_params.ref
+        val = self.ctree.ref
         if val is not None:
-            return val * self.ooa_units_scale
+            return val * self.ctree_units_scale
         else:
             return None
 
     @declarative.dproperty
     def val(self):
-        val = self.ooa_params.val
+        val = self.ctree.val
         if val is not None:
-            return val * self.ooa_units_scale
+            return val * self.ctree_units_scale
         else:
             return None
 
     @declarative.mproperty
     def fitter_parameter(self):
         root = self.root
-        names = [self.ooa_name]
+        names = [self.ctree_name]
         current = self.parent
         while current is not root:
             names.append(current.name_child)

@@ -9,7 +9,7 @@ from ..base import (
     CouplerBase,
     SystemElementBase,
     NoiseBase,
-    OOA_ASSIGN,
+    PTREE_ASSIGN,
 )
 
 class SignalElementBase(CouplerBase, SystemElementBase):

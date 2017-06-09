@@ -17,12 +17,12 @@ class FaradayIsolator(
 
     @decl.dproperty
     def pol_from(self, val = 'S'):
-        val = self.ooa_params.setdefault('pol_from', val)
+        val = self.ctree.setdefault('pol_from', val)
         return val
 
     @decl.dproperty
     def pol_to(self, val = 'S'):
-        val = self.ooa_params.setdefault('pol_from', val)
+        val = self.ctree.setdefault('pol_from', val)
         return val
 
     def __build__(self):

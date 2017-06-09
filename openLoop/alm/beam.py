@@ -38,7 +38,7 @@ from . import standard_attrs as attrs
 
 
 class MatrixAtsBase(Element):
-    #TODO report in ooa_params
+    #TODO report in ctree
 
     #@declarative.dproperty_adv
     #def reversed(desc):
@@ -48,12 +48,12 @@ class MatrixAtsBase(Element):
     #        if arg is declarative.NOARG:
     #            arg = False
 
-    #        ooa = self.ooa_params
+    #        ooa = self.ctree
     #        if self.inst_prototype_t in ["full"]:
     #            #TODO make this do the correct thing
     #            arg = getattr(self.inst_prototype, elname)
     #        else:
-    #            ooa = self.ooa_params.useidx('immediate')
+    #            ooa = self.ctree.useidx('immediate')
     #        arg = ooa.setdefault(elname, arg)
     #        return arg
     #    return
@@ -64,12 +64,12 @@ class MatrixAtsBase(Element):
         if arg is declarative.NOARG:
             arg = False
 
-        ooa = self.ooa_params
+        ooa = self.ctree
         if self.inst_prototype_t in ["full"]:
             #TODO make this do the correct thing
             arg = getattr(self.inst_prototype, elname)
         else:
-            ooa = self.ooa_params.useidx('immediate')
+            ooa = self.ctree.useidx('immediate')
 
         ooa[elname] = arg
         #arg = ooa.setdefault(elname, arg)
@@ -81,9 +81,9 @@ class MatrixAtsBase(Element):
         #print("PREV: ", self.parent.env_reversed, " ME: ", self.reversed)
         p_env_reversed = self.parent.environment_query((MatrixAtsBase, "reversed"))
         arg = bool(p_env_reversed) ^ bool(self.reversed)
-        #arg = self.ooa_params.setdefault("env_reversed", arg)
-        self.ooa_params.env_reversed = arg
-        return self.ooa_params.env_reversed
+        #arg = self.ctree.setdefault("env_reversed", arg)
+        self.ctree.env_reversed = arg
+        return self.ctree.env_reversed
 
     @declarative.mproperty
     @invalidate_auto

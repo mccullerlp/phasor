@@ -29,10 +29,10 @@ def test_AOM():
     db.test.aom.N_ode = 100
     db.test.aom.solution_order = 0
     sys = system.BGSystem(
-        ooa_params = db,
+        ctree = db,
     )
     sys.own.test = AOMTestStand.AOMTestStand()
-    db = sys.ooa_shadow()
+    db = sys.ctree_shadow()
 
     np_test.assert_almost_equal(sys.test.DC_R1.DC_readout, np.cos(sys.test.LO.amplitude * np.pi/2)**2, 2)
     np_test.assert_almost_equal(sys.test.DC_R2.DC_readout, np.sin(sys.test.LO.amplitude * np.pi/2)**2, 2)
@@ -48,12 +48,12 @@ def test_AOM_derivative():
     db.test.aoms.VCO_AOM2.generate.amplitude = .01
     db.environment.F_AC.order = 1
     sys = system.BGSystem(
-        ooa_params = db,
+        ctree = db,
     )
     sys.own.test = AOMTestStand.AOM2VCOTestStand(
         VCO2_use = True,
     )
-    db = sys.ooa_shadow()
+    db = sys.ctree_shadow()
 
     X = sys.test.aoms.VCO_AOM1.generate.amplitude
     Y = sys.test.aoms.VCO_AOM2.generate.amplitude
@@ -78,7 +78,7 @@ def test_AOMBasic():
     db.test.LO.phase.units = 'deg'
     db.test.LO.amplitude = np.linspace(.1, 1, 100)
     sys = system.BGSystem(
-        ooa_params = db,
+        ctree = db,
     )
     sys.own.test = AOMTestStand.AOMTestStandBasic()
 
@@ -92,7 +92,7 @@ def test_AOMBasic():
     )
     sys.test.aom.Drv.bond(sys.LO2.Out)
 
-    db = sys.ooa_shadow()
+    db = sys.ctree_shadow()
 
     np_test.assert_almost_equal(sys.test.DC_Drv.DC_readout, (sys.LO2.amplitude**2 + sys.test.LO.amplitude**2)/2, 2)
     np_test.assert_almost_equal(sys.test.DC_R1.DC_readout, 1, 2)
@@ -106,10 +106,10 @@ def test_AOMBasic_PWR2():
     db.test.LO.phase.units = 'deg'
     db.test.LO.amplitude = np.linspace(.1, 1, 100)
     sys = system.BGSystem(
-        ooa_params = db,
+        ctree = db,
     )
     sys.own.test = AOMTestStand.AOMTestStandBasic()
-    db = sys.ooa_shadow()
+    db = sys.ctree_shadow()
 
     np_test.assert_almost_equal(sys.test.DC_Drv.DC_readout, db.test.LO.amplitude**2/2, 2)
     np_test.assert_almost_equal(sys.test.DC_R1.DC_readout, 1, 2)
@@ -124,12 +124,12 @@ def test_AOMBasic_derivative():
     db.test.aoms.VCO_AOM2.generate.amplitude = .00
     db.environment.F_AC.order = 1
     sys = system.BGSystem(
-        ooa_params = db,
+        ctree = db,
     )
     sys.own.test = AOMTestStand.AOM2VCOTestStandBasic(
         VCO2_use = True,
     )
-    db = sys.ooa_shadow()
+    db = sys.ctree_shadow()
 
     X = sys.test.aoms.VCO_AOM1.generate.amplitude
     Y = sys.test.aoms.VCO_AOM2.generate.amplitude

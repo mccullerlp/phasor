@@ -96,9 +96,9 @@ def test_regenerate_auto_ooa(plot):
     assert(set(sys._registry_inserted.keys()) == set(sys2._registry_inserted.keys()))
     assert(set(sys._registry_children.keys()) == set(sys2._registry_children.keys()))
     print('OOA1')
-    print(sys.ooa_params)
+    print(sys.ctree)
     print('OOA2')
-    print(sys2.ooa_params)
+    print(sys2.ctree)
     sys2.print_yaml()
     return
 

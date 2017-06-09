@@ -51,7 +51,7 @@ def test_XFer_fit():
         + np.random.normal(0, relscale, size) 
         + 1j*np.random.normal(0, relscale, size)
     )
-    print(sys.X1.ooa_as_yaml())
+    print(sys.X1.ctree_as_yaml())
 
     import openLoop.fitting.casadi as FIT
     import openLoop.fitting.casadi.transfer_functions as FIT_TF

@@ -38,7 +38,7 @@ class OpticalDegenerate4PortMixin(object):
 
     @declarative.dproperty
     def AOI_deg(self, val = 0):
-        val = self.ooa_params.setdefault('AOI_deg', val)
+        val = self.ctree.setdefault('AOI_deg', val)
         return val
 
     @declarative.mproperty

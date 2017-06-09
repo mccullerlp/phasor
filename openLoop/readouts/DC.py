@@ -15,7 +15,7 @@ class DCReadout(base.SystemElementBase):
 
     @decl.dproperty
     def port_set(self, val = 'DC'):
-        val = self.ooa_params.setdefault('port_set', val)
+        val = self.ctree.setdefault('port_set', val)
         return val
 
     @decl.dproperty

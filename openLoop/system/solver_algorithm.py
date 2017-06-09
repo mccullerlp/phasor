@@ -39,7 +39,7 @@ class SystemSolver(object):
     field_space_proto = KVSpace('ports', dtype=np.complex128)
     #TODO, I loath how the iterative state is stored for this object, clean it up...
 
-    #TODO make this take ooa_params
+    #TODO make this take ctree
     def __init__(
         self,
         system,
@@ -296,7 +296,7 @@ class SystemSolver(object):
             AC_seq      = solution_bunch.AC_seq,
             AC_req      = solution_bunch.AC_req,
         )
-        if self.system.ooa_params.debug.solver.get('delta_V_max', False):
+        if self.system.ctree.debug.solver.get('delta_V_max', False):
             print(
                 "DELTA V MAX: ",
                 solution_bunch.delta_v,

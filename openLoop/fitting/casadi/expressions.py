@@ -249,19 +249,19 @@ class FitterExpression(FitterBase):
         #double check that they were balanced
         assert(not cplx_imags_map)
 
-        ooa_meta = declarative.Bunch()
+        ctree_meta = declarative.Bunch()
         for sysname in list(self.root.systems.keys()):
-            ooa_meta[sysname] = bunch.DeepBunch()
+            ctree_meta[sysname] = bunch.DeepBunch()
 
-        injectors = self.root.targets_recurse(VISIT.ooa_reinject)
+        injectors = self.root.targets_recurse(VISIT.ctree_reinject)
         for injector in injectors:
-            injector(ooa_meta, sol_map)
+            injector(ctree_meta, sol_map)
 
         systems = declarative.Bunch()
         systems_map = dict()
         for obj, sysname in list(self.root.object_roots_inv.items()):
             new_obj = obj.regenerate(
-                ooa_params = ooa_meta[sysname],
+                ctree = ctree_meta[sysname],
             )
             systems[sysname] = new_obj
             systems_map[sysname] = new_obj

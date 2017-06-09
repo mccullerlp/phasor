@@ -29,9 +29,9 @@ class NoiseReadout(base.SystemElementBase):
 
         if port_set is None:
             if AC_sidebands_use:
-                base.OOA_ASSIGN(self).port_set = 'AC noise'
+                base.PTREE_ASSIGN(self).port_set = 'AC noise'
             else:
-                base.OOA_ASSIGN(self).port_set = 'DC noise'
+                base.PTREE_ASSIGN(self).port_set = 'DC noise'
         else:
             self.port_set = port_set
 

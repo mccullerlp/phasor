@@ -88,11 +88,11 @@ def test_VCO():
     db = declarative.DeepBunch()
     db.environment.F_AC.order = 1
     sys = system.BGSystem(
-        ooa_params = db,
+        ctree = db,
         F_AC = 1e3,
     )
     sys.own.test = VCOTest()
-    db = sys.ooa_shadow()
+    db = sys.ctree_shadow()
 
     print(sys.test.AC_I.AC_sensitivity)
     print(sys.test.AC_Q.AC_sensitivity)

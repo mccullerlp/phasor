@@ -75,7 +75,7 @@ def test_split():
         port = sys.PD_G.Wpd.o,
     )
     print("A")
-    pprint(sys.ooa_params.test.PSL)
+    pprint(sys.ctree.test.PSL)
     np_test.assert_almost_equal(sys.DC_R.DC_readout, 2)
     np_test.assert_almost_equal(sys.DC_G.DC_readout, 1)
 
@@ -123,7 +123,7 @@ def test_split():
 #        port = sys.PD_G.Wpd.o,
 #    )
 #    #print("A")
-#    #pprint(sys.ooa_params.test.PSL)
+#    #pprint(sys.ctree.test.PSL)
 #    print("sys.DC_R.DC_readout", sys.DC_R.DC_readout, 2)
 #    print("sys.DC_G.DC_readout", sys.DC_G.DC_readout, 1)
 #    conv = 0.069527636785009506
@@ -136,10 +136,10 @@ def test_aom():
     from openLoop.optics.models.AOMTestStand import AOMTestStand
     db = DeepBunch()
     sys = system.BGSystem(
-        ooa_params = db,
+        ctree = db,
     )
     sys.own.test = AOMTestStand()
-    db = sys.ooa_shadow()
+    db = sys.ctree_shadow()
     sys.test.LO.amplitude
     print(sys.test.DC_R1.DC_readout)
 

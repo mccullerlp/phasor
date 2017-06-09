@@ -81,11 +81,11 @@ def test_fitter(plot):
     froot.fit_systems
     print(froot.fit_systems)
     print(froot.symbol_map)
-    #print(froot.systems.alm.ooa_params)
+    #print(froot.systems.alm.ctree)
     print(froot.fit_systems.alm.measurements.overlap('q1', 'q2'))
     print(froot.overlap.expression_remapped)
 
-    #print(froot.systems.alm.ooa_params)
+    #print(froot.systems.alm.ctree)
     ret = froot.overlap.minimize_function()
     print("OLAP: ", ret.systems.alm.measurements.overlap('q1', 'q2'))
     print(plot)
@@ -115,11 +115,11 @@ def test_fitter_jitter(plot):
     froot.fit_systems
     print(froot.fit_systems)
     print(froot.symbol_map)
-    #print(froot.systems.alm.ooa_params)
+    #print(froot.systems.alm.ctree)
     print(froot.fit_systems.alm.measurements.overlap('q1', 'q2'))
     print(froot.overlap.expression_remapped)
 
-    #print(froot.systems.alm.ooa_params)
+    #print(froot.systems.alm.ctree)
     ret = froot.overlap.minimize_function()
     return
 

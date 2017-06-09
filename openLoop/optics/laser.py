@@ -30,7 +30,7 @@ class Laser(
 
     @decl.dproperty
     def polarization(self, val = 'S'):
-        val = self.ooa_params.setdefault('polarization', val)
+        val = self.ctree.setdefault('polarization', val)
         return val
 
     @decl.dproperty

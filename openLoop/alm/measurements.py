@@ -45,9 +45,9 @@ class CRootSystem(RootElement, CSystem):
     def env_reversed(self):
         #TODO put this into the environment_query
         arg = bool(self.reversed)
-        #arg = self.ooa_params.setdefault("env_reversed", arg)
-        self.ooa_params.env_reversed = arg
-        return self.ooa_params.env_reversed
+        #arg = self.ctree.setdefault("env_reversed", arg)
+        self.ctree.env_reversed = arg
+        return self.ctree.env_reversed
         return arg
 
     @declarative.dproperty
@@ -60,7 +60,7 @@ class CRootSystem(RootElement, CSystem):
     def print_yaml(self):
         import yaml
         db = DeepBunchSingleAssign()
-        db.update_recursive(self.ooa_params)
+        db.update_recursive(self.ctree)
         yaml.dump(db._mydict_resolved, sys.stdout)
         return
 

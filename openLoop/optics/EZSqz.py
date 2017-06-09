@@ -64,35 +64,35 @@ class EZSqz(
             raise RuntimeError("Must specify some squeezing parameter")
 
         #TODO, actually respect this variable
-        bases.OOA_ASSIGN(self).phi_sqz_deg = phi_sqz_deg
+        bases.PTREE_ASSIGN(self).phi_sqz_deg = phi_sqz_deg
 
-        bases.OOA_ASSIGN(self).use_parameter = use_parameter
+        bases.PTREE_ASSIGN(self).use_parameter = use_parameter
 
         if self.use_parameter == 'nonlinear_power_gain':
             subtype = 'gain'
-            bases.OOA_ASSIGN(self).nonlinear_power_gain = nonlinear_power_gain
+            bases.PTREE_ASSIGN(self).nonlinear_power_gain = nonlinear_power_gain
             if loss is None:
                 loss = 0
-            bases.OOA_ASSIGN(self).loss                 = loss
+            bases.PTREE_ASSIGN(self).loss                 = loss
             nonlinear_field_gain_1 = np.sqrt(self.nonlinear_power_gain)
             nonlinear_field_gain_2 = np.sqrt(self.nonlinear_power_gain - 1)
             normalized_nonlinear_field_gain = 1 - 1/nonlinear_field_gain_1
         elif self.use_parameter == 'nonlinear_field_gain':
             subtype = 'gain'
-            bases.OOA_ASSIGN(self).nonlinear_field_gain = nonlinear_field_gain
+            bases.PTREE_ASSIGN(self).nonlinear_field_gain = nonlinear_field_gain
             if loss is None:
                 loss = 0
-            bases.OOA_ASSIGN(self).loss                 = loss
+            bases.PTREE_ASSIGN(self).loss                 = loss
             nonlinear_field_gain_1 = self.nonlinear_field_gain
             nonlinear_power_gain   = nonlinear_field_gain_1**2
             nonlinear_field_gain_2 = np.sqrt(nonlinear_power_gain - 1)
             normalized_nonlinear_field_gain = 1 - 1/nonlinear_field_gain_1
         elif self.use_parameter == 'normalized_nonlinear_field_gain':
             subtype = 'gain'
-            bases.OOA_ASSIGN(self).normalized_nonlinear_field_gain = normalized_nonlinear_field_gain
+            bases.PTREE_ASSIGN(self).normalized_nonlinear_field_gain = normalized_nonlinear_field_gain
             if loss is None:
                 loss = 0
-            bases.OOA_ASSIGN(self).loss                 = loss
+            bases.PTREE_ASSIGN(self).loss                 = loss
             nonlinear_field_gain = 1/(1 - normalized_nonlinear_field_gain)
             nonlinear_field_gain_1 = nonlinear_field_gain
             nonlinear_power_gain = nonlinear_field_gain_1**2
@@ -109,10 +109,10 @@ class EZSqz(
             antisqzDB = +10 * np.log(rel_variance_2) / np.log(10)
         elif self.use_parameter == 'sqzDB':
             subtype = 'variance'
-            bases.OOA_ASSIGN(self).sqzDB = sqzDB
+            bases.PTREE_ASSIGN(self).sqzDB = sqzDB
             if antisqzDB is None:
                 antisqzDB = self.sqzDB
-            bases.OOA_ASSIGN(self).antisqzDB = antisqzDB
+            bases.PTREE_ASSIGN(self).antisqzDB = antisqzDB
             rel_variance_1 = 10**(-self.sqzDB    / 10)
             rel_variance_2 = 10**(self.antisqzDB / 10)
         else:
@@ -141,14 +141,14 @@ class EZSqz(
             #print(rel_variance_1 , Xrel_variance_1)
             #print(rel_variance_2 , Xrel_variance_2)
 
-        bases.OOA_ASSIGN(self).nonlinear_power_gain            = nonlinear_power_gain
-        bases.OOA_ASSIGN(self).nonlinear_field_gain            = nonlinear_field_gain_1
-        bases.OOA_ASSIGN(self).normalized_nonlinear_field_gain = normalized_nonlinear_field_gain
-        bases.OOA_ASSIGN(self).loss                            = loss
-        bases.OOA_ASSIGN(self).rel_variance_1                  = rel_variance_1
-        bases.OOA_ASSIGN(self).rel_variance_2                  = rel_variance_2
-        bases.OOA_ASSIGN(self).sqzDB                           = sqzDB
-        bases.OOA_ASSIGN(self).antisqzDB                       = antisqzDB
+        bases.PTREE_ASSIGN(self).nonlinear_power_gain            = nonlinear_power_gain
+        bases.PTREE_ASSIGN(self).nonlinear_field_gain            = nonlinear_field_gain_1
+        bases.PTREE_ASSIGN(self).normalized_nonlinear_field_gain = normalized_nonlinear_field_gain
+        bases.PTREE_ASSIGN(self).loss                            = loss
+        bases.PTREE_ASSIGN(self).rel_variance_1                  = rel_variance_1
+        bases.PTREE_ASSIGN(self).rel_variance_2                  = rel_variance_2
+        bases.PTREE_ASSIGN(self).sqzDB                           = sqzDB
+        bases.PTREE_ASSIGN(self).antisqzDB                       = antisqzDB
 
         self.used_nonlinear_power_gain            = nonlinear_power_gain
         self.used_nonlinear_field_gain_1          = nonlinear_field_gain_1

@@ -22,7 +22,7 @@ def gensys(
     db = declarative.DeepBunch()
     db.environment.F_AC.order = 1
     sys = system.BGSystem(
-        ooa_params = db
+        ctree = db
     )
     sys = sys
     sys.own.PSL = optics.Laser(

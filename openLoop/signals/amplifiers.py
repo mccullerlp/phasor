@@ -16,7 +16,7 @@ class DistributionAmplifier(bases.CouplerBase, bases.SystemElementBase):
             **kwargs
     ):
         super(DistributionAmplifier, self).__init__(**kwargs)
-        bases.OOA_ASSIGN(self).port_gains = port_gains
+        bases.PTREE_ASSIGN(self).port_gains = port_gains
 
         self.own.In  = ports.SignalInPort()
 
@@ -50,7 +50,7 @@ class SummingAmplifier(bases.CouplerBase, bases.SystemElementBase):
             **kwargs
     ):
         super(SummingAmplifier, self).__init__(**kwargs)
-        bases.OOA_ASSIGN(self).port_gains = port_gains
+        bases.PTREE_ASSIGN(self).port_gains = port_gains
 
         self.own.O  = ports.SignalOutPort(sname = 'LO')
 
@@ -84,7 +84,7 @@ class MatrixAmplifier(bases.CouplerBase, bases.SystemElementBase):
             **kwargs
     ):
         super(MatrixAmplifier, self).__init__(**kwargs)
-        bases.OOA_ASSIGN(self).port_pair_gains = port_pair_gains
+        bases.PTREE_ASSIGN(self).port_pair_gains = port_pair_gains
 
         self.In  = declarative.Bunch()
         self.O  = declarative.Bunch()

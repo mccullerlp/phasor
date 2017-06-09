@@ -9,7 +9,7 @@ from ..base.bases import (
     NoiseBase,
     CouplerBase,
     SystemElementBase,
-    OOA_ASSIGN,
+    PTREE_ASSIGN,
 )
 
 class OpticalElementBase(SystemElementBase):

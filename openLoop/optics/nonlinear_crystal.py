@@ -26,7 +26,7 @@ class NonlinearCrystal(
         """
         Number of iterations to use in the ODE solution
         """
-        val = self.ooa_params.setdefault('N_ode', val)
+        val = self.ctree.setdefault('N_ode', val)
         return val
 
     @declarative.dproperty
@@ -36,7 +36,7 @@ class NonlinearCrystal(
 
         Should al
         """
-        val = self.ooa_params.setdefault('nlg', val)
+        val = self.ctree.setdefault('nlg', val)
         return val
 
     #@declarative.dproperty
@@ -44,7 +44,7 @@ class NonlinearCrystal(
     #    """
     #    in [mm]
     #    """
-    #    val = self.ooa_params.setdefault('length_mm', val)
+    #    val = self.ctree.setdefault('length_mm', val)
     #    return val
 
     _length_default = '10mm'

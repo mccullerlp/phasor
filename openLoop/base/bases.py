@@ -35,10 +35,10 @@ class Element(dsubstrate.Element):
             return self
         return None
 
-    def ooa_as_yaml(self):
+    def ctree_as_yaml(self):
         import yaml
         db = bunch.DeepBunchSingleAssign()
-        db.update_recursive(self.ooa_params)
+        db.update_recursive(self.ctree)
         return yaml.dump(db._mydict_resolved)
 
     #def insert(self, obj, name = None, invalidate = True):
@@ -136,6 +136,6 @@ class OOABridge(object):
         return self.__setitem__(key, item)
 
 
-def OOA_ASSIGN(obj):
-    warnings.warn("OOA_ASSIGN", DeprecationWarning)
-    return OOABridge(obj, obj.ooa_params)
+def PTREE_ASSIGN(obj):
+    warnings.warn("PTREE_ASSIGN", DeprecationWarning)
+    return OOABridge(obj, obj.ctree)

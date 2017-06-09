@@ -61,7 +61,7 @@ class FitterRoot(RootElement, FitterBase):
 
     def _root_register(self, name, system):
         self.object_roots_inv[system] = name
-        self.meta_ooa[name] = system.ooa_params
+        self.meta_ooa[name] = system.ctree
         self.invalidate()
         return
 
@@ -81,18 +81,18 @@ class FitterRoot(RootElement, FitterBase):
     @declarative.mproperty
     @invalidate_auto
     def fit_systems(self):
-        ooa_meta = declarative.Bunch()
+        ctree_meta = declarative.Bunch()
         for sysname in list(self.systems.keys()):
-            ooa_meta[sysname] = bunch.DeepBunch(vpath=True)
+            ctree_meta[sysname] = bunch.DeepBunch(vpath=True)
 
-        injectors = self.targets_recurse(VISIT.ooa_inject)
+        injectors = self.targets_recurse(VISIT.ctree_inject)
         for injector in injectors:
-            injector(ooa_meta)
+            injector(ctree_meta)
 
         systems = declarative.Bunch()
         for system, name in list(self.object_roots_inv.items()):
             new_obj = system.regenerate(
-                ooa_params = ooa_meta[name],
+                ctree = ctree_meta[name],
             )
             systems[name] = new_obj
         return systems

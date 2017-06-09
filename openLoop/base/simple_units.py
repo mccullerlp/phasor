@@ -97,13 +97,13 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
 
     #TODO integrate or name this better
     @declarative.mproperty
-    def ooa_name(self, val):
+    def ctree_name(self, val):
         return val
 
     @declarative.dproperty
-    def ooa_units_scale(self):
+    def ctree_units_scale(self):
         units_to = self.units
-        units_from = pint.ureg.parse_expression(self.ooa_params.units)
+        units_from = pint.ureg.parse_expression(self.ctree.units)
         rescale = units_from / units_to
         assert(rescale.unitless)
         #TODO check these methods (only seem present on newer pint)
@@ -113,26 +113,26 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
 
     @declarative.dproperty
     def ref(self):
-        val = self.ooa_params.get('ref', declarative.NOARG)
+        val = self.ctree.get('ref', declarative.NOARG)
         if val is declarative.NOARG:
             return self.val
         if val is not None:
-            return val * self.ooa_units_scale
+            return val * self.ctree_units_scale
         else:
             return None
 
     @declarative.dproperty
     def val(self):
-        val = self.ooa_params.val
+        val = self.ctree.val
         if val is not None:
-            return val * self.ooa_units_scale
+            return val * self.ctree_units_scale
         else:
             return None
 
     @declarative.mproperty
     def fitter_parameter(self):
         root = self.root
-        names = [self.ooa_name]
+        names = [self.ctree_name]
         current = self.parent
         while current is not root:
             names.append(current.name_child)
@@ -188,12 +188,12 @@ class UnitlessElementRefValue(SimpleUnitfulGroup, Element):
 
     #TODO integrate or name this better
     @declarative.mproperty
-    def ooa_name(self, val):
+    def ctree_name(self, val):
         return val
 
     @declarative.dproperty
     def ref(self):
-        val = self.ooa_params
+        val = self.ctree
         if not isinstance(val, collections.Mapping):
             return val
         #if it was a mapping, then it is split into ref and val
@@ -204,7 +204,7 @@ class UnitlessElementRefValue(SimpleUnitfulGroup, Element):
 
     @declarative.dproperty
     def val(self):
-        val = self.ooa_params
+        val = self.ctree
         if not isinstance(val, collections.Mapping):
             return val
         #if it was a mapping, then it is split into ref and val
@@ -214,7 +214,7 @@ class UnitlessElementRefValue(SimpleUnitfulGroup, Element):
     @declarative.mproperty
     def fitter_parameter(self):
         root = self.root
-        names = [self.ooa_name]
+        names = [self.ctree_name]
         current = self.parent
         while current is not root:
             names.append(current.name_child)

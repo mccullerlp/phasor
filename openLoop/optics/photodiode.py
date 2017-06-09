@@ -28,7 +28,7 @@ class PD(
 
     @decl.dproperty
     def include_readouts(self, val = False):
-        val = self.ooa_params.setdefault('include_readouts', val)
+        val = self.ctree.setdefault('include_readouts', val)
         return val
 
     @decl.dproperty
@@ -118,7 +118,7 @@ class MagicPD(
 
     @decl.dproperty
     def include_readouts(self, val = False):
-        val = self.ooa_params.setdefault('include_readouts', val)
+        val = self.ctree.setdefault('include_readouts', val)
         return val
 
     @decl.dproperty

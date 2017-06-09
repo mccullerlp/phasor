@@ -11,7 +11,7 @@ from .bases import (
     Element,
     RootElement,
     SystemElementBase,
-    OOA_ASSIGN,
+    PTREE_ASSIGN,
 )
 
 from .ports import (

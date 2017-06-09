@@ -43,12 +43,12 @@ class SignalGenerator(bases.SignalElementBase):
 
     @declarative.dproperty
     def amplitude(self, val = 1):
-        val = self.ooa_params.setdefault('amplitude', val)
+        val = self.ctree.setdefault('amplitude', val)
         return val
 
     @declarative.dproperty
     def amplitudeC(self, val = None):
-        val = self.ooa_params.setdefault('amplitudeC', val)
+        val = self.ctree.setdefault('amplitudeC', val)
         if val is None:
             val = self.symbols.math.conjugate(self.amplitude)
         return val

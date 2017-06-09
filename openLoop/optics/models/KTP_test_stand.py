@@ -95,7 +95,7 @@ class KTPTestStand(optics.OpticalCouplerBase):
         self.own.DC_G = readouts.DCReadout(
             port = self.PD_G.Wpd.o,
         )
-        if self.ooa_params.setdefault('include_AC', True):
+        if self.ctree.setdefault('include_AC', True):
             self.own.AC_G = readouts.HomodyneACReadout(
                 portNI = self.hPD_G.rtQuantumI.o,
                 portNQ = self.hPD_G.rtQuantumQ.o,
@@ -141,7 +141,7 @@ class KTPTestStand(optics.OpticalCouplerBase):
                 print(lst, arr)
         return lst, arr
 #print("A")
-#pprint(self.ooa_params.test.PSL)
+#pprint(self.ctree.test.PSL)
 #print("self.DC_R.DC_readout", self.DC_R.DC_readout, 2)
 #print("self.DC_G.DC_readout", self.DC_G.DC_readout, 1)
 
@@ -242,7 +242,7 @@ class SHGTestStandResonant(optics.OpticalCouplerBase):
         self.own.DC_G = readouts.DCReadout(
             port = self.PD_G.Wpd.o,
         )
-        if self.ooa_params.setdefault('include_AC', True):
+        if self.ctree.setdefault('include_AC', True):
             self.own.AC_G = readouts.HomodyneACReadout(
                 portNI = self.hPD_G.rtQuantumI.o,
                 portNQ = self.hPD_G.rtQuantumQ.o,
@@ -418,7 +418,7 @@ class OPOTestStandResonant(optics.OpticalCouplerBase):
         self.own.DC_G = readouts.DCReadout(
             port = self.PD_G.Wpd.o,
         )
-        if self.ooa_params.setdefault('include_AC', True):
+        if self.ctree.setdefault('include_AC', True):
             self.own.AC_G = readouts.HomodyneACReadout(
                 portNI = self.hPD_G.rtQuantumI.o,
                 portNQ = self.hPD_G.rtQuantumQ.o,

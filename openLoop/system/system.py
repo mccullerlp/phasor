@@ -22,7 +22,7 @@ from ..base import (
     Frequency,
     SystemElementBase,
     ClassicalFreqKey,
-    OOA_ASSIGN,
+    PTREE_ASSIGN,
 )
 
 from .matrix_algorithm import (
@@ -49,16 +49,16 @@ class SystemSymbols(Element):
     """
 
     def __build__(self):
-        OOA_ASSIGN(self).c_m_s                 = 299792458
-        OOA_ASSIGN(self).kB_J_K                = 1.380658e-23
-        OOA_ASSIGN(self).h_Js                  = 6.6260700408e-34
-        OOA_ASSIGN(self).hbar_Js               = 1.0545718001e-34
-        OOA_ASSIGN(self).pi                    = np.pi
-        OOA_ASSIGN(self).i                     = 1j
-        OOA_ASSIGN(self).i2pi                  = np.pi * 2j
-        OOA_ASSIGN(self).math                  = np
-        OOA_ASSIGN(self).temp_K                = 299
-        OOA_ASSIGN(self).Z_termination         = 50
+        PTREE_ASSIGN(self).c_m_s                 = 299792458
+        PTREE_ASSIGN(self).kB_J_K                = 1.380658e-23
+        PTREE_ASSIGN(self).h_Js                  = 6.6260700408e-34
+        PTREE_ASSIGN(self).hbar_Js               = 1.0545718001e-34
+        PTREE_ASSIGN(self).pi                    = np.pi
+        PTREE_ASSIGN(self).i                     = 1j
+        PTREE_ASSIGN(self).i2pi                  = np.pi * 2j
+        PTREE_ASSIGN(self).math                  = np
+        PTREE_ASSIGN(self).temp_K                = 299
+        PTREE_ASSIGN(self).Z_termination         = 50
         super(SystemSymbols, self).__build__()
 
     def number(self, num):
@@ -75,7 +75,7 @@ class BGSystem(RootElement):
 
     @declarative.dproperty
     def include_johnson_noise(self, val = True):
-        val = self.ooa_params.setdefault('include_johnson_noise', val)
+        val = self.ctree.setdefault('include_johnson_noise', val)
         return val
 
     @declarative.dproperty
@@ -96,12 +96,12 @@ class BGSystem(RootElement):
             val = 2
         elif self.sided_spectra == 2:
             val = 1
-        val = self.ooa_params.setdefault('adjust_PSD', val)
+        val = self.ctree.setdefault('adjust_PSD', val)
         return val
 
     @declarative.dproperty
     def sided_spectra(self, val = 1):
-        val = self.ooa_params.setdefault('sided_spectra', val)
+        val = self.ctree.setdefault('sided_spectra', val)
         return val
 
     @declarative.dproperty

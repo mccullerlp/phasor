@@ -47,22 +47,22 @@ class Mirror(
 
     @declarative.dproperty
     def R_backscatter(self, val = 0):
-        val = self.ooa_params.setdefault('R_backscatter', val)
+        val = self.ctree.setdefault('R_backscatter', val)
         return val
 
     @declarative.dproperty
     def T_hr(self, val = 0):
-        val = self.ooa_params.setdefault('T_hr', val)
+        val = self.ctree.setdefault('T_hr', val)
         return val
 
     @declarative.dproperty
     def L_hr(self, val = 0):
-        val = self.ooa_params.setdefault('L_hr', val)
+        val = self.ctree.setdefault('L_hr', val)
         return val
 
     @declarative.dproperty
     def L_t(self, val = 0):
-        val = self.ooa_params.setdefault('L_t', val)
+        val = self.ctree.setdefault('L_t', val)
         return val
 
     #self.angleZ  = MechanicalPortHolder(self, x = 'aZ')

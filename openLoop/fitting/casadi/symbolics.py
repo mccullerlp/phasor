@@ -55,25 +55,25 @@ class FitterSym(FitterBase):
 
     def targets_list(self, typename):
         #TODO, opt out of these if not carrying parameters
-        if typename == VISIT.ooa_inject:
-            return self.ooa_inject
+        if typename == VISIT.ctree_inject:
+            return self.ctree_inject
         elif typename == VISIT.symbol_map:
             return self.fitter_symbol_map
-        elif typename == VISIT.ooa_reinject:
-            return self.ooa_reinject
+        elif typename == VISIT.ctree_reinject:
+            return self.ctree_reinject
         elif typename == VISIT.constraints:
             return self.constraints
         else:
             return super(FitterSym, self).targets_list(typename)
 
-    def ooa_inject(self, meta_ooa):
+    def ctree_inject(self, meta_ooa):
         for datum, symbol in list(self._parameter_symbols.items()):
             sysname = self._parameter_sysnames[datum]
             ival = datum.initial(self.root.meta_ooa[sysname])
             datum.inject(meta_ooa[sysname], symbol, ival)
         return
 
-    def ooa_reinject(self, meta_ooa, param_map):
+    def ctree_reinject(self, meta_ooa, param_map):
         for datum, sysname in list(self._parameter_sysnames.items()):
             nval = param_map[datum]
             datum.reinject(meta_ooa[sysname], nval)

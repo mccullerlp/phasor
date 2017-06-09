@@ -210,7 +210,7 @@ def test_FP_OOA():
     import pprint
     pp = pprint.PrettyPrinter()
     print("OOA")
-    pp.pprint(sys.ooa_params)
+    pp.pprint(sys.ctree)
 
 if __name__ == '__main__':
     test_FP_base()

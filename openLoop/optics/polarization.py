@@ -316,14 +316,14 @@ class WavePlate(
         #TODO Make these generic properties
         super(WavePlate, self).__init__(**kwargs)
 
-        bases.OOA_ASSIGN(self).cplgP  = cplgP
+        bases.PTREE_ASSIGN(self).cplgP  = cplgP
         if cplgPC is None:
             cplgPC = self.cplgP.conjugate()
-        bases.OOA_ASSIGN(self).cplgPC = cplgPC
-        bases.OOA_ASSIGN(self).cplgS  = cplgS
+        bases.PTREE_ASSIGN(self).cplgPC = cplgPC
+        bases.PTREE_ASSIGN(self).cplgS  = cplgS
         if cplgSC is None:
             cplgSC = self.cplgS.conjugate()
-        bases.OOA_ASSIGN(self).cplgSC = cplgSC
+        bases.PTREE_ASSIGN(self).cplgSC = cplgSC
 
     @decl.dproperty
     def Fr(self):
@@ -463,12 +463,12 @@ class PolarizingBeamsplitter(PolarizingMirror):
         AOI_deg           = 45,
         **kwargs
     ):
-        self.__init_ooa__(**kwargs)
-        bases.OOA_ASSIGN(self).pass_polarization = pass_polarization
-        bases.OOA_ASSIGN(self).selection_defect  = selection_defect
-        bases.OOA_ASSIGN(self).rejection_defect  = rejection_defect
-        bases.OOA_ASSIGN(self).select_loss       = select_loss
-        bases.OOA_ASSIGN(self).reject_loss       = reject_loss
+        self.__init_ctree__(**kwargs)
+        bases.PTREE_ASSIGN(self).pass_polarization = pass_polarization
+        bases.PTREE_ASSIGN(self).selection_defect  = selection_defect
+        bases.PTREE_ASSIGN(self).rejection_defect  = rejection_defect
+        bases.PTREE_ASSIGN(self).select_loss       = select_loss
+        bases.PTREE_ASSIGN(self).reject_loss       = reject_loss
 
         select_mirror = Mirror(
             T_hr = 1 - self.selection_defect,

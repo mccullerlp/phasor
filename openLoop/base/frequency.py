@@ -20,7 +20,7 @@ def generate_F_Hz():
             desc,
             ubunch = units.frequency,
             stems = ['F', ],
-            ooa_name = 'frequency',
+            ctree_name = 'frequency',
             preferred_attr = 'frequency',
             default_attr = 'frequency',
             prototypes = ['full'],
@@ -39,7 +39,7 @@ class Frequency(
     def F_center_Hz(self, val = declarative.NOARG):
         if val is declarative.NOARG:
             val = self.F_Hz.ref
-        val = self.ooa_params.setdefault('F_center_Hz', val)
+        val = self.ctree.setdefault('F_center_Hz', val)
         return val
 
     def __init__(
@@ -50,6 +50,6 @@ class Frequency(
     ):
         super(Frequency, self).__init__(**kwargs)
 
-        bases.OOA_ASSIGN(self).F_width_Hz  = F_width_Hz
-        bases.OOA_ASSIGN(self).order = order
+        bases.PTREE_ASSIGN(self).F_width_Hz  = F_width_Hz
+        bases.PTREE_ASSIGN(self).order = order
         return

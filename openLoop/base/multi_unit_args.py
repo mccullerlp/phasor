@@ -12,7 +12,7 @@ from . import pint
 def generate_refval_attribute(
     desc,
     stems,
-    ooa_name,
+    ctree_name,
     preferred_attr,
     prototypes,
     ubunch,
@@ -38,7 +38,7 @@ def generate_refval_attribute(
         group,
         units,
     ):
-        ooa = self.ooa_params[ooa_name]
+        ooa = self.ctree[ctree_name]
         if self.inst_prototype_t in prototypes:
             #TODO make this do the correct thing
             oattr = getattr(self.inst_prototype, preferred_attr[0])
@@ -46,7 +46,7 @@ def generate_refval_attribute(
             if ooa.ref is not ooa.val:
                 ooa.ref   = oattr.ref
             ooa.units = str(oattr.units)
-            #self.ooa_params[ooa_name]["from"] = self.inst_prototype.name_system + "." + preferred_attr
+            #self.ctree[ctree_name]["from"] = self.inst_prototype.name_system + "." + preferred_attr
             sources.clear()
         else:
             if len(sources) > 1:
@@ -109,11 +109,11 @@ def generate_refval_attribute(
             storage,
             group,
         ):
-            pint_units = pint.ureg.parse_expression(self.ooa_params[ooa_name].units)
+            pint_units = pint.ureg.parse_expression(self.ctree[ctree_name].units)
             return simple_units.ElementRefValue(
-                ooa_params = self.ooa_params[ooa_name],
+                ctree = self.ctree[ctree_name],
                 units = pint_units,
-                ooa_name = ooa_name,
+                ctree_name = ctree_name,
             )
         for pattr in preferred_attr:
             desc.mproperty(PREFERRED, name = pattr)
@@ -127,13 +127,13 @@ def generate_refval_attribute(
     ):
         #could get value with
         #k, v = storage.items().next()
-        #print("hmm: " ,self.ooa_params[ooa_name].units)
+        #print("hmm: " ,self.ctree[ctree_name].units)
 
         pint_units = pint.ureg.parse_expression(units)
         return simple_units.ElementRefValue(
-            ooa_params = self.ooa_params[ooa_name],
+            ctree = self.ctree[ctree_name],
             units      = pint_units,
-            ooa_name   = ooa_name,
+            ctree_name   = ctree_name,
         )
 
     for unitname, unitobj in ubunch.umap.items():
@@ -144,7 +144,7 @@ def generate_refval_attribute(
 def unitless_refval_attribute(
     desc,
     prototypes    = ['full', 'base'],
-    ooa_name      = None,
+    ctree_name      = None,
     default_attr  = None,
     allow_fitting = True,
 ):
@@ -152,8 +152,8 @@ def unitless_refval_attribute(
     for dproperty_adv
     """
     prototypes = frozenset(prototypes)
-    if ooa_name is None:
-        ooa_name = desc.__name__
+    if ctree_name is None:
+        ctree_name = desc.__name__
 
     @desc.construct
     def CONSTRUCT(
@@ -163,13 +163,13 @@ def unitless_refval_attribute(
         if self.inst_prototype_t in prototypes:
             #TODO make this do the correct thing
             oattr = getattr(self.inst_prototype, desc.__name__)
-            ooa = self.ooa_params[ooa_name]
+            ooa = self.ctree[ctree_name]
             if isinstance(ooa, collections.Mapping):
                 #the ooa may or may not be specified, if it is, then it is a map type
                 if 'ref' not in ooa and 'val' not in ooa:
                     if oattr.ref is oattr.val:
                         #set the single value
-                        self.ooa_params[ooa_name] = oattr.val
+                        self.ctree[ctree_name] = oattr.val
                     else:
                         ooa.setdefault('ref', oattr.ref)
                         ooa.setdefault('val', oattr.val)
@@ -179,7 +179,7 @@ def unitless_refval_attribute(
             else:
                 #the ooa must already be specified
                 pass
-            #self.ooa_params[ooa_name]["from"] = self.inst_prototype.name_system + "." + preferred_attr
+            #self.ctree[ctree_name]["from"] = self.inst_prototype.name_system + "." + preferred_attr
         else:
             if arg is declarative.NOARG:
                 if default_attr is None:
@@ -194,17 +194,17 @@ def unitless_refval_attribute(
             if isinstance(arg, simple_units.SimpleUnitfulGroup):
                 #TODO check that it is unitless
                 if arg.ref is arg.val:
-                    self.ooa_params.useidx('immediate')[ooa_name] = arg.val
+                    self.ctree.useidx('immediate')[ctree_name] = arg.val
                 else:
-                    ooa = self.ooa_params[ooa_name].useidx('immediate')
+                    ooa = self.ctree[ctree_name].useidx('immediate')
                     ooa.setdefault("ref",   arg.ref)
                     ooa.setdefault("val",   arg.val)
             else:
-                self.ooa_params.useidx('immediate')[ooa_name] = arg
+                self.ctree.useidx('immediate')[ctree_name] = arg
 
         return simple_units.UnitlessElementRefValue(
-            ooa_params    = self.ooa_params[ooa_name],
-            ooa_name      = ooa_name,
+            ctree    = self.ctree[ctree_name],
+            ctree_name      = ctree_name,
             allow_fitting = allow_fitting,
         )
 
@@ -212,22 +212,22 @@ def unitless_refval_attribute(
 def arbunit_refval_attribute(
     desc,
     prototypes,
-    ooa_name = None,
+    ctree_name = None,
     default_attr = None,
 ):
     """
     For use inside of a dproperty_adv
     """
     prototypes = frozenset(prototypes)
-    if ooa_name is None:
-        ooa_name = desc.__name__
+    if ctree_name is None:
+        ctree_name = desc.__name__
 
     @desc.construct
     def CONSTRUCT(
             self,
             arg,
     ):
-        ooa = self.ooa_params[ooa_name]
+        ooa = self.ctree[ctree_name]
         if self.inst_prototype_t in prototypes:
             #TODO make this do the correct thing
             oattr = getattr(self.inst_prototype, desc.__name__)
@@ -235,7 +235,7 @@ def arbunit_refval_attribute(
             if ooa.ref is not ooa.val:
                 ooa.ref   = oattr.ref
             ooa.units = str(oattr.units)
-            #self.ooa_params[ooa_name]["from"] = self.inst_prototype.name_system + "." + preferred_attr
+            #self.ctree[ctree_name]["from"] = self.inst_prototype.name_system + "." + preferred_attr
         else:
             ooa = ooa.useidx('immediate')
             if isinstance(arg, str):
@@ -260,7 +260,7 @@ def arbunit_refval_attribute(
 
         pint_units = pint.ureg.parse_expression(ooa.units)
         return simple_units.ElementRefValue(
-            ooa_params = self.ooa_params[ooa_name],
+            ctree = self.ctree[ctree_name],
             units      = pint_units,
-            ooa_name   = ooa_name,
+            ctree_name   = ctree_name,
         )

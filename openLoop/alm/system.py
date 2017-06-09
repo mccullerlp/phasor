@@ -84,7 +84,7 @@ class CSystem(
     def component_pos_pairings(self):
         with self.building:
             try:
-                del self.ooa_params['_internal']
+                del self.ctree['_internal']
             except KeyError:
                 pass
             components_pos = []
@@ -118,7 +118,7 @@ class CSystem(
                                 obj = CSpace(
                                     L_m = loc_m - loc_m_prev,
                                     loc_m = loc_m,
-                                    #ooa_params = self.ooa_params['internal'][name],
+                                    #ctree = self.ctree['internal'][name],
                                 ),
                                 name = name,
                                 invalidate = False,
@@ -376,7 +376,7 @@ class CSystemStack(CSystem):
         try:
             with self.building:
                 try:
-                    del self.ooa_params['_internal']
+                    del self.ctree['_internal']
                 except KeyError:
                     pass
                 components_pos = []

@@ -350,7 +350,7 @@ class HomodyneACReadout(HomodyneACReadoutBase, base.SystemElementBase):
         self.portNQ = portNQ
         self.portDrv = portDrv
 
-        base.OOA_ASSIGN(self).port_set = 'AC'
+        base.PTREE_ASSIGN(self).port_set = 'AC'
 
         #TODO: make this adjustable
         self.F_sep = self.system.F_AC

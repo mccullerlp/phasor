@@ -9,7 +9,7 @@ import declarative as decl
 
 from ..base import (
     FrequencyBase,
-    OOA_ASSIGN,
+    PTREE_ASSIGN,
 )
 
 
@@ -29,5 +29,5 @@ class OpticalFrequency(FrequencyBase):
             **kwargs
     ):
         super(OpticalFrequency, self).__init__(**kwargs)
-        OOA_ASSIGN(self).order = order
+        PTREE_ASSIGN(self).order = order
         return

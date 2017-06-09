@@ -42,12 +42,12 @@ class AOM(
         """
         Number of iterations to use in the ODE solution
         """
-        val = self.ooa_params.setdefault('N_ode', val)
+        val = self.ctree.setdefault('N_ode', val)
         return val
 
     @declarative.dproperty
     def freq_split_Hz(self, val = 40e6):
-        val = self.ooa_params.setdefault('freq_split_Hz', val)
+        val = self.ctree.setdefault('freq_split_Hz', val)
         return val
 
     @declarative.dproperty

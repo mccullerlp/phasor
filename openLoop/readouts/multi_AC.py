@@ -49,7 +49,7 @@ class MultiACReadout(base.SystemElementBase):
         self.port_map = port_map
         self.portDrv = portDrv
 
-        base.OOA_ASSIGN(self).port_set = 'AC'
+        base.PTREE_ASSIGN(self).port_set = 'AC'
 
         #TODO: make this adjustable
         self.F_sep = system.F_AC
@@ -263,9 +263,9 @@ class MultiNoiseReadout(base.SystemElementBase):
 
         if port_set is None:
             if AC_sidebands_use:
-                base.OOA_ASSIGN(self).port_set = 'AC noise'
+                base.PTREE_ASSIGN(self).port_set = 'AC noise'
             else:
-                base.OOA_ASSIGN(self).port_set = 'DC noise'
+                base.PTREE_ASSIGN(self).port_set = 'DC noise'
         else:
             self.port_set = port_set
 
