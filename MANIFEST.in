@@ -1,11 +1,10 @@
 include LICENSE
 include README.rst
 include README.md
+include README.ipynb
 include MANIFEST.in
 include setup.cfg
 include setup.py
 
-include-recursive openLoop/ *.py
-include-recursive test/ *.py
-
-
+recursive-include openLoop/ *.py
+recursive-include test/ *.py
