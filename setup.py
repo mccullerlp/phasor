@@ -17,16 +17,20 @@ setup(
     author='Lee McCuller',
     author_email='Lee.McCuller@gmail.com',
     description=(
-        'Scientific Modelling'
+        'Scientific modeling of linearized optics, electronics, mechanics, and signal flow in the frequency domain'
     ),
     license='Apache v2',
     packages=find_packages(exclude=['doc']),
     #include_package_data=True,
     #scripts=[''],
     #entry_points={'console_scripts': ['',]},
-    install_requires=[],
+    setup_requires=['pytest-runner'],
+    tests_require=[
+        'pytest',
+        'pytest-runner',
+    ],
     extras_require={
-        "hdf" : ["h5py"],
+        "fitting" : ["casadi"],
         "test" : ["pytest"],
     },
     zip_safe=False,
@@ -43,7 +47,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
-        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: Scientific/Engineering :: Physics',
     ],
 )
 
