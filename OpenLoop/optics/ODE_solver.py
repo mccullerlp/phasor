@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import (division, print_function)
+from __future__ import (division, print_function, unicode_literals)
+from ..utilities.future_from_2 import str, object
+
 #from OpenLoop.utilities.print import print
 #import declarative
 import collections
@@ -202,7 +204,7 @@ class ExpMatCoupling(FactorCouplingBase):
     _prev_sol_vector = None
 
     def update_solution(self, sol_vector):
-        if sol_vector != self._prev_sol_vector:
+        if self._prev_sol_vector is None or sol_vector != self._prev_sol_vector:
             self._prev_sol_vector = sol_vector
             self.generate_solution(sol_vector)
         return

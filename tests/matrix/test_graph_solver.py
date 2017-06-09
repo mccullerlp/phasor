@@ -2,6 +2,8 @@
 """
 from __future__ import (division, print_function)
 from os import path
+import sys
+import pytest
 
 from OpenLoop.utilities.mpl import mplfigB
 
@@ -228,9 +230,11 @@ def test_graph_solver_r10():
 ##    arr = np.random.rand(100,100)
 ##    check_arr(arr)
 
+@pytest.mark.skipif(sys.version_info < (3, 0), reason="Requires pickle version 3")
 def test_LIGOX():
     check_system(fname = path.join(path.dirname(__file__), './LIGOX_mat.pckl'))
 
+#@pytest.mark.skipif(sys.version_info < (3, 0), reason="Requires pickle version 3")
 #def test_HTTS():
     #check_system(fname = path.join(path.dirname(__file__), './HTTS_UL_UL.pckl'))
 

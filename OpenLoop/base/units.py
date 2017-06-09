@@ -14,10 +14,10 @@ def units_map(
 
     for name, to in kwargs.items():
         if to is None:
-            uobj = pint.ureg[name]
+            uobj = pint.ureg.parse_expression(name)
         else:
             if isinstance(to, str):
-                uobj = pint.ureg[to]
+                uobj = pint.ureg.parse_expression(to)
             else:
                 uobj = to
         umap[name] = uobj

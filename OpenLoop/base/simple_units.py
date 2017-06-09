@@ -14,7 +14,7 @@ class SimpleUnitfulGroup(declarative.OverridableObject):
     @declarative.dproperty
     def units(self, val):
         if isinstance(val, str):
-            val = pint.ureg[val]
+            val = pint.ureg.parse_expression(val)
         return val
 
     @declarative.dproperty
@@ -103,7 +103,7 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
     @declarative.dproperty
     def ooa_units_scale(self):
         units_to = self.units
-        units_from = pint.ureg[self.ooa_params.units]
+        units_from = pint.ureg.parse_expression(self.ooa_params.units)
         rescale = units_from / units_to
         assert(rescale.unitless)
         #TODO check these methods (only seem present on newer pint)
@@ -165,7 +165,7 @@ class ElementRefValue(SimpleUnitfulGroup, Element):
                 val = ooa.get('val', None)
             #should reflect the units that it wants
             units_to = self.units
-            units_from = pint.ureg[ooa.units]
+            units_from = pint.ureg.parse_expression(ooa.units)
             rescale = units_from / units_to
             assert(rescale.unitless)
             return val * rescale.to(pint.ureg.dimensionless).magnitude

@@ -109,7 +109,7 @@ def generate_refval_attribute(
             storage,
             group,
         ):
-            pint_units = pint.ureg[self.ooa_params[ooa_name].units]
+            pint_units = pint.ureg.parse_expression(self.ooa_params[ooa_name].units)
             return simple_units.ElementRefValue(
                 ooa_params = self.ooa_params[ooa_name],
                 units = pint_units,
@@ -129,7 +129,7 @@ def generate_refval_attribute(
         #k, v = storage.items().next()
         #print("hmm: " ,self.ooa_params[ooa_name].units)
 
-        pint_units = pint.ureg[units]
+        pint_units = pint.ureg.parse_expression(units)
         return simple_units.ElementRefValue(
             ooa_params = self.ooa_params[ooa_name],
             units      = pint_units,
@@ -241,7 +241,7 @@ def arbunit_refval_attribute(
             if isinstance(arg, str):
                 #string convert to quantity
                 #print('arg', arg)
-                arg = pint.ureg[arg]
+                arg = pint.ureg.parse_expression(arg)
                 #print('arg', arg)
             if isinstance(arg, simple_units.SimpleUnitfulGroup):
                 ooa.setdefault("ref",   arg.ref)
@@ -258,7 +258,7 @@ def arbunit_refval_attribute(
             else:
                 raise RuntimeError("Argument must contain units as a py-pint quantity or SimpleUnitfulGroup")
 
-        pint_units = pint.ureg[ooa.units]
+        pint_units = pint.ureg.parse_expression(ooa.units)
         return simple_units.ElementRefValue(
             ooa_params = self.ooa_params[ooa_name],
             units      = pint_units,

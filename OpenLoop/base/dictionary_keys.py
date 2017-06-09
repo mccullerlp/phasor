@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-from __future__ import division, print_function
+from __future__ import division, print_function, unicode_literals
+from ..utilities.future_from_2 import str, object
+
 from collections import Mapping as MappingABC
 import declarative
 
@@ -53,14 +55,9 @@ class DictKey(MappingABC):
         return l1 < o1
 
     def __repr__(self):
-        def recode(v):
-            if isinstance(v, str):
-                return str(v)
-            else:
-                return repr(v)
         l = tuple(sorted(self._dict.items()))
         #print(unicode(repr(l), 'utf-8'))
-        l2 = [u'{0}:{1}'.format(recode(i), recode(j)) for i, j in l]
+        l2 = [u'{0}:{1}'.format(i, j) for i, j in l]
         return u"DK{{{0}}}".format(u'|'.join(l2))
 
     def __or__(self, other):
