@@ -59,7 +59,7 @@ class SignalGenerator(bases.SignalElementBase):
 
     def __build__(self):
         super(SignalGenerator, self).__build__()
-        self.my.Out = ports.SignalOutPort(sname = 'Out')
+        self.own.Out = ports.SignalOutPort(sname = 'Out')
 
         for Hidx, gain in list(self.harmonic_gains.items()):
             #just to check that it is a number

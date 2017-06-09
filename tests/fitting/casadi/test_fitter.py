@@ -29,15 +29,15 @@ def buildsys():
     sys = CRootSystem(
         env_principle_target = 'q1',
     )
-    sys.my.q1 = CB.BeamTarget(
+    sys.own.q1 = CB.BeamTarget(
         loc_m = 0,
         q_raw = CB.ComplexBeamParam.from_Z_ZR(0, .04),
     )
-    sys.my.lens1 = CB.CThinLens(
+    sys.own.lens1 = CB.CThinLens(
         f_m = .1,
         loc_in = 7,
     )
-    sys.my.lens2 = CB.CThinLens(
+    sys.own.lens2 = CB.CThinLens(
         f_m = .1,
         loc_in = 21,
     )
@@ -45,19 +45,19 @@ def buildsys():
     sys2 = CRootSystem(
         env_principle_target = 'q1',
     )
-    sys2.my.q1 = CB.BeamTarget(
+    sys2.own.q1 = CB.BeamTarget(
         loc_m = 0,
         q_raw = CB.ComplexBeamParam.from_Z_ZR(0, .04),
     )
-    sys2.my.q2 = CB.BeamTarget(
+    sys2.own.q2 = CB.BeamTarget(
         loc_in = 28,
         q_raw = sys.measurements.q_target_z(.4, 'q1'),
     )
-    sys2.my.lens1 = CB.CThinLens(
+    sys2.own.lens1 = CB.CThinLens(
         f_m = .1,
         loc_in = 5,
     )
-    sys2.my.lens2 = CB.CThinLens(
+    sys2.own.lens2 = CB.CThinLens(
         f_m = .1,
         loc_in = 23,
     )
@@ -66,11 +66,11 @@ def buildsys():
 def test_fitter(plot):
     sys = buildsys()
     froot = FIT.FitterRoot()
-    froot.my.sym = FIT.FitterSym()
+    froot.own.sym = FIT.FitterSym()
     print(froot.targets_recurse('self'))
     froot.systems.alm = sys
     froot.sym.parameter(sys.lens1.loc_in)
-    froot.my.overlap = FIT.FitterExpression(
+    froot.own.overlap = FIT.FitterExpression(
         function = lambda alm : abs(alm.measurements.overlap('q1', 'q2'))**4
     )
 
@@ -98,13 +98,13 @@ def test_fitter(plot):
 def test_fitter_jitter(plot):
     sys = buildsys()
     froot = FIT.FitterRoot()
-    froot.my.sym = FIT.FitterSymJitterPlacement(
+    froot.own.sym = FIT.FitterSymJitterPlacement(
         shift = '1e-3in',
     )
     print(froot.targets_recurse('self'))
     froot.systems.alm = sys
     froot.sym.parameter(sys.lens1.loc_in)
-    froot.my.overlap = FIT.FitterExpression(
+    froot.own.overlap = FIT.FitterExpression(
         function = lambda alm : abs(alm.measurements.overlap('q1', 'q2'))**4
     )
 

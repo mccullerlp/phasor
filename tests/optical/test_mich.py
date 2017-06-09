@@ -25,43 +25,43 @@ def gensys(
         ooa_params = db
     )
     sys = sys
-    sys.my.PSL = optics.Laser(
+    sys.own.PSL = optics.Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
     )
 
-    sys.my.mX = optics.Mirror(
+    sys.own.mX = optics.Mirror(
         T_hr = 0,
         L_hr = loss_EM,
     )
-    sys.my.mY = optics.Mirror(
+    sys.own.mY = optics.Mirror(
         T_hr = 0,
         L_hr = loss_EM,
     )
     #T_hr = sys.optical_harmonic_value(.3),
-    sys.my.mBS = optics.Mirror(
+    sys.own.mBS = optics.Mirror(
         T_hr = .5,
         L_hr = loss_BS,
         AOI_deg = 45,
     )
 
-    sys.my.sX = optics.Space(
+    sys.own.sX = optics.Space(
         L_m = 1,
         L_detune_m = 1064e-9 / 4 * detune_frac,
     )
-    sys.my.sY = optics.Space(
+    sys.own.sY = optics.Space(
         L_m = 1,
         L_detune_m = 0,
     )
 
-    sys.my.symPD = optics.MagicPD()
-    sys.my.ASPDHD = optics.HiddenVariableHomodynePD(
+    sys.own.symPD = optics.MagicPD()
+    sys.own.ASPDHD = optics.HiddenVariableHomodynePD(
         source_port     = sys.PSL.Fr.o,
         phase_deg       = 90,
         #include_quanta  = True,
         #facing_cardinal = 'N',
     )
-    sys.my.asymPD = optics.PD()
+    sys.own.asymPD = optics.PD()
 
     sys.bond_sequence(
         sys.PSL.Fr,
@@ -78,21 +78,21 @@ def gensys(
         sys.mY.Fr,
     )
 
-    sys.my.sym_DC = readouts.DCReadout(
+    sys.own.sym_DC = readouts.DCReadout(
         port = sys.symPD.Wpd.o,
     )
-    sys.my.asym_DC = readouts.DCReadout(
+    sys.own.asym_DC = readouts.DCReadout(
         port = sys.asymPD.Wpd.o,
     )
-    sys.my.asym_drive = readouts.ACReadout(
+    sys.own.asym_drive = readouts.ACReadout(
         portD = sys.mX.Z.d.o,
         portN = sys.asymPD.Wpd.o,
     )
-    sys.my.asymHD_drive = readouts.ACReadout(
+    sys.own.asymHD_drive = readouts.ACReadout(
         portD = sys.mX.Z.d.o,
         portN = sys.ASPDHD.rtWpdI.o,
     )
-    sys.my.asymHDHD_drive = readouts.HomodyneACReadout(
+    sys.own.asymHDHD_drive = readouts.HomodyneACReadout(
         portD = sys.mX.Z.d.o,
         portNI = sys.ASPDHD.rtWpdI.o,
         portNQ = sys.ASPDHD.rtWpdI.o,

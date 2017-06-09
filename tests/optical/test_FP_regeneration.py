@@ -26,27 +26,27 @@ def gensys(
         freq_order_max_default = 40,
     )
     sys = sys
-    sys.my.laser = optics.Laser(
+    sys.own.laser = optics.Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
     )
 
-    sys.my.itm = optics.Mirror(
+    sys.own.itm = optics.Mirror(
         T_hr=.001,
     )
-    sys.my.etm = optics.Mirror(
+    sys.own.etm = optics.Mirror(
         T_hr=.001,
     )
 
-    sys.my.s1 = optics.Space(
+    sys.own.s1 = optics.Space(
         L_m = L_m,
         L_detune_m = L_detune_m,
     )
 
-    sys.my.reflPD  = optics.MagicPD()
-    sys.my.itmPD   = optics.MagicPD()
-    sys.my.etmPD   = optics.MagicPD()
-    sys.my.transPD = optics.PD()
+    sys.own.reflPD  = optics.MagicPD()
+    sys.own.itmPD   = optics.MagicPD()
+    sys.own.etmPD   = optics.MagicPD()
+    sys.own.transPD = optics.PD()
 
     sys.bond_sequence(
         sys.laser.Fr,
@@ -59,13 +59,13 @@ def gensys(
         sys.transPD.Fr,
     )
 
-    sys.my.refl_DC     = readouts.DCReadout(port = sys.reflPD.Wpd.o)
-    sys.my.transmon_DC = readouts.DCReadout(port = sys.transPD.Wpd.o)
-    sys.my.etm_DC      = readouts.DCReadout(port = sys.etmPD.Wpd.o)
-    sys.my.itm_DC      = readouts.DCReadout(port = sys.itmPD.Wpd.o)
+    sys.own.refl_DC     = readouts.DCReadout(port = sys.reflPD.Wpd.o)
+    sys.own.transmon_DC = readouts.DCReadout(port = sys.transPD.Wpd.o)
+    sys.own.etm_DC      = readouts.DCReadout(port = sys.etmPD.Wpd.o)
+    sys.own.itm_DC      = readouts.DCReadout(port = sys.itmPD.Wpd.o)
 
-    sys.my.ETM_Drive = readouts.ACReadout(portD = sys.etm.posZ.i, portN = sys.etmPD.Wpd.o)
-    sys.my.ITM_Drive = readouts.ACReadout(portD = sys.etm.posZ.i, portN = sys.itmPD.Wpd.o)
+    sys.own.ETM_Drive = readouts.ACReadout(portD = sys.etm.posZ.i, portN = sys.etmPD.Wpd.o)
+    sys.own.ITM_Drive = readouts.ACReadout(portD = sys.etm.posZ.i, portN = sys.itmPD.Wpd.o)
 
     #analytic sensitivity calculations
     k          = 2 * np.pi * sys.F_carrier_1064.iwavelen_m

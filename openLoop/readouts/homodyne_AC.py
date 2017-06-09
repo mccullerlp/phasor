@@ -358,7 +358,7 @@ class HomodyneACReadout(HomodyneACReadoutBase, base.SystemElementBase):
         self.keyP = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({self.F_sep : 1})})
         self.keyN = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({self.F_sep : -1})})
 
-        self.my.noise = HomodyneNoiseReadout(
+        self.own.noise = HomodyneNoiseReadout(
             portNI = self.portNI,
             portNQ = self.portNQ,
         )

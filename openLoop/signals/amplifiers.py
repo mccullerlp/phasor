@@ -18,7 +18,7 @@ class DistributionAmplifier(bases.CouplerBase, bases.SystemElementBase):
         super(DistributionAmplifier, self).__init__(**kwargs)
         bases.OOA_ASSIGN(self).port_gains = port_gains
 
-        self.my.In  = ports.SignalInPort()
+        self.own.In  = ports.SignalInPort()
 
         for pname in self.port_gains:
             self.insert(ports.SignalOutPort(), pname)
@@ -52,7 +52,7 @@ class SummingAmplifier(bases.CouplerBase, bases.SystemElementBase):
         super(SummingAmplifier, self).__init__(**kwargs)
         bases.OOA_ASSIGN(self).port_gains = port_gains
 
-        self.my.O  = ports.SignalOutPort(sname = 'LO')
+        self.own.O  = ports.SignalOutPort(sname = 'LO')
 
         for pname in self.port_gains:
             self.insert(ports.SignalInPort(sname = pname), pname)

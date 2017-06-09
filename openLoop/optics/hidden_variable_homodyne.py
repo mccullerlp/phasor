@@ -31,24 +31,24 @@ class HiddenVariableHomodynePD(
         self.include_quanta = include_quanta
         self.include_relative = include_relative
 
-        self.my.Fr    = ports.OpticalPort(sname = 'Fr', pchain = 'Bk')
+        self.own.Fr    = ports.OpticalPort(sname = 'Fr', pchain = 'Bk')
         bases.OOA_ASSIGN(self).phase_deg = phase_deg
 
-        self.my.Bk = ports.OpticalPort(sname = 'Bk', pchain = 'Fr')
+        self.own.Bk = ports.OpticalPort(sname = 'Bk', pchain = 'Fr')
         ##Only required if Bk isn't used (not a MagicPD)
         #self._fluct = vacuum.OpticalVacuumFluctuation(port = self.Fr)
 
-        self.my.rtWpdI   = ports.SignalOutPort()
-        self.my.rtWpdQ   = ports.SignalOutPort()
-        self.my.rtWpdCmn = ports.SignalOutPort()
+        self.own.rtWpdI   = ports.SignalOutPort()
+        self.own.rtWpdQ   = ports.SignalOutPort()
+        self.own.rtWpdCmn = ports.SignalOutPort()
 
         if self.include_quanta:
-            self.my.rtQuantumI   = ports.SignalOutPort()
-            self.my.rtQuantumQ   = ports.SignalOutPort()
+            self.own.rtQuantumI   = ports.SignalOutPort()
+            self.own.rtQuantumQ   = ports.SignalOutPort()
 
         if self.include_relative:
-            self.my.RinI   = ports.SignalOutPort()
-            self.my.RadQ   = ports.SignalOutPort()
+            self.own.RinI   = ports.SignalOutPort()
+            self.own.RadQ   = ports.SignalOutPort()
 
         if source_port is None:
             self.source_port = self.Fr.i
@@ -56,21 +56,21 @@ class HiddenVariableHomodynePD(
             self.source_port = source_port
             self.system.own_port_virtual(self, self.source_port)
 
-        self.my.PWR_tot = TotalDCPowerPD(
+        self.own.PWR_tot = TotalDCPowerPD(
             port           = self.source_port,
             #include_quanta = self.include_quanta,
         )
 
         bases.OOA_ASSIGN(self).include_readouts = include_readouts
         if self.include_readouts:
-            self.my.I_DC    = readouts.DCReadout(port = self.rtWpdI.o)
-            self.my.Q_DC    = readouts.DCReadout(port = self.rtWpdQ.o)
+            self.own.I_DC    = readouts.DCReadout(port = self.rtWpdI.o)
+            self.own.Q_DC    = readouts.DCReadout(port = self.rtWpdQ.o)
             if self.include_quanta:
-                self.my.qI_DC    = readouts.DCReadout(port = self.rtQuantumI.o)
-                self.my.qQ_DC    = readouts.DCReadout(port = self.rtQuantumQ.o)
+                self.own.qI_DC    = readouts.DCReadout(port = self.rtQuantumI.o)
+                self.own.qQ_DC    = readouts.DCReadout(port = self.rtQuantumQ.o)
             if self.include_relative:
-                self.my.rI_DC    = readouts.DCReadout(port = self.RinI.o)
-                self.my.rQ_DC    = readouts.DCReadout(port = self.RadQ.o)
+                self.own.rI_DC    = readouts.DCReadout(port = self.RinI.o)
+                self.own.rQ_DC    = readouts.DCReadout(port = self.RadQ.o)
         return
 
     def system_setup_ports(self, ports_algorithm):
@@ -403,12 +403,12 @@ class TotalDCPowerPD(
 
         self.system.own_port_virtual(self, self.port)
 
-        self.my.WpdDC       = ports.SignalOutPort(sname = 'WpdDC')
+        self.own.WpdDC       = ports.SignalOutPort(sname = 'WpdDC')
         self.fdkey          = ports.DictKey({ports.ClassicalFreqKey: ports.FrequencyKey({})})
         self.pk_WpdDC       = (self.WpdDC.o, self.fdkey)
 
         if self.include_quanta:
-            self.my.QuantaDC       = ports.SignalOutPort(sname = 'QuantaDC')
+            self.own.QuantaDC       = ports.SignalOutPort(sname = 'QuantaDC')
             self.fdkey          = ports.DictKey({ports.ClassicalFreqKey: ports.FrequencyKey({})})
             self.pk_QuantaDC       = (self.QuantaDC.o, self.fdkey)
         return

@@ -25,18 +25,18 @@ def gensys(
     )
     sled = sys
 
-    sled.my.F_shift = system.Frequency(
+    sled.own.F_shift = system.Frequency(
         F_Hz = 1000,
         F_center_Hz = 1000,
     )
-    sled.my.laser_upper = optics.Laser(
+    sled.own.laser_upper = optics.Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
         classical_fdict = {
             sled.F_shift : 1,
         },
     )
-    sled.my.laser_lower = optics.Laser(
+    sled.own.laser_lower = optics.Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
         classical_fdict = {
@@ -44,27 +44,27 @@ def gensys(
         },
     )
 
-    sled.my.mBS = optics.Mirror(
+    sled.own.mBS = optics.Mirror(
         T_hr = .5,
         L_hr = loss_BS,
         AOI_deg = 45,
     )
 
-    sled.my.PD1 = optics.PD()
-    sled.my.PD2 = optics.PD()
+    sled.own.PD1 = optics.PD()
+    sled.own.PD2 = optics.PD()
 
-    sled.my.mix_LO = signals.SignalGenerator(
+    sled.own.mix_LO = signals.SignalGenerator(
         F = sled.F_shift,
         multiple = 1,
         amplitude = 2,
     )
-    sled.my.mixer = signals.Mixer(
+    sled.own.mixer = signals.Mixer(
     )
-    #sled.my.mixerIRMS = RMSMixer(
+    #sled.own.mixerIRMS = RMSMixer(
     #)
-    #sled.my.mixerQRMS = RMSMixer(
+    #sled.own.mixerQRMS = RMSMixer(
     #)
-    sled.my.sDelay = optics.Space(
+    sled.own.sDelay = optics.Space(
         L_m = 1,
         #L_detune_m = 1064e-9 / 4,
     )
@@ -84,15 +84,15 @@ def gensys(
         sled.PD2.Fr,
     )
 
-    sled.my.PD1_DC       = readouts.DCReadout(port = sled.PD1.Wpd.o)
-    sled.my.PD2_DC       = readouts.DCReadout(port = sled.PD2.Wpd.o)
-    sled.my.PD1_MIX_I    = readouts.DCReadout(port = sled.mixer.R_I.o)
-    sled.my.PD1_MIX_Q    = readouts.DCReadout(port = sled.mixer.R_Q.o)
-    #sled.my.PD1_MIX_IRMS = readouts.DCReadout(port = sled.mixerIRMS.RMS.o)
-    #sled.my.PD1_MIX_QRMS = readouts.DCReadout(port = sled.mixerQRMS.RMS.o)
-    sled.my.PD1_AC       = readouts.NoiseReadout(portN = sled.PD1.Wpd.o)
-    sled.my.PD1_MIX_I_N  = readouts.NoiseReadout(portN = sled.mixer.R_I.o)
-    sled.my.PD1_MIX_Q_N  = readouts.NoiseReadout(portN = sled.mixer.R_Q.o)
+    sled.own.PD1_DC       = readouts.DCReadout(port = sled.PD1.Wpd.o)
+    sled.own.PD2_DC       = readouts.DCReadout(port = sled.PD2.Wpd.o)
+    sled.own.PD1_MIX_I    = readouts.DCReadout(port = sled.mixer.R_I.o)
+    sled.own.PD1_MIX_Q    = readouts.DCReadout(port = sled.mixer.R_Q.o)
+    #sled.own.PD1_MIX_IRMS = readouts.DCReadout(port = sled.mixerIRMS.RMS.o)
+    #sled.own.PD1_MIX_QRMS = readouts.DCReadout(port = sled.mixerQRMS.RMS.o)
+    sled.own.PD1_AC       = readouts.NoiseReadout(portN = sled.PD1.Wpd.o)
+    sled.own.PD1_MIX_I_N  = readouts.NoiseReadout(portN = sled.mixer.R_I.o)
+    sled.own.PD1_MIX_Q_N  = readouts.NoiseReadout(portN = sled.mixer.R_Q.o)
     return declarative.Bunch(locals())
 
 def test_cyclostationary():

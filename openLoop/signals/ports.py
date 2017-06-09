@@ -77,7 +77,7 @@ class SignalInPort(SignalInPortRaw, bases.SystemElementBase):
             raise RuntimeError("Must be Terminated")
         else:
             from .elements import Connection
-            self.my.connection = Connection(
+            self.own.connection = Connection(
                 N_ports = 1 + len(self._bond_partners)
             )
             self.system._include(self.connection)

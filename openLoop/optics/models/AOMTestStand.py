@@ -262,7 +262,7 @@ class AOM2VCOTestStand(optics.OpticalCouplerBase):
             self.mix.LO.bond(self.aoms.VCO_AOM2.Out)
         self.PD_R.Wpd.bond(self.mix.I)
 
-        self.my.DC_RR = readouts.DCReadout(
+        self.own.DC_RR = readouts.DCReadout(
             port = self.mix.R_I.o,
         )
 
@@ -276,25 +276,25 @@ class AOM2VCOTestStand(optics.OpticalCouplerBase):
 class AOMTestStand(optics.OpticalCouplerBase):
     def __build__(self):
         super(AOMTestStand, self).__build__()
-        self.my.PSL = optics.Laser(
+        self.own.PSL = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = 1,
             multiple = 1,
         )
-        self.my.F_LO = base.Frequency(
+        self.own.F_LO = base.Frequency(
             F_Hz  = 200e6,
             order = 1,
         )
 
-        self.my.PD_R1 = optics.MagicPD()
-        self.my.PD_R2 = optics.MagicPD()
+        self.own.PD_R1 = optics.MagicPD()
+        self.own.PD_R2 = optics.MagicPD()
 
-        self.my.LO = signals.SignalGenerator(
+        self.own.LO = signals.SignalGenerator(
             F         = self.F_LO,
             amplitude = 1,
         )
 
-        self.my.aom = optics.AOM(
+        self.own.aom = optics.AOM(
             N_ode = 100,
         )
         self.aom.Drv.bond(self.LO.Out)
@@ -305,10 +305,10 @@ class AOMTestStand(optics.OpticalCouplerBase):
         self.aom.BkA.bond(self.PD_R1.Fr)
         self.aom.BkB.bond(self.PD_R2.Fr)
 
-        self.my.DC_R1 = readouts.DCReadout(
+        self.own.DC_R1 = readouts.DCReadout(
             port = self.PD_R1.Wpd.o,
         )
-        self.my.DC_R2 = readouts.DCReadout(
+        self.own.DC_R2 = readouts.DCReadout(
             port = self.PD_R2.Wpd.o,
         )
 
@@ -316,24 +316,24 @@ class AOMTestStand(optics.OpticalCouplerBase):
 class AOMTestStandBasic(optics.OpticalCouplerBase):
     def __build__(self):
         super(AOMTestStandBasic, self).__build__()
-        self.my.PSL = optics.Laser(
+        self.own.PSL = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = 1,
             multiple = 1,
         )
-        self.my.F_LO = base.Frequency(
+        self.own.F_LO = base.Frequency(
             F_Hz  = 200e6,
             order = 1,
         )
 
-        self.my.PD_R1 = optics.MagicPD()
+        self.own.PD_R1 = optics.MagicPD()
 
-        self.my.LO = signals.SignalGenerator(
+        self.own.LO = signals.SignalGenerator(
             F         = self.F_LO,
             amplitude = 1,
         )
 
-        self.my.aom = optics.AOMBasic()
+        self.own.aom = optics.AOMBasic()
         self.aom.Drv.bond(self.LO.Out)
 
         self.PSL.Fr.bond_sequence(
@@ -341,10 +341,10 @@ class AOMTestStandBasic(optics.OpticalCouplerBase):
         )
         self.aom.Bk.bond(self.PD_R1.Fr)
 
-        self.my.DC_R1 = readouts.DCReadout(
+        self.own.DC_R1 = readouts.DCReadout(
             port = self.PD_R1.Wpd.o,
         )
-        self.my.DC_Drv = readouts.DCReadout(
+        self.own.DC_Drv = readouts.DCReadout(
             port = self.aom.Drv_Pwr.MS.o,
         )
 

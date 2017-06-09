@@ -18,13 +18,13 @@ from .. import elements
 class HTTS_Flag(mechanical.XYZMomentDriver):
     def __build__(self):
         super(HTTS_Flag, self).__build__()
-        self.my.FZ = mechanical.ForceSource()
-        self.my.FZ.A.bond(self.A.Z)
+        self.own.FZ = mechanical.ForceSource()
+        self.own.FZ.A.bond(self.A.Z)
 
-        self.my.M_teeny = mechanical.XYZMass(mass_kg = 1e-9)
-        self.my.M_teeny.A.bond(self.A)
+        self.own.M_teeny = mechanical.XYZMass(mass_kg = 1e-9)
+        self.own.M_teeny.A.bond(self.A)
 
-        self.my.dZ = mechanical.DisplacementReadout(
+        self.own.dZ = mechanical.DisplacementReadout(
             terminal = self.A.Z,
         )
 
@@ -70,10 +70,10 @@ class HTTS(elements.MechanicalElementBase):
     def __build__(self):
         super(HTTS, self).__build__()
         #tip-tilt displacement test
-        self.my.M_com = mechanical.XYZMass(
+        self.own.M_com = mechanical.XYZMass(
             mass_kg = self.COM_kg,
         )
-        self.my.L1 = mechanical.XYZMoment(
+        self.own.L1 = mechanical.XYZMoment(
             moment_kgmsq = 1 * np.array([
                 30677 / 1e9,
                 37696 / 1e9,
@@ -87,70 +87,70 @@ class HTTS(elements.MechanicalElementBase):
         k_pend_AS = (1 - self.d_yaw_top/self.d_yaw) * (k_pendL + k_pendR) / 4
 
         #bounce mode is k_y, set here to be the pendulum k, which is wrong
-        self.my.S_left = mechanical.XYZTerminatorSpring(
+        self.own.S_left = mechanical.XYZTerminatorSpring(
             elasticity_N_m = [k_pendL, 65.8, k_pendL + self.dz_spring],
         )
-        self.my.S_right = mechanical.XYZTerminatorSpring(
+        self.own.S_right = mechanical.XYZTerminatorSpring(
             elasticity_N_m = [k_pendR, 65.8, k_pendR - self.dz_spring],
         )
-        self.my.S_YAS = mechanical.SeriesSpring(
+        self.own.S_YAS = mechanical.SeriesSpring(
             elasticity_N_m = -k_pend_AS,
         )
         self.S_YAS.A.bond(self.S_left.A.Z)
         self.S_YAS.B.bond(self.S_right.A.Z)
-        self.my.D_left = mechanical.XYZTerminatorDamper(
+        self.own.D_left = mechanical.XYZTerminatorDamper(
             resistance_Ns_m = [.01, .01, .004],
         )
         self.D_left.A.bond(self.S_left.A)
-        self.my.D_right = mechanical.XYZTerminatorDamper(
+        self.own.D_right = mechanical.XYZTerminatorDamper(
             resistance_Ns_m = [.01, .01, .004],
         )
         self.D_right.A.bond(self.S_right.A)
-        self.my.Ld_left = mechanical.XYZMomentDriver(
+        self.own.Ld_left = mechanical.XYZMomentDriver(
             displacementXYZ = [-self.d_yaw/2 + self.dd_yaw/2, self.d_pitch + self.dd_pitch/2, 0],
         )
-        self.my.Ld_left2 = mechanical.XYZMomentDriver(
+        self.own.Ld_left2 = mechanical.XYZMomentDriver(
             displacementXYZ = [-self.d_yaw/2 + self.dd_yaw/2, +self.dd_pitch/2, 0],
         )
         self.Ld_left.A.bond(self.S_left.A)
         self.Ld_left2.A.bond(self.S_left.A)
         self.Ld_left.L.bond(self.L1.L)
-        self.my.M_com.A.bond(self.Ld_left.B)
+        self.own.M_com.A.bond(self.Ld_left.B)
 
-        self.my.Ld_right = mechanical.XYZMomentDriver(
+        self.own.Ld_right = mechanical.XYZMomentDriver(
             displacementXYZ = [+self.d_yaw/2 + self.dd_yaw/2, self.d_pitch - self.dd_pitch/2, 0],
         )
         self.Ld_right.A.bond(self.S_right.A)
         self.Ld_right.L.bond(self.L1.L)
-        self.my.M_com.A.bond(self.Ld_right.B)
-        self.my.Ld_right2 = mechanical.XYZMomentDriver(
+        self.own.M_com.A.bond(self.Ld_right.B)
+        self.own.Ld_right2 = mechanical.XYZMomentDriver(
             displacementXYZ = [+self.d_yaw/2 + self.dd_yaw/2, -self.dd_pitch/2, 0],
         )
         self.Ld_right2.A.bond(self.S_right.A)
 
         self.Ld_left2.B.bond(self.Ld_right2.B)
         self.Ld_left2.L.bond(self.Ld_right2.L)
-        self.my.L_teeny = mechanical.XYZMoment(moment_kgmsq = 1e-9)
-        self.my.L_teeny.L.bond(self.Ld_left2.L)
+        self.own.L_teeny = mechanical.XYZMoment(moment_kgmsq = 1e-9)
+        self.own.L_teeny.L.bond(self.Ld_left2.L)
 
-        self.my.S_p = mechanical.SeriesSpring(
+        self.own.S_p = mechanical.SeriesSpring(
             elasticity_N_m = 9.81 * self.COM_kg / self.d_pitch,
         )
-        self.my.S_p.A.bond(self.M_com.Z.A)
-        self.my.S_p.B.bond(self.Ld_left2.B.Z)
-        self.my.M_teeny = mechanical.XYZMass(mass_kg = 1e-9)
-        self.my.M_teeny.A.bond(self.Ld_left2.B)
+        self.own.S_p.A.bond(self.M_com.Z.A)
+        self.own.S_p.B.bond(self.Ld_left2.B.Z)
+        self.own.M_teeny = mechanical.XYZMass(mass_kg = 1e-9)
+        self.own.M_teeny.A.bond(self.Ld_left2.B)
 
-        self.my.Ld_UL = HTTS_Flag(
+        self.own.Ld_UL = HTTS_Flag(
             displacementXYZ = [-.0241, .0251, -.0382],
         )
-        self.my.Ld_UR = HTTS_Flag(
+        self.own.Ld_UR = HTTS_Flag(
             displacementXYZ = [+.0241, .0251, -.0382],
         )
-        self.my.Ld_LL = HTTS_Flag(
+        self.own.Ld_LL = HTTS_Flag(
             displacementXYZ = [-.0241, -.0251, -.0382],
         )
-        self.my.Ld_LR = HTTS_Flag(
+        self.own.Ld_LR = HTTS_Flag(
             displacementXYZ = [+.0241, -.0251, -.0382],
         )
         self.Ld_UL.L.bond(self.L1.L)
@@ -162,25 +162,25 @@ class HTTS(elements.MechanicalElementBase):
         self.Ld_LR.L.bond(self.L1.L)
         self.Ld_LR.B.bond(self.M_com.A)
 
-        self.my.F_L = mechanical.ForceSource()
-        self.my.F_L.A.bond(self.M_com.Z.A)
+        self.own.F_L = mechanical.ForceSource()
+        self.own.F_L.A.bond(self.M_com.Z.A)
 
-        self.my.F_P = mechanical.ForceSource()
-        self.my.F_P.A.bond(self.L1.X.A)
+        self.own.F_P = mechanical.ForceSource()
+        self.own.F_P.A.bond(self.L1.X.A)
 
-        self.my.F_Y = mechanical.ForceSource()
-        self.my.F_Y.A.bond(self.L1.Y.A)
+        self.own.F_Y = mechanical.ForceSource()
+        self.own.F_Y.A.bond(self.L1.Y.A)
 
-        self.my.R_L = mechanical.DisplacementReadout(
+        self.own.R_L = mechanical.DisplacementReadout(
             terminal = self.M_com.A.Z,
         )
-        self.my.R_P = mechanical.DisplacementReadout(
+        self.own.R_P = mechanical.DisplacementReadout(
             terminal = self.L1.L.X,
         )
-        self.my.R_Y = mechanical.DisplacementReadout(
+        self.own.R_Y = mechanical.DisplacementReadout(
             terminal = self.L1.L.Y,
         )
-        self.my.RAC = base.SystemElementBase()
+        self.own.RAC = base.SystemElementBase()
 
         ins = dict(
             L = self.F_L.F.i,

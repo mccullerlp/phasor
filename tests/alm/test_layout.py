@@ -31,15 +31,15 @@ def test_layout(plot):
         env_principle_target = 'q1',
     )
 
-    sys.my.q1 = CB.BeamTarget(
+    sys.own.q1 = CB.BeamTarget(
         loc_m = 0,
         q_raw = CB.ComplexBeamParam.from_Z_ZR(0, .04),
     )
-    sys.my.lens1 = CB.CThinLens(
+    sys.own.lens1 = CB.CThinLens(
         f_m = .1,
         loc_in = 7,
     )
-    sys.my.q2 = CB.BeamTarget(
+    sys.own.q2 = CB.BeamTarget(
         loc_m = .4,
         q_raw = CB.ComplexBeamParam.from_Z_ZR(0, .04),
     )

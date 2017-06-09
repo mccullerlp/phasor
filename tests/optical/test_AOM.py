@@ -31,7 +31,7 @@ def test_AOM():
     sys = system.BGSystem(
         ooa_params = db,
     )
-    sys.my.test = AOMTestStand.AOMTestStand()
+    sys.own.test = AOMTestStand.AOMTestStand()
     db = sys.ooa_shadow()
 
     np_test.assert_almost_equal(sys.test.DC_R1.DC_readout, np.cos(sys.test.LO.amplitude * np.pi/2)**2, 2)
@@ -50,7 +50,7 @@ def test_AOM_derivative():
     sys = system.BGSystem(
         ooa_params = db,
     )
-    sys.my.test = AOMTestStand.AOM2VCOTestStand(
+    sys.own.test = AOMTestStand.AOM2VCOTestStand(
         VCO2_use = True,
     )
     db = sys.ooa_shadow()
@@ -80,13 +80,13 @@ def test_AOMBasic():
     sys = system.BGSystem(
         ooa_params = db,
     )
-    sys.my.test = AOMTestStand.AOMTestStandBasic()
+    sys.own.test = AOMTestStand.AOMTestStandBasic()
 
-    sys.my.F_LO2 = base.Frequency(
+    sys.own.F_LO2 = base.Frequency(
         F_Hz  = 250e6,
         order = 1,
     )
-    sys.my.LO2 = signals.SignalGenerator(
+    sys.own.LO2 = signals.SignalGenerator(
         F         = sys.F_LO2,
         amplitude = 1,
     )
@@ -108,7 +108,7 @@ def test_AOMBasic_PWR2():
     sys = system.BGSystem(
         ooa_params = db,
     )
-    sys.my.test = AOMTestStand.AOMTestStandBasic()
+    sys.own.test = AOMTestStand.AOMTestStandBasic()
     db = sys.ooa_shadow()
 
     np_test.assert_almost_equal(sys.test.DC_Drv.DC_readout, db.test.LO.amplitude**2/2, 2)
@@ -126,7 +126,7 @@ def test_AOMBasic_derivative():
     sys = system.BGSystem(
         ooa_params = db,
     )
-    sys.my.test = AOMTestStand.AOM2VCOTestStandBasic(
+    sys.own.test = AOMTestStand.AOM2VCOTestStandBasic(
         VCO2_use = True,
     )
     db = sys.ooa_shadow()

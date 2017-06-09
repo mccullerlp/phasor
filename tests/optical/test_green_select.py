@@ -22,18 +22,18 @@ from openLoop.utilities.print import pprint
 
 def test_split():
     sys = system.BGSystem()
-    sys.my.PSL = optics.Laser(
+    sys.own.PSL = optics.Laser(
         F = sys.system.F_carrier_1064,
         power_W = 2.,
     )
 
-    sys.my.PSLG = optics.Laser(
+    sys.own.PSLG = optics.Laser(
         F = sys.system.F_carrier_1064,
         multiple = 2,
         power_W = 1.,
     )
 
-    sys.my.mDC1 = optics.HarmonicMirror(
+    sys.own.mDC1 = optics.HarmonicMirror(
         mirror_H1 = optics.Mirror(
             T_hr = 1,
         ),
@@ -42,7 +42,7 @@ def test_split():
         ),
         AOI_deg = 45,
     )
-    sys.my.mDC2 = optics.HarmonicMirror(
+    sys.own.mDC2 = optics.HarmonicMirror(
         mirror_H1 = optics.Mirror(
             T_hr = 1,
         ),
@@ -51,8 +51,8 @@ def test_split():
         ),
         AOI_deg = 45,
     )
-    sys.my.PD_R = optics.PD()
-    sys.my.PD_G = optics.PD()
+    sys.own.PD_R = optics.PD()
+    sys.own.PD_G = optics.PD()
 
     sys.system.bond_sequence(
         sys.PSL.Fr,
@@ -68,10 +68,10 @@ def test_split():
         sys.mDC2.FrB,
         sys.PD_G.Fr,
     )
-    sys.my.DC_R = readouts.DCReadout(
+    sys.own.DC_R = readouts.DCReadout(
         port = sys.PD_R.Wpd.o,
     )
-    sys.my.DC_G = readouts.DCReadout(
+    sys.own.DC_G = readouts.DCReadout(
         port = sys.PD_G.Wpd.o,
     )
     print("A")
@@ -82,19 +82,19 @@ def test_split():
 
 #def test_shg():
 #    sys = system.BGSystem()
-#    sys.my.PSL = optics.Laser(
+#    sys.own.PSL = optics.Laser(
 #        F = sys.system.F_carrier_1064,
 #        power_W = 1.,
 #    )
 #
-#    sys.my.ktp = NonlinearCrystal(
+#    sys.own.ktp = NonlinearCrystal(
 #        nlg = 1,
 #        length_mm = 1,
 #        N_ode = 1000,
 #        solution_order = 4,
 #    )
 #
-#    sys.my.mDC2 = optics.HarmonicMirror(
+#    sys.own.mDC2 = optics.HarmonicMirror(
 #        mirror_H1 = optics.Mirror(
 #            T_hr = 1,
 #        ),
@@ -103,8 +103,8 @@ def test_split():
 #        ),
 #        AOI_deg = 45,
 #    )
-#    sys.my.PD_R = optics.PD()
-#    sys.my.PD_G = optics.PD()
+#    sys.own.PD_R = optics.PD()
+#    sys.own.PD_G = optics.PD()
 #
 #    sys.system.bond_sequence(
 #        sys.PSL.Fr,
@@ -116,10 +116,10 @@ def test_split():
 #        sys.mDC2.FrB,
 #        sys.PD_G.Fr,
 #    )
-#    sys.my.DC_R = readouts.DCReadout(
+#    sys.own.DC_R = readouts.DCReadout(
 #        port = sys.PD_R.Wpd.o,
 #    )
-#    sys.my.DC_G = readouts.DCReadout(
+#    sys.own.DC_G = readouts.DCReadout(
 #        port = sys.PD_G.Wpd.o,
 #    )
 #    #print("A")
@@ -138,7 +138,7 @@ def test_aom():
     sys = system.BGSystem(
         ooa_params = db,
     )
-    sys.my.test = AOMTestStand()
+    sys.own.test = AOMTestStand()
     db = sys.ooa_shadow()
     sys.test.LO.amplitude
     print(sys.test.DC_R1.DC_readout)

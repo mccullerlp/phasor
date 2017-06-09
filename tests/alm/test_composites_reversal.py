@@ -28,24 +28,24 @@ asavefig.org_subfolder = path.join(path.dirname(__file__), 'tests')
 def test_composites(plot):
     def gensys(reversed):
         sys = alm_measurements.CRootSystem()
-        sys.my.sub1 = alm_system.CSystem(
+        sys.own.sub1 = alm_system.CSystem(
             loc_m = 0,
             reversed = reversed,
         )
-        sys.sub1.my.q1 = alm_beam.BeamTarget(
+        sys.sub1.own.q1 = alm_beam.BeamTarget(
             loc_m = 0,
             q_raw = alm_beam.ComplexBeamParam.from_Z_ZR(0, .5),
         )
-        #sys.sub1.my.m1 = alm_beam.CThinLens(
+        #sys.sub1.own.m1 = alm_beam.CThinLens(
         #    f_m = .5,
         #    loc_m = .5,
         #)
-        sys.sub1.my.m1 = alm_composites.PLCX(
+        sys.sub1.own.m1 = alm_composites.PLCX(
             R_m = .24,
             loc_m = .5,
             L_m = .02,
         )
-        sys.sub1.my.c_return = alm_beam.CNoP(
+        sys.sub1.own.c_return = alm_beam.CNoP(
             loc_m = 1,
         )
         return sys
@@ -55,14 +55,14 @@ def test_composites(plot):
     q_end = sys.measurements.q_target_z(1.0)
     #print(("INVAL: ", sys.measurements._registry_invalidate))
     #sys = gensys(False)
-    sys.sub1.my.q2 = alm_beam.BeamTarget(
+    sys.sub1.own.q2 = alm_beam.BeamTarget(
         loc_m = 1.00001,
         q_raw = q_end,
     )
     #sys.invalidate()
     #print("B")
     #q_end2 = sys.measurements.q_target_z(1.0)
-    sysR.sub1.my.q2 = alm_beam.BeamTarget(
+    sysR.sub1.own.q2 = alm_beam.BeamTarget(
         loc_m = 1.00001,
         q_raw = q_end,
     )

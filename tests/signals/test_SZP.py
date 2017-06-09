@@ -17,11 +17,11 @@ def test_Xfer():
     sys = system.BGSystem(
         F_AC = np.linspace(0, 10, 10)
     )
-    sys.my.X1 = signals.SRationalFilter(
+    sys.own.X1 = signals.SRationalFilter(
         poles_r = (-1, ),
         gain    = 1,
     )
-    sys.my.R1 = readouts.ACReadout(
+    sys.own.R1 = readouts.ACReadout(
         portN = sys.X1.Out.o,
         portD = sys.X1.In.i,
     )
@@ -34,12 +34,12 @@ def test_XFer_fit():
     sys = system.BGSystem(
         F_AC = logspaced(0.1, 100, 10)
     )
-    sys.my.X1 = signals.SRationalFilter(
+    sys.own.X1 = signals.SRationalFilter(
         #poles_c = (-2 - 10j, ),
         zeros_r = (-10, -10),
         gain    = 1,
     )
-    sys.my.R1 = readouts.ACReadout(
+    sys.own.R1 = readouts.ACReadout(
         portN = sys.X1.Out.o,
         portD = sys.X1.In.i,
     )
@@ -56,10 +56,10 @@ def test_XFer_fit():
     import openLoop.fitting.casadi as FIT
     import openLoop.fitting.casadi.transfer_functions as FIT_TF
     froot = FIT.FitterRoot()
-    froot.my.sym = FIT.FitterSym()
+    froot.own.sym = FIT.FitterSym()
     froot.systems.xfer = sys
     froot.sym.parameter(sys.X1)
-    froot.my.residual = FIT_TF.TransferACExpression(
+    froot.own.residual = FIT_TF.TransferACExpression(
         ACData = AC_data,
         ACReadout = sys.R1,
         SNR_weights = 1/relscale,

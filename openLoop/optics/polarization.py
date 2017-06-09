@@ -419,14 +419,14 @@ class WavePlateMount(
     ):
         super(WavePlateMount, self).__init__(**kwargs)
 
-        self.my.coord_Fr = PolarizationRotator(rotate =  self.rotate)
-        self.my.coord_Bk = PolarizationRotator(rotate = -self.rotate)
+        self.own.coord_Fr = PolarizationRotator(rotate =  self.rotate)
+        self.own.coord_Bk = PolarizationRotator(rotate = -self.rotate)
 
         self.system.bond(self.coord_Fr.Bk, self.plate.Fr)
         self.system.bond(self.plate.Bk, self.coord_Bk.Fr)
 
-        self.my.Fr = ports.PortIndirect(inner_port = self.coord_Fr.Fr, pchain = lambda : self.Bk)
-        self.my.Bk = ports.PortIndirect(inner_port = self.coord_Bk.Bk, pchain = lambda : self.Fr)
+        self.own.Fr = ports.PortIndirect(inner_port = self.coord_Fr.Fr, pchain = lambda : self.Bk)
+        self.own.Bk = ports.PortIndirect(inner_port = self.coord_Bk.Bk, pchain = lambda : self.Fr)
 
 
 class HalfWavePlate(WavePlateMount):

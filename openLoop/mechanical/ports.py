@@ -76,7 +76,7 @@ class MechanicalPort(MechanicalPortRaw, bases.SystemElementBase):
         else:
             from .elements import Connection
             b_p_set = set(self._bond_partners)
-            self.my.connection = Connection(
+            self.own.connection = Connection(
                 N_ports = 1 + len(b_p_set)
             )
             self.system._include(self.connection)
@@ -103,7 +103,7 @@ class MechanicalPort(MechanicalPortRaw, bases.SystemElementBase):
         """
         Only call if this port has not been bonded
         """
-        self.my.terminator = self.t_terminator()
+        self.own.terminator = self.t_terminator()
         self.system.bond(self, self.terminator.Fr)
         return (self, self.terminator)
 

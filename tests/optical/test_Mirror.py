@@ -18,19 +18,19 @@ assertions = unittest.TestCase('__init__')
 
 def gensys():
     sys = system.BGSystem()
-    sys.my.laser = optics.Laser(
+    sys.own.laser = optics.Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
     )
 
-    sys.my.etmPD = optics.MagicPD()
+    sys.own.etmPD = optics.MagicPD()
 
     sys.bond_sequence(
         sys.laser.Fr,
         sys.etmPD.Fr,
     )
 
-    sys.my.etm_DC = readouts.DCReadout(port = sys.etmPD.Wpd.o)
+    sys.own.etm_DC = readouts.DCReadout(port = sys.etmPD.Wpd.o)
     #sys.AC_freq(np.array([1]))
     return declarative.Bunch(locals())
 
@@ -38,17 +38,17 @@ def gensys():
 def gensys_full():
     sys = system.BGSystem()
     sys = sys
-    sys.my.laser = optics.Laser(
+    sys.own.laser = optics.Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
         name = "laser",
     )
 
-    sys.my.etm = optics.Mirror(
+    sys.own.etm = optics.Mirror(
         T_hr = 0.25,
     )
-    sys.my.etmPD = optics.MagicPD()
-    sys.my.s1 = optics.Space(
+    sys.own.etmPD = optics.MagicPD()
+    sys.own.s1 = optics.Space(
         L_m = 100,
         L_detune_m = 0,
     )
@@ -60,8 +60,8 @@ def gensys_full():
         sys.etm.Fr,
     )
 
-    sys.my.etm_DC = readouts.DCReadout(port = sys.etmPD.Wpd.o)
-    sys.my.etm_drive = readouts.ACReadout(
+    sys.own.etm_DC = readouts.DCReadout(port = sys.etmPD.Wpd.o)
+    sys.own.etm_drive = readouts.ACReadout(
         portN = sys.etmPD.Wpd.o,
         portD = sys.etm.Z.d.o,
     )

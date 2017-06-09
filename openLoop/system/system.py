@@ -168,21 +168,21 @@ class BGSystem(RootElement):
     @declarative.dproperty
     def F_AC(self, val = 0):
         #TODO make this detect a PropertyTransforming or injected frequency object
-        self.environment.my.F_AC = Frequency(
+        self.environment.own.F_AC = Frequency(
             F_Hz  = val,
             name  = 'AC',
             order = 2,
             F_center_Hz = 1e3,
         )
-        return self.environment.my.F_AC
+        return self.environment.own.F_AC
 
     @declarative.dproperty
     def F_carrier_1064(self):
-        self.environment.my.F_carrier_1064 = OpticalFrequency(
+        self.environment.own.F_carrier_1064 = OpticalFrequency(
             wavelen_m = 1064e-9,
             name = u'λIR',
         )
-        return self.environment.my.F_carrier_1064
+        return self.environment.own.F_carrier_1064
 
     @declarative.dproperty
     def FD_carrier_1064(self):
@@ -404,7 +404,7 @@ class BGSystem(RootElement):
         registered_ports = set(self.port_owners.keys())
         unterminated_ports = registered_ports - terminated_ports
         if unterminated_ports and not hasattr(self, 'autoterminate'):
-            self.my.autoterminate = SystemElementBase()
+            self.own.autoterminate = SystemElementBase()
         for port in unterminated_ports:
             #print("UNTERMINATED: ", port)
             aterm = self.port_autoterminate.get(port, None)

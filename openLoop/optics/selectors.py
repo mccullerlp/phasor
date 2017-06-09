@@ -16,9 +16,9 @@ class PolSelector(
 ):
 
     def __build__(self):
-        self.my.Fr   = ports.OpticalPort(sname = 'Fr')
-        self.my.Bk_P = ports.OpticalPort(sname = 'Bk_P')
-        self.my.Bk_S = ports.OpticalPort(sname = 'Bk_S')
+        self.own.Fr   = ports.OpticalPort(sname = 'Fr')
+        self.own.Bk_P = ports.OpticalPort(sname = 'Bk_P')
+        self.own.Bk_S = ports.OpticalPort(sname = 'Bk_S')
         return
 
     def system_setup_ports(self, ports_algorithm):

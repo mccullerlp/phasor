@@ -91,7 +91,7 @@ def test_VCO():
         ooa_params = db,
         F_AC = 1e3,
     )
-    sys.my.test = VCOTest()
+    sys.own.test = VCOTest()
     db = sys.ooa_shadow()
 
     print(sys.test.AC_I.AC_sensitivity)

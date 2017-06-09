@@ -44,7 +44,7 @@ class ACReadout(base.SystemElementBase):
         self.keyN = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({self.F_sep : -1})})
 
         if include_noise:
-            self.my.noise = NoiseReadout(
+            self.own.noise = NoiseReadout(
                 portN = self.portN,
             )
         return
@@ -148,7 +148,7 @@ class ACReadoutCLG(base.SystemElementBase):
         self.keyN = base.DictKey({base.ClassicalFreqKey: base.FrequencyKey({self.F_sep : -1})})
 
         if include_noise:
-            self.my.noise = NoiseReadout(
+            self.own.noise = NoiseReadout(
                 portN = self.portN,
             )
         else:
@@ -244,11 +244,11 @@ class ACReadoutLG(base.SystemElementBase):
 
         if include_noise:
             if self.portAct is not None:
-                self.my.noiseAct = NoiseReadout(
+                self.own.noiseAct = NoiseReadout(
                     portN = self.portAct,
                 )
             if self.portSense is not None:
-                self.my.noiseSense = NoiseReadout(
+                self.own.noiseSense = NoiseReadout(
                     portN = self.portSense,
                 )
         else:

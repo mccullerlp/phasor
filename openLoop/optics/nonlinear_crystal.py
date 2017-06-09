@@ -61,8 +61,8 @@ class NonlinearCrystal(
 
     def __build__(self):
         super(NonlinearCrystal, self).__build__()
-        self.my.Fr   = ports.OpticalPort(sname = 'Fr', pchain = lambda : self.Bk)
-        self.my.Bk   = ports.OpticalPort(sname = 'Bk', pchain = lambda : self.Fr)
+        self.own.Fr   = ports.OpticalPort(sname = 'Fr', pchain = lambda : self.Bk)
+        self.own.Bk   = ports.OpticalPort(sname = 'Bk', pchain = lambda : self.Fr)
         return
 
     @declarative.mproperty

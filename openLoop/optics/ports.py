@@ -105,7 +105,7 @@ class OpticalPort(OpticalPortRaw, bases.SystemElementBase):
         Only call if this port has not been bonded
         """
         from .vacuum import VacuumTerminator
-        self.my.terminator = VacuumTerminator()
+        self.own.terminator = VacuumTerminator()
         self.system.bond(self, self.terminator.Fr)
         return (self, self.terminator)
 

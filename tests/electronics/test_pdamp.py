@@ -15,7 +15,7 @@ from openLoop.electronics.models.PDAmp import PDTransimpedance
 #pytest.mark.parametrize('gain', [(1), (10), (100)])
 def test_PD_amp():
     sys = system.BGSystem()
-    sys.my.pd = PDTransimpedance()
+    sys.own.pd = PDTransimpedance()
     t_gain = (10e3 * (-1e6 + 1) / 1e6)
     test.assert_almost_equal(sys.pd.VOutTrans_AC.AC_sensitivity / t_gain, 1)
 
