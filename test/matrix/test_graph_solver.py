@@ -16,6 +16,7 @@ import pickle
 #import numpy as np
 
 from openLoop.system import DAG_algorithm
+from openLoop.system import scisparse_algorithm
 from openLoop.system import SRE_matrix_algorithms
 from openLoop.utilities.print import pprint
 
@@ -39,7 +40,7 @@ def isolve_mat(
                 seq[idx_c].add(idx_r)
                 req[idx_r].add(idx_c)
 
-    sbunch = DAG_algorithm.inverse_solve_inplace(
+    sbunch = scisparse_algorithm.inverse_solve_inplace(
         seq = seq,
         req = req,
         inputs_set = inputs_set,

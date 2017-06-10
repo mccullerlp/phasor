@@ -2,7 +2,6 @@
 """
 """
 from __future__ import (division, print_function)
-import warnings
 from numbers import Number
 import numpy as np
 from collections import defaultdict
@@ -10,6 +9,13 @@ import declarative
 
 from openLoop.utilities.priority_queue import HeapPriorityQueue, Empty
 from openLoop.utilities.print import pprint
+
+from .matrix_generic import (
+    pre_purge_inplace,
+    purge_seqless_inplace,
+    purge_reqless_inplace,
+    check_seq_req_balance,
+)
 
 from ..base import (
     DictKey,
@@ -23,188 +29,6 @@ def abssq(arr):
 def enorm(arr):
     return np.max(abssq(arr))
 
-def print_seq(seq, edge_map):
-    print("Sequential Edges")
-    for node, seq_set in seq.items():
-        plist = []
-        print(node)
-        for snode in seq_set:
-            etup = (u'➠\t', snode, edge_map.get((node, snode), None))
-            plist.append(etup)
-        plist.sort()
-        for etup in plist:
-            print(*etup)
-
-def print_req(req, edge_map):
-    print("Requisite Edges")
-    for node, seq_set in req.items():
-        plist = []
-        print(node)
-        for rnode in seq_set:
-            etup = (u'⟽\t', rnode, edge_map[rnode, node])
-            plist.append(etup)
-        plist.sort()
-        for etup in plist:
-            print(*etup)
-
-
-def check_seq_req_balance(seq, req, edge_map = None):
-    for node, seq_set in seq.items():
-        for snode in seq_set:
-            assert(node in req[snode])
-            if edge_map and (node, snode) not in edge_map:
-                warnings.warn(repr((node, snode)) + 'not in edge map')
-                edge_map[node, snode] = 0
-
-    for node, req_set in req.items():
-        for rnode in req_set:
-            assert(node in seq[rnode])
-
-
-def condition_node(
-    seq, req, req_alpha, edge_map, node
-):
-    self_edge = edge_map[node, node]
-    #if verbose: print("SELF_EDGE min: ", 1/np.max(abs(1 - self_edge)))
-    totC = 0
-    c_edges_c = dict()
-    c_edges = dict()
-    #print("seq: ", seq)
-    for snode in seq[node]:
-        #must be output node if not in seq
-        if snode == node:
-            continue
-        #print("SNODE: ", snode, seq[snode])
-        if not seq[snode]:
-            continue
-        if not req[snode]:
-            continue
-        assert(snode in req)
-        edge = edge_map[node, snode]
-        #print("C_EDGE: ", node, snode, edge)
-        #if verbose: print("C_val: ", node, snode, edge)
-        c_edges[snode] = edge
-        c_edges_c[snode] = edge.conjugate()
-        totC = totC + abs(edge_map[node, snode])**2
-    #print("SELF_EDGE C: ", np.max(1/abs(1 - self_edge)), np.max(totC), len(c_edges))
-    #print('c_edges', c_edges)
-
-    a = -self_edge
-    y = a / abs(a)
-    y = 1/a.conjugate()
-    #y = self_edge / totC
-
-    yc = y.conjugate()
-
-    condition = True
-    #if np.all(totC < abs(a)):
-        #condition = False
-    if not c_edges:
-        condition = False
-    else:
-        #assert(False)
-        pass
-    if condition:
-        #print("Q-condition: ", node)
-        b_edges = dict()
-        for rnode in req[node]:
-            #must be output node if not in seq
-            if rnode == node:
-                continue
-            if not seq[rnode]:
-                continue
-            if not req[rnode]:
-                continue
-            assert(rnode in seq)
-            edge = edge_map[rnode, node]
-            b_edges[rnode] = edge
-        #print("b_edges", b_edges)
-
-        #wrap the loop
-        edge_map[node, node] = edge_map[node, node] - y * totC
-
-        emap_mod = dict()
-        #print("REQ_ALPHA: ", req_alpha[node])
-        #since alpha_2 modifies the list for alpha_1, we have to pre-store it
-        pre_req_alpha = list(req_alpha[node])
-        ##from alpha_2 to node
-        for snode, edge in c_edges_c.items():
-            #print("REQ_SNODE: ", snode, req_alpha[snode])
-            for winode in list(req_alpha[snode]):
-                seq[winode].add(node)
-                req[node].add(winode)
-                req_alpha[node].add(winode)
-                #edge_map[winode, node] = edge_map.get((winode, node), 0) + -y * edge
-                emap_mod[winode, node] = edge_map.get((winode, node), 0) + -y * edge * edge_map.get((winode, snode))
-
-        ##from alpha_1 to node
-        for winode in pre_req_alpha:
-            for snode, edge in c_edges.items():
-                seq[winode].add(snode)
-                req[snode].add(winode)
-                req_alpha[snode].add(winode)
-                #edge_map[winode, snode] = edge_map.get((winode, snode), 0) + yc * edge
-                emap_mod[winode, snode] = edge_map.get((winode, snode), 0) + yc * edge * edge_map.get((winode, node))
-
-        for tf, e in emap_mod.items():
-            edge_map[tf] = e
-
-        #adjust C itself
-        correction = (1 - yc * a)
-        if np.any(correction != 0):
-            for snode, edge in c_edges.items():
-                edge_map[node, snode] = correction * edge
-                #print("C: ", correction * edge)
-        else:
-            for snode, edge in c_edges.items():
-                seq[node].remove(snode)
-                req[snode].remove(node)
-                del edge_map[node, snode]
-
-        #adjust B itself
-        scsd = dict()
-        d_mat = dict()
-        for lnode in seq:
-            #print('lnode ', lnode)
-            lval = 0
-            if not req[lnode]:
-                #must be an output node
-                continue
-            if not seq[lnode]:
-                #must be an input node
-                continue
-            #ignore the current node
-            if lnode == node:
-                continue
-            #print('lnode2 ', lnode)
-            for snode, edge in c_edges_c.items():
-                #print('snode ', snode)
-                assert(snode != node)
-                if snode in seq[lnode] or snode == lnode:
-                    edge2 = edge_map.get((lnode, snode), 0)
-                    lval = lval - edge * edge2
-                    d_mat[lnode, snode] = -edge2
-            scsd[lnode] = lval
-        #print('d_mat: ', d_mat)
-        #print('scsd: ', scsd)
-
-        for lnode, edge in scsd.items():
-            seq[lnode].add(node)
-            req[node].add(lnode)
-            #does not affect req_alpha
-            edge_map[lnode, node] = edge_map.get((lnode, node), 0) + y * edge
-
-        #adjust D
-        for cnode, cedge in c_edges.items():
-            for bnode, bedge in b_edges.items():
-                #print("ADD: ", bnode, cnode)
-                seq[bnode].add(cnode)
-                req[cnode].add(bnode)
-                #does not affect req_alpha
-                edge_map[bnode, cnode] = edge_map.get((bnode, cnode), 0) + yc * cedge * bedge
-
-        #edge_map[node, snode] = edge_map[node, snode] + (a - yc) * edge
-
 
 def mgraph_simplify_inplace(
     seq, req,
@@ -212,6 +36,13 @@ def mgraph_simplify_inplace(
     verbose        = False,
     sorted_order   = False,
 ):
+    if verbose:
+        def vprint(*p):
+            print(*p)
+    else:
+        def vprint(*p):
+            return
+
     check_seq_req_balance(seq, req, edge_map)
 
     reqO = req
@@ -256,11 +87,11 @@ def mgraph_simplify_inplace(
     if sorted_order:
         mgraph_simplify_sorted(**kwargs)
     else:
-        if verbose: print("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
+        vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
         mgraph_simplify_trivial(**kwargs)
-        if verbose: print("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
+        vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
         mgraph_simplify_trivial(**kwargs)
-        if verbose: print("BADGUY STAGE, REMAINING {0}".format(len(req)))
+        vprint("BADGUY STAGE, REMAINING {0}".format(len(req)))
         mgraph_simplify_badguys(**kwargs)
 
     #now reapply the seq and req lists
@@ -304,7 +135,6 @@ def mgraph_simplify_sorted(
             node = node,
             **kwargs
         )
-
 
 
 def mgraph_simplify_trivial(
@@ -395,6 +225,13 @@ def mgraph_simplify_badguys(
     edge_map,
     verbose = False,
 ):
+    if verbose:
+        def vprint(*p):
+            print(*p)
+    else:
+        def vprint(*p):
+            return
+
     kwargs = dict(
         seq                         = seq,
         req                         = req,
@@ -462,7 +299,7 @@ def mgraph_simplify_badguys(
     for node in seq.keys():
         cost = generate_node_cost(node)
         pqueue.push((cost, node))
-    if verbose: print("pqueue length: ", len(pqueue))
+    vprint("pqueue length: ", len(pqueue))
 
     try:
         while req:
@@ -1149,112 +986,6 @@ def reduceLU(
     del req_alpha[node]
     return
 
-
-def color_purge_inplace(
-    start_set, emap,
-    seq, req,
-    edge_map,
-):
-    #can't actually purge, must color all nodes
-    #from the exception set and then subtract the
-    #remainder.
-    #purging algorithms otherwise have to deal with
-    #strongly connected components, which makes them
-    #no better than coloring
-    active_set = set()
-    active_set_pending = set()
-    #print("PURGE START: ", start_set)
-    for node in start_set:
-        active_set_pending.add(node)
-
-    while active_set_pending:
-        node = active_set_pending.pop()
-        #print("PURGE NODE: ", node)
-        active_set.add(node)
-        for snode in emap[node]:
-            if snode not in active_set:
-                active_set_pending.add(snode)
-    full_set = set(seq.keys())
-    purge_set = full_set - active_set
-    #print("FULL_SET", active_set)
-    #print("PURGE", len(purge_set), len(full_set))
-    purge_subgraph_inplace(seq, req, edge_map, purge_set)
-
-
-def purge_reqless_inplace(
-        except_set,
-        seq,
-        req,
-        edge_map = None,
-):
-    color_purge_inplace(
-        except_set, seq,
-        seq, req, edge_map,
-    )
-
-
-def purge_seqless_inplace(
-        except_set,
-        seq,
-        req,
-        edge_map = None,
-):
-    color_purge_inplace(
-        except_set, req,
-        seq, req, edge_map,
-    )
-
-
-def edgedelwarn(
-        edge_map,
-        nfrom,
-        nto,
-):
-    if edge_map is None:
-        return
-    try:
-        del edge_map[nfrom, nto]
-    except KeyError:
-        warnings.warn(repr(("Missing edge", nfrom, nto)))
-
-def purge_subgraph_inplace(
-    seq, req,
-    edge_map,
-    purge_set,
-):
-    for node in purge_set:
-        for snode in seq[node]:
-            edgedelwarn(edge_map, node, snode)
-            if snode not in purge_set and (snode, node):
-                req[snode].remove(node)
-        del seq[node]
-        for rnode in req[node]:
-            #edgedelwarn(edge_map, rnode, node)
-            if rnode not in purge_set and (rnode, node):
-                seq[rnode].remove(node)
-        del req[node]
-    return
-
-
-def pre_purge_inplace(seq, req, edge_map):
-    #print("PRE-PURGING")
-    total_N = 0
-    purge_N = 0
-    #actually needs to list this as seq is mutating
-    for inode, smap in list(seq.items()):
-        for snode in list(smap):
-            total_N += 1
-            if (inode, snode) not in edge_map:
-                #if purge_N % 100:
-                #    print("DEL: ", inode, snode)
-                purge_N += 1
-                smap.remove(snode)
-    for snode, rmap in (req.items()):
-        for inode in list(rmap):
-            if (inode, snode) not in edge_map:
-                rmap.remove(inode)
-    #print("FRAC REMOVED: ", purge_N / total_N, purge_N)
-
 def wrap_input_node(node):
     return ('INPUT', node)
 
@@ -1473,22 +1204,3 @@ def push_solve_inplace(
         AC_seq      = unwrapped_seq_map,
         AC_req      = unwrapped_req_map,
     )
-
-def sparsity_graph(km):
-    active = set()
-    seq = defaultdict(set)
-    req = defaultdict(set)
-
-    #setup all linkage data
-    for kfrom, kto, val in km:
-        active.add(kfrom)
-        active.add(kto)
-        seq[kfrom].append(kto)
-        req[kto].append(kfrom)
-    return declarative.Bunch(
-        active = active,
-        seq = seq,
-        req = req,
-    )
-
-
