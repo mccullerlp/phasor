@@ -59,14 +59,24 @@ def mgraph_simplify_inplace(
         if not seq.get(node, None):
             for rnode in req[node]:
                 seq_beta[rnode].add(node)
-                seq[rnode].remove(node)
                 beta_set.add(node)
     for node in seq:
         if not req.get(node, None):
             for snode in seq[node]:
                 req_alpha[snode].add(node)
-                req[snode].remove(node)
                 alpha_set.add(node)
+
+    #this must be done separately otherwise some nodes are accidentally considered alpha or beta nodes
+    for node, seqset in seq_beta.items():
+        #print("BETA: ", node, seqset)
+        for snode in seqset:
+            req[snode].remove(node)
+            seq[node].remove(snode)
+    for node, reqset in req_alpha.items():
+        #print("ALPHA: ", node, reqset)
+        for rnode in reqset:
+            seq[rnode].remove(node)
+            req[node].remove(rnode)
 
     #remove the alpha and beta nodes from the standard sets
     for node in alpha_set:
@@ -309,25 +319,25 @@ def mgraph_simplify_badguys(
                     continue
                 cost = generate_node_cost(node)
                 pqueue.push((cost, node))
-            #print("REQ: ", req)
-            #print("REQ_A: ", req_alpha)
-            #print("SEQ: ", seq)
-            #print("SEQ_B: ", seq_beta)
+            #vprint("REQ: ", req)
+            #vprint("REQ_A: ", req_alpha)
+            #vprint("SEQ: ", seq)
+            #vprint("SEQ_B: ", seq_beta)
             cost, node = pqueue.pop()
             if node not in seq:
                 continue
 
-            print("MY NODE: ", node)
+            vprint("MY NODE: ", node)
             new_cost = generate_node_cost(node)
             while abs(abs(cost / new_cost) - 1) > .1:
                 cost, node = pqueue.pushpop((new_cost, node))
                 while node not in seq:
                     cost, node = pqueue.pop()
                 new_cost = generate_node_cost(node)
-                print("NCOST: ", node, new_cost)
+                vprint("NCOST: ", node, new_cost)
 
             if node not in seq:
-                print("MY GOD: ", node)
+                vprint("MY GOD: ", node)
 
             if node in seq[node]:
                 #node must at least have a self-loop
@@ -338,7 +348,7 @@ def mgraph_simplify_badguys(
                     if rcost < min_rnode_cost:
                         min_rnode = rnode
                         min_rnode_cost = rcost
-                print("MIN_MAX: ", node, min_rnode)
+                vprint("MIN_MAX: ", node, min_rnode)
 
             normr = 0
             for rnode in req[node]:
@@ -350,15 +360,15 @@ def mgraph_simplify_badguys(
                 normc += abs(edge_map[node, snode])**2
             normc = normc ** .5
 
-            print("SHAPE: ", np.asarray(normr).shape)
+            vprint("SHAPE: ", np.asarray(normr).shape)
             if np.asarray(normr).shape or np.asarray(normc).shape:
                 rel_r_to_c = np.asarray(np.count_nonzero(normr > normc))
-                print(rel_r_to_c)
+                vprint(rel_r_to_c)
                 rel_r_to_c = np.mean(rel_r_to_c)
-                print("SHAPE: ", rel_r_to_c.shape)
+                vprint("SHAPE: ", rel_r_to_c.shape)
             else:
                 rel_r_to_c = normr > normc
-            print("REL LARGER: ", rel_r_to_c)
+            vprint("REL LARGER: ", rel_r_to_c)
 
             rvec = []
             rvec_N = []
@@ -369,40 +379,40 @@ def mgraph_simplify_badguys(
                 rvec.append(np.max(abs(edge_map[rnode, node] / normr)))
                 rvec_N.append(rnode)
 
-            print("RVEC: ", rvec)
+            vprint("RVEC: ", rvec)
             bignodes_r = np.array(rvec) >= 1./(len(req[node]))**.5
             rcount = np.count_nonzero(bignodes_r)
-            print("R: ", np.count_nonzero(bignodes_r), len(req[node]), bignodes_r[rvec_self_idx], rel_r_to_c > .5)
+            vprint("R: ", np.count_nonzero(bignodes_r), len(req[node]), bignodes_r[rvec_self_idx], rel_r_to_c > .5)
             cvec = []
             cvec_N = []
             cvec_self_idx = None
             for idx, snode in enumerate(seq[node]):
                 if node == snode:
                     cvec_self_idx = idx
-                    print(cvec_self_idx, idx, node)
+                    vprint(cvec_self_idx, idx, node)
                 cvec.append(np.max(abs(edge_map[node, snode] / normc)))
                 cvec_N.append(snode)
-            print("CVEC: ", cvec)
+            vprint("CVEC: ", cvec)
             bignodes_c = np.array(cvec) >= 1./(len(seq[node]))**.5
             ccount = np.count_nonzero(bignodes_c)
-            print(bignodes_c, cvec_self_idx, ccount)
-            print("C: ", np.count_nonzero(bignodes_c), len(seq[node]), bignodes_c[cvec_self_idx], rel_r_to_c < .5)
+            vprint(bignodes_c, cvec_self_idx, ccount)
+            vprint("C: ", np.count_nonzero(bignodes_c), len(seq[node]), bignodes_c[cvec_self_idx], rel_r_to_c < .5)
 
             if node in req[node]:
                 norma = abs(edge_map[node, node])
-                print("NORM: ", np.max(normr / norma), np.max(normc / norma))
+                vprint("NORM: ", np.max(normr / norma), np.max(normc / norma))
 
             if rel_r_to_c > .5:
-                print("Using ROW Operations")
+                vprint("Using ROW Operations")
                 if rcount >= 2:
-                    print("MUST USE HOUSEHOLDER {0}x".format(rcount))
+                    vprint("MUST USE HOUSEHOLDER {0}x".format(rcount))
                     if rvec_self_idx is None or not bignodes_r[rvec_self_idx]:
-                        print("MUST PIVOT")
+                        vprint("MUST PIVOT")
                         idx_pivot = np.nonzero(bignodes_r)[0][0]
-                        print("SELF: ", rvec_self_idx)
-                        print("PIVO: ", idx_pivot)
+                        vprint("SELF: ", rvec_self_idx)
+                        vprint("PIVO: ", idx_pivot)
                         node_pivot = rvec_N[idx_pivot]
-                        print("SWAP: ", node, node_pivot)
+                        vprint("SWAP: ", node, node_pivot)
                         pivotROW_OP(
                             node_costs_invalid_in_queue = node_costs_invalid_in_queue,
                             node1 = node,
@@ -414,15 +424,15 @@ def mgraph_simplify_badguys(
                         node = node_pivot
                     #make more efficient
                     nfrom = set()
-                    print(bignodes_r.shape)
+                    vprint(bignodes_r.shape)
                     for idx in range(bignodes_r.shape[0]):
                         if np.any(bignodes_r[idx]):
                             nfrom.add(rvec_N[idx])
-                    print("NFROM: ", nfrom, node)
+                    vprint("NFROM: ", nfrom, node)
                     nfrom.remove(node)
                     for kf in nfrom:
                         assert(node in seq[kf])
-                    print("NFROM: ", nfrom, node)
+                    vprint("NFROM: ", nfrom, node)
                     householderREFL_ROW_OP(
                         node_into = node,
                         nodes_from = nfrom,
@@ -430,16 +440,16 @@ def mgraph_simplify_badguys(
                         **kwargs
                     )
                 elif rcount == 1:
-                    print("DIRECT")
+                    vprint("DIRECT")
                     if rvec_self_idx is None or not bignodes_r[rvec_self_idx]:
-                        print("MUST PIVOT")
-                        print('bignodes', bignodes_r)
+                        vprint("MUST PIVOT")
+                        vprint('bignodes', bignodes_r)
                         #could choose pivot node based on projected fill-in
                         idx_pivot = np.nonzero(bignodes_r)[0][0]
-                        print("SELF: ", rvec_self_idx)
-                        print("PIVO: ", idx_pivot)
+                        vprint("SELF: ", rvec_self_idx)
+                        vprint("PIVO: ", idx_pivot)
                         node_pivot = rvec_N[idx_pivot]
-                        print("SWAP: ", node, node_pivot)
+                        vprint("SWAP: ", node, node_pivot)
                         pivotROW_OP(
                             node_costs_invalid_in_queue = node_costs_invalid_in_queue,
                             node1 = node,
@@ -451,18 +461,18 @@ def mgraph_simplify_badguys(
                         node = node_pivot
                         #continue
             else:
-                print("Using COLUMN Operations")
-                print("bignodes_c[cvec_self_idx]", bignodes_c[cvec_self_idx])
+                vprint("Using COLUMN Operations")
+                vprint("bignodes_c[cvec_self_idx]", bignodes_c[cvec_self_idx])
                 if ccount >= 2:
-                    print("MUST USE HOUSEHOLDER {0}x".format(ccount))
+                    vprint("MUST USE HOUSEHOLDER {0}x".format(ccount))
                     if cvec_self_idx is None or not bignodes_c[cvec_self_idx]:
-                        print("MUST PIVOT")
-                        print('bignodes', bignodes_c)
+                        vprint("MUST PIVOT")
+                        vprint('bignodes', bignodes_c)
                         #could choose pivot node based on projected fill-in
                         idx_pivot = np.nonzero(bignodes_c)[0][0]
-                        print(idx_pivot)
+                        vprint(idx_pivot)
                         node_pivot = cvec_N[idx_pivot]
-                        print("SWAP: ", node, node_pivot)
+                        vprint("SWAP: ", node, node_pivot)
                         pivotCOL_OP(
                             node_costs_invalid_in_queue = node_costs_invalid_in_queue,
                             node1 = node,
@@ -474,11 +484,11 @@ def mgraph_simplify_badguys(
                         node = node_pivot
                     #make more efficient
                     nfrom = set()
-                    print(bignodes_c.shape)
+                    vprint(bignodes_c.shape)
                     for idx in range(bignodes_c.shape[0]):
                         if np.any(bignodes_c[idx]):
                             nfrom.add(cvec_N[idx])
-                    print("NFROM: ", nfrom, node)
+                    vprint("NFROM: ", nfrom, node)
                     nfrom.remove(node)
                     householderREFL_COL_OP(
                         node_into = node,
@@ -487,15 +497,15 @@ def mgraph_simplify_badguys(
                         **kwargs
                     )
                 elif ccount == 1:
-                    print("DIRECT")
+                    vprint("DIRECT")
                     if cvec_self_idx is None or not bignodes_c[cvec_self_idx]:
-                        print("MUST PIVOT")
-                        print('bignodes', bignodes_c)
+                        vprint("MUST PIVOT")
+                        vprint('bignodes', bignodes_c)
                         #could choose pivot node based on projected fill-in
                         idx_pivot = np.nonzero(bignodes_c)[0][0]
-                        print(idx_pivot)
+                        vprint(idx_pivot)
                         node_pivot = cvec_N[idx_pivot]
-                        print("SWAP: ", node, node_pivot)
+                        vprint("SWAP: ", node, node_pivot)
                         pivotCOL_OP(
                             node_costs_invalid_in_queue = node_costs_invalid_in_queue,
                             node1 = node,
@@ -1028,10 +1038,12 @@ def inverse_solve_inplace(
         edge_map[winode, inode] = 1
 
     wrapped_onodes = set()
+
+    #this convention is correct for how this solver operates!
     if negative:
-        value = -1
-    else:
         value = 1
+    else:
+        value = -1
     for onode in outputs_set:
         wonode = wrap_output_node(onode)
         wrapped_onodes.add(wonode)
@@ -1132,10 +1144,11 @@ def push_solve_inplace(
         req[inode].add(winode)
         edge_map[winode, inode] = 1
 
+    #this convention is correct for how this solver operates!
     if negative:
-        value = -1
-    else:
         value = 1
+    else:
+        value = -1
     wrapped_onodes = set()
     for onode in outputs_set:
         wonode = wrap_output_node(onode)

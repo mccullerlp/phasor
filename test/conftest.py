@@ -12,6 +12,8 @@ def pytest_addoption(parser):
         help="Have tests update plots (it is slow)",
     )
 
+    parser.addoption("--do-benchmarks", action="store_true",
+        help="run slow benchmarking tests")
 
 @pytest.fixture
 def plot(request):

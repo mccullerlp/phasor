@@ -43,6 +43,7 @@ setup(
     tests_require = [
         'pytest',
         'pytest-runner',
+        'pytest-benchmark',
     ],
     extras_require = {
         "fitting" : ["casadi"],

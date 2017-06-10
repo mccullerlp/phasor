@@ -1,6 +1,7 @@
 """
 """
 from __future__ import (division, print_function)
+import warnings
 from os import path
 import sys
 import pytest
@@ -15,6 +16,7 @@ import pickle
 
 #import numpy as np
 
+from openLoop.system import graph_algorithm
 from openLoop.system import DAG_algorithm
 from openLoop.system import scisparse_algorithm
 from openLoop.system import SRE_matrix_algorithms
@@ -24,6 +26,7 @@ from openLoop.utilities.print import pprint
 
 def isolve_mat(
         arr,
+        solver = scisparse_algorithm,
         **kwargs
 ):
     arr = arr.astype(float)
@@ -40,7 +43,7 @@ def isolve_mat(
                 seq[idx_c].add(idx_r)
                 req[idx_r].add(idx_c)
 
-    sbunch = scisparse_algorithm.inverse_solve_inplace(
+    sbunch = solver.inverse_solve_inplace(
         seq = seq,
         req = req,
         inputs_set = inputs_set,
@@ -71,7 +74,10 @@ def check_arr(arr, **kwargs):
     np_test.assert_almost_equal(arr_inv, arr_inv2)
 
 
-def check_system(fname = './LIGOX_mat.pckl'):
+def check_system(
+    fname = './LIGOX_mat.pckl',
+    solver = scisparse_algorithm,
+):
     #with open('./HTTS_UL_UL.pckl', 'rb') as F:
     with open(fname, 'rb') as F:
         data = declarative.Bunch(pickle.load(F))
@@ -100,7 +106,7 @@ def check_system(fname = './LIGOX_mat.pckl'):
     inputs_set = set([data.AC_index[0]])
     outputs_set = set([data.AC_index[1]])
 
-    sbunch = scisparse_algorithm.inverse_solve_inplace(
+    sbunch = solver.inverse_solve_inplace(
         seq = seq,
         req = req,
         inputs_set = inputs_set,
@@ -232,8 +238,13 @@ def test_graph_solver_r10():
 ##    check_arr(arr)
 
 @pytest.mark.skipif(sys.version_info < (3, 0), reason="Requires pickle version 3")
-def test_LIGOX():
-    check_system(fname = path.join(path.dirname(__file__), './LIGOX_mat.pckl'))
+def test_LIGOX_scisparse():
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        check_system(
+            fname = path.join(path.dirname(__file__), './LIGOX_mat.pckl'),
+            solver = scisparse_algorithm,
+        )
 
 #@pytest.mark.skipif(sys.version_info < (3, 0), reason="Requires pickle version 3")
 #def test_HTTS():

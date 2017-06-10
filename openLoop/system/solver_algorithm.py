@@ -56,6 +56,7 @@ def scisparse_umfpack():
     use_solver(useUmfpack = True)
     return scisparse_algorithm
 
+#TODO: Make a KLU solver since Finesse uses it. We could also reuse the symbolic solver portion!
 
 
 solvers_symbolic = dict(

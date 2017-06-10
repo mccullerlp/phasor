@@ -20,9 +20,11 @@ core.*
 _old/
 
 .ipynb_checkpoints
-*.ipynb
+#*.ipynb
 
 *.jpg
+*.png
+*.pdf
 *.tar.gz
 *.tar.*
 *.zip

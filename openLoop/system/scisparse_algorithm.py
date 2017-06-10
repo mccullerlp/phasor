@@ -114,7 +114,6 @@ def mgraph_simplify_inplace(
         if not seq.get(node, None):
             for rnode in req[node]:
                 seq_beta[rnode].add(node)
-                seq[rnode].remove(node)
                 beta_set.add(node)
                 edge_map_beta[rnode, node] = edge_map[rnode, node]
             keys_beta.add(node)
@@ -124,12 +123,22 @@ def mgraph_simplify_inplace(
         if not req.get(node, None):
             for snode in seq[node]:
                 req_alpha[snode].add(node)
-                req[snode].remove(node)
                 alpha_set.add(node)
             keys_alpha.add(node)
         else:
             keys.add(node)
 
+    #this must be done separately otherwise some nodes are accidentally considered alpha or beta nodes
+    for node, seqset in seq_beta.items():
+        #print("BETA: ", node, seqset)
+        for snode in seqset:
+            req[snode].remove(node)
+            seq[node].remove(snode)
+    for node, reqset in req_alpha.items():
+        #print("ALPHA: ", node, reqset)
+        for rnode in reqset:
+            seq[rnode].remove(node)
+            req[node].remove(rnode)
     #remove the alpha and beta nodes from the standard sets
     for node in alpha_set:
         del seq[node]
@@ -138,12 +147,18 @@ def mgraph_simplify_inplace(
         del req[node]
         del seq[node]
 
+    #pprint(req)
+    #pprint(seq)
+    #pprint(req_alpha)
+    #pprint(seq_beta)
+
     keys = (keys - keys_alpha) - keys_beta
 
     keys = list(keys)
     #pprint(keys)
     sortkeys_inplace(keys)
     keys_alpha = list(keys_alpha)
+    #print(keys_alpha)
     sortkeys_inplace_split(keys_alpha)
 
     keys_inv = dict()
@@ -263,7 +278,6 @@ def mgraph_simplify_inplace(
         if sset:
             assert(len(sset) == 1)
             s_k_to = next(iter(sset))
-            print("BETA MAP: ", k_to, edge_map_beta[k_to, s_k_to])
             edge_map[k_fr, s_k_to] = data * edge_map_beta[k_to, s_k_to]
             reqO[s_k_to].add(k_fr)
             seqO[k_fr].add(s_k_to)
@@ -441,12 +455,6 @@ def push_solve_inplace(
             edge_map = edge_map,
         )
     #print_seq(seq, edge_map)
-
-    pprint(inputs_map)
-    pprint(outputs_set)
-    pprint(seq)
-    pprint(req)
-    pprint(edge_map)
 
     if edge_map:
         #simplify with the wrapped nodes
