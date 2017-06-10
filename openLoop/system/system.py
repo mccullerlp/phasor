@@ -73,6 +73,26 @@ class BGSystem(RootElement):
 
     _frozen = False
 
+    solver_name_default = 'scisparse'
+    @declarative.dproperty
+    def solver_name(self, val = None):
+        if val is None:
+            val = self.solver_name_default
+        assert(val in solver_algorithm.solvers_all)
+        return val
+
+    solver_symbolic_name_default = 'loop_LUQ'
+    @declarative.dproperty
+    def solver_symbolic_name(self, val = None):
+        if val is None:
+            val = self.solver_symbolic_name_default
+        assert(val in solver_algorithm.solvers_symbolic)
+        return val
+
+    @declarative.dproperty
+    def symbolic(self, val = False):
+        return val
+
     @declarative.dproperty
     def include_johnson_noise(self, val = True):
         val = self.ctree.setdefault('include_johnson_noise', val)

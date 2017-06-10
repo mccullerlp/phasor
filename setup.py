@@ -38,6 +38,7 @@ setup(
         'IPython',
         'pyyaml',
         'declarative',
+        'scikit-umfpack',
     ] + extra_install_requires,
     tests_require = [
         'pytest',

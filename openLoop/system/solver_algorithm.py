@@ -21,18 +21,58 @@ from ..math.key_matrix import (
     KeyMatrix,
 )
 
-from .graph_algorithm import (
-#from .DAG_algorithm import (
-    push_solve_inplace,
-    inverse_solve_inplace,
-)
-
-
 def setdict_copy(orig):
     duplicate = defaultdict(set)
     for k, vset in orig.items():
         duplicate[k] = set(vset)
     return duplicate
+
+
+def loop_fast_unstable():
+    from . import graph_algorithm
+    return graph_algorithm
+
+
+def loop_LUQ():
+    from . import DAG_algorithm
+    return DAG_algorithm
+
+
+def scisparse():
+    from . import scisparse_algorithm
+    return scisparse_algorithm
+
+
+def scisparse_superLU():
+    from . import scisparse_algorithm
+    from scipy.sparse.linalg import use_solver
+    use_solver(useUmfpack = False)
+    return scisparse_algorithm
+
+
+def scisparse_umfpack():
+    from . import scisparse_algorithm
+    from scipy.sparse.linalg import use_solver
+    use_solver(useUmfpack = True)
+    return scisparse_algorithm
+
+
+
+solvers_symbolic = dict(
+    loop_fast_unstable = loop_fast_unstable,
+    loop_LUQ           = loop_LUQ,
+)
+
+
+solvers_numeric = dict(
+    scisparse_umfpack = scisparse_umfpack,
+    scisparse_superLU = scisparse_superLU,
+    scisparse         = scisparse,
+)
+
+solvers_all = dict()
+solvers_all.update(solvers_numeric)
+solvers_all.update(solvers_symbolic)
 
 
 class SystemSolver(object):
@@ -52,6 +92,18 @@ class SystemSolver(object):
         self.system = system
         self.ports_algorithm   = ports_algorithm
         self.matrix_algorithm  = matrix_algorithm
+
+        #TODO check if the matrix or ports are symbolic
+        if self.system.symbolic:
+            #call the function in the solvers lookup to generate the solver to use
+            self.solver = solvers_symbolic[
+                self.system.symbolic_solver_name
+            ]()
+        else:
+            #call the function in the solvers lookup to generate the solver to use
+            self.solver = solvers_all[
+                self.system.solver_name
+            ]()
 
         #each index stores a dict, indexed by the output set
         self.driven_solution_bunches = [
@@ -266,7 +318,7 @@ class SystemSolver(object):
         #TODO purging should no longer be necessary
         #print("PERTURBER RUNNING: ")
         #print("COUPLING_SIZE: ", len(coupling_matrix))
-        solution_bunch = push_solve_inplace(
+        solution_bunch = self.solver.push_solve_inplace(
             seq           = seq,
             req           = req,
             edge_map      = dict(coupling_matrix.items()),
@@ -390,7 +442,7 @@ class SystemSolver(object):
 
         #TODO purging should no longer be necessary
         #print("PROPAGAGOR RUNNING: ", readout_set)
-        solution_bunch = push_solve_inplace(
+        solution_bunch = self.solver.push_solve_inplace(
             seq           = seq,
             req           = req,
             outputs_set   = outputs_set,
@@ -467,7 +519,7 @@ class SystemSolver(object):
 
         #TODO purging should no longer be necessary
         #print("SOLVER RUNNING: ", drive_set, readout_set)
-        inverse_bunch = inverse_solve_inplace(
+        inverse_bunch = self.solver.inverse_solve_inplace(
             seq           = seq,
             req           = req,
             inputs_set    = inputs_set,
@@ -475,7 +527,6 @@ class SystemSolver(object):
             edge_map      = dict(coupling_matrix.items()),
             purge_in      = True,
             purge_out     = True,
-            #Q_conditioning = self.system.solver_Q_conditioning,
             scattering    = True,
         )
 

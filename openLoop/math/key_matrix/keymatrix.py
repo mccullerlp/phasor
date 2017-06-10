@@ -172,7 +172,10 @@ class KeyVectorBase(KeyLinearBase):
         return self._data_map.get(key, default)
 
     def items(self):
-        return list(self._data_map.items())
+        return self._data_map.items()
+
+    def keys(self):
+        return self._data_map.keys()
 
     def __len__(self):
         return len(self._data_map)
@@ -258,10 +261,10 @@ class KeyMatrixBase(KeyLinearBase):
             yield key_from, key_to, value
 
     def keys(self):
-        return list(self._data_map.keys())
+        return self._data_map.keys()
 
     def items(self):
-        return list(self._data_map.items())
+        return self._data_map.items()
 
     def set_nullable(self, key_to, key_from, value):
         self._memoize_count += 1
@@ -399,7 +402,7 @@ class KeyMatrix(KeyMatrixBase):
         vspace_from = self.vspace_from
         vspace_to   = self.vspace_to
         array = np.asarray(array)
-        
+
         if len(array.shape) > 2:
             array_2d = np.any(array, axis = 0)
             while len(array_2d.shape) > 2:

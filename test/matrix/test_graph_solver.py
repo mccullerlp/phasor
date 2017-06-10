@@ -100,7 +100,7 @@ def check_system(fname = './LIGOX_mat.pckl'):
     inputs_set = set([data.AC_index[0]])
     outputs_set = set([data.AC_index[1]])
 
-    sbunch = DAG_algorithm.inverse_solve_inplace(
+    sbunch = scisparse_algorithm.inverse_solve_inplace(
         seq = seq,
         req = req,
         inputs_set = inputs_set,

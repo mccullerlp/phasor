@@ -109,12 +109,14 @@ def mgraph_simplify_inplace(
     seq_beta  = defaultdict(set)
     beta_set  = set()
     alpha_set = set()
+    edge_map_beta = dict()
     for node in req:
         if not seq.get(node, None):
             for rnode in req[node]:
                 seq_beta[rnode].add(node)
                 seq[rnode].remove(node)
                 beta_set.add(node)
+                edge_map_beta[rnode, node] = edge_map[rnode, node]
             keys_beta.add(node)
         else:
             keys.add(node)
@@ -139,7 +141,7 @@ def mgraph_simplify_inplace(
     keys = (keys - keys_alpha) - keys_beta
 
     keys = list(keys)
-    pprint(keys)
+    #pprint(keys)
     sortkeys_inplace(keys)
     keys_alpha = list(keys_alpha)
     sortkeys_inplace_split(keys_alpha)
@@ -200,56 +202,73 @@ def mgraph_simplify_inplace(
                 [d[index] for d in data_ind],
                 (row_ind, col_ind)
             ),
+            shape = (len(keys), len(keys)),
+            dtype = arr_type,
         )
         b_csc = scisparse.csc_matrix(
             (
                 [d[index] for d in data_alpha_ind],
                 (row_alpha_ind, col_alpha_ind)
             ),
+            shape = (len(keys), len(keys_alpha)),
+            dtype = arr_type,
         )
+        #print(arr_type)
+        #print(A_csc.dtype)
+        #print(b_csc.dtype)
         x_csc = scisparselin.spsolve(A_csc, b_csc)
-
-        arr1 = x_csc.toarray()
-        arr = np.zeros_like(arr1, dtype = arr_type)
-        ind_prev = x_csc.indptr[0]
-        if index:
-            for idx_col, ind in enumerate(x_csc.indptr[1:]):
-                idx_row = x_csc.indices[ind_prev : ind]
-                data    = x_csc.data[ind_prev : ind]
-                for sub_idx_row, sub_data in zip(idx_row, data):
-                    edge_map_ab[idx_col, sub_idx_row][index] = sub_data
-                arr[idx_row, idx_col] = data
-                ind_prev = ind
+        if b_csc.ndim > 1 and b_csc.shape[1] > 1:
+            #the output of spsolve depends on if b_csc is a vector or not
+            #arr1 = x_csc.toarray()
+            #arr = np.zeros_like(arr1, dtype = arr_type)
+            ind_prev = x_csc.indptr[0]
+            if index:
+                for idx_col, ind in enumerate(x_csc.indptr[1:]):
+                    idx_row = x_csc.indices[ind_prev : ind]
+                    data    = x_csc.data[ind_prev : ind]
+                    for sub_idx_row, sub_data in zip(idx_row, data):
+                        edge_map_ab[idx_col, sub_idx_row][index] = sub_data
+                    #arr[idx_row, idx_col] = data
+                    ind_prev = ind
+            else:
+                for idx_col, ind in enumerate(x_csc.indptr[1:]):
+                    idx_row = x_csc.indices[ind_prev : ind]
+                    data    = x_csc.data[ind_prev : ind]
+                    for sub_idx_row, sub_data in zip(idx_row, data):
+                        edge_map_ab[idx_col, sub_idx_row] = sub_data
+                    #arr[idx_row, idx_col] = data
+                    ind_prev = ind
+            #pprint(arr - arr1)
         else:
-            for idx_col, ind in enumerate(x_csc.indptr[1:]):
-                idx_row = x_csc.indices[ind_prev : ind]
-                data    = x_csc.data[ind_prev : ind]
-                for sub_idx_row, sub_data in zip(idx_row, data):
-                    edge_map_ab[idx_col, sub_idx_row] = sub_data
-                arr[idx_row, idx_col] = data
-                ind_prev = ind
-        #pprint(arr - arr1)
+            if index:
+                for idx_row in np.nonzero(x_csc)[0]:
+                    edge_map_ab[0, idx_row][index] = x_csc[idx_row]
+            else:
+                for idx_row in np.nonzero(x_csc)[0]:
+                    edge_map_ab[0, idx_row] = x_csc[idx_row]
+            #pprint(arr - arr1)
 
     #now reapply the seq and req lists
     reqO.clear()
     seqO.clear()
     edge_map.clear()
-    pprint(edge_map_ab)
+    #pprint(edge_map_ab)
 
     for (idx_col, idx_row), data in edge_map_ab.items():
         k_fr = keys_alpha[idx_col]
         #TODO can only currently deal with 1:1 seq_beta map
         k_to = keys[idx_row]
         sset = seq_beta.get(k_to, None)
-        print(k_fr, k_to, sset)
+        #print(k_fr, k_to, sset)
         if sset:
             assert(len(sset) == 1)
             s_k_to = next(iter(sset))
-            edge_map[k_fr, s_k_to] = data
+            print("BETA MAP: ", k_to, edge_map_beta[k_to, s_k_to])
+            edge_map[k_fr, s_k_to] = data * edge_map_beta[k_to, s_k_to]
             reqO[s_k_to].add(k_fr)
             seqO[k_fr].add(s_k_to)
-    pprint(seqO)
-    pprint(reqO)
+    #pprint(seqO)
+    #pprint(reqO)
     return
 
 def inverse_solve_inplace(
@@ -265,7 +284,7 @@ def inverse_solve_inplace(
     **kwargs
 ):
     if scattering:
-        keys = set(seq.keys()) | set(req.keys())
+        keys = set(seq.keys()) | set(req.keys()) | inputs_set | outputs_set
         for node in keys:
             if node in seq[node]:
                 edge_map[node, node] = edge_map[node, node] - 1
@@ -289,9 +308,9 @@ def inverse_solve_inplace(
 
     wrapped_onodes = set()
     if negative:
-        value = 1
-    else:
         value = -1
+    else:
+        value = 1
     for onode in outputs_set:
         wonode = wrap_output_node(onode)
         wrapped_onodes.add(wonode)
@@ -361,7 +380,7 @@ def push_solve_inplace(
     scattering = False,
 ):
     if scattering:
-        keys = set(seq.keys()) | set(req.keys())
+        keys = set(seq.keys()) | set(req.keys()) | set(inputs_map.keys()) | outputs_set
         for node in keys:
             if node in seq[node]:
                 edge_map[node, node] = edge_map[node, node] - 1
@@ -373,11 +392,10 @@ def push_solve_inplace(
         negative = not negative
 
     pre_purge_inplace(seq, req, edge_map)
-
     #first dress the nodes. The source vectors is converted into edges with a special
     #source node
     #the inputs are from the special state (with implicit vector value of '1')
-    VACUUM_STATE = DictKey(special = 'vacuum')
+    VACUUM_STATE = wrap_input_node(DictKey(special = 'vacuum'))
     for inode, val in inputs_map.items():
         seq[VACUUM_STATE].add(inode)
         req[inode].add(VACUUM_STATE)
@@ -393,9 +411,9 @@ def push_solve_inplace(
         edge_map[winode, inode] = 1
 
     if negative:
-        value = 1
-    else:
         value = -1
+    else:
+        value = 1
     wrapped_onodes = set()
     for onode in outputs_set:
         wonode = wrap_output_node(onode)
@@ -424,11 +442,18 @@ def push_solve_inplace(
         )
     #print_seq(seq, edge_map)
 
-    #simplify with the wrapped nodes
-    mgraph_simplify_inplace(
-        seq = seq, req = req,
-        edge_map = edge_map,
-    )
+    pprint(inputs_map)
+    pprint(outputs_set)
+    pprint(seq)
+    pprint(req)
+    pprint(edge_map)
+
+    if edge_map:
+        #simplify with the wrapped nodes
+        mgraph_simplify_inplace(
+            seq = seq, req = req,
+            edge_map = edge_map,
+        )
 
     #now unwrap the
     outputs_map = dict()

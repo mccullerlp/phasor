@@ -1029,9 +1029,9 @@ def inverse_solve_inplace(
 
     wrapped_onodes = set()
     if negative:
-        value = 1
-    else:
         value = -1
+    else:
+        value = 1
     for onode in outputs_set:
         wonode = wrap_output_node(onode)
         wrapped_onodes.add(wonode)
@@ -1133,9 +1133,9 @@ def push_solve_inplace(
         edge_map[winode, inode] = 1
 
     if negative:
-        value = 1
-    else:
         value = -1
+    else:
+        value = 1
     wrapped_onodes = set()
     for onode in outputs_set:
         wonode = wrap_output_node(onode)
