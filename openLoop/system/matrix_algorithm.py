@@ -14,7 +14,7 @@ from ..math.key_matrix import (
     KVSpace,
 )
 
-from .graph_algorithm import (
+from ..matrix.matrix_generic import (
     check_seq_req_balance,
     purge_reqless_inplace,
     purge_seqless_inplace,

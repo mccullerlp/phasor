@@ -16,9 +16,9 @@ import pickle
 
 #import numpy as np
 
-from openLoop.system import graph_algorithm
-from openLoop.system import DAG_algorithm
-from openLoop.system import scisparse_algorithm
+from openLoop.matrix import graph_algorithm
+from openLoop.matrix import DAG_algorithm
+from openLoop.matrix import scisparse_algorithm
 from openLoop.utilities.print import pprint
 
 #from openLoop.utilities.np import logspaced

@@ -1,24 +1,25 @@
 """
 """
 from __future__ import (division, print_function)
-from os import path
-
-from openLoop.utilities.mpl import mplfigB
+import pytest
 
 import numpy.testing as np_test
 import numpy as np
-import declarative
-import collections
-import pickle
 
 #import numpy as np
 
-from openLoop.system import DAG_algorithm
-from openLoop.system import scisparse_algorithm
-from openLoop.system import SRE_matrix_algorithms
+from openLoop.matrix import DAG_algorithm
+from openLoop.matrix import scisparse_algorithm
+from openLoop.matrix import SRE_matrix_algorithms
 from openLoop.utilities.print import pprint
 
 #from openLoop.utilities.np import logspaced
+
+stresstest = pytest.mark.skipif(
+    not pytest.config.getoption("--do-stresstest"),
+    reason="need --do-stresstest option to run"
+)
+
 
 def test_sre_unitary():
     tmatrix = {
@@ -269,6 +270,8 @@ def test_sparse_SVDinv_scisparse():
     )
     return
 
+
+@stresstest
 def test_sparse_SVDinv_stress():
     for idx in range(10):
         SVD_gen_check(

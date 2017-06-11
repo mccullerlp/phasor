@@ -5,7 +5,6 @@ from __future__ import division, print_function, unicode_literals
 from ..utilities.future_from_2 import str, object
 
 import numpy as np
-import copy
 from collections import defaultdict
 import declarative
 
@@ -21,6 +20,7 @@ from ..math.key_matrix import (
     KeyMatrix,
 )
 
+
 def setdict_copy(orig):
     duplicate = defaultdict(set)
     for k, vset in orig.items():
@@ -34,24 +34,24 @@ def loop_fast_unstable():
 
 
 def loop_LUQ():
-    from . import DAG_algorithm
+    from ..matrix import DAG_algorithm
     return DAG_algorithm
 
 
 def scisparse():
-    from . import scisparse_algorithm
+    from ..matrix import scisparse_algorithm
     return scisparse_algorithm
 
 
 def scisparse_superLU():
-    from . import scisparse_algorithm
+    from ..matrix import scisparse_algorithm
     from scipy.sparse.linalg import use_solver
     use_solver(useUmfpack = False)
     return scisparse_algorithm
 
 
 def scisparse_umfpack():
-    from . import scisparse_algorithm
+    from ..matrix import scisparse_algorithm
     from scipy.sparse.linalg import use_solver
     use_solver(useUmfpack = True)
     return scisparse_algorithm
