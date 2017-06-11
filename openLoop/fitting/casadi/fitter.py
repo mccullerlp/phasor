@@ -83,7 +83,9 @@ class FitterRoot(RootElement, FitterBase):
     def fit_systems(self):
         ctree_meta = declarative.Bunch()
         for sysname in list(self.systems.keys()):
-            ctree_meta[sysname] = bunch.DeepBunch(vpath=True)
+            ctree = bunch.DeepBunch(vpath=True)
+            ctree_meta[sysname] = ctree
+            ctree.hints.symbolic = 'casadi'
 
         injectors = self.targets_recurse(VISIT.ctree_inject)
         for injector in injectors:

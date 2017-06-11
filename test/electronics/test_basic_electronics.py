@@ -123,8 +123,11 @@ def test_VIR_conn():
     test.assert_almost_equal(sys.R2.DC_readout, 5)
     test.assert_almost_equal(sys.R3.DC_readout, .5)
 
+    #TODO this one needs more study about its conditioning. It can often cause the matrix inversion to fail
 def test_VIR_conn2():
-    sys = system.BGSystem()
+    sys = system.BGSystem(
+        solver_name = 'scisparse',
+    )
     sys.own.I1 = electronics.CurrentSource(I_DC = 1)
     sys.own.Conn1 = electronics.Connection(N_ports = 4)
     sys.own.Conn2 = electronics.Connection(N_ports = 5)

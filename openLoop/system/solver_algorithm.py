@@ -150,6 +150,13 @@ class SystemSolver(object):
         self._setup_views()
         return
 
+    def check_zero(self, obj):
+        o2 = (obj == 0)
+        if o2.__class__ is bool:
+            return o2
+        elif isinstance(o2, np.ndarray):
+            return np.all(o2)
+
     @declarative.mproperty
     def views(self):
         return declarative.DeepBunch(vpath = False)
@@ -244,8 +251,6 @@ class SystemSolver(object):
                     if not factor_func_list:
                         #TODO prevent filling if zeros?
                         continue
-                        coupling_matrix[pkfrom, pkto] = 0
-                        continue
                     factor_func = factor_func_list[0]
                     val = factor_func(
                         solution_vector_prev,
@@ -257,8 +262,7 @@ class SystemSolver(object):
                             solution_bunch_prev
                         )
                         #print('multi-edge: ', pkto, factor_func)
-                    if np.any(val != 0):
-                        coupling_matrix[pkfrom, pkto] = val
+                    coupling_matrix[pkfrom, pkto] = val
 
         #now generate the floating edge couplings
         #must happen after the other edge generation since the linkages are otherwise
@@ -319,6 +323,8 @@ class SystemSolver(object):
         #TODO purging should no longer be necessary
         #print("PERTURBER RUNNING: ")
         #print("COUPLING_SIZE: ", len(coupling_matrix))
+        #TODO TODO TODO Pre-purge the seq/req list to prevent unnecessary edge-matrix generation
+        #this is somewhat done already since there are purged versions
         solution_bunch = self.solver.push_solve_inplace(
             seq           = seq,
             req           = req,
@@ -429,6 +435,7 @@ class SystemSolver(object):
         seq = setdict_copy(csgb.seq_full)
         req = setdict_copy(csgb.req_full)
 
+        #TODO TODO TODO Pre-purge the seq/req list to prevent unnecessary edge-matrix generation
         coupling_matrix = self._edge_matrix_generate(
             seq                  = seq,
             req                  = req,
@@ -511,6 +518,7 @@ class SystemSolver(object):
         seq = setdict_copy(csgb.seq_full)
         req = setdict_copy(csgb.req_full)
 
+        #TODO TODO TODO Pre-purge the seq/req list to prevent unnecessary edge-matrix generation
         coupling_matrix = self._edge_matrix_generate(
             seq                  = seq,
             req                  = req,

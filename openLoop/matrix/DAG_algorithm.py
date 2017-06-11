@@ -7,6 +7,8 @@ import numpy as np
 from collections import defaultdict
 import declarative
 
+from ..math.dispatched import abs_sq
+
 from ..utilities.priority_queue import HeapPriorityQueue, Empty
 from ..utilities.print import pprint
 
@@ -24,7 +26,7 @@ from ..base import (
 N_limit_rel = 100
 
 def abssq(arr):
-    return arr * arr.conjugate()
+    return arr.real**2 + arr.imag**2
 
 def enorm(arr):
     return np.max(abssq(arr))
@@ -201,6 +203,9 @@ def mgraph_simplify_trivial(
         sedge_abssq = abssq(self_edge)
 
         #check conditions for numerical stability, if they are bad, drop the node
+
+        if np.all(sedge_abssq == 0):
+            continue
 
         badness = 0
         #columns

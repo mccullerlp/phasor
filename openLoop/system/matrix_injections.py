@@ -269,7 +269,8 @@ class TripletNormCoupling(FactorCouplingBase):
         val = -self.cplg
         val = val * sol_vector.get(self.pkfrom1, 0)
         val = val * sol_vector.get(self.pkfrom2, 0)
-        val = val / self.pknorm_func(sol_vector.get(self.pknorm, 1e12))
+        denom = sol_vector.get(self.pknorm, 1e12) + 1e-30
+        val = val / self.pknorm_func(denom)
         return val
 
 
