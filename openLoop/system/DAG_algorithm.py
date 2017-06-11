@@ -7,8 +7,8 @@ import numpy as np
 from collections import defaultdict
 import declarative
 
-from openLoop.utilities.priority_queue import HeapPriorityQueue, Empty
-from openLoop.utilities.print import pprint
+from ..utilities.priority_queue import HeapPriorityQueue, Empty
+from ..utilities.print import pprint
 
 from .matrix_generic import (
     pre_purge_inplace,
@@ -139,8 +139,6 @@ def mgraph_simplify_sorted(
     while req:
         cost, node = pqueue.pop()
 
-        assert(np.isfinite(cost))
-
         reduceLU(
             node = node,
             **kwargs
@@ -197,7 +195,9 @@ def mgraph_simplify_trivial(
 
         edge_cost, arr_cost = cost
 
-        self_edge = edge_map[node, node]
+        self_edge = edge_map.get((node, node), None)
+        if self_edge is None:
+            continue
         sedge_abssq = abssq(self_edge)
 
         #check conditions for numerical stability, if they are bad, drop the node
@@ -352,12 +352,12 @@ def mgraph_simplify_badguys(
 
             normr = 0
             for rnode in req[node]:
-                normr += abs(edge_map[rnode, node])**2
+                normr = normr + abs(edge_map[rnode, node])**2
             normr = normr ** .5
             #row norm
             normc = 0
             for snode in seq[node]:
-                normc += abs(edge_map[node, snode])**2
+                normc = normc + abs(edge_map[node, snode])**2
             normc = normc ** .5
 
             vprint("SHAPE: ", np.asarray(normr).shape)
@@ -370,40 +370,24 @@ def mgraph_simplify_badguys(
                 rel_r_to_c = normr > normc
             vprint("REL LARGER: ", rel_r_to_c)
 
-            rvec = []
-            rvec_N = []
-            rvec_self_idx = None
-            for idx, rnode in enumerate(req[node]):
-                if node == rnode:
-                    rvec_self_idx = idx
-                rvec.append(np.max(abs(edge_map[rnode, node] / normr)))
-                rvec_N.append(rnode)
-
-            vprint("RVEC: ", rvec)
-            bignodes_r = np.array(rvec) >= 1./(len(req[node]))**.5
-            rcount = np.count_nonzero(bignodes_r)
-            vprint("R: ", np.count_nonzero(bignodes_r), len(req[node]), bignodes_r[rvec_self_idx], rel_r_to_c > .5)
-            cvec = []
-            cvec_N = []
-            cvec_self_idx = None
-            for idx, snode in enumerate(seq[node]):
-                if node == snode:
-                    cvec_self_idx = idx
-                    vprint(cvec_self_idx, idx, node)
-                cvec.append(np.max(abs(edge_map[node, snode] / normc)))
-                cvec_N.append(snode)
-            vprint("CVEC: ", cvec)
-            bignodes_c = np.array(cvec) >= 1./(len(seq[node]))**.5
-            ccount = np.count_nonzero(bignodes_c)
-            vprint(bignodes_c, cvec_self_idx, ccount)
-            vprint("C: ", np.count_nonzero(bignodes_c), len(seq[node]), bignodes_c[cvec_self_idx], rel_r_to_c < .5)
-
-            if node in req[node]:
-                norma = abs(edge_map[node, node])
-                vprint("NORM: ", np.max(normr / norma), np.max(normc / norma))
-
             if rel_r_to_c > .5:
                 vprint("Using ROW Operations")
+
+                assert(req[node])
+                rvec = []
+                rvec_N = []
+                rvec_self_idx = None
+                for idx, rnode in enumerate(req[node]):
+                    if node == rnode:
+                        rvec_self_idx = idx
+                    rvec.append(np.max(abs(edge_map[rnode, node] / normr)))
+                    rvec_N.append(rnode)
+
+                vprint("RVEC: ", rvec)
+                bignodes_r = np.array(rvec) >= 1./(len(req[node]))**.5
+                rcount = np.count_nonzero(bignodes_r)
+                vprint("R: ", np.count_nonzero(bignodes_r), len(req[node]), bignodes_r[rvec_self_idx], rel_r_to_c > .5)
+
                 if rcount >= 2:
                     vprint("MUST USE HOUSEHOLDER {0}x".format(rcount))
                     if rvec_self_idx is None or not bignodes_r[rvec_self_idx]:
@@ -462,6 +446,23 @@ def mgraph_simplify_badguys(
                         #continue
             else:
                 vprint("Using COLUMN Operations")
+
+                assert(seq[node])
+                cvec = []
+                cvec_N = []
+                cvec_self_idx = None
+                for idx, snode in enumerate(seq[node]):
+                    if node == snode:
+                        cvec_self_idx = idx
+                        vprint(cvec_self_idx, idx, node)
+                    cvec.append(np.max(abs(edge_map[node, snode] / normc)))
+                    cvec_N.append(snode)
+                vprint("CVEC: ", cvec)
+                bignodes_c = np.array(cvec) >= 1./(len(seq[node]))**.5
+                ccount = np.count_nonzero(bignodes_c)
+                vprint(bignodes_c, cvec_self_idx, ccount)
+                vprint("C: ", np.count_nonzero(bignodes_c), len(seq[node]), bignodes_c[cvec_self_idx], rel_r_to_c < .5)
+
                 vprint("bignodes_c[cvec_self_idx]", bignodes_c[cvec_self_idx])
                 if ccount >= 2:
                     vprint("MUST USE HOUSEHOLDER {0}x".format(ccount))
@@ -516,8 +517,6 @@ def mgraph_simplify_badguys(
                         node_costs_invalid_in_queue.add(node_pivot)
                         node = node_pivot
                         #continue
-            assert(np.isfinite(cost))
-
             reduceLU(
                 node = node,
                 node_costs_invalid_in_queue = node_costs_invalid_in_queue,
@@ -546,6 +545,16 @@ def pivotROW_OP(
     #print("SEQ 2: ", node2, seq[node2])
     #print("REQ 2: ", node2, req[node2])
 
+    #check graph
+    for snode in seq[node2]:
+        assert(node2 in req[snode])
+    for snode in seq[node1]:
+        assert(node1 in req[snode])
+    for rnode in req[node2]:
+        assert(node2 in seq[rnode])
+    for rnode in req[node1]:
+        assert(node1 in seq[rnode])
+
     edge_map2 = dict()
     #gets all edges to node1/2
     for rnode in req[node1]:
@@ -558,7 +567,6 @@ def pivotROW_OP(
     for rnode in req_alpha[node1]:
         edge = edge_map.pop((rnode, node1))
         edge_map2[rnode, node2] = edge
-        node_costs_invalid_in_queue.add(rnode)
 
     for rnode in req[node2]:
         edge = edge_map.pop((rnode, node2))
@@ -572,7 +580,6 @@ def pivotROW_OP(
     for rnode in req_alpha[node2]:
         edge = edge_map.pop((rnode, node2))
         edge_map2[rnode, node1] = edge
-        node_costs_invalid_in_queue.add(rnode)
 
     rn1 = req[node1]
     rnA1 = req_alpha[node1]
@@ -616,6 +623,12 @@ def householderREFL_ROW_OP(
 
     row ops affect BETA.
     """
+
+    for rnode in req[node_into]:
+        assert(node_into in seq[rnode])
+    for rnode in req[node_into]:
+        assert(node_into in seq[rnode])
+
     u_vec = dict()
     norm_sq = 0
 
@@ -699,6 +712,11 @@ def householderREFL_ROW_OP(
             edge_map[k_to, snode] = edge
             seq_beta[k_to].add(snode)
 
+    for rnode in req[node_into]:
+        assert(node_into in seq[rnode])
+    for rnode in req[node_into]:
+        assert(node_into in seq[rnode])
+
     #print("INTO: ", node_into)
     #print("FROM: ", nodes_from)
     #for k1k2, edge in list(edge_map2.items()):
@@ -726,6 +744,13 @@ def householderREFL_COL_OP(
 
     column ops affect ALPHA.
     """
+
+    #check graph
+    for rnode in req[node_into]:
+        assert(node_into in seq[rnode])
+    for rnode in req[node_into]:
+        assert(node_into in seq[rnode])
+
     u_vec = dict()
     norm_sq = 0
 
@@ -809,6 +834,11 @@ def householderREFL_COL_OP(
             edge_map[rnode, k_to] = edge
             req_alpha[k_to].add(rnode)
 
+    for rnode in req[node_into]:
+        assert(node_into in seq[rnode])
+    for rnode in req[node_into]:
+        assert(node_into in seq[rnode])
+
     #print("INTO: ", node_into)
     #print("FROM: ", nodes_from)
     #for k1k2, edge in list(edge_map2.items()):
@@ -841,20 +871,29 @@ def pivotCOL_OP(
     #print("SEQ 2: ", node2, seq[node2])
     #print("REQ 2: ", node2, req[node2])
 
+    #check graph
+    for rnode in req[node2]:
+        assert(node2 in seq[rnode])
+    for rnode in req[node1]:
+        assert(node1 in seq[rnode])
+    for snode in seq[node2]:
+        assert(node2 in req[snode])
+    for snode in seq[node1]:
+        assert(node1 in req[snode])
+
     edge_map2 = dict()
     #gets all edges from node1/2
     for snode in seq[node1]:
         edge = edge_map.pop((node1, snode))
         edge_map2[node2, snode] = edge
-        if snode != node2:
-            req[snode].remove(node1)
-            req[snode].add(node2)
+        #if snode != node2:
+        req[snode].remove(node1)
+        req[snode].add(node2)
         node_costs_invalid_in_queue.add(snode)
 
     for snode in seq_beta[node1]:
         edge = edge_map.pop((node1, snode))
         edge_map2[node2, snode] = edge
-        node_costs_invalid_in_queue.add(snode)
 
     for snode in seq[node2]:
         edge = edge_map.pop((node2, snode))
@@ -868,7 +907,6 @@ def pivotCOL_OP(
     for snode in seq_beta[node2]:
         edge = edge_map.pop((node2, snode))
         edge_map2[node1, snode] = edge
-        node_costs_invalid_in_queue.add(snode)
 
     sn1 = seq[node1]
     snB1 = seq_beta[node1]

@@ -199,7 +199,7 @@ def test_sparse_SVDinv():
 def SVD_gen_check(
     N = 10,
     length = 10,
-    solver = scisparse_algorithm,
+    solver = DAG_algorithm,
     benchmark = None,
     prevent_assert = True,
 ):
@@ -263,8 +263,19 @@ def SVD_gen_check(
     #pprint(em1_ll)
     #pprint(em0_ll)
 
-def test_sparse_SVDinv():
-    SVD_gen_check()
+def test_sparse_SVDinv_scisparse():
+    SVD_gen_check(
+        solver = scisparse_algorithm,
+    )
+    return
+
+def test_sparse_SVDinv_stress():
+    for idx in range(10):
+        SVD_gen_check(
+            solver = DAG_algorithm,
+            N = 1000,
+            length = 10,
+        )
     return
 
 if __name__ == '__main__':

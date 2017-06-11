@@ -4,6 +4,7 @@
 from __future__ import (division, print_function)
 import numpy as np
 from collections import defaultdict
+import declarative
 
 def abssq(arr):
     return arr * arr.conjugate()
@@ -140,7 +141,12 @@ def SRE_count_sparsity(sre):
     for k_f, fseq in seq.items():
         N += len(fseq)
 
-    return N / len(seq)**2
+    return declarative.Bunch(
+        density_sq = N / len(seq)**2,
+        density_lin = N / len(seq),
+        Nedges = N,
+        Nnodes = len(seq),
+    )
 
 
 
