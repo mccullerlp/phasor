@@ -29,12 +29,13 @@ def setdict_copy(orig):
 
 
 def loop_fast_unstable():
-    from . import graph_algorithm
+    from ..matrix import graph_algorithm
     return graph_algorithm
 
 
 def loop_LUQ():
     from ..matrix import DAG_algorithm
+    #print("USING DAG ALGO")
     return DAG_algorithm
 
 
@@ -227,6 +228,7 @@ class SystemSolver(object):
         field_space          = self.matrix_algorithm.field_space
         coupling_matrix      = KeyMatrix(field_space, field_space)
 
+        drop_list = []
         #generate only the edges needed
         for pkfrom, seq_set in seq.items():
             for pkto in seq_set:
@@ -262,8 +264,20 @@ class SystemSolver(object):
                             solution_bunch_prev
                         )
                         #print('multi-edge: ', pkto, factor_func)
-                    coupling_matrix[pkfrom, pkto] = val
+                    if np.any(val != 0):
+                        coupling_matrix[pkfrom, pkto] = val
+                    else:
+                        drop_list.append((pkfrom, pkto))
+        #print("DROPPED: ", len(drop_list), " TO: ", len(seq))
+        #print("SPARSITY (linear): ",
+        #      len(coupling_matrix) / len(seq),
+        #      len(coupling_matrix),
+        #      sum((len(s) for s in seq.values())))
+        for k1, k2 in drop_list:
+            seq[k1].remove(k2)
+            req[k2].remove(k1)
 
+        N_sub_drop = 0
         #now generate the floating edge couplings
         #must happen after the other edge generation since the linkages are otherwise
         #missing (to be filled in here) from req and seq
@@ -276,9 +290,19 @@ class SystemSolver(object):
                 for (pkf, pkt), edge in submatrix.items():
                     assert(pkf in ins)
                     assert(pkt in outs)
-                    coupling_matrix[pkf, pkt] = edge
-                    seq[pkf].add(pkt)
-                    req[pkt].add(pkf)
+                    if np.any(val != 0):
+                        coupling_matrix[pkf, pkt] = edge
+                        seq[pkf].add(pkt)
+                        req[pkt].add(pkf)
+                    else:
+                        N_sub_drop += 1
+        #print("DROPPED", N_sub_drop, " MORE")
+
+        #print("DONE DROPPED: ", len(drop_list), " TO: ", len(seq))
+        #print("DONE SPARSITY (linear): ",
+        #      len(coupling_matrix) / len(seq),
+        #      len(coupling_matrix),
+        #      sum((len(s) for s in seq.values())))
 
         return coupling_matrix
 

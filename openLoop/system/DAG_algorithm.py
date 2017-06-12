@@ -7,8 +7,6 @@ import numpy as np
 from collections import defaultdict
 import declarative
 
-from ..math.dispatched import abs_sq
-
 from ..utilities.priority_queue import HeapPriorityQueue, Empty
 from ..utilities.print import pprint
 
@@ -26,7 +24,7 @@ from ..base import (
 N_limit_rel = 100
 
 def abssq(arr):
-    return arr.real**2 + arr.imag**2
+    return arr * arr.conjugate()
 
 def enorm(arr):
     return np.max(abssq(arr))
@@ -46,24 +44,6 @@ def mgraph_simplify_inplace(
             return
 
     check_seq_req_balance(seq, req, edge_map)
-
-
-    #TODO temporary to check broadcasting logic
-    #arr_keys = []
-    #arr_arrays = []
-    #for k, a in edge_map.items():
-    #    arr_keys.append(k)
-    #    arr_arrays.append(np.asarray(a))
-
-    #arr_type = np.common_type(*arr_arrays)
-    #arr_arrays = np.broadcast_arrays(*arr_arrays)
-
-    #edge_map_bcast = dict()
-    #for k, a in zip(arr_keys, arr_arrays):
-    #    edge_map_bcast[k] = a
-
-    #edge_map.update(edge_map_bcast)
-
 
     reqO = req
     seqO = seq
@@ -159,6 +139,8 @@ def mgraph_simplify_sorted(
     while req:
         cost, node = pqueue.pop()
 
+        assert(np.isfinite(cost))
+
         reduceLU(
             node = node,
             **kwargs
@@ -222,9 +204,6 @@ def mgraph_simplify_trivial(
 
         #check conditions for numerical stability, if they are bad, drop the node
 
-        if np.all(sedge_abssq == 0):
-            continue
-
         badness = 0
         #columns
         for rnode in req[node]:
@@ -258,7 +237,6 @@ def mgraph_simplify_badguys(
     edge_map,
     verbose = False,
 ):
-    #verbose = True
     if verbose:
         def vprint(*p):
             print(*p)
@@ -376,48 +354,58 @@ def mgraph_simplify_badguys(
 
             normr = 0
             for rnode in req[node]:
-                normr = normr + abs(edge_map[rnode, node])**2
+                normr += abs(edge_map[rnode, node])**2
             normr = normr ** .5
-
-
-            #TODO determine why choosing between these two is devastating for numerical stability, but a single one is fine
-
             #row norm
-            #normc = 0
-            #for snode in seq[node]:
-            #    normc = normc + abs(edge_map[node, snode])**2
-            #normc = normc ** .5
+            normc = 0
+            for snode in seq[node]:
+                normc += abs(edge_map[node, snode])**2
+            normc = normc ** .5
 
-            #vprint("SHAPE: ", np.asarray(normr).shape)
-            #if np.asarray(normr).shape or np.asarray(normc).shape:
-            #    rel_r_to_c = np.asarray(np.count_nonzero(normr > normc))
-            #    vprint(rel_r_to_c)
-            #    rel_r_to_c = np.mean(rel_r_to_c)
-            #else:
-            #    rel_r_to_c = normr > normc
-            #vprint("REL LARGER: ", rel_r_to_c)
+            vprint("SHAPE: ", np.asarray(normr).shape)
+            if np.asarray(normr).shape or np.asarray(normc).shape:
+                rel_r_to_c = np.asarray(np.count_nonzero(normr > normc))
+                vprint(rel_r_to_c)
+                rel_r_to_c = np.mean(rel_r_to_c)
+                vprint("SHAPE: ", rel_r_to_c.shape)
+            else:
+                rel_r_to_c = normr > normc
+            vprint("REL LARGER: ", rel_r_to_c)
 
-            if True: #rel_r_to_c > .5:
+            rvec = []
+            rvec_N = []
+            rvec_self_idx = None
+            for idx, rnode in enumerate(req[node]):
+                if node == rnode:
+                    rvec_self_idx = idx
+                rvec.append(np.max(abs(edge_map[rnode, node] / normr)))
+                rvec_N.append(rnode)
+
+            vprint("RVEC: ", rvec)
+            bignodes_r = np.array(rvec) >= 1./(len(req[node]))**.5
+            rcount = np.count_nonzero(bignodes_r)
+            vprint("R: ", np.count_nonzero(bignodes_r), len(req[node]), bignodes_r[rvec_self_idx], rel_r_to_c > .5)
+            cvec = []
+            cvec_N = []
+            cvec_self_idx = None
+            for idx, snode in enumerate(seq[node]):
+                if node == snode:
+                    cvec_self_idx = idx
+                    vprint(cvec_self_idx, idx, node)
+                cvec.append(np.max(abs(edge_map[node, snode] / normc)))
+                cvec_N.append(snode)
+            vprint("CVEC: ", cvec)
+            bignodes_c = np.array(cvec) >= 1./(len(seq[node]))**.5
+            ccount = np.count_nonzero(bignodes_c)
+            vprint(bignodes_c, cvec_self_idx, ccount)
+            vprint("C: ", np.count_nonzero(bignodes_c), len(seq[node]), bignodes_c[cvec_self_idx], rel_r_to_c < .5)
+
+            if node in req[node]:
+                norma = abs(edge_map[node, node])
+                vprint("NORM: ", np.max(normr / norma), np.max(normc / norma))
+
+            if rel_r_to_c > .5:
                 vprint("Using ROW Operations")
-
-                assert(req[node])
-                rvec = []
-                rvec_N = []
-                rvec_self_idx = None
-                for idx, rnode in enumerate(req[node]):
-                    if node == rnode:
-                        rvec_self_idx = idx
-                    rvec.append(np.max(abs(edge_map[rnode, node] / normr)))
-                    rvec_N.append(rnode)
-
-                vprint("RVEC: ", rvec)
-                if not np.all(np.isfinite(rvec)):
-                    print("NORMR: ", normr)
-                    assert(False)
-                bignodes_r = np.array(rvec) >= 1./(len(req[node]))**.5
-                rcount = np.count_nonzero(bignodes_r)
-                vprint("R: ", np.count_nonzero(bignodes_r), len(req[node]), bignodes_r[rvec_self_idx])
-
                 if rcount >= 2:
                     vprint("MUST USE HOUSEHOLDER {0}x".format(rcount))
                     if rvec_self_idx is None or not bignodes_r[rvec_self_idx]:
@@ -476,26 +464,6 @@ def mgraph_simplify_badguys(
                         #continue
             else:
                 vprint("Using COLUMN Operations")
-
-                assert(seq[node])
-                cvec = []
-                cvec_N = []
-                cvec_self_idx = None
-                for idx, snode in enumerate(seq[node]):
-                    if node == snode:
-                        cvec_self_idx = idx
-                        vprint(cvec_self_idx, idx, node)
-                    cvec.append(np.max(abs(edge_map[node, snode] / normc)))
-                    cvec_N.append(snode)
-                vprint("CVEC: ", cvec)
-                if not np.all(np.isfinite(cvec)):
-                    print("NORMC: ", normc)
-                    assert(False)
-                bignodes_c = np.array(cvec) >= 1./(len(seq[node]))**.5
-                ccount = np.count_nonzero(bignodes_c)
-                vprint(bignodes_c, cvec_self_idx, ccount)
-                vprint("C: ", np.count_nonzero(bignodes_c), len(seq[node]), bignodes_c[cvec_self_idx])
-
                 vprint("bignodes_c[cvec_self_idx]", bignodes_c[cvec_self_idx])
                 if ccount >= 2:
                     vprint("MUST USE HOUSEHOLDER {0}x".format(ccount))
@@ -550,6 +518,8 @@ def mgraph_simplify_badguys(
                         node_costs_invalid_in_queue.add(node_pivot)
                         node = node_pivot
                         #continue
+            assert(np.isfinite(cost))
+
             reduceLU(
                 node = node,
                 node_costs_invalid_in_queue = node_costs_invalid_in_queue,
@@ -919,9 +889,9 @@ def pivotCOL_OP(
     for snode in seq[node1]:
         edge = edge_map.pop((node1, snode))
         edge_map2[node2, snode] = edge
-        #if snode != node2:
-        req[snode].remove(node1)
-        req[snode].add(node2)
+        if snode != node2:
+            req[snode].remove(node1)
+            req[snode].add(node2)
         node_costs_invalid_in_queue.add(snode)
 
     for snode in seq_beta[node1]:
@@ -1138,11 +1108,8 @@ def inverse_solve_inplace(
             req = req,
             edge_map = edge_map,
         )
-    #print("SEQ")
+    print("POST_PURGE_SPARSITY: ", len(seq), len(edge_map), len(edge_map) / len(seq))
     #print_seq(seq, edge_map)
-
-    #subN = len(wrapped_onodes) + len(wrapped_inodes)
-    #print("SPARSITY ", len(seq) - subN, len(edge_map) - subN, (len(edge_map) - subN) / (len(seq) - subN))
 
     #simplify with the wrapped nodes
     mgraph_simplify_inplace(
@@ -1249,11 +1216,8 @@ def push_solve_inplace(
             req = req,
             edge_map = edge_map,
         )
-
     #print_seq(seq, edge_map)
-
-    #subN = len(wrapped_onodes) + len(wrapped_inodes)
-    #print("SPARSITY ", len(seq) - subN, len(edge_map) - subN, (len(edge_map) - subN) / (len(seq) - subN))
+    print("POST_PURGE_SPARSITY: ", len(seq), len(edge_map), len(edge_map) / len(seq))
 
     #simplify with the wrapped nodes
     mgraph_simplify_inplace(

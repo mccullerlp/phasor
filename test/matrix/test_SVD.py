@@ -15,10 +15,14 @@ from openLoop.utilities.print import pprint
 
 #from openLoop.utilities.np import logspaced
 
-stresstest = pytest.mark.skipif(
-    not pytest.config.getoption("--do-stresstest"),
-    reason="need --do-stresstest option to run"
-)
+try:
+    stresstest = pytest.mark.skipif(
+        not pytest.config.getoption("--do-stresstest"),
+        reason="need --do-stresstest option to run"
+    )
+except AttributeError:
+    #needed for importing when py.test isn't in test mode
+    stresstest = lambda x : x
 
 
 def test_sre_unitary():
