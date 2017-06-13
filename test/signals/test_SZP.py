@@ -68,4 +68,4 @@ def test_XFer_fit():
 
 
 if __name__ == '__main__':
-    test_V()
+    test_XFer_fit()

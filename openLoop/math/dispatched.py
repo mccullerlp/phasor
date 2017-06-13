@@ -88,10 +88,13 @@ def abs_sq(obj):
     cobj = Complex(obj)
     return cobj.abs_sq()
 
+def zero_check_heuristic_np(arg):
+    return np.all(arg == 0)
+
 np.abs_sq = abs_sq
+np.zero_check_heuristic = zero_check_heuristic_np
 
-
-
+#shouldn't be allowed?!
 mod_locals = locals()
 
 def inject_dispatched(func_name):
@@ -116,6 +119,18 @@ for name in dir(scipy.special):
 
 inject_dispatched('angle')
 
+zero_check_heuristic_run = generate_dispatched('zero_check_heuristic')
+
+def zero_check_heuristic(arg):
+    if isinstance(arg, (int, float, complex)):
+        return arg == 0
+    elif isinstance(arg, np.ndarray):
+        if np.issubdtype(arg.dtype, np.number):
+            return np.all(arg == 0)
+        else:
+            raise NotImplementedError("Can't handle such dtypes")
+    else:
+        return zero_check_heuristic_run(arg)
 
 
 

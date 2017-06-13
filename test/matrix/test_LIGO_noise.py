@@ -3,6 +3,7 @@ from os import path
 import numpy as np
 import declarative
 import numpy.testing as np_test
+import pytest
 from declarative.bunch import (
     DeepBunch
 )
@@ -16,6 +17,16 @@ from ligo_sled import (
 import pickle
 
 
+try:
+    stresstest = pytest.mark.skipif(
+        not pytest.config.getoption("--do-stresstest"),
+        reason="need --do-stresstest option to run"
+    )
+except AttributeError:
+    #needed for importing when py.test isn't in test mode
+    stresstest = lambda x : x
+
+@stresstest
 def test_LIGO_noise_inversion():
     with open(path.join(path.split(__file__)[0], 'aLIGO_outspec.pckl'), 'rb') as F:
         output = declarative.Bunch(pickle.load(F))
@@ -48,7 +59,7 @@ def test_LIGO_noise_inversion():
         np_test.assert_almost_equal(
             rel, 1, 2
         )
-    for i in range(100):
+    for i in range(20):
         test_inverse()
 
 

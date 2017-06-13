@@ -14,6 +14,8 @@ from ..base import (
     DictKey,
 )
 
+from ..math import dispatched as dmath
+
 from ..math.key_matrix import (
     KVSpace,
     KeyVector,
@@ -101,11 +103,20 @@ class SystemSolver(object):
             self.solver = solvers_symbolic[
                 self.system.symbolic_solver_name
             ]()
+            self.check_zero = dmath.zero_check_heuristic
         else:
             #call the function in the solvers lookup to generate the solver to use
             self.solver = solvers_all[
                 self.system.solver_name
             ]()
+            def check_zero_safe(arg):
+                try:
+                    return np.all(arg == 0)
+                except Exception:
+                    self.check_zero = dmath.zero_check_heuristic
+                    return dmath.zero_check_heuristic(arg)
+            self.check_zero = check_zero_safe
+            #self.check_zero = dmath.zero_check_heuristic
 
         #each index stores a dict, indexed by the output set
         self.driven_solution_bunches = [
@@ -150,13 +161,6 @@ class SystemSolver(object):
 
         self._setup_views()
         return
-
-    def check_zero(self, obj):
-        o2 = (obj == 0)
-        if o2.__class__ is bool:
-            return o2
-        elif isinstance(o2, np.ndarray):
-            return np.all(o2)
 
     @declarative.mproperty
     def views(self):
@@ -211,7 +215,8 @@ class SystemSolver(object):
             val = factor_func(solution_vector_prev, solution_bunch_prev)
             for factor_func in factor_func_list[1:]:
                 val = val + factor_func(solution_vector_prev, solution_bunch_prev)
-            source_vector[pkto] = val
+            if not self.check_zero(val):
+                source_vector[pkto] = val
         return source_vector
 
     def noise_map(self):
@@ -264,7 +269,7 @@ class SystemSolver(object):
                             solution_bunch_prev
                         )
                         #print('multi-edge: ', pkto, factor_func)
-                    if np.any(val != 0):
+                    if not self.check_zero(val):
                         coupling_matrix[pkfrom, pkto] = val
                     else:
                         drop_list.append((pkfrom, pkto))
@@ -290,7 +295,7 @@ class SystemSolver(object):
                 for (pkf, pkt), edge in submatrix.items():
                     assert(pkf in ins)
                     assert(pkt in outs)
-                    if np.any(val != 0):
+                    if not self.check_zero(edge):
                         coupling_matrix[pkf, pkt] = edge
                         seq[pkf].add(pkt)
                         req[pkt].add(pkf)

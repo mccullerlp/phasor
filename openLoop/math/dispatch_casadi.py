@@ -72,3 +72,11 @@ fix_many(casadi.SX)
 #fix_many(casadi.DVector)
 
 casadi.abs = abs
+
+def zero_check_heuristic(arg):
+    return arg.is_zero()
+
+#monkey patch
+casadi.MX.zero_check_heuristic = zero_check_heuristic
+casadi.SX.zero_check_heuristic = zero_check_heuristic
+casadi.zero_check_heuristic = zero_check_heuristic

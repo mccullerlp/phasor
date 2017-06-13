@@ -320,5 +320,9 @@ def angle(arg, deg = False):
     else:
         return phase
 
+def zero_check_heuristic(arg):
+    return dispatched.zero_check_heuristic(arg.real) and dispatched.zero_check_heuristic(arg.imag)
+
+
 dispatched.module_by_type[Complex] = [sys.modules[__name__]]
 
