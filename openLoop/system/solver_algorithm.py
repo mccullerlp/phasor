@@ -109,6 +109,11 @@ class SystemSolver(object):
             self.solver = solvers_all[
                 self.system.solver_name
             ]()
+            #TODO this is a heirstic that zero testing will fail on casadi and some other objects
+            #this falls back to the dispatch math version
+            #but the exception test is quite dirty
+            #it would be better to simply know if symbolics are in play
+            #perhaps during edge generation is the time to do that...
             def check_zero_safe(arg):
                 try:
                     return np.all(arg == 0)
@@ -207,6 +212,7 @@ class SystemSolver(object):
         field_space          = self.matrix_algorithm.field_space
 
         source_vector        = KeyVector(field_space)
+        source_vector_sym    = KeyVector(field_space)
         for pkto in inputs_iter:
             factor_func_list = malgo.source_vector_inj_funclist[pkto]
             if not factor_func_list:
@@ -215,9 +221,18 @@ class SystemSolver(object):
             val = factor_func(solution_vector_prev, solution_bunch_prev)
             for factor_func in factor_func_list[1:]:
                 val = val + factor_func(solution_vector_prev, solution_bunch_prev)
-            if not self.check_zero(val):
-                source_vector[pkto] = val
-        return source_vector
+            #TODO check best method for this between zero check or symbol check
+            #if not self.check_zero(val):
+            #    source_vector[pkto] = val
+            if not dmath.check_symbolic_type(val):
+                if not np.all(val == 0):
+                    source_vector[pkto] = val
+            else:
+                source_vector_sym[pkto] = val
+
+        #TODO LOGIC on source vector should check for zeros and include that data in graph purge
+        #TODO return source_vector_sym too
+        return source_vector, source_vector_sym
 
     def noise_map(self):
         return self.matrix_algorithm.coupling_noise_map
@@ -232,6 +247,7 @@ class SystemSolver(object):
         malgo                = self.matrix_algorithm
         field_space          = self.matrix_algorithm.field_space
         coupling_matrix      = KeyMatrix(field_space, field_space)
+        coupling_matrix_sym  = KeyMatrix(field_space, field_space)
 
         drop_list = []
         #generate only the edges needed
@@ -269,10 +285,18 @@ class SystemSolver(object):
                             solution_bunch_prev
                         )
                         #print('multi-edge: ', pkto, factor_func)
-                    if not self.check_zero(val):
-                        coupling_matrix[pkfrom, pkto] = val
+                    #TODO decide between check_zero and check_symbolic_type
+                    #if not self.check_zero(val):
+                    #    coupling_matrix[pkfrom, pkto] = val
+                    #else:
+                    #    drop_list.append((pkfrom, pkto))
+                    if not dmath.check_symbolic_type(val):
+                        if not np.all(val == 0):
+                            coupling_matrix[pkfrom, pkto] = val
+                        else:
+                            drop_list.append((pkfrom, pkto))
                     else:
-                        drop_list.append((pkfrom, pkto))
+                        coupling_matrix_sym[pkfrom, pkto] = val
         #print("DROPPED: ", len(drop_list), " TO: ", len(seq))
         #print("SPARSITY (linear): ",
         #      len(coupling_matrix) / len(seq),
@@ -295,12 +319,25 @@ class SystemSolver(object):
                 for (pkf, pkt), edge in submatrix.items():
                     assert(pkf in ins)
                     assert(pkt in outs)
-                    if not self.check_zero(edge):
-                        coupling_matrix[pkf, pkt] = edge
+                    #TODO check between check_symbolic_type and check_zero
+                    #if not self.check_zero(edge):
+                    #    coupling_matrix[pkf, pkt] = edge
+                    #    seq[pkf].add(pkt)
+                    #    req[pkt].add(pkf)
+                    #else:
+                    #    N_sub_drop += 1
+                    if not dmath.check_symbolic_type(edge):
+                        if not np.all(edge == 0):
+                            coupling_matrix[pkf, pkt] = edge
+                            seq[pkf].add(pkt)
+                            req[pkt].add(pkf)
+                        else:
+                            N_sub_drop += 1
+                    else:
+                        coupling_matrix_sym[pkfrom, pkto] = edge
                         seq[pkf].add(pkt)
                         req[pkt].add(pkf)
-                    else:
-                        N_sub_drop += 1
+
         #print("DROPPED", N_sub_drop, " MORE")
 
         #print("DONE DROPPED: ", len(drop_list), " TO: ", len(seq))
@@ -309,7 +346,8 @@ class SystemSolver(object):
         #      len(coupling_matrix),
         #      sum((len(s) for s in seq.values())))
 
-        return coupling_matrix
+        #TODO return coupling_matrix_sym too
+        return coupling_matrix, coupling_matrix_sym
 
     def _perturbation_iterate(self, N):
         #print("PERTURB: ", N)
@@ -335,13 +373,13 @@ class SystemSolver(object):
             seq = setdict_copy(csgb.seq_full)
             req = setdict_copy(csgb.req_full)
 
-        coupling_matrix = self._edge_matrix_generate(
+        coupling_matrix, coupling_matrix_sym = self._edge_matrix_generate(
             seq = seq,
             req = req,
             solution_vector_prev = solution_vector_prev,
             solution_bunch_prev  = solution_bunch_prev,
         )
-        source_vector = self._source_vector_generate(
+        source_vector, source_vector_sym = self._source_vector_generate(
             inputs_iter          = csgb.inputs_set,
             solution_vector_prev = solution_vector_prev,
             solution_bunch_prev  = solution_bunch_prev,
@@ -465,13 +503,13 @@ class SystemSolver(object):
         req = setdict_copy(csgb.req_full)
 
         #TODO TODO TODO Pre-purge the seq/req list to prevent unnecessary edge-matrix generation
-        coupling_matrix = self._edge_matrix_generate(
+        coupling_matrix, coupling_matrix_sym = self._edge_matrix_generate(
             seq                  = seq,
             req                  = req,
             solution_vector_prev = solution_vector_prev,
             solution_bunch_prev  = solution_bunch_prev,
         )
-        source_vector = self._source_vector_generate(
+        source_vector, source_vector_sym = self._source_vector_generate(
             inputs_iter          = csgb.inputs_set,
             solution_vector_prev = solution_vector_prev,
             solution_bunch_prev  = solution_bunch_prev,
@@ -548,7 +586,7 @@ class SystemSolver(object):
         req = setdict_copy(csgb.req_full)
 
         #TODO TODO TODO Pre-purge the seq/req list to prevent unnecessary edge-matrix generation
-        coupling_matrix = self._edge_matrix_generate(
+        coupling_matrix, coupling_matrix_sym = self._edge_matrix_generate(
             seq                  = seq,
             req                  = req,
             solution_vector_prev = solution_vector_prev,

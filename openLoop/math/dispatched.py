@@ -133,4 +133,18 @@ def zero_check_heuristic(arg):
         return zero_check_heuristic_run(arg)
 
 
+check_symbolic_type_run = generate_dispatched('check_symbolic_type')
+
+def check_symbolic_type(arg):
+    if isinstance(arg, (int, float, complex)):
+        return False
+    elif isinstance(arg, np.ndarray):
+        if np.issubdtype(arg.dtype, np.number):
+            return False
+        else:
+            raise NotImplementedError("Can't handle such dtypes")
+    else:
+        return check_symbolic_type(arg)
+
+
 

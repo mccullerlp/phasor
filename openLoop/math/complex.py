@@ -326,3 +326,9 @@ def zero_check_heuristic(arg):
 
 dispatched.module_by_type[Complex] = [sys.modules[__name__]]
 
+
+def check_symbolic_type(arg):
+    sym = dispatched.check_symbolic_type(arg.real)
+    if not sym:
+        return dispatched.check_symbolic_type(arg.imag)
+

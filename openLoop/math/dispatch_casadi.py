@@ -56,6 +56,7 @@ def fix_many(otype):
     fix_custom_complex(otype, '__radd__' , lambda s, o: o + s)
     fix_custom_complex(otype, '__sub__'  , lambda s, o: s - o)
     fix_custom_complex(otype, '__rsub__' , lambda s, o: o - s)
+
     def null_conjugate(self):
         return self
 
@@ -67,6 +68,7 @@ def fix_many(otype):
     otype.real = property(lambda self : self)
     otype.imag = property(lambda self : 0)
 
+
 fix_many(casadi.MX)
 fix_many(casadi.SX)
 #fix_many(casadi.DVector)
@@ -76,7 +78,24 @@ casadi.abs = abs
 def zero_check_heuristic(arg):
     return arg.is_zero()
 
+
 #monkey patch
 casadi.MX.zero_check_heuristic = zero_check_heuristic
 casadi.SX.zero_check_heuristic = zero_check_heuristic
-casadi.zero_check_heuristic = zero_check_heuristic
+#casadi.zero_check_heuristic = zero_check_heuristic
+
+
+def check_symbolic_type_MX(arg):
+    return casadi.MX
+
+
+casadi.MX.check_symbolic_type = check_symbolic_type_MX
+
+
+def check_symbolic_type_SX(arg):
+    return casadi.SX
+
+
+casadi.SX.check_symbolic_type = check_symbolic_type_SX
+
+

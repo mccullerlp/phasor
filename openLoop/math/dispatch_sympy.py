@@ -11,3 +11,12 @@ dispatched.module_by_type[sympy.Add] = sympy_mods
 def zero_check_heuristic(arg):
     return arg == 0
 
+
+sympy.zero_check_heuristic = zero_check_heuristic
+
+
+def check_symbolic_type(arg):
+    return sympy
+
+
+sympy.check_symbolic_type = check_symbolic_type
