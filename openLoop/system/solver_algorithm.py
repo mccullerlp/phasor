@@ -167,6 +167,12 @@ class SystemSolver(object):
         self._setup_views()
         return
 
+    def symbolic_subs(self, expr):
+        subs = self.system.ctree.hints.symbolic_fiducial_substitute
+        if not subs:
+            raise RuntimeError("Must provide a symbolic fiducial substitution function to ctree.hints.symbolic_fiducial_substitute")
+        return subs(expr)
+
     @declarative.mproperty
     def views(self):
         return declarative.DeepBunch(vpath = False)
@@ -229,6 +235,9 @@ class SystemSolver(object):
                     source_vector[pkto] = val
             else:
                 source_vector_sym[pkto] = val
+
+        for pkto, edge in source_vector_sym.items():
+            source_vector[pkto] = self.symbolic_subs(edge)
 
         #TODO LOGIC on source vector should check for zeros and include that data in graph purge
         #TODO return source_vector_sym too
@@ -345,6 +354,9 @@ class SystemSolver(object):
         #      len(coupling_matrix) / len(seq),
         #      len(coupling_matrix),
         #      sum((len(s) for s in seq.values())))
+
+        for pktf, edge in coupling_matrix_sym.items():
+            coupling_matrix[pktf] = self.symbolic_subs(edge)
 
         #TODO return coupling_matrix_sym too
         return coupling_matrix, coupling_matrix_sym

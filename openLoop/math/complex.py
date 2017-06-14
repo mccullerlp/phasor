@@ -331,4 +331,6 @@ def check_symbolic_type(arg):
     sym = dispatched.check_symbolic_type(arg.real)
     if not sym:
         return dispatched.check_symbolic_type(arg.imag)
+    else:
+        return sym
 

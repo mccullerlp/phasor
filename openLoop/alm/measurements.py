@@ -20,9 +20,12 @@ from .beam import (
     MatrixAtsBase
 )
 
-from declarative.substrate import (
+from ..bases import (
     RootElement,
     Element,
+)
+
+from declarative.substrate import (
     invalidate_auto,
 )
 

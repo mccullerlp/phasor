@@ -144,7 +144,7 @@ def check_symbolic_type(arg):
         else:
             raise NotImplementedError("Can't handle such dtypes")
     else:
-        return check_symbolic_type(arg)
+        return check_symbolic_type_run(arg)
 
 
 

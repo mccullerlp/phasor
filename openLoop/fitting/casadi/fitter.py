@@ -3,6 +3,7 @@
 from __future__ import division, print_function
 #from builtins import zip
 import numpy as np
+import casadi
 
 import declarative
 from declarative import bunch
@@ -86,6 +87,8 @@ class FitterRoot(RootElement, FitterBase):
             ctree = bunch.DeepBunch(vpath=True)
             ctree_meta[sysname] = ctree
             ctree.hints.symbolic = 'casadi'
+            ctree.hints.symbolic_fiducials = self.symbol_fiducials
+            ctree.hints.symbolic_fiducial_substitute = self.symbol_fiducial_substitute
 
         injectors = self.targets_recurse(VISIT.ctree_inject)
         for injector in injectors:
@@ -203,5 +206,46 @@ class FitterRoot(RootElement, FitterBase):
             sbunch_list    = sbunch_list,
             #transform_list = transform_list,
         )
+
+    @declarative.mproperty
+    @invalidate_auto
+    def symbol_fiducials(self):
+        """
+        Generates a list of fiducial parameters to re-substitute for fiducial matrix 
+        """
+        return dict(zip(self.symbol_map.sym_list, self.symbol_map.ival_list))
+
+    def symbol_fiducial_substitute(self, expr):
+        keys = []
+        vals = []
+        a = casadi.MX.sym('a')
+        for k, v in self.symbol_fiducials.items():
+            keys.append(k)
+            vals.append(v)
+        if isinstance(expr, Complex):
+            rval = casadi.graph_substitute(
+                expr.real,
+                keys,
+                vals,
+            )
+            rval = casadi.Function('x', [a], [rval])(0)
+            rval = np.asarray(rval).squeeze()
+            ival = casadi.graph_substitute(
+                expr.imag,
+                keys,
+                vals,
+            )
+            ival = casadi.Function('x', [a], [ival])(0)
+            ival = np.asarray(ival).squeeze()
+            return rval + 1j*ival
+        else:
+            rval = casadi.graph_substitute(
+                expr,
+                keys,
+                vals,
+            )
+            rval = casadi.Function('x', [a], [rval])(0)
+            rval = np.asarray(rval).squeeze()
+            return rval
 
 

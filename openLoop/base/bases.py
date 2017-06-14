@@ -3,9 +3,10 @@
 """
 from __future__ import division, print_function
 
-import declarative as decl
+import declarative
 from declarative.utilities import SuperBase
 from declarative import bunch
+
 import declarative.substrate as dsubstrate
 from . import visitors as VISIT
 import warnings
@@ -67,17 +68,17 @@ class SystemElementBase(Element, SuperBase):
             return "{cls}({name})".format(cls = self.__class__.__name__, name = self.name)
         return self.__class__.__name__ + '(<unknown>)'
 
-    @decl.dproperty
+    @declarative.dproperty
     def system(self):
         sys = self.parent.system
         return sys
 
-    @decl.dproperty
-    def _include(self, val = decl.NOARG):
-        if val is decl.NOARG:
+    @declarative.dproperty
+    def _include(self, val = declarative.NOARG):
+        if val is declarative.NOARG:
             self.system.include(self)
 
-    @decl.mproperty
+    @declarative.mproperty
     def fully_resolved_name_tuple(self):
         if self.parent is None:
             ptup = ()
@@ -98,7 +99,7 @@ class CouplerBase(SystemElementBase):
 
 
 class NoiseBase(SystemElementBase):
-    @decl.mproperty
+    @declarative.mproperty
     def name_noise(self, val = None):
         if val is None:
             return self.name_system

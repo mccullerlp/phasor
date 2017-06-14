@@ -3,13 +3,15 @@
 from __future__ import (division, print_function)
 #import pytest
 import numpy as np
-import numpy.testing as test
+import numpy.testing as np_test
 
 import openLoop.signals as signals
 import openLoop.readouts as readouts
 import openLoop.system as system
 
 from openLoop.utilities.np import logspaced
+
+from openLoop.utilities.print import pprint
 
 
 def test_Xfer():
@@ -26,7 +28,7 @@ def test_Xfer():
         portD = sys.X1.In.i,
     )
     compare = 1/(1 + 1j*sys.F_AC.F_Hz.val)
-    test.assert_almost_equal(sys.R1.AC_sensitivity / compare, 1)
+    np_test.assert_almost_equal(sys.R1.AC_sensitivity / compare, 1)
     return
 
 
@@ -47,8 +49,8 @@ def test_XFer_fit():
     size = len(sys.R1.F_Hz.val)
     relscale = .1
     AC_data = sys.R1.AC_sensitivity * (
-        1
-        + np.random.normal(0, relscale, size) 
+        2
+        + np.random.normal(0, relscale, size)
         + 1j*np.random.normal(0, relscale, size)
     )
     print(sys.X1.ctree_as_yaml())
@@ -64,7 +66,13 @@ def test_XFer_fit():
         ACReadout = sys.R1,
         SNR_weights = 1/relscale,
     )
-    return froot.residual.minimize_function()
+    minimized = froot.residual.minimize_function()
+    print(minimized)
+    xsys = froot.fit_systems.xfer
+    print("AC_sensitivity", xsys.R1.AC_sensitivity)
+
+    np_test.assert_almost_equal(minimized.systems.xfer.R1.AC_sensitivity / sys.R1.AC_sensitivity, 2, 1)
+    return
 
 
 if __name__ == '__main__':
