@@ -90,6 +90,9 @@ def mgraph_simplify_inplace(
             pqueue.push((cost, node))
             continue
 
+        #if len(seq) % 100 == 0:
+            #print("REPORT: ", len(seq), len(edge_map), len(edge_map) / len(seq), len(edge_map) / len(seq)**2)
+
         #now check if it is a loop node, adjusting the action accordingly
         if node in seq[node]:
             self_edge = edge_map[node, node]

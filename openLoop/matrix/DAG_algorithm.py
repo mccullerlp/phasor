@@ -121,7 +121,7 @@ def mgraph_simplify_inplace(
         mgraph_simplify_trivial(**kwargs)
         vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
         mgraph_simplify_trivial(**kwargs)
-        vprint("BADGUY STAGE, REMAINING {0}".format(len(req)))
+        print("BADGUY STAGE, REMAINING {0}".format(len(req)))
         mgraph_simplify_badguys(**kwargs)
 
     #now reapply the seq and req lists
@@ -379,6 +379,9 @@ def mgraph_simplify_badguys(
                 normr = normr + abs(edge_map[rnode, node])**2
             normr = normr ** .5
 
+            #if len(seq) % 100 == 0:
+                #print("REPORT: ", len(seq), len(edge_map), len(edge_map) / len(seq), len(edge_map) / len(seq)**2)
+
 
             #TODO determine why choosing between these two is devastating for numerical stability, but a single one is fine
 
@@ -418,9 +421,18 @@ def mgraph_simplify_badguys(
                 rcount = np.count_nonzero(bignodes_r)
                 vprint("R: ", np.count_nonzero(bignodes_r), len(req[node]), bignodes_r[rvec_self_idx])
 
+                do_save = False
                 if rcount >= 2:
+                    if rvec_self_idx is not None:
+                        if not bignodes_r[rvec_self_idx]:
+                            if rvec[rvec_self_idx] > 1./(len(req[node]))**.5 / N_limit_rel:
+                                #print("COULD SAVE! ", node, len(seq), len(edge_map))
+                                do_save = True
+                            else:
+                                #print("CANT SAVE! ", node)
+                                pass
                     vprint("MUST USE HOUSEHOLDER {0}x".format(rcount))
-                    if rvec_self_idx is None or not bignodes_r[rvec_self_idx]:
+                    if not do_save and rvec_self_idx is None or not bignodes_r[rvec_self_idx]:
                         vprint("MUST PIVOT")
                         idx_pivot = np.nonzero(bignodes_r)[0][0]
                         vprint("SELF: ", rvec_self_idx)
@@ -455,7 +467,11 @@ def mgraph_simplify_badguys(
                     )
                 elif rcount == 1:
                     vprint("DIRECT")
-                    if rvec_self_idx is None or not bignodes_r[rvec_self_idx]:
+                    if rvec_self_idx is not None:
+                        if not bignodes_r[rvec_self_idx] and rvec[rvec_self_idx] > 1./(len(req[node]))**.5 / N_limit_rel:
+                            #print("COULD PREVENT PIVOT! ", node)
+                            do_save = True
+                    if not do_save and rvec_self_idx is None or not bignodes_r[rvec_self_idx]:
                         vprint("MUST PIVOT")
                         vprint('bignodes', bignodes_r)
                         #could choose pivot node based on projected fill-in
