@@ -73,13 +73,13 @@ def gensys(
         name = 'asymPD',
     )
 
-    #sys.link(laser.Fr, symPD.Bk)
-    #sys.link(symPD.Fr, mBS.FrA)
-    #sys.link(mBS.FrB, sY.Fr)
-    #sys.link(sY.Bk, mY.Fr)
-    #sys.link(mBS.BkA, sX.Fr)
-    #sys.link(sX.Bk, mX.Fr)
-    #sys.link(mBS.BkB, asymPD.Fr)
+    #sys.link(laser.po_Fr, symPD.po_Bk)
+    #sys.link(symPD.po_Fr, mBS.po_FrA)
+    #sys.link(mBS.po_FrB, sY.po_Fr)
+    #sys.link(sY.po_Bk, mY.po_Fr)
+    #sys.link(mBS.po_BkA, sX.po_Fr)
+    #sys.link(sX.po_Bk, mX.po_Fr)
+    #sys.link(mBS.po_BkB, asymPD.po_Fr)
     sys.optical_link_sequence_WtoE(
         sled.laser, sled.symPD, sled.mBS, sled.sX, sled.mX,
     )
@@ -127,8 +127,8 @@ def test_mich():
     print("ACnoise", AC_noise)
     print("ACnoise_rel", (N_expect / AC_noise)**2)
 
-    #sys.port_set_print(b.mBS.BkB.i)
-    #sys.port_set_print(b.vterm.Fr.o)
+    #sys.port_set_print(b.mBS.po_BkB.i)
+    #sys.port_set_print(b.vterm.po_Fr.o)
     #sys.coupling_matrix_inv_print(select_to = b.asymPD.Wpd.o)
 
     #from openLoop.utilities.mpl.autoniceplot import (mplfigB)

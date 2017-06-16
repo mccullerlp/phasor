@@ -90,16 +90,16 @@ class Mirror(
         self.system.own_port_virtual(self, self.Z.d.o)
 
     @declarative.dproperty
-    def Fr(self):
+    def po_Fr(self):
         if not self.is_4_port:
-            return ports.OpticalPort(sname = 'Fr', pchain = 'Bk')
+            return ports.OpticalPort(sname = 'po_Fr', pchain = 'po_Bk')
         else:
             return None
 
     @declarative.dproperty
-    def Bk(self):
+    def po_Bk(self):
         if not self.is_4_port:
-            return ports.OpticalPort(sname = 'Bk', pchain = 'Fr')
+            return ports.OpticalPort(sname = 'po_Bk', pchain = 'po_Fr')
         else:
             return None
 
@@ -132,32 +132,32 @@ class Mirror(
             return VacuumTerminator()
 
     @declarative.dproperty
-    def FrA(self):
+    def po_FrA(self):
         if self.is_4_port:
-            return ports.OpticalPort(sname = 'FrA', pchain = 'BkA')
+            return ports.OpticalPort(sname = 'po_FrA', pchain = 'po_BkA')
         else:
-            return self.Fr
+            return self.po_Fr
 
     @declarative.dproperty
-    def FrB(self):
+    def po_FrB(self):
         if self.is_4_port:
-            return ports.OpticalPort(sname = 'FrB', pchain = 'BkB')
+            return ports.OpticalPort(sname = 'po_FrB', pchain = 'po_BkB')
         else:
-            return self.Fr
+            return self.po_Fr
 
     @declarative.dproperty
-    def BkA(self):
+    def po_BkA(self):
         if self.is_4_port:
-            return ports.OpticalPort(sname = 'BkA', pchain = 'FrA')
+            return ports.OpticalPort(sname = 'po_BkA', pchain = 'po_FrA')
         else:
-            return self.Bk
+            return self.po_Bk
 
     @declarative.dproperty
-    def BkB(self):
+    def po_BkB(self):
         if self.is_4_port:
-            return ports.OpticalPort(sname = 'BkB', pchain = 'FrB')
+            return ports.OpticalPort(sname = 'po_BkB', pchain = 'po_FrB')
         else:
-            return self.Bk
+            return self.po_Bk
 
     @declarative.dproperty
     def _LFrA(self):
@@ -190,30 +190,30 @@ class Mirror(
     @declarative.dproperty
     def _link(self):
         if self._has_loss:
-            self.system.bond(self._LFrA, self._LFrA_vac.Fr)
-            self.system.bond(self._LBkA, self._LBkA_vac.Fr)
+            self.system.bond(self._LFrA, self._LFrA_vac.po_Fr)
+            self.system.bond(self._LBkA, self._LBkA_vac.po_Fr)
             if self.is_4_port:
-                self.system.bond(self._LFrB, self._LFrB_vac.Fr)
-                self.system.bond(self._LBkB, self._LBkB_vac.Fr)
+                self.system.bond(self._LFrB, self._LFrB_vac.po_Fr)
+                self.system.bond(self._LBkB, self._LBkB_vac.po_Fr)
 
     @declarative.mproperty
     def ports_select(self):
         return [
-            self.Fr,
-            self.Bk,
-            self.FrA,
-            self.BkA,
-            self.FrB,
-            self.BkB,
+            self.po_Fr,
+            self.po_Bk,
+            self.po_FrA,
+            self.po_BkA,
+            self.po_FrB,
+            self.po_BkB,
         ]
 
     @declarative.mproperty
     def ports_optical(self):
         return set([
-            self.FrA,
-            self.BkA,
-            self.FrB,
-            self.BkB,
+            self.po_FrA,
+            self.po_BkA,
+            self.po_FrB,
+            self.po_BkB,
         ])
 
     @declarative.mproperty
@@ -231,35 +231,35 @@ class Mirror(
 
     def system_setup_ports(self, ports_algorithm):
         tmap = {
-            self.FrA: self.BkA,
-            self.BkA: self.FrA,
-            self.FrB: self.BkB,
-            self.BkB: self.FrB,
+            self.po_FrA: self.po_BkA,
+            self.po_BkA: self.po_FrA,
+            self.po_FrB: self.po_BkB,
+            self.po_BkB: self.po_FrB,
         }
 
         rmap = {
-            self.FrA: self.FrB,
-            self.BkA: self.BkB,
-            self.FrB: self.FrA,
-            self.BkB: self.BkA,
+            self.po_FrA: self.po_FrB,
+            self.po_BkA: self.po_BkB,
+            self.po_FrB: self.po_FrA,
+            self.po_BkB: self.po_BkA,
         }
 
         rBSmap = {
-            self.FrA: self.FrA,
-            self.BkA: self.BkA,
-            self.FrB: self.FrB,
-            self.BkB: self.BkB,
+            self.po_FrA: self.po_FrA,
+            self.po_BkA: self.po_BkA,
+            self.po_FrB: self.po_FrB,
+            self.po_BkB: self.po_BkB,
         }
 
         lmap = {
-            self.FrA: self._LFrA,
-            self.BkA: self._LBkA,
-            self.FrB: self._LFrB,
-            self.BkB: self._LBkB,
-            self._LFrA: self.FrA,
-            self._LBkA: self.BkA,
-            self._LFrB: self.FrB,
-            self._LBkB: self.BkB,
+            self.po_FrA: self._LFrA,
+            self.po_BkA: self._LBkA,
+            self.po_FrB: self._LFrB,
+            self.po_BkB: self._LBkB,
+            self._LFrA: self.po_FrA,
+            self._LBkA: self.po_BkA,
+            self._LFrB: self.po_FrB,
+            self._LBkB: self.po_BkB,
         }
         rmapL = dict((k.i, [v.o]) for k, v in list(rmap.items()))
         rmapL.update((k.o, [v.i]) for k, v in list(rmap.items()))
@@ -321,43 +321,43 @@ class Mirror(
             rBS = -rBS
 
         mod_sign_map = {
-            self.FrA: 1,
-            self.BkA: -1,
-            self.FrB: 1,
-            self.BkB: -1,
+            self.po_FrA: 1,
+            self.po_BkA: -1,
+            self.po_FrB: 1,
+            self.po_BkB: -1,
         }
 
         tmap = {
-            self.FrA: (self.BkA   , t),
-            self.BkA: (self.FrA   , t),
-            self.FrB: (self.BkB   , t),
-            self.BkB: (self.FrB   , t),
+            self.po_FrA: (self.po_BkA   , t),
+            self.po_BkA: (self.po_FrA   , t),
+            self.po_FrB: (self.po_BkB   , t),
+            self.po_BkB: (self.po_FrB   , t),
         }
         rmap = {
-            self.FrA: (self.FrB   , r),
-            self.BkA: (self.BkB   , -r),
-            self.FrB: (self.FrA   , r),
-            self.BkB: (self.BkA   , -r),
+            self.po_FrA: (self.po_FrB   , r),
+            self.po_BkA: (self.po_BkB   , -r),
+            self.po_FrB: (self.po_FrA   , r),
+            self.po_BkB: (self.po_BkA   , -r),
         }
         rBSmap = {
-            self.FrA: (self.FrA   , rBS),
-            self.FrB: (self.FrB   , -rBS),
-            self.BkA: (self.BkA   , -rBS),
-            self.BkB: (self.BkB   , rBS),
+            self.po_FrA: (self.po_FrA   , rBS),
+            self.po_FrB: (self.po_FrB   , -rBS),
+            self.po_BkA: (self.po_BkA   , -rBS),
+            self.po_BkB: (self.po_BkB   , rBS),
         }
         lmap = {
-            self._LFrA: (self.FrA   , l),
-            self._LBkA: (self.BkA   , l),
-            self._LFrB: (self.FrB   , l),
-            self._LBkB: (self.BkB   , l),
+            self._LFrA: (self.po_FrA   , l),
+            self._LBkA: (self.po_BkA   , l),
+            self._LFrB: (self.po_FrB   , l),
+            self._LBkB: (self.po_BkB   , l),
         }
         if self.unitary_loss:
             raise NotImplementedError("Needs to add phases to property account for fully unitary loss.")
             lmap.update({
-                self.FrA  : (self._LFrA , l),
-                self.BkA  : (self._LBkA , l),
-                self.FrB  : (self._LFrB , l),
-                self.BkB  : (self._LBkB , l),
+                self.po_FrA  : (self._LFrA , l),
+                self.po_BkA  : (self._LBkA , l),
+                self.po_FrB  : (self._LFrB , l),
+                self.po_BkB  : (self._LBkB , l),
                 self._LFrA: (self._LFrA , lT),
                 self._LBkA: (self._LBkA , lT),
                 self._LFrB: (self._LFrB , lT),

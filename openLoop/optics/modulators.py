@@ -14,12 +14,12 @@ class Optical2PortModulator(
     bases.SystemElementBase,
 ):
     @declarative.dproperty
-    def Fr(self):
-        return ports.OpticalPort(pchain = 'Bk')
+    def po_Fr(self):
+        return ports.OpticalPort(pchain = 'po_Bk')
 
     @declarative.dproperty
-    def Bk(self):
-        return ports.OpticalPort(pchain = 'Fr')
+    def po_Bk(self):
+        return ports.OpticalPort(pchain = 'po_Fr')
 
     @declarative.dproperty
     def Drv(self):
@@ -32,16 +32,16 @@ class Optical2PortModulator(
     @declarative.mproperty
     def ports_optical(self):
         return set([
-            self.Fr,
-            self.Bk,
+            self.po_Fr,
+            self.po_Bk,
         ])
 
     def system_setup_ports(self, ports_algorithm):
         pmap = {
-            self.Fr.i : [self.Bk.o],
-            self.Bk.i : [self.Fr.o],
-            self.Fr.o : [self.Bk.i],
-            self.Bk.o : [self.Fr.i],
+            self.po_Fr.i : [self.po_Bk.o],
+            self.po_Bk.i : [self.po_Fr.o],
+            self.po_Fr.o : [self.po_Bk.i],
+            self.po_Bk.o : [self.po_Fr.i],
         }
 
         #direct couplings
@@ -86,13 +86,13 @@ class PM(Optical2PortModulator):
 
     def system_setup_coupling(self, matrix_algorithm):
         cmap = {
-            self.Fr : (self.Bk, 1),
-            self.Bk : (self.Fr, 1),
+            self.po_Fr : (self.po_Bk, 1),
+            self.po_Bk : (self.po_Fr, 1),
         }
 
         ports_in_optical = [
-            self.Fr,
-            self.Bk,
+            self.po_Fr,
+            self.po_Bk,
         ]
 
         for pfrom in ports_in_optical:
@@ -124,13 +124,13 @@ class AM(Optical2PortModulator):
 
     def system_setup_coupling(self, matrix_algorithm):
         cmap = {
-            self.Fr : (self.Bk, 1),
-            self.Bk : (self.Fr, 1),
+            self.po_Fr : (self.po_Bk, 1),
+            self.po_Bk : (self.po_Fr, 1),
         }
 
         ports_in_optical = [
-            self.Fr,
-            self.Bk,
+            self.po_Fr,
+            self.po_Bk,
         ]
 
         for pfrom in ports_in_optical:
@@ -160,12 +160,12 @@ class AMPM(
     bases.SystemElementBase,
 ):
     @declarative.dproperty
-    def Fr(self):
-        return ports.OpticalPort(pchain = 'Bk')
+    def po_Fr(self):
+        return ports.OpticalPort(pchain = 'po_Bk')
 
     @declarative.dproperty
-    def Bk(self):
-        return ports.OpticalPort(pchain = 'Fr')
+    def po_Bk(self):
+        return ports.OpticalPort(pchain = 'po_Fr')
 
     @declarative.dproperty
     def DrvAM(self):
@@ -192,16 +192,16 @@ class AMPM(
     @declarative.mproperty
     def ports_optical(self):
         return set([
-            self.Fr,
-            self.Bk,
+            self.po_Fr,
+            self.po_Bk,
         ])
 
     def system_setup_ports(self, ports_algorithm):
         pmap = {
-            self.Fr.i : [self.Bk.o],
-            self.Bk.i : [self.Fr.o],
-            self.Fr.o : [self.Bk.i],
-            self.Bk.o : [self.Fr.i],
+            self.po_Fr.i : [self.po_Bk.o],
+            self.po_Bk.i : [self.po_Fr.o],
+            self.po_Fr.o : [self.po_Bk.i],
+            self.po_Bk.o : [self.po_Fr.i],
         }
 
         #direct couplings
@@ -236,13 +236,13 @@ class AMPM(
 
     def system_setup_coupling(self, matrix_algorithm):
         cmap = {
-            self.Fr : (self.Bk, 1),
-            self.Bk : (self.Fr, 1),
+            self.po_Fr : (self.po_Bk, 1),
+            self.po_Bk : (self.po_Fr, 1),
         }
 
         ports_in_optical = [
-            self.Fr,
-            self.Bk,
+            self.po_Fr,
+            self.po_Bk,
         ]
 
         for pfrom in ports_in_optical:

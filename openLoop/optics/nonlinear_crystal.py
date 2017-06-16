@@ -61,21 +61,21 @@ class NonlinearCrystal(
 
     def __build__(self):
         super(NonlinearCrystal, self).__build__()
-        self.own.Fr   = ports.OpticalPort(sname = 'Fr', pchain = lambda : self.Bk)
-        self.own.Bk   = ports.OpticalPort(sname = 'Bk', pchain = lambda : self.Fr)
+        self.own.po_Fr   = ports.OpticalPort(sname = 'po_Fr', pchain = lambda : self.po_Bk)
+        self.own.po_Bk   = ports.OpticalPort(sname = 'po_Bk', pchain = lambda : self.po_Fr)
         return
 
     @declarative.mproperty
     def ports_optical(self):
         return (
-            self.Fr,
-            self.Bk,
+            self.po_Fr,
+            self.po_Bk,
         )
 
     def system_setup_ports(self, ports_algorithm):
         tmap = {
-            self.Fr: self.Bk,
-            self.Bk: self.Fr,
+            self.po_Fr: self.po_Bk,
+            self.po_Bk: self.po_Fr,
         }
 
         for port in self.ports_optical:
@@ -147,8 +147,8 @@ class NonlinearCrystal(
 
     def system_setup_coupling(self, matrix_algorithm):
         tmap = {
-            self.Fr: self.Bk,
-            self.Bk: self.Fr,
+            self.po_Fr: self.po_Bk,
+            self.po_Bk: self.po_Fr,
         }
 
         for port in self.ports_optical:

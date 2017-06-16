@@ -50,7 +50,7 @@ class Mechanical1PortBase(MechanicalElementBase):
         return ports.MechanicalPort(sname = 'A')
 
     @decl.mproperty
-    def Fr(self):
+    def po_Fr(self):
         return self.A
 
     def system_setup_ports(self, ports_algorithm):
@@ -71,11 +71,11 @@ class Mechanical2PortBase(MechanicalElementBase):
         return ports.MechanicalPort(sname = 'B', pchain = 'A')
 
     @decl.mproperty
-    def Fr(self):
+    def po_Fr(self):
         return self.A
 
     @decl.mproperty
-    def Bk(self):
+    def po_Bk(self):
         return self.B
 
     def bond_series(self, other):
@@ -104,19 +104,19 @@ class Mechanical4PortBase(MechanicalElementBase):
         return ports.MechanicalPort(sname = 'D')
 
     @decl.mproperty
-    def FrA(self):
+    def po_FrA(self):
         return self.A
 
     @decl.mproperty
-    def FrB(self):
+    def po_FrB(self):
         return self.B
 
     @decl.mproperty
-    def BkA(self):
+    def po_BkA(self):
         return self.C
 
     @decl.mproperty
-    def BkB(self):
+    def po_BkB(self):
         return self.D
 
 

@@ -50,14 +50,14 @@ def gensys(
     sys.own.transPD = optics.PD()
 
     sys.bond_sequence(
-        sys.laser.Fr,
-        sys.reflPD.Bk,
-        sys.itm.Bk,
-        sys.itmPD.Fr,
-        sys.s1.Fr,
-        sys.etmPD.Bk,
-        sys.etm.Fr,
-        sys.transPD.Fr,
+        sys.laser.po_Fr,
+        sys.reflPD.po_Bk,
+        sys.itm.po_Bk,
+        sys.itmPD.po_Fr,
+        sys.s1.po_Fr,
+        sys.etmPD.po_Bk,
+        sys.etm.po_Fr,
+        sys.transPD.po_Fr,
     )
 
     sys.own.refl_DC     = readouts.DCReadout(port = sys.reflPD.Wpd.o)
@@ -106,20 +106,20 @@ def test_FP_base():
     np_test.assert_almost_equal(sys.etm_DC.DC_readout     , 417.383238254     , 7 )
     np_test.assert_almost_equal(sys.etm_ForceZ.DC_readout , -2.78587453006e-06, 7 )
 
-    #sys.coupling_matrix_print(select_from = b.etm.Z.d.o, select_to = b.etm.Fr.o)
+    #sys.coupling_matrix_print(select_from = b.etm.Z.d.o, select_to = b.etm.po_Fr.o)
     #sys.coupling_matrix_print(
-    #    #select_from = b.etm.Fr.o,
+    #    #select_from = b.etm.po_Fr.o,
     #    select_to = b.etmPD.Wpd.o,
     #)
 
     #print('inverse')
     #sys.coupling_matrix_inv_print(
-    #    select_from = b.etm.Fr.o,
-    #    select_to = b.etm.Fr.o,
+    #    select_from = b.etm.po_Fr.o,
+    #    select_to = b.etm.po_Fr.o,
     #)
     #sys.coupling_matrix_inv_print(
     #    select_from = b.etm.Z.d.o,
-    #    select_to = b.etm.Fr.o,
+    #    select_to = b.etm.po_Fr.o,
     #)
 
     #from openLoop.optics.dictionary_keys import (
@@ -137,14 +137,14 @@ def test_FP_base():
     #lsb_keyR = DictKey({OpticalFreqKey: FrequencyKey(b.laser.optical_f_dict), ClassicalFreqKey: FrequencyKey({sys.F_AC : -1})}) | b.laser.polarization | RAISE
     #ucl_key = DictKey({ClassicalFreqKey: FrequencyKey({sys.F_AC : 1})})
     #lcl_key = DictKey({ClassicalFreqKey: FrequencyKey({sys.F_AC : -1})})
-    #print("USBLU: ", rt_inv.get((b.etm.Fr.o, usb_keyL), (b.etm.Z.d.o, ucl_key), 0))
-    #print("USBRU: ", rt_inv.get((b.etm.Fr.o, usb_keyR), (b.etm.Z.d.o, ucl_key), 0))
-    #print("USBLL: ", rt_inv.get((b.etm.Fr.o, usb_keyL), (b.etm.Z.d.o, lcl_key), 0))
-    #print("USBRL: ", rt_inv.get((b.etm.Fr.o, usb_keyR), (b.etm.Z.d.o, lcl_key), 0))
-    #print("LSBLL: ", rt_inv.get((b.etm.Fr.o, lsb_keyL), (b.etm.Z.d.o, lcl_key), 0))
-    #print("LSBRL: ", rt_inv.get((b.etm.Fr.o, lsb_keyR), (b.etm.Z.d.o, lcl_key), 0))
-    #print("LSBLU: ", rt_inv.get((b.etm.Fr.o, lsb_keyL), (b.etm.Z.d.o, ucl_key), 0))
-    #print("LSBRU: ", rt_inv.get((b.etm.Fr.o, lsb_keyR), (b.etm.Z.d.o, ucl_key), 0))
+    #print("USBLU: ", rt_inv.get((b.etm.po_Fr.o, usb_keyL), (b.etm.Z.d.o, ucl_key), 0))
+    #print("USBRU: ", rt_inv.get((b.etm.po_Fr.o, usb_keyR), (b.etm.Z.d.o, ucl_key), 0))
+    #print("USBLL: ", rt_inv.get((b.etm.po_Fr.o, usb_keyL), (b.etm.Z.d.o, lcl_key), 0))
+    #print("USBRL: ", rt_inv.get((b.etm.po_Fr.o, usb_keyR), (b.etm.Z.d.o, lcl_key), 0))
+    #print("LSBLL: ", rt_inv.get((b.etm.po_Fr.o, lsb_keyL), (b.etm.Z.d.o, lcl_key), 0))
+    #print("LSBRL: ", rt_inv.get((b.etm.po_Fr.o, lsb_keyR), (b.etm.Z.d.o, lcl_key), 0))
+    #print("LSBLU: ", rt_inv.get((b.etm.po_Fr.o, lsb_keyL), (b.etm.Z.d.o, ucl_key), 0))
+    #print("LSBRU: ", rt_inv.get((b.etm.po_Fr.o, lsb_keyR), (b.etm.Z.d.o, ucl_key), 0))
 
     AC = sys.ETM_Drive.AC_sensitivity
     print("AC:", AC)

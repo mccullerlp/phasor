@@ -55,18 +55,18 @@ def test_split():
     sys.own.PD_G = optics.PD()
 
     sys.system.bond_sequence(
-        sys.PSL.Fr,
-        sys.mDC1.FrA,
-        sys.mDC2.FrA,
-        sys.PD_R.Fr,
+        sys.PSL.po_Fr,
+        sys.mDC1.po_FrA,
+        sys.mDC2.po_FrA,
+        sys.PD_R.po_Fr,
     )
     sys.system.bond_sequence(
-        sys.PSLG.Fr,
-        sys.mDC1.BkB,
+        sys.PSLG.po_Fr,
+        sys.mDC1.po_BkB,
     )
     sys.system.bond_sequence(
-        sys.mDC2.FrB,
-        sys.PD_G.Fr,
+        sys.mDC2.po_FrB,
+        sys.PD_G.po_Fr,
     )
     sys.own.DC_R = readouts.DCReadout(
         port = sys.PD_R.Wpd.o,
@@ -107,14 +107,14 @@ def test_split():
 #    sys.own.PD_G = optics.PD()
 #
 #    sys.system.bond_sequence(
-#        sys.PSL.Fr,
-#        sys.ktp.Fr,
-#        sys.mDC2.FrA,
-#        sys.PD_R.Fr,
+#        sys.PSL.po_Fr,
+#        sys.ktp.po_Fr,
+#        sys.mDC2.po_FrA,
+#        sys.PD_R.po_Fr,
 #    )
 #    sys.system.bond_sequence(
-#        sys.mDC2.FrB,
-#        sys.PD_G.Fr,
+#        sys.mDC2.po_FrB,
+#        sys.PD_G.po_Fr,
 #    )
 #    sys.own.DC_R = readouts.DCReadout(
 #        port = sys.PD_R.Wpd.o,

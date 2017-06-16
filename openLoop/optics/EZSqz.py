@@ -162,8 +162,8 @@ class EZSqz(
 
         self.Fkey_QC_center = Fkey_QC_center
 
-        self.Fr   = ports.OpticalPort(sname = 'Fr' )
-        self.Bk   = ports.OpticalPort(sname = 'Bk' )
+        self.po_Fr   = ports.OpticalPort(sname = 'po_Fr' )
+        self.po_Bk   = ports.OpticalPort(sname = 'po_Bk' )
         self._LFr = ports.OpticalPort(sname = 'LFr')
         self._LBk = ports.OpticalPort(sname = 'LBk')
         return
@@ -171,8 +171,8 @@ class EZSqz(
     @decl.mproperty
     def ports_optical(self):
         return (
-            self.Fr,
-            self.Bk,
+            self.po_Fr,
+            self.po_Bk,
         )
 
     @decl.mproperty
@@ -184,15 +184,15 @@ class EZSqz(
 
     def system_setup_ports(self, ports_algorithm):
         tmap = {
-            self.Fr: self.Bk,
-            self.Bk: self.Fr,
+            self.po_Fr: self.po_Bk,
+            self.po_Bk: self.po_Fr,
         }
 
         lmap = {
-            self.Fr: self._LFr,
-            self.Bk: self._LBk,
-            self._LFr: self.Fr,
-            self._LBk: self.Bk,
+            self.po_Fr: self._LFr,
+            self.po_Bk: self._LBk,
+            self._LFr: self.po_Fr,
+            self._LBk: self.po_Bk,
         }
         #direct couplings
         okey = self.Fkey_QC_center[ports.OpticalFreqKey]
@@ -232,15 +232,15 @@ class EZSqz(
         lR = self.symbols.math.sqrt(self.used_loss)
         lT = self.symbols.math.sqrt(1 - self.used_loss)
         tmap = {
-            self.Fr: self.Bk,
-            self.Bk: self.Fr,
+            self.po_Fr: self.po_Bk,
+            self.po_Bk: self.po_Fr,
         }
 
         lmap = {
-            self.Fr  : self._LFr,
-            self.Bk  : self._LBk,
-            self._LFr: self.Fr  ,
-            self._LBk: self.Bk  ,
+            self.po_Fr  : self._LFr,
+            self.po_Bk  : self._LBk,
+            self._LFr: self.po_Fr  ,
+            self._LBk: self.po_Bk  ,
         }
 
         okey = self.Fkey_QC_center[ports.OpticalFreqKey]

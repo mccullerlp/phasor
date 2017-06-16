@@ -101,7 +101,7 @@ class ElectricalPort(ElectricalPortRaw, bases.SystemElementBase):
         Only call if this port has not been bonded
         """
         self.own.terminator = self.t_terminator()
-        self.system.bond(self, self.terminator.Fr)
+        self.system.bond(self, self.terminator.po_Fr)
         return (self, self.terminator)
 
     def targets_list(self, typename):

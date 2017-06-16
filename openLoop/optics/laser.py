@@ -21,8 +21,8 @@ class Laser(
 ):
 
     @decl.dproperty
-    def Fr(self):
-        return ports.OpticalPort(sname = 'Fr')
+    def po_Fr(self):
+        return ports.OpticalPort()
 
     power = standard_attrs.generate_power()
     phase = standard_attrs.generate_rotate(name = 'phase')
@@ -50,7 +50,7 @@ class Laser(
     def _fluct(self):
         #TODO add realistic laser noise
         return vacuum.OpticalVacuumFluctuation(
-            port = self.Fr
+            port = self.po_Fr
         )
 
     multiple = 1
@@ -73,17 +73,17 @@ class Laser(
         })
 
     def system_setup_ports_initial(self, ports_algorithm):
-        ports_algorithm.coherent_sources_needed(self.Fr.o, self.fkey | self.polk | ports.LOWER)
-        ports_algorithm.coherent_sources_needed(self.Fr.o, self.fkey | self.polk | ports.RAISE)
+        ports_algorithm.coherent_sources_needed(self.po_Fr.o, self.fkey | self.polk | ports.LOWER)
+        ports_algorithm.coherent_sources_needed(self.po_Fr.o, self.fkey | self.polk | ports.RAISE)
         return
 
     def system_setup_ports(self, ports_algorithm):
         #TODO should separate "wanted" ports from "driven ports"
         #Must move inputs to outputs for AC sidebands
-        for kto in ports_algorithm.port_update_get(self.Fr.o):
-            ports_algorithm.port_coupling_needed(self.Fr.i, kto)
-        for kfrom in ports_algorithm.port_update_get(self.Fr.i):
-            ports_algorithm.port_coupling_needed(self.Fr.o, kfrom)
+        for kto in ports_algorithm.port_update_get(self.po_Fr.o):
+            ports_algorithm.port_coupling_needed(self.po_Fr.i, kto)
+        for kfrom in ports_algorithm.port_update_get(self.po_Fr.i):
+            ports_algorithm.port_coupling_needed(self.po_Fr.o, kfrom)
         return
 
     def system_setup_coupling(self, matrix_algorithm):
@@ -91,10 +91,10 @@ class Laser(
         if self.phase_rad.val is not 0:
             cplg = self.symbols.math.exp(self.symbols.i * self.phase_rad.val)
             cplgC = self.symbols.math.exp(-self.symbols.i * self.phase_rad.val)
-            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.LOWER, field_rtW * cplg)
-            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.RAISE, field_rtW * cplgC)
+            matrix_algorithm.coherent_sources_insert(self.po_Fr.o, self.fkey | self.polk | ports.LOWER, field_rtW * cplg)
+            matrix_algorithm.coherent_sources_insert(self.po_Fr.o, self.fkey | self.polk | ports.RAISE, field_rtW * cplgC)
         else:
-            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.LOWER, field_rtW)
-            matrix_algorithm.coherent_sources_insert(self.Fr.o, self.fkey | self.polk | ports.RAISE, field_rtW)
+            matrix_algorithm.coherent_sources_insert(self.po_Fr.o, self.fkey | self.polk | ports.LOWER, field_rtW)
+            matrix_algorithm.coherent_sources_insert(self.po_Fr.o, self.fkey | self.polk | ports.RAISE, field_rtW)
         return
 

@@ -17,12 +17,12 @@ class Space(
         bases.SystemElementBase,
 ):
     @decl.dproperty
-    def Fr(self):
-        return ports.OpticalPort(sname = 'Fr', pchain = 'Bk')
+    def po_Fr(self):
+        return ports.OpticalPort(sname = 'po_Fr', pchain = 'po_Bk')
 
     @decl.dproperty
-    def Bk(self):
-        return ports.OpticalPort(sname = 'Bk', pchain = 'Fr')
+    def po_Bk(self):
+        return ports.OpticalPort(sname = 'po_Bk', pchain = 'po_Fr')
 
     length = standard_attrs.generate_length()
 
@@ -40,15 +40,15 @@ class Space(
     @decl.mproperty
     def ports_optical(self):
         return [
-            self.Fr,
-            self.Bk,
+            self.po_Fr,
+            self.po_Bk,
         ]
 
     @decl.mproperty
     def pmap(self):
         return {
-            self.Fr : self.Bk,
-            self.Bk : self.Fr,
+            self.po_Fr : self.po_Bk,
+            self.po_Bk : self.po_Fr,
         }
 
     def system_setup_ports(self, ports_algorithm):

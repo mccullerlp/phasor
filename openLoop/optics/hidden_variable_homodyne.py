@@ -31,12 +31,12 @@ class HiddenVariableHomodynePD(
         self.include_quanta = include_quanta
         self.include_relative = include_relative
 
-        self.own.Fr    = ports.OpticalPort(sname = 'Fr', pchain = 'Bk')
+        self.own.po_Fr    = ports.OpticalPort(sname = 'po_Fr', pchain = 'po_Bk')
         bases.PTREE_ASSIGN(self).phase_deg = phase_deg
 
-        self.own.Bk = ports.OpticalPort(sname = 'Bk', pchain = 'Fr')
-        ##Only required if Bk isn't used (not a MagicPD)
-        #self._fluct = vacuum.OpticalVacuumFluctuation(port = self.Fr)
+        self.own.po_Bk = ports.OpticalPort(sname = 'po_Bk', pchain = 'po_Fr')
+        ##Only required if po_Bk isn't used (not a MagicPD)
+        #self._fluct = vacuum.OpticalVacuumFluctuation(port = self.po_Fr)
 
         self.own.rtWpdI   = ports.SignalOutPort()
         self.own.rtWpdQ   = ports.SignalOutPort()
@@ -51,7 +51,7 @@ class HiddenVariableHomodynePD(
             self.own.RadQ   = ports.SignalOutPort()
 
         if source_port is None:
-            self.source_port = self.Fr.i
+            self.source_port = self.po_Fr.i
         else:
             self.source_port = source_port
             self.system.own_port_virtual(self, self.source_port)
@@ -77,7 +77,7 @@ class HiddenVariableHomodynePD(
         def referred_ports_fill(
             out_port_classical,
         ):
-            pfrom = self.Fr.i
+            pfrom = self.po_Fr.i
             for kfrom, lkto in ports_algorithm.symmetric_update(self.source_port, out_port_classical.o):
                 if kfrom.contains(ports.LOWER):
                     fnew = kfrom[ports.ClassicalFreqKey] - lkto[ports.ClassicalFreqKey]
@@ -149,24 +149,24 @@ class HiddenVariableHomodynePD(
         ports_fill_2optical_2classical_hdyne(
             system = self.system,
             ports_algorithm = ports_algorithm,
-            ports_in_optical = [self.Fr.i, self.source_port],
+            ports_in_optical = [self.po_Fr.i, self.source_port],
             out_port_classical = self.rtWpdCmn,
         )
 
         pmap = {
-            self.Fr.i : self.Bk.o,
-            self.Fr.o : self.Bk.i,
-            self.Bk.i : self.Fr.o,
-            self.Bk.o : self.Fr.i,
+            self.po_Fr.i : self.po_Bk.o,
+            self.po_Fr.o : self.po_Bk.i,
+            self.po_Bk.i : self.po_Fr.o,
+            self.po_Bk.o : self.po_Fr.i,
         }
-        for kfrom in ports_algorithm.port_update_get(self.Fr.i):
-            ports_algorithm.port_coupling_needed(pmap[self.Fr.i], kfrom)
-        for kto in ports_algorithm.port_update_get(self.Fr.o):
-            ports_algorithm.port_coupling_needed(pmap[self.Fr.o], kto)
-        for kfrom in ports_algorithm.port_update_get(self.Bk.i):
-            ports_algorithm.port_coupling_needed(pmap[self.Bk.i], kfrom)
-        for kto in ports_algorithm.port_update_get(self.Bk.o):
-            ports_algorithm.port_coupling_needed(pmap[self.Bk.o], kto)
+        for kfrom in ports_algorithm.port_update_get(self.po_Fr.i):
+            ports_algorithm.port_coupling_needed(pmap[self.po_Fr.i], kfrom)
+        for kto in ports_algorithm.port_update_get(self.po_Fr.o):
+            ports_algorithm.port_coupling_needed(pmap[self.po_Fr.o], kto)
+        for kfrom in ports_algorithm.port_update_get(self.po_Bk.i):
+            ports_algorithm.port_coupling_needed(pmap[self.po_Bk.i], kfrom)
+        for kto in ports_algorithm.port_update_get(self.po_Bk.o):
+            ports_algorithm.port_coupling_needed(pmap[self.po_Bk.o], kto)
         return
 
     def system_setup_coupling(self, matrix_algorithm):
@@ -242,7 +242,7 @@ class HiddenVariableHomodynePD(
                         #TODO Check factor of 2 overcounting here between raising and lowering
                         if ktoOptP is not None:
                             inj = TripletNormCoupling(
-                                pkfrom1     = (self.Fr.i,            ktoOptP),
+                                pkfrom1     = (self.po_Fr.i,            ktoOptP),
                                 pkfrom2     = optCplgC,
                                 pkto        = (out_port_classical.o, lkto),
                                 pknorm      = norm_port,
@@ -252,7 +252,7 @@ class HiddenVariableHomodynePD(
                             matrix_algorithm.injection_insert(inj)
                         if lktoN != lkto and ktoOptN is not None:
                             inj = TripletNormCoupling(
-                                pkfrom1     = (self.Fr.i, ktoOptN),
+                                pkfrom1     = (self.po_Fr.i, ktoOptN),
                                 pkfrom2     = optCplgC,
                                 pkto        = (out_port_classical.o, lktoN),
                                 pknorm      = norm_port,
@@ -265,7 +265,7 @@ class HiddenVariableHomodynePD(
                         # because of conjugation issues, the frequencies are reversed in the lktos for the optical ports.RAISE operators
                         if ktoOptP is not None:
                             inj = TripletNormCoupling(
-                                pkfrom1      = (self.Fr.i, ktoOptP),
+                                pkfrom1      = (self.po_Fr.i, ktoOptP),
                                 pkfrom2     = optCplgC,
                                 pkto        = (out_port_classical.o, lktoN),
                                 pknorm      = norm_port,
@@ -275,7 +275,7 @@ class HiddenVariableHomodynePD(
                             matrix_algorithm.injection_insert(inj)
                         if lktoN != lkto and ktoOptN is not None:
                             inj = TripletNormCoupling(
-                                pkfrom1     = (self.Fr.i, ktoOptN),
+                                pkfrom1     = (self.po_Fr.i, ktoOptN),
                                 pkfrom2     = optCplgC,
                                 pkto        = (out_port_classical.o, lkto),
                                 pknorm      = norm_port,
@@ -333,17 +333,17 @@ class HiddenVariableHomodynePD(
                     norm_func = lambda v : v,
                 )
 
-        for kfrom in matrix_algorithm.port_set_get(self.Bk.i):
-            matrix_algorithm.port_coupling_insert(self.Bk.i, kfrom, self.Fr.o, kfrom, 1)
+        for kfrom in matrix_algorithm.port_set_get(self.po_Bk.i):
+            matrix_algorithm.port_coupling_insert(self.po_Bk.i, kfrom, self.po_Fr.o, kfrom, 1)
 
-        if self.source_port != self.Fr.i:
-            for kfrom in matrix_algorithm.port_set_get(self.Fr.i):
-                matrix_algorithm.port_coupling_insert(self.Fr.i, kfrom, self.Bk.o, kfrom, 1)
+        if self.source_port != self.po_Fr.i:
+            for kfrom in matrix_algorithm.port_set_get(self.po_Fr.i):
+                matrix_algorithm.port_coupling_insert(self.po_Fr.i, kfrom, self.po_Bk.o, kfrom, 1)
 
                 modulations_fill_2optical_2classical_hdyne(
                     system             = self.system,
                     matrix_algorithm   = matrix_algorithm,
-                    pfrom             = self.Fr.i,
+                    pfrom             = self.po_Fr.i,
                     kfrom              = kfrom,
                     out_port_classical = self.rtWpdCmn,
                     Stdcplg            = 1,
@@ -367,13 +367,13 @@ class HiddenVariableHomodynePD(
                 )
         else:
             #TODO: double check the constants for this case, may (probably) need factor of 2
-            for kfrom in matrix_algorithm.port_set_get(self.Fr.i):
-                matrix_algorithm.port_coupling_insert(self.Fr.i, kfrom, self.Bk.o, kfrom, 1)
+            for kfrom in matrix_algorithm.port_set_get(self.po_Fr.i):
+                matrix_algorithm.port_coupling_insert(self.po_Fr.i, kfrom, self.po_Bk.o, kfrom, 1)
 
                 modulations_fill_2optical_2classical_hdyne(
                     system             = self.system,
                     matrix_algorithm   = matrix_algorithm,
-                    pfrom             = self.Fr.i,
+                    pfrom             = self.po_Fr.i,
                     kfrom              = kfrom,
                     out_port_classical = self.rtWpdCmn,
                     Stdcplg            = 1,

@@ -49,14 +49,14 @@ def gensys(
     sys.own.transPD = optics.PD()
 
     sys.bond_sequence(
-        sys.laser.Fr,
-        sys.reflPD.Bk,
-        sys.itm.Bk,
-        sys.itmPD.Fr,
-        sys.s1.Fr,
-        sys.etmPD.Bk,
-        sys.etm.Fr,
-        sys.transPD.Fr,
+        sys.laser.po_Fr,
+        sys.reflPD.po_Bk,
+        sys.itm.po_Bk,
+        sys.itmPD.po_Fr,
+        sys.s1.po_Fr,
+        sys.etmPD.po_Bk,
+        sys.etm.po_Fr,
+        sys.transPD.po_Fr,
     )
 
     sys.own.refl_DC     = readouts.DCReadout(port = sys.reflPD.Wpd.o)

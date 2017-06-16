@@ -16,13 +16,13 @@ class PolSelector(
 ):
 
     def __build__(self):
-        self.own.Fr   = ports.OpticalPort(sname = 'Fr')
+        self.own.po_Fr   = ports.OpticalPort(sname = 'po_Fr')
         self.own.Bk_P = ports.OpticalPort(sname = 'Bk_P')
         self.own.Bk_S = ports.OpticalPort(sname = 'Bk_S')
         return
 
     def system_setup_ports(self, ports_algorithm):
-        for kfrom in ports_algorithm.port_update_get(self.Fr.i):
+        for kfrom in ports_algorithm.port_update_get(self.po_Fr.i):
             if ports.PolP & kfrom:
                 ports_algorithm.port_coupling_needed(self.Bk_P.o, kfrom)
             elif ports.PolS & kfrom:
@@ -30,11 +30,11 @@ class PolSelector(
             else:
                 assert(False)
         for kfrom in ports_algorithm.port_update_get(self.Bk_P.i):
-            ports_algorithm.port_coupling_needed(self.Fr.o, kfrom)
+            ports_algorithm.port_coupling_needed(self.po_Fr.o, kfrom)
         for kfrom in ports_algorithm.port_update_get(self.Bk_S.i):
-            ports_algorithm.port_coupling_needed(self.Fr.o, kfrom)
+            ports_algorithm.port_coupling_needed(self.po_Fr.o, kfrom)
 
-        for kto in ports_algorithm.port_update_get(self.Fr.o):
+        for kto in ports_algorithm.port_update_get(self.po_Fr.o):
             if ports.PolP & kto:
                 ports_algorithm.port_coupling_needed(self.Bk_P.i, kto)
             elif ports.PolS & kto:
@@ -42,23 +42,23 @@ class PolSelector(
             else:
                 assert(False)
         for kto in ports_algorithm.port_update_get(self.Bk_P.o):
-            ports_algorithm.port_coupling_needed(self.Fr.i, kto)
+            ports_algorithm.port_coupling_needed(self.po_Fr.i, kto)
         for kto in ports_algorithm.port_update_get(self.Bk_S.o):
-            ports_algorithm.port_coupling_needed(self.Fr.i, kto)
+            ports_algorithm.port_coupling_needed(self.po_Fr.i, kto)
         return
 
     def system_setup_coupling(self, matrix_algorithm):
-        for kfrom in matrix_algorithm.port_set_get(self.Fr.i):
+        for kfrom in matrix_algorithm.port_set_get(self.po_Fr.i):
             if ports.PolP & kfrom:
-                matrix_algorithm.port_coupling_insert(self.Fr.i, kfrom, self.Bk_P.o, kfrom, 1)
+                matrix_algorithm.port_coupling_insert(self.po_Fr.i, kfrom, self.Bk_P.o, kfrom, 1)
             elif ports.PolS & kfrom:
-                matrix_algorithm.port_coupling_insert(self.Fr.i, kfrom, self.Bk_S.o, kfrom, 1)
+                matrix_algorithm.port_coupling_insert(self.po_Fr.i, kfrom, self.Bk_S.o, kfrom, 1)
             else:
                 assert(False)
         for kfrom in matrix_algorithm.port_set_get(self.Bk_P.i):
-            matrix_algorithm.port_coupling_insert(self.Bk_P.i, kfrom, self.Fr.o, kfrom, 1)
+            matrix_algorithm.port_coupling_insert(self.Bk_P.i, kfrom, self.po_Fr.o, kfrom, 1)
         for kfrom in matrix_algorithm.port_set_get(self.Bk_S.i):
-            matrix_algorithm.port_coupling_insert(self.Bk_P.i, kfrom, self.Fr.o, kfrom, 1)
+            matrix_algorithm.port_coupling_insert(self.Bk_P.i, kfrom, self.po_Fr.o, kfrom, 1)
         return
 
 
@@ -69,8 +69,8 @@ class GenericSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
         return val
 
     @declarative.dproperty
-    def Fr(self):
-        return ports.OpticalPort(sname = 'Fr')
+    def po_Fr(self):
+        return ports.OpticalPort(sname = 'po_Fr')
 
     def __build__(self):
         self.check      = True
@@ -84,7 +84,7 @@ class GenericSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
         return
 
     def system_setup_ports(self, ports_algorithm):
-        for kfrom in ports_algorithm.port_update_get(self.Fr.i):
+        for kfrom in ports_algorithm.port_update_get(self.po_Fr.i):
             N_selections = 0
             #print("KFROM: ", kfrom)
             for pname, (port, key) in list(self.port_map.items()):
@@ -99,9 +99,9 @@ class GenericSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
             assert(N_selections == 1)
         for pname, (port, key) in list(self.port_map.items()):
             for kfrom in ports_algorithm.port_update_get(port.i):
-                ports_algorithm.port_coupling_needed(self.Fr.o, kfrom)
+                ports_algorithm.port_coupling_needed(self.po_Fr.o, kfrom)
 
-        for kto in ports_algorithm.port_update_get(self.Fr.o):
+        for kto in ports_algorithm.port_update_get(self.po_Fr.o):
             N_selections = 0
             for pname, (port, key) in list(self.port_map.items()):
                 if key & kto:
@@ -111,22 +111,22 @@ class GenericSelector(bases.OpticalCouplerBase, bases.SystemElementBase):
                         break
         for pname, (port, key) in list(self.port_map.items()):
             for kto in ports_algorithm.port_update_get(port.o):
-                ports_algorithm.port_coupling_needed(self.Fr.i, kto)
+                ports_algorithm.port_coupling_needed(self.po_Fr.i, kto)
         return
 
     def system_setup_coupling(self, matrix_algorithm):
-        for kfrom in matrix_algorithm.port_set_get(self.Fr.i):
+        for kfrom in matrix_algorithm.port_set_get(self.po_Fr.i):
             N_selections = 0
             for pname, (port, key) in list(self.port_map.items()):
                 if key & kfrom:
                     N_selections += 1
-                    matrix_algorithm.port_coupling_insert(self.Fr.i, kfrom, port.o, kfrom, 1)
+                    matrix_algorithm.port_coupling_insert(self.po_Fr.i, kfrom, port.o, kfrom, 1)
                     if not self.check:
                         break
             assert(N_selections == 1)
         for pname, (port, key) in list(self.port_map.items()):
             for kfrom in matrix_algorithm.port_set_get(port.i):
-                matrix_algorithm.port_coupling_insert(port.i, kfrom, self.Fr.o, kfrom, 1)
+                matrix_algorithm.port_coupling_insert(port.i, kfrom, self.po_Fr.o, kfrom, 1)
         return
 
 
@@ -184,7 +184,7 @@ class OpticalSelectionStack(
             sname = "psel_{0}".format(pname)
             psel = self.insert(GenericSelector(select_map = self.select_map), sname)
             self.split_ports[pname] = psel
-            setattr(self, pname, psel.Fr)
+            setattr(self, pname, psel.po_Fr)
 
             for ename, element in self.sub_element_map.items():
                 celement = getattr(self, ename)

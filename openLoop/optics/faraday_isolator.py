@@ -45,23 +45,23 @@ class FaradayIsolator(
             pass_polarization = self.pol_to,
         )
 
-        self.system.bond(self.pol_BS_in.BkA, self.faraday.Fr)
-        self.system.bond(self.faraday.Bk,    self.lambda2.Fr)
-        self.system.bond(self.lambda2.Bk,    self.pol_BS_out.FrA)
+        self.system.bond(self.pol_BS_in.po_BkA, self.faraday.po_Fr)
+        self.system.bond(self.faraday.po_Bk,    self.lambda2.po_Fr)
+        self.system.bond(self.lambda2.po_Bk,    self.pol_BS_out.po_FrA)
 
-        self.Fr          = self.pol_BS_in.FrA
+        self.po_Fr          = self.pol_BS_in.po_FrA
         self.Fr_pol      = self.pol_from
 
-        self.Bk          = self.pol_BS_out.BkA
+        self.po_Bk          = self.pol_BS_out.po_BkA
         self.Bk_pol      = self.pol_to
 
-        self.Fr_Prej     = self.pol_BS_in.FrB
+        self.Fr_Prej     = self.pol_BS_in.po_FrB
         self.Fr_Prej_pol = pol.polarization_opposite(self.pol_from)
 
-        self.Bk_Prej     = self.pol_BS_out.BkB
+        self.Bk_Prej     = self.pol_BS_out.po_BkB
         self.Bk_Prej_pol = pol.polarization_opposite(self.pol_to)
 
-        self.Fr_ins      = self.pol_BS_out.FrB
+        self.Fr_ins      = self.pol_BS_out.po_FrB
         self.Fr_ins_pol  = pol.polarization_opposite(self.pol_to)
 
 

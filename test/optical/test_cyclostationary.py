@@ -74,14 +74,14 @@ def gensys(
     #sys.link(sled.mixer.R_Q, sled.mixerQRMS.I)
 
     sys.bond_sequence(
-        sled.laser_upper.Fr,
-        sled.mBS.FrA,
-        sled.PD1.Fr,
+        sled.laser_upper.po_Fr,
+        sled.mBS.po_FrA,
+        sled.PD1.po_Fr,
     )
     sys.bond_sequence(
-        sled.laser_lower.Fr,
-        sled.mBS.BkB,
-        sled.PD2.Fr,
+        sled.laser_lower.po_Fr,
+        sled.mBS.po_BkB,
+        sled.PD2.po_Fr,
     )
 
     sled.own.PD1_DC       = readouts.DCReadout(port = sled.PD1.Wpd.o)
@@ -157,21 +157,21 @@ def test_cyclostationary():
 
     #sys.coupling_matrix_inv_print(
     #    select_to = b.sled.mixer.R_I.o,
-    #    select_from = b.sled.laser_upper.Fr.o,
+    #    select_from = b.sled.laser_upper.po_Fr.o,
     #)
     #sys.coupling_matrix_inv_print(
     #    select_to = b.sled.mixer.R_I.o,
-    #    select_from = b.sled.laser_lower.Fr.o,
+    #    select_from = b.sled.laser_lower.po_Fr.o,
     #)
 
     #print()
     #sys.coupling_matrix_inv_print(
     #    select_to = b.sled.mixer.R_Q.o,
-    #    select_from = b.sled.laser_upper.Fr.o,
+    #    select_from = b.sled.laser_upper.po_Fr.o,
     #)
     #sys.coupling_matrix_inv_print(
     #    select_to = b.sled.mixer.R_Q.o,
-    #    select_from = b.sled.laser_lower.Fr.o,
+    #    select_from = b.sled.laser_lower.po_Fr.o,
     #)
 
 

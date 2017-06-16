@@ -440,7 +440,7 @@ class BGSystem(RootElement):
                 tinst = self.autoterminate.insert(tclass(), name)
                 #print("Autoterminating port:", port)
                 #print("with ", tinst)
-                self.bond(pobj, tinst.Fr)
+                self.bond(pobj, tinst.po_Fr)
 
         with self.building:
             for port, obj in self.targets_recurse(VISIT.auto_terminate):

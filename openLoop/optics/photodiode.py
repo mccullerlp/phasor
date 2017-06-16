@@ -23,7 +23,7 @@ class PD(
     @decl.dproperty
     def _fluct(self):
         return vacuum.OpticalVacuumFluctuation(
-            port = self.Fr,
+            port = self.po_Fr,
         )
 
     @decl.dproperty
@@ -42,7 +42,7 @@ class PD(
             return readouts.NoiseReadout(portN = self.Wpd.o)
 
     @decl.dproperty
-    def Fr(self):
+    def po_Fr(self):
         return ports.OpticalPort()
 
     @decl.dproperty
@@ -57,19 +57,19 @@ class PD(
             return ports.SignalInPort(sname = 'BA')
 
     @decl.dproperty
-    def Bk(self):
+    def po_Bk(self):
         if self.magic:
-            return ports.OpticalPort(sname = 'Bk')
+            return ports.OpticalPort(sname = 'po_Bk')
 
     def system_setup_ports(self, ports_algorithm):
         pmap = {
-            self.Fr.i : []
+            self.po_Fr.i : []
         }
 
         nonlinear_utilities.ports_fill_2optical_2classical(
             self.system,
             ports_algorithm,
-            [self.Fr],
+            [self.po_Fr],
             [],
             pmap,
             self.BA.i,
@@ -78,14 +78,14 @@ class PD(
         return
 
     def system_setup_coupling(self, matrix_algorithm):
-        for kfrom in matrix_algorithm.port_set_get(self.Fr.i):
+        for kfrom in matrix_algorithm.port_set_get(self.po_Fr.i):
             std_cplg  = 1
             std_cplgC = std_cplg
 
             nonlinear_utilities.modulations_fill_2optical_2classical(
                 self.system,
                 matrix_algorithm,
-                self.Fr, kfrom,
+                self.po_Fr, kfrom,
                 None,
                 self.BA.i,
                 self.Wpd.o,
@@ -105,16 +105,16 @@ class MagicPD(
 ):
 
     @decl.dproperty
-    def Fr(self):
-        return ports.OpticalPort(sname = 'Fr', pchain = 'Bk')
+    def po_Fr(self):
+        return ports.OpticalPort(sname = 'po_Fr', pchain = 'po_Bk')
 
     @decl.dproperty
     def Wpd(self):
         return ports.SignalOutPort(sname = 'Wpd')
 
     @decl.dproperty
-    def Bk(self):
-        return ports.OpticalPort(sname = 'Bk', pchain = 'Fr')
+    def po_Bk(self):
+        return ports.OpticalPort(sname = 'po_Bk', pchain = 'po_Fr')
 
     @decl.dproperty
     def include_readouts(self, val = False):
@@ -133,38 +133,38 @@ class MagicPD(
 
     def system_setup_ports(self, ports_algorithm):
         pmap = {
-            self.Fr.i : [self.Bk.o],
-            self.Fr.o : [self.Bk.i],
-            self.Bk.i : [self.Fr.o],
-            self.Bk.o : [self.Fr.i],
+            self.po_Fr.i : [self.po_Bk.o],
+            self.po_Fr.o : [self.po_Bk.i],
+            self.po_Bk.i : [self.po_Fr.o],
+            self.po_Bk.o : [self.po_Fr.i],
         }
 
         nonlinear_utilities.ports_fill_2optical_2classical(
             self.system,
             ports_algorithm,
-            [self.Fr],
-            [self.Bk],
+            [self.po_Fr],
+            [self.po_Bk],
             pmap,
             None,
             self.Wpd.o,
         )
 
-        for kfrom in ports_algorithm.port_update_get(self.Bk.i):
-            ports_algorithm.port_coupling_needed(pmap[self.Bk.i][0], kfrom)
-        for kto in ports_algorithm.port_update_get(self.Bk.o):
-            ports_algorithm.port_coupling_needed(pmap[self.Bk.o][0], kto)
+        for kfrom in ports_algorithm.port_update_get(self.po_Bk.i):
+            ports_algorithm.port_coupling_needed(pmap[self.po_Bk.i][0], kfrom)
+        for kto in ports_algorithm.port_update_get(self.po_Bk.o):
+            ports_algorithm.port_coupling_needed(pmap[self.po_Bk.o][0], kto)
         return
 
     def system_setup_coupling(self, matrix_algorithm):
-        for kfrom in matrix_algorithm.port_set_get(self.Fr.i):
+        for kfrom in matrix_algorithm.port_set_get(self.po_Fr.i):
             std_cplg  = 1
             std_cplgC = std_cplg
 
             nonlinear_utilities.modulations_fill_2optical_2classical(
                 self.system,
                 matrix_algorithm,
-                self.Fr, kfrom,
-                self.Bk,
+                self.po_Fr, kfrom,
+                self.po_Bk,
                 None,
                 self.Wpd.o,
                 std_cplg,
@@ -174,8 +174,8 @@ class MagicPD(
                 1,
                 1,
             )
-        for kfrom in matrix_algorithm.port_set_get(self.Bk.i):
-            matrix_algorithm.port_coupling_insert(self.Bk.i, kfrom, self.Fr.o, kfrom, 1)
+        for kfrom in matrix_algorithm.port_set_get(self.po_Bk.i):
+            matrix_algorithm.port_coupling_insert(self.po_Bk.i, kfrom, self.po_Fr.o, kfrom, 1)
         #Dont need a second for-loop here since the direct coupling is included with modulations_fill_2optical_2classical
         return
 

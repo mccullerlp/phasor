@@ -56,7 +56,7 @@ def gensys(
 
     sys.own.symPD = optics.MagicPD()
     sys.own.ASPDHD = optics.HiddenVariableHomodynePD(
-        source_port     = sys.PSL.Fr.o,
+        source_port     = sys.PSL.po_Fr.o,
         phase_deg       = 90,
         #include_quanta  = True,
         #facing_cardinal = 'N',
@@ -64,18 +64,18 @@ def gensys(
     sys.own.asymPD = optics.PD()
 
     sys.bond_sequence(
-        sys.PSL.Fr,
-        sys.symPD.Bk,
-        sys.mBS.FrA,
-        sys.sX.Fr,
-        sys.mX.Fr,
+        sys.PSL.po_Fr,
+        sys.symPD.po_Bk,
+        sys.mBS.po_FrA,
+        sys.sX.po_Fr,
+        sys.mX.po_Fr,
     )
     sys.bond_sequence(
-        sys.asymPD.Fr,
-        sys.ASPDHD.Bk,
-        sys.mBS.BkB,
-        sys.sY.Fr,
-        sys.mY.Fr,
+        sys.asymPD.po_Fr,
+        sys.ASPDHD.po_Bk,
+        sys.mBS.po_BkB,
+        sys.sY.po_Fr,
+        sys.mY.po_Fr,
     )
 
     sys.own.sym_DC = readouts.DCReadout(
@@ -145,8 +145,8 @@ def test_mich():
     srel = 4 * np.pi * sys.F_carrier_1064.iwavelen_m / (2 * ptot * E1064_J)**.5
     print("ACnoise m_rtHz", sys.asymHDHD_drive.AC_noise_limited_sensitivity)
     np_test.assert_almost_equal(sys.asymHDHD_drive.AC_noise_limited_sensitivity * srel, 1, 3)
-    #sys.port_set_print(b.mBS.BkB.i)
-    #sys.port_set_print(b.vterm.Fr.o)
+    #sys.port_set_print(b.mBS.po_BkB.i)
+    #sys.port_set_print(b.vterm.po_Fr.o)
     #sys.coupling_matrix_inv_print(select_to = b.asymPD.Wpd.o)
 
     #from openLoop.utilities.mpl.autoniceplot import (mplfigB)
@@ -189,8 +189,8 @@ def test_mich_lossy():
     np_test.assert_almost_equal(N_expect / AC_noise, 1, 3)
 
     print("ACnoise m_rtHz", sys.asym_drive.AC_noise_limited_sensitivity)
-    #sys.port_set_print(b.mBS.BkB.i)
-    #sys.port_set_print(b.vterm.Fr.o)
+    #sys.port_set_print(b.mBS.po_BkB.i)
+    #sys.port_set_print(b.vterm.po_Fr.o)
     #sys.coupling_matrix_inv_print(select_to = b.asymPD.Wpd.o)
 
     #from openLoop.utilities.mpl.autoniceplot import (mplfigB)

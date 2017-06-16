@@ -33,9 +33,9 @@ class MirrorSelectionStack(
     @declarative.dproperty
     def port_set(self):
         if self.AOI_deg == 0:
-            return set(['Fr', 'Bk'])
+            return set(['po_Fr', 'po_Bk'])
         else:
-            return set(['FrA', 'FrB', 'BkA', 'BkB'])
+            return set(['po_FrA', 'po_FrB', 'po_BkA', 'po_BkB'])
 
     def __build__(self):
         super(MirrorSelectionStack, self).__build__()
@@ -45,17 +45,17 @@ class MirrorSelectionStack(
 
         #TODO, HACK!
         if self.AOI_deg == 0:
-            self.Fr.pchain = self.Bk
-            self.Bk.pchain = self.Fr
-            self.FrA = self.Fr
-            self.FrB = self.Fr
-            self.BkA = self.Bk
-            self.BkB = self.Bk
+            self.po_Fr.pchain = self.po_Bk
+            self.po_Bk.pchain = self.po_Fr
+            self.po_FrA = self.po_Fr
+            self.po_FrB = self.po_Fr
+            self.po_BkA = self.po_Bk
+            self.po_BkB = self.po_Bk
         else:
-            self.FrA.pchain = self.BkA
-            self.BkA.pchain = self.FrA
-            self.FrB.pchain = self.BkB
-            self.BkB.pchain = self.FrB
+            self.po_FrA.pchain = self.po_BkA
+            self.po_BkA.pchain = self.po_FrA
+            self.po_FrB.pchain = self.po_BkB
+            self.po_BkB.pchain = self.po_FrB
 
         #TODO, combine mechanicals
 

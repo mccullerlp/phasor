@@ -26,8 +26,8 @@ def gensys():
     sys.own.etmPD = optics.MagicPD()
 
     sys.bond_sequence(
-        sys.laser.Fr,
-        sys.etmPD.Fr,
+        sys.laser.po_Fr,
+        sys.etmPD.po_Fr,
     )
 
     sys.own.etm_DC = readouts.DCReadout(port = sys.etmPD.Wpd.o)
@@ -54,10 +54,10 @@ def gensys_full():
     )
 
     sys.bond_sequence(
-        sys.laser.Fr,
-        sys.etmPD.Bk,
-        sys.s1.Fr,
-        sys.etm.Fr,
+        sys.laser.po_Fr,
+        sys.etmPD.po_Bk,
+        sys.s1.po_Fr,
+        sys.etm.po_Fr,
     )
 
     sys.own.etm_DC = readouts.DCReadout(port = sys.etmPD.Wpd.o)
@@ -92,10 +92,10 @@ def test_mirror():
     #print("etm_Force[N]", sys.DC_readout('etm_ForceZ'))
 
     #print("A")
-    #sys.coupling_matrix_print(select_from = b.sys.etm.Z.d.o, select_to = b.sys.etm.Fr.o)
+    #sys.coupling_matrix_print(select_from = b.sys.etm.Z.d.o, select_to = b.sys.etm.po_Fr.o)
     #print("B")
     #sys.solution.coupling_matrix_print(
-    #    select_to= b.sys.etm.Fr.i,
+    #    select_to= b.sys.etm.po_Fr.i,
     #)
     assertions.assertAlmostEqual(sys.etm_DC.DC_readout, .75)
     print("inv")
@@ -103,19 +103,19 @@ def test_mirror():
     print('A')
     sys.solution.coupling_matrix_inv_print(
         select_from = b.sys.etm.Z.d.o,
-        select_to = b.sys.etmPD.Fr.i,
+        select_to = b.sys.etmPD.po_Fr.i,
     )
     print('B')
 
     sys.solution.coupling_matrix_print(
-        select_from = b.sys.etmPD.Fr.i,
+        select_from = b.sys.etmPD.po_Fr.i,
         select_to = b.sys.etmPD.Wpd.o,
         drive_set = 'AC',
         readout_set = 'AC',
     )
     print('B inv')
     sys.solution.coupling_matrix_inv_print(
-        select_from = b.sys.etmPD.Fr.i,
+        select_from = b.sys.etmPD.po_Fr.i,
         select_to = b.sys.etmPD.Wpd.o,
         drive_set = 'AC',
         readout_set = 'AC',
@@ -139,14 +139,14 @@ def test_mirror():
     #lsb_keyR = DictKey({optics.OpticalFreqKey: FrequencyKey(b.sys.laser.optical_fdict), optics.ClassicalFreqKey: FrequencyKey({sys.F_AC : -1})}) | b.sys.laser.polarization | optics.RAISE
     #ucl_key = DictKey({optics.ClassicalFreqKey: FrequencyKey({sys.F_AC : 1})})
     #lcl_key = DictKey({optics.ClassicalFreqKey: FrequencyKey({sys.F_AC : -1})})
-    #print("USBLU: ", rt_inv.get((b.sys.etm.Fr.o, usb_keyL), (b.sys.etm.Z.d.o, ucl_key), 0))
-    #print("USBRU: ", rt_inv.get((b.sys.etm.Fr.o, usb_keyR), (b.sys.etm.Z.d.o, ucl_key), 0))
-    #print("USBLL: ", rt_inv.get((b.sys.etm.Fr.o, usb_keyL), (b.sys.etm.Z.d.o, lcl_key), 0))
-    #print("USBRL: ", rt_inv.get((b.sys.etm.Fr.o, usb_keyR), (b.sys.etm.Z.d.o, lcl_key), 0))
-    #print("LSBLU: ", rt_inv.get((b.sys.etm.Fr.o, lsb_keyL), (b.sys.etm.Z.d.o, ucl_key), 0))
-    #print("LSBRU: ", rt_inv.get((b.sys.etm.Fr.o, lsb_keyR), (b.sys.etm.Z.d.o, ucl_key), 0))
-    #print("LSBLL: ", rt_inv.get((b.sys.etm.Fr.o, lsb_keyL), (b.sys.etm.Z.d.o, lcl_key), 0))
-    #print("LSBRL: ", rt_inv.get((b.sys.etm.Fr.o, lsb_keyR), (b.sys.etm.Z.d.o, lcl_key), 0))
+    #print("USBLU: ", rt_inv.get((b.sys.etm.po_Fr.o, usb_keyL), (b.sys.etm.Z.d.o, ucl_key), 0))
+    #print("USBRU: ", rt_inv.get((b.sys.etm.po_Fr.o, usb_keyR), (b.sys.etm.Z.d.o, ucl_key), 0))
+    #print("USBLL: ", rt_inv.get((b.sys.etm.po_Fr.o, usb_keyL), (b.sys.etm.Z.d.o, lcl_key), 0))
+    #print("USBRL: ", rt_inv.get((b.sys.etm.po_Fr.o, usb_keyR), (b.sys.etm.Z.d.o, lcl_key), 0))
+    #print("LSBLU: ", rt_inv.get((b.sys.etm.po_Fr.o, lsb_keyL), (b.sys.etm.Z.d.o, ucl_key), 0))
+    #print("LSBRU: ", rt_inv.get((b.sys.etm.po_Fr.o, lsb_keyR), (b.sys.etm.Z.d.o, ucl_key), 0))
+    #print("LSBLL: ", rt_inv.get((b.sys.etm.po_Fr.o, lsb_keyL), (b.sys.etm.Z.d.o, lcl_key), 0))
+    #print("LSBRL: ", rt_inv.get((b.sys.etm.po_Fr.o, lsb_keyR), (b.sys.etm.Z.d.o, lcl_key), 0))
     #print("AC:", sys.AC_sensitivity('ETM_Drive'))
 
     #from openLoop.utilities.mpl.autoniceplot import (mplfigB)

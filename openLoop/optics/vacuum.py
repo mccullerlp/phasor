@@ -14,20 +14,20 @@ class VacuumTerminator(
 ):
 
     @declarative.dproperty
-    def Fr(self):
-        return ports.OpticalPort(sname = 'Fr')
+    def po_Fr(self):
+        return ports.OpticalPort(sname = 'po_Fr')
 
     @declarative.dproperty
     def _fluct(self):
-        return OpticalVacuumFluctuation(port = self.Fr)
+        return OpticalVacuumFluctuation(port = self.po_Fr)
 
     def system_setup_ports(self, ports_algorithm):
         #TODO should separate "wanted" ports from "driven ports"
         #Must move inputs to outputs for AC sidebands
-        for kto in ports_algorithm.port_update_get(self.Fr.o):
-            ports_algorithm.port_coupling_needed(self.Fr.i, kto)
-        for kfrom in ports_algorithm.port_update_get(self.Fr.i):
-            ports_algorithm.port_coupling_needed(self.Fr.o, kfrom)
+        for kto in ports_algorithm.port_update_get(self.po_Fr.o):
+            ports_algorithm.port_coupling_needed(self.po_Fr.i, kto)
+        for kfrom in ports_algorithm.port_update_get(self.po_Fr.i):
+            ports_algorithm.port_coupling_needed(self.po_Fr.o, kfrom)
         return
 
 

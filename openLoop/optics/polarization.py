@@ -17,12 +17,12 @@ class BaseRotator(
         bases.SystemElementBase
 ):
     @decl.dproperty
-    def Fr(self):
-        return ports.OpticalPort(sname = 'Fr' , pchain = 'Bk')
+    def po_Fr(self):
+        return ports.OpticalPort(sname = 'po_Fr' , pchain = 'po_Bk')
 
     @decl.dproperty
-    def Bk(self):
-        return ports.OpticalPort(sname = 'Bk' , pchain = 'Fr')
+    def po_Bk(self):
+        return ports.OpticalPort(sname = 'po_Bk' , pchain = 'po_Fr')
 
     _rotate_default = ('rotate_deg', 0)
     rotate = standard_attrs.generate_rotate()
@@ -30,15 +30,15 @@ class BaseRotator(
     @decl.mproperty
     def ports_optical(self):
         return [
-            self.Fr,
-            self.Bk,
+            self.po_Fr,
+            self.po_Bk,
         ]
 
     @decl.mproperty
     def pmap(self):
         return {
-            self.Fr : self.Bk,
-            self.Bk : self.Fr,
+            self.po_Fr : self.po_Bk,
+            self.po_Bk : self.po_Fr,
         }
 
     def system_setup_ports(self, ports_algorithm):
@@ -85,7 +85,7 @@ class BaseRotator(
             elif self.rotate_deg.val in (-90, 270):
                 cplg_O = -1
             for port in self.ports_optical:
-                if port is self.Fr:
+                if port is self.po_Fr:
                     cplg = cplg_O
                 else:
                     cplg = -cplg_O
@@ -110,7 +110,7 @@ class BaseRotator(
             cplgC = self.symbols.math.cos(self.rotate_deg.val / 180 * self.symbols.pi)
             cplgS_O = self.symbols.math.sin(self.rotate_deg.val / 180 * self.symbols.pi)
             for port in self.ports_optical:
-                if port is self.Fr:
+                if port is self.po_Fr:
                     cplgS = cplgS_O
                 else:
                     cplgS = -cplgS_O
@@ -166,7 +166,7 @@ class PolarizationRotator(
             elif self.rotate_deg.val in (-90, 270):
                 cplg_O = -1
             for port in self.ports_optical:
-                if port is self.Fr:
+                if port is self.po_Fr:
                     cplg = cplg_O
                 else:
                     cplg = -cplg_O
@@ -191,7 +191,7 @@ class PolarizationRotator(
             cplgC = self.symbols.math.cos(self.rotate_deg.val / 180 * self.symbols.pi)
             cplgS_O = self.symbols.math.sin(self.rotate_deg.val / 180 * self.symbols.pi)
             for port in self.ports_optical:
-                if port is self.Fr:
+                if port is self.po_Fr:
                     cplgS = cplgS_O
                 else:
                     cplgS = -cplgS_O
@@ -326,25 +326,25 @@ class WavePlate(
         bases.PTREE_ASSIGN(self).cplgSC = cplgSC
 
     @decl.dproperty
-    def Fr(self):
-        return ports.OpticalPort(sname = 'Fr')
+    def po_Fr(self):
+        return ports.OpticalPort(sname = 'po_Fr')
 
     @decl.dproperty
-    def Bk(self):
-        return ports.OpticalPort(sname = 'Bk')
+    def po_Bk(self):
+        return ports.OpticalPort(sname = 'po_Bk')
 
     @decl.mproperty
     def ports_optical(self):
         return [
-            self.Fr,
-            self.Bk,
+            self.po_Fr,
+            self.po_Bk,
         ]
 
     @decl.mproperty
     def pmap(self):
         return {
-            self.Fr : self.Bk,
-            self.Bk : self.Fr,
+            self.po_Fr : self.po_Bk,
+            self.po_Bk : self.po_Fr,
         }
 
     def system_setup_ports(self, ports_algorithm):
@@ -422,11 +422,11 @@ class WavePlateMount(
         self.own.coord_Fr = PolarizationRotator(rotate =  self.rotate)
         self.own.coord_Bk = PolarizationRotator(rotate = -self.rotate)
 
-        self.system.bond(self.coord_Fr.Bk, self.plate.Fr)
-        self.system.bond(self.plate.Bk, self.coord_Bk.Fr)
+        self.system.bond(self.coord_Fr.po_Bk, self.plate.po_Fr)
+        self.system.bond(self.plate.po_Bk, self.coord_Bk.po_Fr)
 
-        self.own.Fr = ports.PortIndirect(inner_port = self.coord_Fr.Fr, pchain = lambda : self.Bk)
-        self.own.Bk = ports.PortIndirect(inner_port = self.coord_Bk.Bk, pchain = lambda : self.Fr)
+        self.own.po_Fr = ports.PortIndirect(inner_port = self.coord_Fr.po_Fr, pchain = lambda : self.po_Bk)
+        self.own.po_Bk = ports.PortIndirect(inner_port = self.coord_Bk.po_Bk, pchain = lambda : self.po_Fr)
 
 
 class HalfWavePlate(WavePlateMount):

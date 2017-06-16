@@ -18,19 +18,19 @@ class AOM(
     bases.SystemElementBase,
 ):
     @declarative.dproperty
-    def FrA(self):
+    def po_FrA(self):
         return ports.OpticalPort()
 
     @declarative.dproperty
-    def BkA(self):
+    def po_BkA(self):
         return ports.OpticalPort()
 
     @declarative.dproperty
-    def BkB(self):
+    def po_BkB(self):
         return ports.OpticalPort()
 
     @declarative.dproperty
-    def FrB(self):
+    def po_FrB(self):
         return ports.OpticalPort()
 
     @declarative.dproperty
@@ -57,29 +57,29 @@ class AOM(
     @declarative.mproperty
     def ports_optical(self):
         return set([
-            self.FrA,
-            self.BkA,
-            self.FrB,
-            self.BkB,
+            self.po_FrA,
+            self.po_BkA,
+            self.po_FrB,
+            self.po_BkB,
         ])
 
     def system_setup_ports(self, ports_algorithm):
         tmap = {
-            self.FrA: self.BkA,
-            self.BkA: self.FrA,
-            self.FrB: self.BkB,
-            self.BkB: self.FrB,
+            self.po_FrA: self.po_BkA,
+            self.po_BkA: self.po_FrA,
+            self.po_FrB: self.po_BkB,
+            self.po_BkB: self.po_FrB,
         }
         smap = {
-            self.FrA: self.BkB,
-            self.BkA: self.FrB,
-            self.FrB: self.BkA,
-            self.BkB: self.FrA,
+            self.po_FrA: self.po_BkB,
+            self.po_BkA: self.po_FrB,
+            self.po_FrB: self.po_BkA,
+            self.po_BkB: self.po_FrA,
         }
 
         for portset in [
-            {self.FrA : 1, self.FrB : -1},
-            {self.BkA : -1, self.BkB : 1},
+            {self.po_FrA : 1, self.po_FrB : -1},
+            {self.po_BkA : -1, self.po_BkB : 1},
         ]:
             for kfrom in ports_algorithm.port_update_get(self.Drv.i):
                 drv_ckey = kfrom[ports.ClassicalFreqKey]
@@ -181,27 +181,27 @@ class AOM(
 
     def system_setup_coupling(self, matrix_algorithm):
         tmap = {
-            self.FrA: self.FrA,
-            self.BkA: self.BkA,
-            self.FrB: self.FrB,
-            self.BkB: self.BkB,
+            self.po_FrA: self.po_FrA,
+            self.po_BkA: self.po_BkA,
+            self.po_FrB: self.po_FrB,
+            self.po_BkB: self.po_BkB,
         }
         smap = {
-            self.FrA: self.FrB,
-            self.BkA: self.BkB,
-            self.FrB: self.FrA,
-            self.BkB: self.BkA,
+            self.po_FrA: self.po_FrB,
+            self.po_BkA: self.po_BkB,
+            self.po_FrB: self.po_FrA,
+            self.po_BkB: self.po_BkA,
         }
         omap = {
-            self.FrA: self.BkA,
-            self.BkA: self.FrA,
-            self.FrB: self.BkB,
-            self.BkB: self.FrB,
+            self.po_FrA: self.po_BkA,
+            self.po_BkA: self.po_FrA,
+            self.po_FrB: self.po_BkB,
+            self.po_BkB: self.po_FrB,
         }
 
         for portset in [
-            {self.FrA : 1, self.FrB : -1},
-            {self.BkA : -1, self.BkB : 1},
+            {self.po_FrA : 1, self.po_FrB : -1},
+            {self.po_BkA : -1, self.po_BkB : 1},
         ]:
             dLt = collections.defaultdict(list)
             out_map = dict()

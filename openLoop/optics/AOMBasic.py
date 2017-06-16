@@ -18,12 +18,12 @@ class AOMBasic(
     bases.SystemElementBase,
 ):
     @declarative.dproperty
-    def Fr(self):
-        return ports.OpticalPort(pchain = lambda : self.Bk)
+    def po_Fr(self):
+        return ports.OpticalPort(pchain = lambda : self.po_Bk)
 
     @declarative.dproperty
-    def Bk(self):
-        return ports.OpticalPort(pchain = lambda : self.Fr)
+    def po_Bk(self):
+        return ports.OpticalPort(pchain = lambda : self.po_Fr)
 
     @declarative.dproperty
     def Drv(self):
@@ -39,23 +39,23 @@ class AOMBasic(
     @declarative.mproperty
     def ports_optical(self):
         return set([
-            self.Fr,
-            self.Bk,
+            self.po_Fr,
+            self.po_Bk,
         ])
 
     def system_setup_ports(self, ports_algorithm):
         tmap = {
-            self.Fr.i: self.Bk.o,
-            self.Fr.o: self.Bk.i,
-            self.Bk.i: self.Fr.o,
-            self.Bk.o: self.Fr.i,
+            self.po_Fr.i: self.po_Bk.o,
+            self.po_Fr.o: self.po_Bk.i,
+            self.po_Bk.i: self.po_Fr.o,
+            self.po_Bk.o: self.po_Fr.i,
         }
 
         for port, direction in [
-            (self.Fr.i, 1),
-            (self.Bk.i, -1),
-            (self.Fr.o, 1),
-            (self.Bk.o, -1),
+            (self.po_Fr.i, 1),
+            (self.po_Bk.i, -1),
+            (self.po_Fr.o, 1),
+            (self.po_Bk.o, -1),
         ]:
             for kfrom in ports_algorithm.port_update_get(self.Drv.i):
                 drv_ckey = kfrom[ports.ClassicalFreqKey]
@@ -145,15 +145,15 @@ class AOMBasic(
 
     def system_setup_coupling(self, matrix_algorithm):
         tmap = {
-            self.Fr: self.Bk,
-            self.Bk: self.Fr,
+            self.po_Fr: self.po_Bk,
+            self.po_Bk: self.po_Fr,
         }
 
         fdkey          = ports.DictKey({ports.ClassicalFreqKey: ports.FrequencyKey({})})
         pknorm = (self.Drv_Pwr.MS.o, fdkey)
         for port, direction in [
-            (self.Fr, 1),
-            (self.Bk, -1),
+            (self.po_Fr, 1),
+            (self.po_Bk, -1),
         ]:
             for kfrom in matrix_algorithm.port_set_get(port.i):
                 okey = kfrom[ports.OpticalFreqKey]

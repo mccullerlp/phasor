@@ -40,8 +40,8 @@ class PPKTP(ports.OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementB
         self.Qheat = ports.MechanicalPortHolderOut(self, x = 'Q')
 
         self.is_4_port = False
-        self.Fr   = ports.OpticalPort(sname = 'Fr' )
-        self.Bk   = ports.OpticalPort(sname = 'Bk' )
+        self.po_Fr   = ports.OpticalPort(sname = 'po_Fr' )
+        self.po_Bk   = ports.OpticalPort(sname = 'po_Bk' )
         self._LFr = ports.OpticalPort(sname = 'LFr')
         self._LBk = ports.OpticalPort(sname = 'LBk')
         return
@@ -62,8 +62,8 @@ class PPKTP(ports.OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementB
     @decl.mproperty
     def ports_optical(self):
         return [
-            self.Fr,
-            self.Bk,
+            self.po_Fr,
+            self.po_Bk,
         ]
 
     @mproperty
@@ -75,28 +75,28 @@ class PPKTP(ports.OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementB
 
     def system_setup_ports(self, system):
         tmap = {
-            self.FrA: self.BkA,
-            self.BkA: self.FrA,
-            self.FrB: self.BkB,
-            self.BkB: self.FrB,
+            self.po_FrA: self.po_BkA,
+            self.po_BkA: self.po_FrA,
+            self.po_FrB: self.po_BkB,
+            self.po_BkB: self.po_FrB,
         }
 
         rmap = {
-            self.FrA: self.FrB,
-            self.BkA: self.BkB,
-            self.FrB: self.FrA,
-            self.BkB: self.BkA,
+            self.po_FrA: self.po_FrB,
+            self.po_BkA: self.po_BkB,
+            self.po_FrB: self.po_FrA,
+            self.po_BkB: self.po_BkA,
         }
 
         lmap = {
-            self.FrA: self._LFrA,
-            self.BkA: self._LBkA,
-            self.FrB: self._LFrB,
-            self.BkB: self._LBkB,
-            self._LFrA: self.FrA,
-            self._LBkA: self.BkA,
-            self._LFrB: self.FrB,
-            self._LBkB: self.BkB,
+            self.po_FrA: self._LFrA,
+            self.po_BkA: self._LBkA,
+            self.po_FrB: self._LFrB,
+            self.po_BkB: self._LBkB,
+            self._LFrA: self.po_FrA,
+            self._LBkA: self.po_BkA,
+            self._LFrB: self.po_FrB,
+            self._LBkB: self.po_BkB,
         }
         rmapL = dict((k.i, [v.o]) for k, v in list(rmap.items()))
         rmapL.update((k.o, [v.i]) for k, v in list(rmap.items()))
@@ -129,28 +129,28 @@ class PPKTP(ports.OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementB
         l     = +system.math.sqrt(self.L_hr)
 
         tmap = {
-            self.FrA: (self.BkA   , t),
-            self.BkA: (self.FrA   , t),
-            self.FrB: (self.BkB   , t),
-            self.BkB: (self.FrB   , t),
+            self.po_FrA: (self.po_BkA   , t),
+            self.po_BkA: (self.po_FrA   , t),
+            self.po_FrB: (self.po_BkB   , t),
+            self.po_BkB: (self.po_FrB   , t),
         }
 
         rmap = {
-            self.FrA: (self.FrB   , r),
-            self.BkA: (self.BkB   , r_neg),
-            self.FrB: (self.FrA   , r),
-            self.BkB: (self.BkA   , r_neg),
+            self.po_FrA: (self.po_FrB   , r),
+            self.po_BkA: (self.po_BkB   , r_neg),
+            self.po_FrB: (self.po_FrA   , r),
+            self.po_BkB: (self.po_BkA   , r_neg),
         }
 
         lmap = {
-            self._LFrA: (self.FrA   , l),
-            self._LBkA: (self.BkA   , l),
-            self.FrA  : (self._LFrA , l),
-            self.BkA  : (self._LBkA , l),
-            self._LFrB: (self.FrB   , l),
-            self._LBkB: (self.BkB   , l),
-            self.FrB  : (self._LFrB , l),
-            self.BkB  : (self._LBkB , l),
+            self._LFrA: (self.po_FrA   , l),
+            self._LBkA: (self.po_BkA   , l),
+            self.po_FrA  : (self._LFrA , l),
+            self.po_BkA  : (self._LBkA , l),
+            self._LFrB: (self.po_FrB   , l),
+            self._LBkB: (self.po_BkB   , l),
+            self.po_FrB  : (self._LFrB , l),
+            self.po_BkB  : (self._LBkB , l),
         }
 
         if self.AOI_deg != 0:

@@ -65,28 +65,28 @@ class KTPTestStand(optics.OpticalCouplerBase):
             AOI_deg = 45,
         )
         self.own.hPD_R = optics.HiddenVariableHomodynePD(
-            source_port = self.PSLRs.Fr.o,
+            source_port = self.PSLRs.po_Fr.o,
             include_quanta = True,
         )
         self.own.hPD_G = optics.HiddenVariableHomodynePD(
-            source_port = self.PSLGs.Fr.o,
+            source_port = self.PSLGs.po_Fr.o,
             include_quanta = True,
         )
 
-        self.PSLR.Fr.bond_sequence(
-            self.mDC1.BkA,
-            self.ditherAM.Fr,
-            self.ktp.Fr,
-            self.mDC2.FrA,
-            self.PD_R.Fr,
-            self.hPD_R.Fr,
+        self.PSLR.po_Fr.bond_sequence(
+            self.mDC1.po_BkA,
+            self.ditherAM.po_Fr,
+            self.ktp.po_Fr,
+            self.mDC2.po_FrA,
+            self.PD_R.po_Fr,
+            self.hPD_R.po_Fr,
         )
-        self.PSLG.Fr.bond_sequence(
-            self.mDC1.BkB,
+        self.PSLG.po_Fr.bond_sequence(
+            self.mDC1.po_BkB,
         )
-        self.mDC2.FrB.bond_sequence(
-            self.PD_G.Fr,
-            self.hPD_G.Fr,
+        self.mDC2.po_FrB.bond_sequence(
+            self.PD_G.po_Fr,
+            self.hPD_G.po_Fr,
         )
 
         self.own.DC_R = readouts.DCReadout(
@@ -208,32 +208,32 @@ class SHGTestStandResonant(optics.OpticalCouplerBase):
             AOI_deg   = 0,
         )
         self.own.hPD_R = optics.HiddenVariableHomodynePD(
-            source_port = self.PSLRs.Fr.o,
+            source_port = self.PSLRs.po_Fr.o,
             include_quanta = True,
         )
         self.own.hPD_G = optics.HiddenVariableHomodynePD(
-            source_port = self.PSLGs.Fr.o,
+            source_port = self.PSLGs.po_Fr.o,
             include_quanta = True,
         )
 
-        self.PSLR.Fr.bond_sequence(
-            self.ditherPM.Fr,
+        self.PSLR.po_Fr.bond_sequence(
+            self.ditherPM.po_Fr,
             self.faraday.P0,
         )
         self.faraday.P1.bond_sequence(
-            self.mDC1.FrA,
-            self.S1.Fr,
-            self.ktp.Fr,
-            self.S2.Fr,
-            self.mDC2.FrA,
-            self.Sg.Fr,
-            self.mirror_gres.Fr,
-            self.PD_G.Fr,
-            self.hPD_G.Fr,
+            self.mDC1.po_FrA,
+            self.S1.po_Fr,
+            self.ktp.po_Fr,
+            self.S2.po_Fr,
+            self.mDC2.po_FrA,
+            self.Sg.po_Fr,
+            self.mirror_gres.po_Fr,
+            self.PD_G.po_Fr,
+            self.hPD_G.po_Fr,
         )
         self.faraday.P2.bond_sequence(
-            self.PD_R.Fr,
-            self.hPD_R.Fr,
+            self.PD_R.po_Fr,
+            self.hPD_R.po_Fr,
         )
 
         self.own.DC_R = readouts.DCReadout(
@@ -384,32 +384,32 @@ class OPOTestStandResonant(optics.OpticalCouplerBase):
             ),
             AOI_deg = 0,
         )
-        self.PSLRs.Fr.bond(self.own.ditherPMRead.Fr)
+        self.PSLRs.po_Fr.bond(self.own.ditherPMRead.po_Fr)
         self.own.hPD_R = optics.HiddenVariableHomodynePD(
-            source_port = self.ditherPMRead.Bk.o,
+            source_port = self.ditherPMRead.po_Bk.o,
             include_quanta = True,
         )
         self.own.hPD_G = optics.HiddenVariableHomodynePD(
-            source_port = self.PSLGs.Fr.o,
+            source_port = self.PSLGs.po_Fr.o,
             include_quanta = True,
         )
 
-        self.PSLG.Fr.bond_sequence(
-            self.ditherPM.Fr,
+        self.PSLG.po_Fr.bond_sequence(
+            self.ditherPM.po_Fr,
             self.faraday.P0,
         )
         self.faraday.P1.bond_sequence(
-            self.mDC1.FrA,
-            self.S1.Fr,
-            self.ktp.Fr,
-            self.S2.Fr,
-            self.mDC2.FrA,
-            self.PD_R.Fr,
-            self.hPD_R.Fr,
+            self.mDC1.po_FrA,
+            self.S1.po_Fr,
+            self.ktp.po_Fr,
+            self.S2.po_Fr,
+            self.mDC2.po_FrA,
+            self.PD_R.po_Fr,
+            self.hPD_R.po_Fr,
         )
         self.faraday.P2.bond_sequence(
-            self.PD_G.Fr,
-            self.hPD_G.Fr,
+            self.PD_G.po_Fr,
+            self.hPD_G.po_Fr,
         )
 
         self.own.DC_R = readouts.DCReadout(

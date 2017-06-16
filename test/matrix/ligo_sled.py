@@ -336,37 +336,37 @@ class LIGODetector(base.SystemElementBase):
         self.own.asymPD = optics.PD()
 
         self.system.bond_sequence(
-            self.REFLPD.Fr,
-            self.PR.Fr,
-            self.POPTruePD.Bk,
-            self.S_PR_PR2.Fr,
-            self.PR2.BkA,
-            self.S_PR2_BS.Fr,
-            self.BS.FrA,
-            self.S_BS_IX.Fr,
-            self.IX.Fr,
-            self.XarmPD.Bk,
-            self.S_IX_EX.Fr,
-            self.EX.Bk,
-            self.XtransPD.Fr,
+            self.REFLPD.po_Fr,
+            self.PR.po_Fr,
+            self.POPTruePD.po_Bk,
+            self.S_PR_PR2.po_Fr,
+            self.PR2.po_BkA,
+            self.S_PR2_BS.po_Fr,
+            self.BS.po_FrA,
+            self.S_BS_IX.po_Fr,
+            self.IX.po_Fr,
+            self.XarmPD.po_Bk,
+            self.S_IX_EX.po_Fr,
+            self.EX.po_Bk,
+            self.XtransPD.po_Fr,
         )
         self.system.bond_sequence(
-            self.SR.Fr,
-            self.S_BS_SR.Fr,
-            self.BS.BkB,
-            self.S_BS_IY.Fr,
-            self.IY.Fr,
-            self.YarmPD.Fr,
-            self.S_IY_EY.Fr,
-            self.EY.Bk,
-            self.YtransPD.Fr,
+            self.SR.po_Fr,
+            self.S_BS_SR.po_Fr,
+            self.BS.po_BkB,
+            self.S_BS_IY.po_Fr,
+            self.IY.po_Fr,
+            self.YarmPD.po_Fr,
+            self.S_IY_EY.po_Fr,
+            self.EY.po_Bk,
+            self.YtransPD.po_Fr,
         )
 
         self.own.PR2_vac = optics.VacuumTerminator()
         self.system.bond_sequence(
-            self.PR2_vac.Fr,
-            self.PR2.BkB,
-            self.POPPD.Fr,
+            self.PR2_vac.po_Fr,
+            self.PR2.po_BkB,
+            self.POPPD.po_Fr,
         )
 
         self.own.XtransDC = readouts.DCReadout(
@@ -455,9 +455,9 @@ class LIGODetector(base.SystemElementBase):
         self.system.bond(self.EY.Z.d, self.testpoint_CARM_pos_m.EY)
 
         #since it is facing east
-        self.INPUT_ATTACH_POINT = self.REFLPD.Bk
+        self.INPUT_ATTACH_POINT = self.REFLPD.po_Bk
         #since it is facing south
-        self.OUTPUT_ATTACH_POINT = self.SR.Bk
+        self.OUTPUT_ATTACH_POINT = self.SR.po_Bk
         return
 
 
@@ -496,11 +496,11 @@ class LIGOInputBasic(base.SystemElementBase):
         self.own.EOM = optics.PM()
 
         self.system.bond_sequence(
-            self.PSL.Fr,
-            self.EOM.Fr,
+            self.PSL.po_Fr,
+            self.EOM.po_Fr,
         )
 
-        self.INPUT_ATTACH_POINT = self.EOM.Bk
+        self.INPUT_ATTACH_POINT = self.EOM.po_Bk
 
 
 class LIGOOutputBasic(base.SystemElementBase):
@@ -516,7 +516,7 @@ class LIGOOutputBasic(base.SystemElementBase):
             portD = LIGO_obj.actuate_DARM_h.In.i,
         )
 
-        self.OUTPUT_ATTACH_POINT = self.ASPD.Fr
+        self.OUTPUT_ATTACH_POINT = self.ASPD.po_Fr
 
 
 class LIGOOutputHomodyne(base.SystemElementBase):
@@ -533,7 +533,7 @@ class LIGOOutputHomodyne(base.SystemElementBase):
         )
         self.own.AS_vac = optics.VacuumTerminator()
         self.own.ASPDHD_lossless = optics.HiddenVariableHomodynePD(
-            source_port     = input_obj.PSL.Fr.o,
+            source_port     = input_obj.PSL.po_Fr.o,
             phase_deg       = 90,
             include_quanta  = True,
             #facing_cardinal = 'N',
@@ -549,7 +549,7 @@ class LIGOOutputHomodyne(base.SystemElementBase):
         )
 
         self.own.ASPDHD = optics.HiddenVariableHomodynePD(
-            source_port     = input_obj.PSL.Fr.o,
+            source_port     = input_obj.PSL.po_Fr.o,
             phase_deg       = 90,
             include_quanta  = True,
             #facing_cardinal = 'N',
@@ -610,13 +610,13 @@ class LIGOOutputHomodyne(base.SystemElementBase):
 
         #TODO add loss
         self.system.bond_sequence(
-            self.ASPD.Bk,
-            self.ASPDHD_lossless.Fr,
-            self.AS_loss.Fr,
-            self.ASPDHD.Fr,
-            self.AS_vac.Fr,
+            self.ASPD.po_Bk,
+            self.ASPDHD_lossless.po_Fr,
+            self.AS_loss.po_Fr,
+            self.ASPDHD.po_Fr,
+            self.AS_vac.po_Fr,
         )
-        self.OUTPUT_ATTACH_POINT = self.ASPD.Fr
+        self.OUTPUT_ATTACH_POINT = self.ASPD.po_Fr
 
 
 class LIGOBasicOperation(base.SystemElementBase):

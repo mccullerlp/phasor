@@ -47,14 +47,14 @@ class FaradayTestSled(
         self.PD_Bk_Prej = optics.PD()
         self.PD_Fr_ins  = optics.PD()
 
-        self.system.bond(self.circulator_Fr.P2,      self.PD_Fr.Fr     )
-        self.system.bond(self.circulator_Bk.P2,      self.PD_Bk.Fr     )
-        self.system.bond(self.circulator_Fr_Prej.P2, self.PD_Fr_Prej.Fr)
-        self.system.bond(self.circulator_Bk_Prej.P2, self.PD_Bk_Prej.Fr)
-        self.system.bond(self.circulator_Fr_ins.P2,  self.PD_Fr_ins.Fr )
+        self.system.bond(self.circulator_Fr.P2,      self.PD_Fr.po_Fr     )
+        self.system.bond(self.circulator_Bk.P2,      self.PD_Bk.po_Fr     )
+        self.system.bond(self.circulator_Fr_Prej.P2, self.PD_Fr_Prej.po_Fr)
+        self.system.bond(self.circulator_Bk_Prej.P2, self.PD_Bk_Prej.po_Fr)
+        self.system.bond(self.circulator_Fr_ins.P2,  self.PD_Fr_ins.po_Fr )
 
-        self.system.bond(self.circulator_Fr.P1,      self.faraday.Fr     )
-        self.system.bond(self.circulator_Bk.P1,      self.faraday.Bk     )
+        self.system.bond(self.circulator_Fr.P1,      self.faraday.po_Fr     )
+        self.system.bond(self.circulator_Bk.P1,      self.faraday.po_Bk     )
         self.system.bond(self.circulator_Fr_Prej.P1, self.faraday.Fr_Prej)
         self.system.bond(self.circulator_Bk_Prej.P1, self.faraday.Bk_Prej)
         self.system.bond(self.circulator_Fr_ins.P1,  self.faraday.Fr_ins )
@@ -70,7 +70,7 @@ class TestFaradayIsolator(TestCase):
     def test_inj(self):
         sys = system.BGSystem()
         sys.test = FaradayTestSled(PSL_pol = 'S')
-        sys.link(sys.test.PSL.Fr, sys.test.circulator_Fr.P0)
+        sys.link(sys.test.PSL.po_Fr, sys.test.circulator_Fr.P0)
         sol = sys.solve()
 
         print("DC_Fr     : ", sys.test.DC_Fr.DC_readout)

@@ -106,7 +106,7 @@ class OpticalPort(OpticalPortRaw, bases.SystemElementBase):
         """
         from .vacuum import VacuumTerminator
         self.own.terminator = VacuumTerminator()
-        self.system.bond(self, self.terminator.Fr)
+        self.system.bond(self, self.terminator.po_Fr)
         return (self, self.terminator)
 
     def targets_list(self, typename):

@@ -41,13 +41,13 @@ class PolTester(
         self.own.PD_P = optics.PD()
 
         self.system.bond_sequence(
-            self.PSL.Fr,
-            self.mBS.FrA,
-            self.PD_P.Fr,
+            self.PSL.po_Fr,
+            self.mBS.po_FrA,
+            self.PD_P.po_Fr,
         )
         self.system.bond_sequence(
-            self.mBS.FrB,
-            self.PD_S.Fr,
+            self.mBS.po_FrB,
+            self.PD_S.po_Fr,
         )
 
         self.own.DC_P = readouts.DCReadout(
@@ -101,14 +101,14 @@ class WavePlateTester(
         self.own.PD_P = optics.PD()
 
         self.system.bond_sequence(
-            self.PSL.Fr,
-            self.waveplate.Fr,
-            self.mBS.FrA,
-            self.PD_P.Fr,
+            self.PSL.po_Fr,
+            self.waveplate.po_Fr,
+            self.mBS.po_FrA,
+            self.PD_P.po_Fr,
         )
         self.system.bond_sequence(
-            self.mBS.FrB,
-            self.PD_S.Fr,
+            self.mBS.po_FrB,
+            self.PD_S.po_Fr,
         )
 
         self.own.DC_P = readouts.DCReadout(
@@ -168,22 +168,22 @@ class WavePlateTesterRetro(
         self.own.PD_P = optics.PD()
 
         self.system.bond_sequence(
-            self.PSL.Fr,
+            self.PSL.po_Fr,
             self.circulator.P0,
         )
         self.system.bond_sequence(
             self.circulator.P1,
-            self.waveplate.Fr,
-            self.reflector.Fr,
+            self.waveplate.po_Fr,
+            self.reflector.po_Fr,
         )
         self.system.bond_sequence(
             self.circulator.P2,
-            self.mBS.FrA,
-            self.PD_P.Fr,
+            self.mBS.po_FrA,
+            self.PD_P.po_Fr,
         )
         self.system.bond_sequence(
-            self.mBS.FrB,
-            self.PD_S.Fr,
+            self.mBS.po_FrB,
+            self.PD_S.po_Fr,
         )
 
         self.own.DC_P = readouts.DCReadout(
