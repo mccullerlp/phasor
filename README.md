@@ -21,7 +21,7 @@ After reading the features, it is easiest to dive in to some examples before con
  
  * Uses internal matrix solver optimized for smallest-arrays-first and fewest-connections-first as it solves the linear system.
 
- * NOTE: currently the Gaussian elimination algorithm with heuristics can be unstable for large systems. A QR factorization step is needed to behave better. The output is obviously bad when unstable, but the iterative solver can take many iterations when poor loop reduction ordering occurs.
+ * NOTE: currently the Gaussian elimination algorithm with heuristics can be unstable for large systems. pe_A QR factorization step is needed to behave better. The output is obviously bad when unstable, but the iterative solver can take many iterations when poor loop reduction ordering occurs.
  
  * The system object can store global settings and debug flags. These are easy to hook into and can be adjusted through the configuration management system.
 

@@ -81,9 +81,9 @@ class SignalInPort(SignalInPortRaw, bases.SystemElementBase):
                 N_ports = 1 + len(self._bond_partners)
             )
             self.system._include(self.connection)
-            self.connection.p0.bond_inform(self)
-            self.system.bond_completion_raw(self, self.connection.p0, self)
-            self.connection.p0.bond_completion()
+            self.connection.pe_0.bond_inform(self)
+            self.system.bond_completion_raw(self, self.connection.pe_0, self)
+            self.connection.pe_0.bond_completion()
             for idx, partner in enumerate(self._bond_partners):
                 #TODO not sure if I like the connection object not knowing who it is bound to
                 #maybe make a more explicit notification for the raw bonding

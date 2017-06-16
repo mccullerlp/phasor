@@ -12,11 +12,11 @@ from . import elements
 
 class XYZMass(elements.Mechanical1PortBase):
     @declarative.dproperty
-    def A(self):
+    def pm_A(self):
         return ports.MechanicalXYZPort(
-            X = self.X.A,
-            Y = self.Y.A,
-            Z = self.Z.A,
+            X = self.X.pm_A,
+            Y = self.Y.pm_A,
+            Z = self.Z.pm_A,
         )
 
     @declarative.dproperty
@@ -48,11 +48,11 @@ class XYZMass(elements.Mechanical1PortBase):
 class XYZTerminatorSpring(elements.Mechanical1PortBase):
 
     @declarative.dproperty
-    def A(self):
+    def pm_A(self):
         return ports.MechanicalXYZPort(
-            X = self.X.A,
-            Y = self.Y.A,
-            Z = self.Z.A,
+            X = self.X.pm_A,
+            Y = self.Y.pm_A,
+            Z = self.Z.pm_A,
         )
 
     @declarative.dproperty
@@ -83,11 +83,11 @@ class XYZTerminatorSpring(elements.Mechanical1PortBase):
 
 class XYZTerminatorOpen(elements.Mechanical1PortBase):
     @declarative.dproperty
-    def A(self):
+    def pm_A(self):
         return ports.MechanicalXYZPort(
-            X = self.X.A,
-            Y = self.Y.A,
-            Z = self.Z.A,
+            X = self.X.pm_A,
+            Y = self.Y.pm_A,
+            Z = self.Z.pm_A,
         )
 
     @declarative.dproperty
@@ -105,11 +105,11 @@ class XYZTerminatorOpen(elements.Mechanical1PortBase):
 
 class XYZTerminatorShorted(elements.Mechanical1PortBase):
     @declarative.dproperty
-    def A(self):
+    def pm_A(self):
         return ports.MechanicalXYZPort(
-            X = self.X.A,
-            Y = self.Y.A,
-            Z = self.Z.A,
+            X = self.X.pm_A,
+            Y = self.Y.pm_A,
+            Z = self.Z.pm_A,
         )
 
     @declarative.dproperty
@@ -128,11 +128,11 @@ class XYZTerminatorShorted(elements.Mechanical1PortBase):
 class XYZTerminatorDamper(elements.Mechanical1PortBase):
 
     @declarative.dproperty
-    def A(self):
+    def pm_A(self):
         return ports.MechanicalXYZPort(
-            X = self.X.A,
-            Y = self.Y.A,
-            Z = self.Z.A,
+            X = self.X.pm_A,
+            Y = self.Y.pm_A,
+            Z = self.Z.pm_A,
         )
 
     @declarative.dproperty
@@ -165,9 +165,9 @@ class XYZMoment(elements.Mechanical1PortBase):
     @declarative.dproperty
     def L(self):
         return ports.MechanicalXYZPort(
-            X = self.X.A,
-            Y = self.Y.A,
-            Z = self.Z.A,
+            X = self.X.pm_A,
+            Y = self.Y.pm_A,
+            Z = self.Z.pm_A,
         )
 
     @declarative.dproperty
@@ -206,7 +206,7 @@ class XYZMomentDriver(elements.Mechanical1PortBase):
         )
 
     @declarative.dproperty
-    def A(self):
+    def pm_A(self):
         return ports.MechanicalXYZPort(
             X = self.Ax,
             Y = self.Ay,
@@ -214,7 +214,7 @@ class XYZMomentDriver(elements.Mechanical1PortBase):
         )
 
     @declarative.dproperty
-    def B(self):
+    def pm_B(self):
         return ports.MechanicalXYZPort(
             X = self.Bx,
             Y = self.By,
@@ -271,7 +271,7 @@ class XYZMomentDriver(elements.Mechanical1PortBase):
         return XYZ
 
     def system_setup_ports(self, ports_algorithm):
-        all_ports = [self.A.X, self.A.Y, self.A.Z] + [self.B.X, self.B.Y, self.B.Z] + [self.L.X, self.L.Y, self.L.Z]
+        all_ports = [self.pm_A.X, self.pm_A.Y, self.pm_A.Z] + [self.pm_B.X, self.pm_B.Y, self.pm_B.Z] + [self.L.X, self.L.Y, self.L.Z]
         for port1 in all_ports:
             for port2 in all_ports:
                 for kfrom in ports_algorithm.port_update_get(port1.i):
@@ -281,8 +281,8 @@ class XYZMomentDriver(elements.Mechanical1PortBase):
         return
 
     def system_setup_coupling(self, matrix_algorithm):
-        A_ports = [self.A.X, self.A.Y, self.A.Z]
-        B_ports = [self.B.X, self.B.Y, self.B.Z]
+        A_ports = [self.pm_A.X, self.pm_A.Y, self.pm_A.Z]
+        B_ports = [self.pm_B.X, self.pm_B.Y, self.pm_B.Z]
         L_ports = [self.L.X, self.L.Y, self.L.Z]
         d_vec = np.asarray(self.displacementXYZ)
 
@@ -369,11 +369,11 @@ class MomentDriver(elements.Mechanical1PortBase):
         return ports.MechanicalPort()
 
     @declarative.dproperty
-    def A(self):
+    def pm_A(self):
         return ports.MechanicalPort()
 
     @declarative.dproperty
-    def B(self):
+    def pm_B(self):
         return ports.MechanicalXYZPort(
             X = self.Bx,
             Y = self.By,
@@ -404,7 +404,7 @@ class MomentDriver(elements.Mechanical1PortBase):
         return XYZ
 
     def system_setup_ports(self, ports_algorithm):
-        all_ports = [self.A] + [self.L.X, self.L.Y, self.L.Z] + [self.B.X, self.B.Y, self.B.Z]
+        all_ports = [self.pm_A] + [self.L.X, self.L.Y, self.L.Z] + [self.pm_B.X, self.pm_B.Y, self.pm_B.Z]
         for port1 in all_ports:
             for port2 in all_ports:
                 for kfrom in ports_algorithm.port_update_get(port1.i):
@@ -414,9 +414,9 @@ class MomentDriver(elements.Mechanical1PortBase):
         return
 
     def system_setup_coupling(self, matrix_algorithm):
-        A_ports = [self.A]
+        A_ports = [self.pm_A]
         L_ports = [self.L.X, self.L.Y, self.L.Z]
-        B_ports = [self.B.X, self.B.Y, self.B.Z]
+        B_ports = [self.pm_B.X, self.pm_B.Y, self.pm_B.Z]
         d_vec = np.array(self.displacementXYZ)
         v_vec = np.array(self.driveXYZ)
 
@@ -493,11 +493,11 @@ class Moment1D(elements.Mechanical1PortBase):
         return ports.MechanicalPort()
 
     @declarative.dproperty
-    def A(self):
+    def pm_A(self):
         return ports.MechanicalPort()
 
     @declarative.dproperty
-    def B(self):
+    def pm_B(self):
         return ports.MechanicalPort()
 
     @declarative.dproperty
@@ -505,7 +505,7 @@ class Moment1D(elements.Mechanical1PortBase):
         return X
 
     def system_setup_ports(self, ports_algorithm):
-        all_ports = [self.A, self.B, self.L]
+        all_ports = [self.pm_A, self.pm_B, self.L]
         for port1 in all_ports:
             for port2 in all_ports:
                 for kfrom in ports_algorithm.port_update_get(port1.i):
@@ -520,7 +520,7 @@ class Moment1D(elements.Mechanical1PortBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         d = self.displacement
-        ports = [self.A, self.B, self.L]
+        ports = [self.pm_A, self.pm_B, self.L]
         den = d**2 + 2
         matrix = 1/den * np.array([
             [d**2, 2   , +2*d],

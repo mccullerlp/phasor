@@ -129,9 +129,9 @@ class NoiseReadout(base.SystemElementBase):
                         vals = nmap_inner.get(pk2, None)
                         if vals is None:
                             continue
-                        for p1, k1, p2, k2, nobj in vals:
-                            pspec_2sided = nobj.noise_2pt_expectation(p1, k1, p2, k2)
-                            #print("PSPEC: ", p1, k1, p2, k2, pspec_2sided, cplg1 * cplg2)
+                        for pe_1, k1, pe_2, k2, nobj in vals:
+                            pspec_2sided = nobj.noise_2pt_expectation(pe_1, k1, pe_2, k2)
+                            #print("PSPEC: ", pe_1, k1, pe_2, k2, pspec_2sided, cplg1 * cplg2)
                             pspec_tot = self.system.adjust_PSD * pspec_2sided * cplg1 * cplg2
                             if pnameP == pnameN:
                                 pspec_tot = np.real(pspec_tot)

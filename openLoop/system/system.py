@@ -326,10 +326,10 @@ class BGSystem(RootElement):
 
         bad_completions = dict()
         while self._bond_completions_raw:
-            (p1, p2), raw_port1 = self._bond_completions_raw.popitem()
-            raw_port2 = self._bond_completions_raw.pop((p2, p1), None)
+            (pe_1, pe_2), raw_port1 = self._bond_completions_raw.popitem()
+            raw_port2 = self._bond_completions_raw.pop((pe_2, pe_1), None)
             if raw_port2 is None:
-                bad_completions[(p1, p2)] = raw_port1
+                bad_completions[(pe_1, pe_2)] = raw_port1
             else:
                 self.bond_old(raw_port1, raw_port2)
         if bad_completions:
@@ -352,16 +352,16 @@ class BGSystem(RootElement):
         )
         return
 
-    def bond_completion_raw_pair(self, p1, p2, raw_port1, raw_port2):
-        self.bond_completion_raw(p1, p2, raw_port1)
-        self.bond_completion_raw(p2, p1, raw_port2)
+    def bond_completion_raw_pair(self, pe_1, pe_2, raw_port1, raw_port2):
+        self.bond_completion_raw(pe_1, pe_2, raw_port1)
+        self.bond_completion_raw(pe_2, pe_1, raw_port2)
 
     @declarative.mproperty
     def _bond_completions_raw(self):
         return dict()
 
-    def bond_completion_raw(self, p1, p2, raw_port):
-        self._bond_completions_raw[(p1, p2)] = raw_port
+    def bond_completion_raw(self, pe_1, pe_2, raw_port):
+        self._bond_completions_raw[(pe_1, pe_2)] = raw_port
         return
 
     def _solve(self):

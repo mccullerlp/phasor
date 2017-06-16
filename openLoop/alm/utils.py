@@ -64,11 +64,11 @@ def matrix_telescope(L1, R, dL = 0):
 
 
 def eigen_q(mat):
-    A = mat[0, 0]
-    B = mat[0, 1]
-    C = mat[1, 0]
-    D = mat[1, 1]
-    q = Complex((A - D)/(2 * C), np.sqrt(-((D-A)**2 + 4 * B * C))/(2 * abs(C)))
+    pe_A = mat[0, 0]
+    pe_B = mat[0, 1]
+    pe_C = mat[1, 0]
+    pe_D = mat[1, 1]
+    q = Complex((pe_A - pe_D)/(2 * pe_C), np.sqrt(-((pe_D-pe_A)**2 + 4 * pe_B * pe_C))/(2 * abs(pe_C)))
     return q
 
 

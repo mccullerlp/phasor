@@ -33,17 +33,17 @@ def eng_string(x, format='%.3f', si=False):
         x = -x
         sign = '-'
     exp = int(math.floor(math.log10(x)))
-    exp3 = exp - (exp % 3)
-    x3 = x / (10 ** exp3)
+    expe_3 = exp - (exp % 3)
+    x3 = x / (10 ** expe_3)
 
-    if si and exp3 >= -24 and exp3 <= 24 and exp3 != 0:
-        exp3_text = 'yzafpnum kMGTPEZY'[(exp3 - (-24)) / 3]
-    elif exp3 == 0:
-        exp3_text = ''
+    if si and expe_3 >= -24 and expe_3 <= 24 and expe_3 != 0:
+        expe_3_text = 'yzafpnum kMGTPEZY'[(expe_3 - (-24)) / 3]
+    elif expe_3 == 0:
+        expe_3_text = ''
     else:
-        exp3_text = 'e%s' % exp3
+        expe_3_text = 'e%s' % expe_3
 
-    return ('%s'+format+'%s') % (sign, x3, exp3_text)
+    return ('%s'+format+'%s') % (sign, x3, expe_3_text)
 
 
 class ZPKAnnotator(declarative.OverridableObject):

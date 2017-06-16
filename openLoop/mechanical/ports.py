@@ -80,9 +80,9 @@ class MechanicalPort(MechanicalPortRaw, bases.SystemElementBase):
                 N_ports = 1 + len(b_p_set)
             )
             self.system._include(self.connection)
-            self.connection.p0.bond_inform(self)
-            self.system.bond_completion_raw(self, self.connection.p0, self)
-            self.connection.p0.bond_completion()
+            self.connection.pm_0.bond_inform(self)
+            self.system.bond_completion_raw(self, self.connection.pm_0, self)
+            self.connection.pm_0.bond_completion()
             for idx, partner in enumerate(b_p_set):
                 #TODO not sure if I like the connection object not knowing who it is bound to
                 #maybe make a more explicit notification for the raw bonding
@@ -104,7 +104,7 @@ class MechanicalPort(MechanicalPortRaw, bases.SystemElementBase):
         Only call if this port has not been bonded
         """
         self.own.terminator = self.t_terminator()
-        self.system.bond(self, self.terminator.po_Fr)
+        self.system.bond(self, self.terminator.pm_A)
         return (self, self.terminator)
 
     def targets_list(self, typename):

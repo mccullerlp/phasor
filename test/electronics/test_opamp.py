@@ -22,8 +22,8 @@ def test_open_loop_opamp(gain = 10):
     sys.own.amp = electronics.OpAmp(
         gain_by_freq = lambda F : gain
     )
-    sys.bond(sys.amp.in_p, sys.V_P.A)
-    sys.bond(sys.amp.in_n, sys.V_N.A)
+    sys.bond(sys.amp.in_p, sys.V_P.pe_A)
+    sys.bond(sys.amp.in_n, sys.V_N.pe_A)
     sys.own.R1 = electronics.VoltageReadout(
         terminal = sys.amp.out,
     )
@@ -46,7 +46,7 @@ def test_closed_loop_opamp(gain = 10):
     sys.own.amp = electronics.OpAmp(
         gain_by_freq = lambda F : gain
     )
-    sys.bond(sys.amp.in_p, sys.V_P.A)
+    sys.bond(sys.amp.in_p, sys.V_P.pe_A)
     sys.bond(sys.amp.out, sys.amp.in_n)
     sys.own.R1 = electronics.VoltageReadout(
         terminal = sys.amp.out,
@@ -65,7 +65,7 @@ def test_noise_open_loop(gain = 1):
     sys.own.amp = electronics.OpAmp(
         gain_by_freq = lambda F : gain
     )
-    sys.bond(sys.amp.in_n, sys.V_N.A)
+    sys.bond(sys.amp.in_n, sys.V_N.pe_A)
     sys.own.R1 = electronics.VoltageReadout(
         terminal = sys.amp.out,
     )
@@ -74,13 +74,13 @@ def test_noise_open_loop(gain = 1):
         portN = sys.R1.V.o,
     )
     sys.own.T1 = electronics.TerminatorShorted()
-    sys.bond(sys.amp.in_p, sys.T1.A)
+    sys.bond(sys.amp.in_p, sys.T1.pe_A)
     #sys.own.T1 = electronics.TerminatorMatched()
-    #sys.bond(sys.amp.in_p, sys.T1.A)
+    #sys.bond(sys.amp.in_p, sys.T1.pe_A)
 
     sys.own.VN = electronics.VoltageFluctuation(
         #port = sys.amp.in_p,
-        port = sys.T1.A,
+        port = sys.T1.pe_A,
         Vsq_Hz_by_freq = lambda F : 1,
         sided = 'one-sided',
     )
@@ -94,7 +94,7 @@ def test_noise_open_loop(gain = 1):
     sys.own.amp = electronics.OpAmp(
         gain_by_freq = lambda F : gain
     )
-    sys.bond(sys.amp.in_n, sys.V_N.A)
+    sys.bond(sys.amp.in_n, sys.V_N.pe_A)
     sys.own.R1 = electronics.VoltageReadout(
         terminal = sys.amp.out,
     )
@@ -105,11 +105,11 @@ def test_noise_open_loop(gain = 1):
     sys.own.T1 = electronics.TerminatorResistor(
         resistance_Ohms = resistance_Ohms,
     )
-    sys.bond(sys.amp.in_p, sys.T1.A)
+    sys.bond(sys.amp.in_p, sys.T1.pe_A)
 
     sys.own.VN = electronics.CurrentFluctuation(
         port = sys.amp.in_p,
-        #port = sys.T1.A,
+        #port = sys.T1.pe_A,
         Isq_Hz_by_freq = lambda F : 1,
         sided = 'one-sided',
     )
@@ -123,7 +123,7 @@ def test_closed_loop_opamp_noise():
     sys.own.amp = electronics.OpAmp(
         gain_by_freq = lambda F : gain
     )
-    sys.bond(sys.amp.in_p, sys.V_P.A)
+    sys.bond(sys.amp.in_p, sys.V_P.pe_A)
     sys.bond(sys.amp.out, sys.amp.in_n)
     sys.own.R1 = electronics.VoltageReadout(
         terminal = sys.amp.out,
@@ -149,17 +149,17 @@ def test_closed_loop_opamp_noise():
     sys.own.amp = electronics.OpAmp(
         gain_by_freq = lambda F : gain
     )
-    sys.bond(sys.amp.in_p, sys.V_P.A)
+    sys.bond(sys.amp.in_p, sys.V_P.pe_A)
     sys.own.RTRans = electronics.SeriesResistor(
         resistance_Ohms = resistance_Ohms,
     )
-    sys.bond_sequence(sys.amp.out, sys.RTRans.A, sys.amp.in_n)
+    sys.bond_sequence(sys.amp.out, sys.RTRans.pe_A, sys.amp.in_n)
     sys.own.R1 = electronics.VoltageReadout(
         terminal = sys.amp.out,
     )
     sys.own.VN = electronics.CurrentFluctuation(
         port = sys.amp.in_n,
-        #port = sys.RTRans.B,
+        #port = sys.RTRans.pe_B,
         Isq_Hz_by_freq = lambda F : 1,
         sided = 'one-sided',
     )
@@ -179,17 +179,17 @@ def test_closed_loop_opamp_noise_regen():
     sys.own.amp = electronics.OpAmp(
         gain_by_freq = lambda F : gain
     )
-    sys.bond(sys.amp.in_p, sys.V_P.A)
+    sys.bond(sys.amp.in_p, sys.V_P.pe_A)
     sys.own.RTRans = electronics.SeriesResistor(
         resistance_Ohms = resistance_Ohms,
     )
-    sys.bond_sequence(sys.amp.out, sys.RTRans.A, sys.amp.in_n)
+    sys.bond_sequence(sys.amp.out, sys.RTRans.pe_A, sys.amp.in_n)
     sys.own.R1 = electronics.VoltageReadout(
         terminal = sys.amp.out,
     )
     sys.own.VN = electronics.CurrentFluctuation(
         port = sys.amp.in_n,
-        #port = sys.RTRans.B,
+        #port = sys.RTRans.pe_B,
         Isq_Hz_by_freq = lambda F : 1,
         sided = 'one-sided',
     )
@@ -212,9 +212,9 @@ def test_johnson_noise():
         resistance_Ohms = resistance_Ohms,
     )
     sys.own.T1 = electronics.TerminatorOpen()
-    sys.bond(sys.Z1.A, sys.T1.A)
+    sys.bond(sys.Z1.pe_A, sys.T1.pe_A)
     sys.own.R1 = electronics.VoltageReadout(
-        terminal = sys.T1.A,
+        terminal = sys.T1.pe_A,
     )
     sys.own.RN = readouts.NoiseReadout(
         portN = sys.R1.V.o,
@@ -227,9 +227,9 @@ def test_johnson_noise():
         resistance_Ohms = resistance_Ohms,
     )
     sys.own.T1 = electronics.TerminatorOpen()
-    sys.bond(sys.Z1.A, sys.T1.A)
+    sys.bond(sys.Z1.pe_A, sys.T1.pe_A)
     sys.own.R1 = electronics.VoltageReadout(
-        terminal = sys.Z1.A,
+        terminal = sys.Z1.pe_A,
     )
     sys.own.RN = readouts.NoiseReadout(
         portN = sys.R1.V.o,
@@ -244,9 +244,9 @@ def test_johnson_noise_shorted():
         resistance_Ohms = resistance_Ohms,
     )
     sys.own.T1 = electronics.TerminatorShorted()
-    sys.bond(sys.Z1.A, sys.T1.A)
+    sys.bond(sys.Z1.pe_A, sys.T1.pe_A)
     sys.own.R1 = electronics.VoltageReadout(
-        terminal = sys.Z1.A,
+        terminal = sys.Z1.pe_A,
     )
     sys.own.RN = readouts.NoiseReadout(
         portN = sys.R1.V.o,
@@ -263,9 +263,9 @@ def test_johnson_noise_parallel():
     sys.own.Z2 = electronics.TerminatorResistor(
         resistance_Ohms = resistance_Ohms,
     )
-    sys.bond(sys.Z1.A, sys.Z2.A)
+    sys.bond(sys.Z1.pe_A, sys.Z2.pe_A)
     sys.own.R1 = electronics.VoltageReadout(
-        terminal = sys.Z1.A,
+        terminal = sys.Z1.pe_A,
     )
     sys.own.RN = readouts.NoiseReadout(
         portN = sys.R1.V.o,
@@ -277,9 +277,9 @@ def test_johnson_noise_terminator():
     sys = BGSystem()
     sys.own.Z1 = electronics.TerminatorMatched()
     sys.own.T1 = electronics.TerminatorOpen()
-    sys.bond(sys.Z1.A, sys.T1.A)
+    sys.bond(sys.Z1.pe_A, sys.T1.pe_A)
     sys.own.R1 = electronics.VoltageReadout(
-        terminal = sys.Z1.A,
+        terminal = sys.Z1.pe_A,
     )
     sys.own.RN = readouts.NoiseReadout(
         portN = sys.R1.V.o,

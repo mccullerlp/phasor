@@ -29,7 +29,7 @@ class DamperBase(object):
     def johnson_noise(self):
         if self.include_johnson_noise and self.system.include_johnson_noise:
             return noise.DisplacementFluctuation(
-                port = self.A,
+                port = self.pm_A,
                 dsq_Hz_by_freq = lambda F : 4 * self.symbols.temp_K * self.symbols.kB_J_K / (self.resistance_Ns_m * (2 * self.symbols.pi * F)**2),
                 sided = 'one-sided',
             )
@@ -57,7 +57,7 @@ class SpringBase(object):
             if self.include_johnson_noise and self.system.include_johnson_noise:
                 #this formula is the conversion of loss angle to equivalent viscous damping
                 return noise.DisplacementFluctuation(
-                    port = self.A,
+                    port = self.pm_A,
                     dsq_Hz_by_freq = lambda F : 4 * self.symbols.temp_K * self.symbols.kB_J_K * self.loss_angle_by_freq(F)  / ((2 * self.symbols.pi * F) * self.elasticity_N_m),
                     sided = 'one-sided',
                 )

@@ -140,7 +140,7 @@ class KTPTestStand(optics.OpticalCouplerBase):
             except ImportError:
                 print(lst, arr)
         return lst, arr
-#print("A")
+#print("pe_A")
 #pprint(self.ctree.test.PSL)
 #print("self.DC_R.DC_readout", self.DC_R.DC_readout, 2)
 #print("self.DC_G.DC_readout", self.DC_G.DC_readout, 1)

@@ -53,7 +53,7 @@ class WhiteNoise(bases.SignalElementBase, bases.NoiseBase):
             )
         return
 
-    def noise_2pt_expectation(self, p1, k1, p2, k2):
+    def noise_2pt_expectation(self, pe_1, k1, pe_2, k2):
         #print("APPLY NOISE: ", self.name_noise)
         Fsq_Hz = 1 / self.conversion
         return Fsq_Hz

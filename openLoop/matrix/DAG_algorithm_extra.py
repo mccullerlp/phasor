@@ -26,7 +26,7 @@ def condition_node(
         c_edges[snode] = edge
         c_edges_c[snode] = edge.conjugate()
         totC = totC + abs(edge_map[node, snode])**2
-    #print("SELF_EDGE C: ", np.max(1/abs(1 - self_edge)), np.max(totC), len(c_edges))
+    #print("SELF_EDGE pe_C: ", np.max(1/abs(1 - self_edge)), np.max(totC), len(c_edges))
     #print('c_edges', c_edges)
 
     a = -self_edge
@@ -89,19 +89,19 @@ def condition_node(
         for tf, e in emap_mod.items():
             edge_map[tf] = e
 
-        #adjust C itself
+        #adjust pe_C itself
         correction = (1 - yc * a)
         if np.any(correction != 0):
             for snode, edge in c_edges.items():
                 edge_map[node, snode] = correction * edge
-                #print("C: ", correction * edge)
+                #print("pe_C: ", correction * edge)
         else:
             for snode, edge in c_edges.items():
                 seq[node].remove(snode)
                 req[snode].remove(node)
                 del edge_map[node, snode]
 
-        #adjust B itself
+        #adjust pe_B itself
         scsd = dict()
         d_mat = dict()
         for lnode in seq:
@@ -134,7 +134,7 @@ def condition_node(
             #does not affect req_alpha
             edge_map[lnode, node] = edge_map.get((lnode, node), 0) + y * edge
 
-        #adjust D
+        #adjust pe_D
         for cnode, cedge in c_edges.items():
             for bnode, bedge in b_edges.items():
                 #print("ADD: ", bnode, cnode)

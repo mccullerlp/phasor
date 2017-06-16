@@ -114,15 +114,15 @@ class MPlotter(declarative.OverridableObject):
         fB.Gouy.set_ylabel("Gouy Phase [deg]")
 
         fB.ax_bottom.set_xlim(z_unit * min(z), z_unit * max(z))
-        fB.ax_top2 = fB.ax_top.twiny()
-        fB.ax_top2.set_xlim(z_unit_top * min(z), z_unit_top * max(z))
+        fB.ax_tope_2 = fB.ax_top.twiny()
+        fB.ax_tope_2.set_xlim(z_unit_top * min(z), z_unit_top * max(z))
 
         if use_in:
             l = fB.ax_bottom.set_xlabel('Path [in]')
-            l2 = fB.ax_top2.set_xlabel('Path [m]')
+            l2 = fB.ax_tope_2.set_xlabel('Path [m]')
         else:
             l = fB.ax_bottom.set_xlabel('Path [m]')
-            l2 = fB.ax_top2.set_xlabel('Path [in]')
+            l2 = fB.ax_tope_2.set_xlabel('Path [in]')
         l.set_horizontalalignment('right')
         l.set_position((0.9, 0))
         l2.set_horizontalalignment('left')

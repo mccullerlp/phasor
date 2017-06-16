@@ -510,7 +510,7 @@ def mgraph_simplify_badguys(
                 bignodes_c = np.array(cvec) >= 1./(len(seq[node]))**.5
                 ccount = np.count_nonzero(bignodes_c)
                 vprint(bignodes_c, cvec_self_idx, ccount)
-                vprint("C: ", np.count_nonzero(bignodes_c), len(seq[node]), bignodes_c[cvec_self_idx])
+                vprint("pe_C: ", np.count_nonzero(bignodes_c), len(seq[node]), bignodes_c[cvec_self_idx])
 
                 vprint("bignodes_c[cvec_self_idx]", bignodes_c[cvec_self_idx])
                 if ccount >= 2:
@@ -604,22 +604,22 @@ def pivotROW_OP(
     for rnode in req[node1]:
         assert(node1 in seq[rnode])
 
-    edge_map2 = dict()
+    edge_mape_2 = dict()
     #gets all edges to node1/2
     for rnode in req[node1]:
         edge = edge_map.pop((rnode, node1))
-        edge_map2[rnode, node2] = edge
+        edge_mape_2[rnode, node2] = edge
         seq[rnode].remove(node1)
         seq[rnode].add(node2)
         node_costs_invalid_in_queue.add(rnode)
 
     for rnode in req_alpha[node1]:
         edge = edge_map.pop((rnode, node1))
-        edge_map2[rnode, node2] = edge
+        edge_mape_2[rnode, node2] = edge
 
     for rnode in req[node2]:
         edge = edge_map.pop((rnode, node2))
-        edge_map2[rnode, node1] = edge
+        edge_mape_2[rnode, node1] = edge
         #since this one follows the other, we must be careful about uniqueness of removes
         if rnode not in req[node1]:
             seq[rnode].remove(node2)
@@ -628,7 +628,7 @@ def pivotROW_OP(
 
     for rnode in req_alpha[node2]:
         edge = edge_map.pop((rnode, node2))
-        edge_map2[rnode, node1] = edge
+        edge_mape_2[rnode, node1] = edge
 
     rn1 = req[node1]
     rnA1 = req_alpha[node1]
@@ -654,7 +654,7 @@ def pivotROW_OP(
     for rnode in req[node1]:
         assert(node1 in seq[rnode])
 
-    edge_map.update(edge_map2)
+    edge_map.update(edge_mape_2)
     return
 
 def householderREFL_ROW_OP(
@@ -725,7 +725,7 @@ def householderREFL_ROW_OP(
         if np.any(gen_edge != 0):
             fnode_edges[fnode] = gen_edge
 
-    edge_map2 = dict()
+    edge_mape_2 = dict()
     for fnode, fedge in fnode_edges.items():
         for k, edge in u_vec.items():
             if fnode in seq[k]:
@@ -745,16 +745,16 @@ def householderREFL_ROW_OP(
     #now also apply to BETA
     #This could probably be accelerated..
     #gotta be careful with intermediates if trying a live update. Maybe could do a triangular loop?
-    edge_map2 = dict()
+    edge_mape_2 = dict()
     for k, edge in u_vec.items():
         edge_c = edge.conjugate()
         for snode in seq_beta[k]:
             edge_beta = edge_map[k, snode]
             gain = -2 * edge_c * edge_beta
             for k_to, edge_to in u_vec.items():
-                edge_map2[snode, k_to] = edge_map2.get((snode, k_to), 0) + edge_to * gain
+                edge_mape_2[snode, k_to] = edge_mape_2.get((snode, k_to), 0) + edge_to * gain
 
-    for (snode, k_to), edge in edge_map2.items():
+    for (snode, k_to), edge in edge_mape_2.items():
         if snode in seq_beta[k_to]:
             edge_map[k_to, snode] = edge_map[k_to, snode] + edge
         else:
@@ -768,14 +768,14 @@ def householderREFL_ROW_OP(
 
     #print("INTO: ", node_into)
     #print("FROM: ", nodes_from)
-    #for k1k2, edge in list(edge_map2.items()):
-    #    edge_map2[k1k2] = edge[0]
+    #for k1k2, edge in list(edge_mape_2.items()):
+    #    edge_mape_2[k1k2] = edge[0]
     #print("EMAP")
-    #pprint(edge_map2)
-    #print("SELF: ", edge_map2[node_into, node_into])
+    #pprint(edge_mape_2)
+    #print("SELF: ", edge_mape_2[node_into, node_into])
     #print("ECHECK: ", edge_inject[0]),
     #for nfrom in nodes_from:
-    #    print("NFROM: ", nfrom, edge_map2[node_into, nfrom])
+    #    print("NFROM: ", nfrom, edge_mape_2[node_into, nfrom])
     return
 
 def householderREFL_COL_OP(
@@ -847,7 +847,7 @@ def householderREFL_COL_OP(
         if np.any(gen_edge != 0):
             fnode_edges[fnode] = gen_edge
 
-    edge_map2 = dict()
+    edge_mape_2 = dict()
     for fnode, fedge in fnode_edges.items():
         for k, edge in u_vec.items():
             if fnode in req[k]:
@@ -867,16 +867,16 @@ def householderREFL_COL_OP(
     #now also apply to ALPHA
     #This could probably be accelerated..
     #gotta be careful with intermediates if trying a live update. Maybe could do a triangular loop?
-    edge_map2 = dict()
+    edge_mape_2 = dict()
     for k, edge in u_vec.items():
         edge_c = edge.conjugate()
         for rnode in req_alpha[k]:
             edge_alpha = edge_map[rnode, k]
             gain = -2 * edge_c * edge_alpha
             for k_to, edge_to in u_vec.items():
-                edge_map2[rnode, k_to] = edge_map2.get((rnode, k_to), 0) + edge_to * gain
+                edge_mape_2[rnode, k_to] = edge_mape_2.get((rnode, k_to), 0) + edge_to * gain
 
-    for (rnode, k_to), edge in edge_map2.items():
+    for (rnode, k_to), edge in edge_mape_2.items():
         if rnode in req_alpha[k_to]:
             edge_map[rnode, k_to] = edge_map[rnode, k_to] + edge
         else:
@@ -890,14 +890,14 @@ def householderREFL_COL_OP(
 
     #print("INTO: ", node_into)
     #print("FROM: ", nodes_from)
-    #for k1k2, edge in list(edge_map2.items()):
-    #    edge_map2[k1k2] = edge[0]
+    #for k1k2, edge in list(edge_mape_2.items()):
+    #    edge_mape_2[k1k2] = edge[0]
     #print("EMAP")
-    #pprint(edge_map2)
-    #print("SELF: ", edge_map2[node_into, node_into])
+    #pprint(edge_mape_2)
+    #print("SELF: ", edge_mape_2[node_into, node_into])
     #print("ECHECK: ", edge_inject[0]),
     #for nfrom in nodes_from:
-    #    print("NFROM: ", nfrom, edge_map2[node_into, nfrom])
+    #    print("NFROM: ", nfrom, edge_mape_2[node_into, nfrom])
     return
 
 def pivotCOL_OP(
@@ -930,11 +930,11 @@ def pivotCOL_OP(
     for snode in seq[node1]:
         assert(node1 in req[snode])
 
-    edge_map2 = dict()
+    edge_mape_2 = dict()
     #gets all edges from node1/2
     for snode in seq[node1]:
         edge = edge_map.pop((node1, snode))
-        edge_map2[node2, snode] = edge
+        edge_mape_2[node2, snode] = edge
         #if snode != node2:
         req[snode].remove(node1)
         req[snode].add(node2)
@@ -942,11 +942,11 @@ def pivotCOL_OP(
 
     for snode in seq_beta[node1]:
         edge = edge_map.pop((node1, snode))
-        edge_map2[node2, snode] = edge
+        edge_mape_2[node2, snode] = edge
 
     for snode in seq[node2]:
         edge = edge_map.pop((node2, snode))
-        edge_map2[node1, snode] = edge
+        edge_mape_2[node1, snode] = edge
         #since this one follows the other, we must be careful about uniqueness of removes
         if snode not in seq[node1]:
             req[snode].remove(node2)
@@ -955,7 +955,7 @@ def pivotCOL_OP(
 
     for snode in seq_beta[node2]:
         edge = edge_map.pop((node2, snode))
-        edge_map2[node1, snode] = edge
+        edge_mape_2[node1, snode] = edge
 
     sn1 = seq[node1]
     snB1 = seq_beta[node1]
@@ -981,7 +981,7 @@ def pivotCOL_OP(
     #print("SEQ 2: ", node2, seq[node2])
     #print("REQ 2: ", node2, req[node2])
 
-    edge_map.update(edge_map2)
+    edge_map.update(edge_mape_2)
     return
 
 

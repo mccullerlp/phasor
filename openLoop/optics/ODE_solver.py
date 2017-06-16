@@ -710,13 +710,13 @@ class ExpMatCoupling(FactorCouplingBase):
         eye = np.eye(len(pks), dtype = object)
         Mexp_tot = eye
         for idx_N in range(self.N_ode):
-            print('A premult')
+            print('pe_A premult')
             Mexp = np.zeros([len(pks), len(pks)], dtype = object)
             for (idx_out, idx_in), lt in self.ddlt_accel_premult2.items():
                     val = lt_val(lt)
                     Mexp[idx_out, idx_in] = val
             #print("Mexp: ", Mexp)
-            print('B')
+            print('pe_B')
             Mexp_tot = np.dot(Mexp, Mexp_tot)
             print("Sparsity: ", idx_N, np.sum(Mexp_tot.flatten() != 0)/ len(Mexp_tot.flatten()))
             #print(Mexp.shape, pkv.shape)
@@ -806,13 +806,13 @@ class ExpMatCoupling(FactorCouplingBase):
         eye = np.eye(len(pks), dtype = object)
         Mexp_tot = eye
         for idx_N in range(self.N_ode):
-            print('A')
+            print('pe_A')
             m1 = np.zeros([len(pks), len(pks)], dtype = object)
             for (idx_out, idx_in), lt in self.ddlt_accel.items():
                     val = lt_val(lt)
                     m1[idx_out, idx_in] = val
             #print("M1: ", m1)
-            print('B')
+            print('pe_B')
             Mexp = m1 + eye
             mmem = m1
             #try:
@@ -842,7 +842,7 @@ class ExpMatCoupling(FactorCouplingBase):
                 #except ImportError:
                 #    print("XXXX")
                 Mexp = Mexp + mmem
-            print('C')
+            print('pe_C')
             #try:
             #    import tabulate
             #    tabular_data = [[str(idx)] + list(str(x) for x in td) for idx, (label, td) in enumerate(zip(pks, Mexp))]
@@ -852,12 +852,12 @@ class ExpMatCoupling(FactorCouplingBase):
             #except ImportError:
             #    print("XXXX")
             #import scipy.linalg
-            #Mexp2 = scipy.linalg.expm(m1.astype(complex))
+            #Mexpe_2 = scipy.linalg.expm(m1.astype(complex))
             #try:
             #    import tabulate
-            #    tabular_data = [[str(idx)] + list(str(x) for x in td) for idx, (label, td) in enumerate(zip(pks, Mexp2))]
-            #    print("Mexp2", idx)
-            #    print(Mexp2.dtype)
+            #    tabular_data = [[str(idx)] + list(str(x) for x in td) for idx, (label, td) in enumerate(zip(pks, Mexpe_2))]
+            #    print("Mexpe_2", idx)
+            #    print(Mexpe_2.dtype)
             #    print(tabulate.tabulate(tabular_data))
             #except ImportError:
             #    print("XXXX")

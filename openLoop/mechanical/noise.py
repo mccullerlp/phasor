@@ -85,7 +85,7 @@ class DisplacementFluctuation(elements.MechanicalNoiseBase, elements.MechanicalE
             )
         return
 
-    def noise_2pt_expectation(self, p1, k1, p2, k2):
+    def noise_2pt_expectation(self, pm_1, k1, pm_2, k2):
         freq = k1[ports.ClassicalFreqKey].frequency()
         dsq_Hz = self.dsq_Hz_by_freq(freq) / self.conversion
         return dsq_Hz
@@ -156,7 +156,7 @@ class ForceFluctuation(elements.MechanicalNoiseBase, elements.MechanicalElementB
             )
         return
 
-    def noise_2pt_expectation(self, p1, k1, p2, k2):
+    def noise_2pt_expectation(self, pm_1, k1, pm_2, k2):
         freq = k1[ports.ClassicalFreqKey].frequency()
         Fsq_Hz = self.Fsq_Hz_by_freq(freq) / self.conversion
         return (self.zM_termination)**2 * Fsq_Hz

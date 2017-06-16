@@ -27,78 +27,78 @@ class ElectricalNoiseBase(NoiseBase, ElectricalElementBase):
 
 class Electrical1PortBase(ElectricalElementBase):
     @decl.dproperty
-    def A(self):
-        return ports.ElectricalPort(sname = 'A')
+    def pe_A(self):
+        return ports.ElectricalPort()
 
     @decl.mproperty
     def po_Fr(self):
-        return self.A
+        return self.pe_A
 
     def system_setup_ports(self, ports_algorithm):
-        for kfrom in ports_algorithm.port_update_get(self.A.i):
-            ports_algorithm.port_coupling_needed(self.A.o, kfrom)
-        for kto in ports_algorithm.port_update_get(self.A.o):
-            ports_algorithm.port_coupling_needed(self.A.i, kto)
+        for kfrom in ports_algorithm.port_update_get(self.pe_A.i):
+            ports_algorithm.port_coupling_needed(self.pe_A.o, kfrom)
+        for kto in ports_algorithm.port_update_get(self.pe_A.o):
+            ports_algorithm.port_coupling_needed(self.pe_A.i, kto)
         return
 
 
 class Electrical2PortBase(ElectricalElementBase):
     @decl.dproperty
-    def A(self):
-        return ports.ElectricalPort(sname = 'A', pchain = 'B')
+    def pe_A(self):
+        return ports.ElectricalPort(pchain = 'pe_B')
 
     @decl.dproperty
-    def B(self):
-        return ports.ElectricalPort(sname = 'B', pchain = 'A')
+    def pe_B(self):
+        return ports.ElectricalPort(pchain = 'pe_A')
 
     @decl.mproperty
     def po_Fr(self):
-        return self.A
+        return self.pe_A
 
     @decl.mproperty
     def po_Bk(self):
-        return self.B
+        return self.pe_B
 
     def bond_series(self, other):
         """
         Takes two 2-port objects and bonds them to form a series connection. With multibonding,
         this can be done and the original can still be connected.
         """
-        self.A.bond(other.A)
-        self.B.bond(other.B)
+        self.pe_A.bond(other.pe_A)
+        self.pe_B.bond(other.pe_B)
 
 class Electrical4PortBase(ElectricalElementBase):
     @decl.dproperty
-    def A(self):
-        return ports.ElectricalPort(sname = 'A')
+    def pe_A(self):
+        return ports.ElectricalPort()
 
     @decl.dproperty
-    def B(self):
-        return ports.ElectricalPort(sname = 'B')
+    def pe_B(self):
+        return ports.ElectricalPort()
 
     @decl.dproperty
-    def C(self):
-        return ports.ElectricalPort(sname = 'C')
+    def pe_C(self):
+        return ports.ElectricalPort()
 
     @decl.dproperty
-    def D(self):
-        return ports.ElectricalPort(sname = 'D')
+    def pe_D(self):
+        return ports.ElectricalPort()
 
     @decl.mproperty
-    def po_FrA(self):
-        return self.A
+    def pe_FrA(self):
+        return self.pe_A
 
     @decl.mproperty
-    def po_FrB(self):
-        return self.B
+    def pe_FrB(self):
+        return self.pe_B
 
     @decl.mproperty
-    def po_BkA(self):
-        return self.C
+    def pe_BkA(self):
+        return self.pe_C
 
     @decl.mproperty
-    def po_BkB(self):
-        return self.D
+    def pe_BkB(self):
+        return self.pe_D
 
 
 class Connection(ElectricalElementBase):
@@ -116,13 +116,13 @@ class Connection(ElectricalElementBase):
         total_ports = self.N_ports + len(self.connect)
         ports_electrical = []
         for idx in range(total_ports):
-            name = 'p{0}'.format(idx)
+            name = 'pe_{0}'.format(idx)
             pobj = ports.ElectricalPort(sname = name)
             pobj = self.insert(pobj, name)
             ports_electrical.append(pobj)
         self.ports_electrical = ports_electrical
         for idx in range(len(self.connect)):
-            name = 'p{0}'.format(idx + self.N_ports)
+            name = 'pe_{0}'.format(idx + self.N_ports)
             port = getattr(self, name)
             self.system.bond(self.connect[idx], port)
         return
@@ -166,8 +166,8 @@ class Cable(Electrical2PortBase):
     def system_setup_ports(self, ports_algorithm):
         #TODO could reduce these with more information about used S-matrix elements
         for port1, port2 in [
-            (self.A, self.B),
-            (self.B, self.A),
+            (self.pe_A, self.pe_B),
+            (self.pe_B, self.pe_A),
         ]:
             for kfrom in ports_algorithm.port_update_get(port1.i):
                 ports_algorithm.port_coupling_needed(port2.o, kfrom)
@@ -177,8 +177,8 @@ class Cable(Electrical2PortBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         for port1, port2 in [
-            (self.A, self.B),
-            (self.B, self.A),
+            (self.pe_A, self.pe_B),
+            (self.pe_B, self.pe_A),
         ]:
             for kfrom in matrix_algorithm.port_set_get(port1.i):
                 #if self.system.classical_frequency_test_max(kfrom, self.max_freq):

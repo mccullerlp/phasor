@@ -23,7 +23,7 @@ class ResistorBase(object):
     def johnson_noise(self):
         if self.system.include_johnson_noise:
             return noise.VoltageFluctuation(
-                port = self.A,
+                port = self.pe_A,
                 Vsq_Hz_by_freq = lambda F : 4 * self.resistance_Ohms * self.symbols.temp_K * self.symbols.kB_J_K,
                 sided = 'one-sided',
             )
@@ -55,7 +55,7 @@ class InductorBase(object):
     def johnson_noise(self):
         if self.system.include_johnson_noise and self.resistance_Ohms != 0:
             return noise.VoltageFluctuation(
-                port = self.A,
+                port = self.pe_A,
                 Vsq_Hz_by_freq = lambda F : 4 * self.resistance_Ohms * self.symbols.temp_K * self.symbols.kB_J_K,
                 sided = 'one-sided',
             )
@@ -162,10 +162,10 @@ class Z2x2To4Port(elements.Electrical4PortBase):
     @decl.mproperty
     def ports_electrical(self):
         return [
-            self.A,
-            self.B,
-            self.C,
-            self.D,
+            self.pe_A,
+            self.pe_B,
+            self.pe_C,
+            self.pe_D,
         ]
 
     def system_setup_ports(self, ports_algorithm):
@@ -180,7 +180,7 @@ class Z2x2To4Port(elements.Electrical4PortBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         #assumes that all ports have the same setup/keys
-        for kfrom in matrix_algorithm.port_set_get(self.A.i):
+        for kfrom in matrix_algorithm.port_set_get(self.pe_A.i):
             Y = 1/self.Z_termination
             freq = self.system.classical_frequency_extract(kfrom)
             Z11 = self.Z11_by_freq(freq)
@@ -195,33 +195,33 @@ class Z2x2To4Port(elements.Electrical4PortBase):
             N34 = 2 * Y * Z12 * Z21 * Z11 - 4 * det
             N13 = -2 * Y * Z11 * Z22 * Z21
             N31 = -2 * Y * Z11 * Z22 * Z12
-            D   = Y**2 * (Z11 * Z22 * Z12 * Z21) + 2 * Y * (Z12 * Z21) * tr - 4 * det
+            pe_D   = Y**2 * (Z11 * Z22 * Z12 * Z21) + 2 * Y * (Z12 * Z21) * tr - 4 * det
             for port1, port2, num in [
-                (self.A, self.A, N11),
-                (self.A, self.B, N12),
-                (self.B, self.A, N12),
-                (self.B, self.B, N11),
-                (self.C, self.C, N33),
-                (self.C, self.D, N34),
-                (self.D, self.C, N34),
-                (self.D, self.D, N33),
-                (self.A, self.C, N13),
-                (self.A, self.D, -N13),
-                (self.B, self.C, -N13),
-                (self.B, self.D, N13),
-                (self.C, self.A, N31),
-                (self.C, self.B, -N31),
-                (self.D, self.A, -N31),
-                (self.D, self.B, N31),
+                (self.pe_A, self.pe_A, N11),
+                (self.pe_A, self.pe_B, N12),
+                (self.pe_B, self.pe_A, N12),
+                (self.pe_B, self.pe_B, N11),
+                (self.pe_C, self.pe_C, N33),
+                (self.pe_C, self.pe_D, N34),
+                (self.pe_D, self.pe_C, N34),
+                (self.pe_D, self.pe_D, N33),
+                (self.pe_A, self.pe_C, N13),
+                (self.pe_A, self.pe_D, -N13),
+                (self.pe_B, self.pe_C, -N13),
+                (self.pe_B, self.pe_D, N13),
+                (self.pe_C, self.pe_A, N31),
+                (self.pe_C, self.pe_B, -N31),
+                (self.pe_D, self.pe_A, -N31),
+                (self.pe_D, self.pe_B, N31),
             ]:
                 @np.vectorize
-                def ddiv(num, D):
+                def ddiv(num, pe_D):
                     if num != 0:
-                        pgain = num / D
+                        pgain = num / pe_D
                     else:
                         pgain = 0
                     return pgain
-                pgain = ddiv(num, D)
+                pgain = ddiv(num, pe_D)
                 matrix_algorithm.port_coupling_insert(
                     port1.i,
                     kfrom,
@@ -252,7 +252,7 @@ class Transformer(Z2x2To4Port):
     def L1_johnson_noise(self):
         if self.system.include_johnson_noise and self.L1_resistance_Ohms != 0:
             return noise.VoltageFluctuation(
-                port = self.A,
+                port = self.pe_A,
                 Vsq_Hz_by_freq = lambda F : 4 * self.L1_resistance_Ohms * self.symbols.temp_K * self.symbols.kB_J_K,
                 sided = 'one-sided',
             )
@@ -266,7 +266,7 @@ class Transformer(Z2x2To4Port):
     def L2_johnson_noise(self):
         if self.system.include_johnson_noise and self.L2_resistance_Ohms != 0:
             return noise.VoltageFluctuation(
-                port = self.C,
+                port = self.pe_C,
                 Vsq_Hz_by_freq = lambda F : 4 * self.L2_resistance_Ohms * self.symbols.temp_K * self.symbols.kB_J_K,
                 sided = 'one-sided',
             )

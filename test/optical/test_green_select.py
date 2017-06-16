@@ -74,7 +74,7 @@ def test_split():
     sys.own.DC_G = readouts.DCReadout(
         port = sys.PD_G.Wpd.o,
     )
-    print("A")
+    print("pm_A")
     pprint(sys.ctree.test.PSL)
     np_test.assert_almost_equal(sys.DC_R.DC_readout, 2)
     np_test.assert_almost_equal(sys.DC_G.DC_readout, 1)
@@ -122,7 +122,7 @@ def test_split():
 #    sys.own.DC_G = readouts.DCReadout(
 #        port = sys.PD_G.Wpd.o,
 #    )
-#    #print("A")
+#    #print("pm_A")
 #    #pprint(sys.ctree.test.PSL)
 #    print("sys.DC_R.DC_readout", sys.DC_R.DC_readout, 2)
 #    print("sys.DC_G.DC_readout", sys.DC_G.DC_readout, 1)

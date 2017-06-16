@@ -14,9 +14,9 @@ def test_V():
     sys = system.BGSystem()
     sys.own.V1 = electronics.VoltageSource(V_DC = 1)
     sys.own.T1 = electronics.TerminatorOpen()
-    sys.bond(sys.V1.A, sys.T1.A)
+    sys.bond(sys.V1.pe_A, sys.T1.pe_A)
     sys.own.R1 = electronics.VoltageReadout(
-        terminal =sys.V1.A,
+        terminal =sys.V1.pe_A,
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1)
 
@@ -24,7 +24,7 @@ def test_V():
     sys = system.BGSystem()
     sys.own.V1 = electronics.VoltageSource(V_DC = 1)
     sys.own.R1 = electronics.VoltageReadout(
-        terminal =sys.V1.A,
+        terminal =sys.V1.pe_A,
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1)
 
@@ -32,9 +32,9 @@ def test_V():
     sys = system.BGSystem()
     sys.own.V1 = electronics.VoltageSource(V_DC = 1)
     sys.own.T1 = electronics.TerminatorOpen()
-    sys.bond(sys.V1.A, sys.T1.A)
+    sys.bond(sys.V1.pe_A, sys.T1.pe_A)
     sys.own.R1 = electronics.VoltageReadout(
-        terminal =sys.T1.A,
+        terminal =sys.T1.pe_A,
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1)
 
@@ -43,9 +43,9 @@ def test_I():
     sys = system.BGSystem()
     sys.own.I1 = electronics.CurrentSource(I_DC = 1)
     sys.own.T1 = electronics.TerminatorShorted()
-    sys.bond(sys.I1.A, sys.T1.A)
+    sys.bond(sys.I1.pe_A, sys.T1.pe_A)
     sys.own.R1 = electronics.CurrentReadout(
-        terminal = sys.I1.A,
+        terminal = sys.I1.pe_A,
         direction = 'out',
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1)
@@ -54,9 +54,9 @@ def test_I():
     sys = system.BGSystem()
     sys.own.I1 = electronics.CurrentSource(I_DC = 1)
     sys.own.T1 = electronics.TerminatorShorted()
-    sys.bond(sys.I1.A, sys.T1.A)
+    sys.bond(sys.I1.pe_A, sys.T1.pe_A)
     sys.own.R1 = electronics.CurrentReadout(
-        terminal = sys.T1.A,
+        terminal = sys.T1.pe_A,
         direction = 'in',
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1)
@@ -67,13 +67,13 @@ def test_VIR():
     sys.own.T1 = electronics.TerminatorResistor(
         resistance_Ohms = 10,
     )
-    sys.bond(sys.I1.A, sys.T1.A)
+    sys.bond(sys.I1.pe_A, sys.T1.pe_A)
     sys.own.R1 = electronics.CurrentReadout(
-        terminal = sys.I1.A,
+        terminal = sys.I1.pe_A,
         direction = 'out',
     )
     sys.own.R2 = electronics.VoltageReadout(
-        terminal = sys.I1.A,
+        terminal = sys.I1.pe_A,
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1)
     test.assert_almost_equal(sys.R2.DC_readout, 10)
@@ -84,13 +84,13 @@ def test_VIR():
     sys.own.T1 = electronics.TerminatorResistor(
         resistance_Ohms = 50,
     )
-    sys.bond(sys.I1.A, sys.T1.A)
+    sys.bond(sys.I1.pe_A, sys.T1.pe_A)
     sys.own.R1 = electronics.CurrentReadout(
-        terminal = sys.I1.A,
+        terminal = sys.I1.pe_A,
         direction = 'out',
     )
     sys.own.R2 = electronics.VoltageReadout(
-        terminal = sys.I1.A,
+        terminal = sys.I1.pe_A,
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1)
     test.assert_almost_equal(sys.R2.DC_readout, 50)
@@ -105,18 +105,18 @@ def test_VIR_conn():
     sys.own.T2 = electronics.TerminatorResistor(
         resistance_Ohms = 10,
     )
-    sys.bond(sys.I1.A, sys.Conn1.p0)
-    sys.bond(sys.Conn1.p1, sys.T1.A)
-    sys.bond(sys.Conn1.p2, sys.T2.A)
+    sys.bond(sys.I1.pe_A, sys.Conn1.pe_0)
+    sys.bond(sys.Conn1.pe_1, sys.T1.pe_A)
+    sys.bond(sys.Conn1.pe_2, sys.T2.pe_A)
     sys.own.R1 = electronics.CurrentReadout(
-        terminal = sys.I1.A,
+        terminal = sys.I1.pe_A,
         direction = 'out',
     )
     sys.own.R2 = electronics.VoltageReadout(
-        terminal = sys.I1.A,
+        terminal = sys.I1.pe_A,
     )
     sys.own.R3 = electronics.CurrentReadout(
-        terminal = sys.T1.A,
+        terminal = sys.T1.pe_A,
         direction = 'in',
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1)
@@ -137,20 +137,20 @@ def test_VIR_conn2():
     sys.own.T2 = electronics.TerminatorResistor(
         resistance_Ohms = 10,
     )
-    sys.bond(sys.I1.A, sys.Conn1.p0)
-    sys.bond(sys.Conn1.p1, sys.Conn2.p0)
-    sys.bond(sys.Conn1.p2, sys.Conn2.p3)
-    sys.bond(sys.Conn2.p1, sys.T1.A)
-    sys.bond(sys.Conn2.p2, sys.T2.A)
+    sys.bond(sys.I1.pe_A, sys.Conn1.pe_0)
+    sys.bond(sys.Conn1.pe_1, sys.Conn2.pe_0)
+    sys.bond(sys.Conn1.pe_2, sys.Conn2.pe_3)
+    sys.bond(sys.Conn2.pe_1, sys.T1.pe_A)
+    sys.bond(sys.Conn2.pe_2, sys.T2.pe_A)
     sys.own.R1 = electronics.CurrentReadout(
-        terminal = sys.I1.A,
+        terminal = sys.I1.pe_A,
         direction = 'out',
     )
     sys.own.R2 = electronics.VoltageReadout(
-        terminal = sys.I1.A,
+        terminal = sys.I1.pe_A,
     )
     sys.own.R3 = electronics.CurrentReadout(
-        terminal = sys.T1.A,
+        terminal = sys.T1.pe_A,
         direction = 'in',
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1)
@@ -165,55 +165,55 @@ def test_bdV():
     sys = system.BGSystem()
     sys.own.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
     sys.own.T1 = electronics.TerminatorOpen()
-    sys.bond(sys.V1.A, sys.T1.A)
+    sys.bond(sys.V1.pe_A, sys.T1.pe_A)
     sys.own.T2 = electronics.TerminatorShorted()
-    sys.bond(sys.V1.B, sys.T2.A)
+    sys.bond(sys.V1.pe_B, sys.T2.pe_A)
     sys.own.R1 = electronics.VoltageReadout(
-        terminal = sys.V1.A,
+        terminal = sys.V1.pe_A,
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1)
 
     sys = system.BGSystem()
     sys.own.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
     #sys.own.T1 = electronics.TerminatorOpen()
-    #sys.bond(sys.V1.A, sys.T1.A)
+    #sys.bond(sys.V1.pe_A, sys.T1.pe_A)
     sys.own.T2 = electronics.TerminatorShorted()
-    sys.bond(sys.V1.B, sys.T2.A)
+    sys.bond(sys.V1.pe_B, sys.T2.pe_A)
     sys.own.R1 = electronics.VoltageReadout(
-        terminal = sys.V1.A,
+        terminal = sys.V1.pe_A,
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1)
 
     sys = system.BGSystem()
     sys.own.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
     sys.own.T2 = electronics.TerminatorMatched()
-    sys.bond(sys.V1.B, sys.T2.A)
+    sys.bond(sys.V1.pe_B, sys.T2.pe_A)
     sys.own.R1 = electronics.VoltageReadout(
-        terminal = sys.V1.A,
+        terminal = sys.V1.pe_A,
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1)
 
     sys = system.BGSystem()
     sys.own.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
     sys.own.T2 = electronics.TerminatorShorted()
-    sys.bond(sys.V1.B, sys.T2.A)
+    sys.bond(sys.V1.pe_B, sys.T2.pe_A)
     sys.own.T1 = electronics.TerminatorMatched()
-    sys.bond(sys.V1.A, sys.T1.A)
+    sys.bond(sys.V1.pe_A, sys.T1.pe_A)
     sys.own.R1 = electronics.VoltageReadout(
-        terminal = sys.V1.A,
-        terminal_N = sys.V1.B,
+        terminal = sys.V1.pe_A,
+        terminal_N = sys.V1.pe_B,
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1)
 
     sys = system.BGSystem()
     sys.own.V1 = electronics.VoltageSourceBalanced(V_DC = 1)
     sys.own.T1 = electronics.TerminatorMatched()
-    sys.bond(sys.V1.A, sys.T1.A)
+    sys.bond(sys.V1.pe_A, sys.T1.pe_A)
     sys.own.T2 = electronics.TerminatorMatched()
-    sys.bond(sys.V1.B, sys.T2.A)
+    sys.bond(sys.V1.pe_B, sys.T2.pe_A)
     sys.own.R1 = electronics.VoltageReadout(
-        terminal = sys.V1.A,
-        terminal_N = sys.V1.B,
+        terminal = sys.V1.pe_A,
+        terminal_N = sys.V1.pe_B,
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1)
 
@@ -224,13 +224,13 @@ def test_bdVIR():
     sys.own.T1 = electronics.TerminatorResistor(
         resistance_Ohms = 10,
     )
-    sys.bond(sys.V1.A, sys.T1.A)
+    sys.bond(sys.V1.pe_A, sys.T1.pe_A)
     sys.own.T2 = electronics.TerminatorResistor(
         resistance_Ohms = 20,
     )
-    sys.bond(sys.V1.B, sys.T2.A)
+    sys.bond(sys.V1.pe_B, sys.T2.pe_A)
     sys.own.R1 = electronics.CurrentReadout(
-        terminal = sys.T1.A,
+        terminal = sys.T1.pe_A,
         direction = 'in',
     )
     test.assert_almost_equal(sys.R1.DC_readout, 1 / 30)
@@ -241,13 +241,13 @@ def test_bdVIR_AC():
     sys.own.T1 = electronics.TerminatorResistor(
         resistance_Ohms = 10,
     )
-    sys.bond(sys.V1.A, sys.T1.A)
+    sys.bond(sys.V1.pe_A, sys.T1.pe_A)
     sys.own.T2 = electronics.TerminatorResistor(
         resistance_Ohms = 20,
     )
-    sys.bond(sys.V1.B, sys.T2.A)
+    sys.bond(sys.V1.pe_B, sys.T2.pe_A)
     sys.own.R1 = electronics.CurrentReadout(
-        terminal = sys.T1.A,
+        terminal = sys.T1.pe_A,
         direction = 'in',
     )
     sys.own.RAC1 = readouts.ACReadout(
@@ -262,7 +262,7 @@ def test_V_AC():
     )
     sys.own.V1 = electronics.VoltageSource()
     sys.own.R1 = electronics.VoltageReadout(
-        terminal = sys.V1.A,
+        terminal = sys.V1.pe_A,
     )
     sys.own.RAC1 = readouts.ACReadout(
         portD = sys.V1.V.i,

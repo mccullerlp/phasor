@@ -177,33 +177,33 @@ class QuadSusp(optics.OpticalCouplerBase):
         try:
             super(QuadSusp, self).__build__()
 
-            self.Platform.A.bond(self.ActuatorF.A)
+            self.Platform.pm_A.bond(self.ActuatorF.pm_A)
 
-            self.Pendn.A.bond(self.Platform.A)
-            self.Pend1.A.bond(self.Pendn.B)
-            self.Pend2.A.bond(self.Pend1.B)
-            self.Pend3.A.bond(self.Pend2.B)
+            self.Pendn.pm_A.bond(self.Platform.pm_A)
+            self.Pend1.pm_A.bond(self.Pendn.pm_B)
+            self.Pend2.pm_A.bond(self.Pend1.pm_B)
+            self.Pend3.pm_A.bond(self.Pend2.pm_B)
 
-            self.Pendn.B.bond(self.Mn.A)
-            self.Pend1.B.bond(self.M1.A)
-            self.Pend2.B.bond(self.M2.A)
-            self.Pend3.B.bond(self.M3.A)
+            self.Pendn.pm_B.bond(self.Mn.pm_A)
+            self.Pend1.pm_B.bond(self.M1.pm_A)
+            self.Pend2.pm_B.bond(self.M2.pm_A)
+            self.Pend3.pm_B.bond(self.M3.pm_A)
 
-            self.PendDn.A.bond(self.Pendn.A)
-            self.PendD1.A.bond(self.Pend1.A)
-            self.PendD2.A.bond(self.Pend2.A)
-            self.PendD3.A.bond(self.Pend3.A)
+            self.PendDn.pm_A.bond(self.Pendn.pm_A)
+            self.PendD1.pm_A.bond(self.Pend1.pm_A)
+            self.PendD2.pm_A.bond(self.Pend2.pm_A)
+            self.PendD3.pm_A.bond(self.Pend3.pm_A)
 
-            self.PendDn.B.bond(self.Pendn.B)
-            self.PendD1.B.bond(self.Pend1.B)
-            self.PendD2.B.bond(self.Pend2.B)
-            self.PendD3.B.bond(self.Pend3.B)
+            self.PendDn.pm_B.bond(self.Pendn.pm_B)
+            self.PendD1.pm_B.bond(self.Pend1.pm_B)
+            self.PendD2.pm_B.bond(self.Pend2.pm_B)
+            self.PendD3.pm_B.bond(self.Pend3.pm_B)
 
-            self.ActuatorF.B.bond(self.M3.A)
-            self.ActuatorD.A.bond(self.ActuatorF.B)
+            self.ActuatorF.pm_B.bond(self.M3.pm_A)
+            self.ActuatorD.pm_A.bond(self.ActuatorF.pm_B)
 
-            self.B_platform = self.Platform.A
-            self.A_mirror = self.ActuatorD.B
+            self.B_platform = self.Platform.pm_A
+            self.A_mirror = self.ActuatorD.pm_B
         except Exception as E:
             print(repr(E))
 

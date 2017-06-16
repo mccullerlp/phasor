@@ -25,7 +25,7 @@ def annotate_inverses(func1, func2):
 
 def _generate_bitfill(p):
     """
-    A helper function for yield_bits_on to generate the primitive-root lookup table is
+    pe_A helper function for yield_bits_on to generate the primitive-root lookup table is
 
     :param p: prime number which is also a primitive root of 2
 

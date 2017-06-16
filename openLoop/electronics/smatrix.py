@@ -14,15 +14,15 @@ class SMatrix1PortBase(elements.Electrical1PortBase):
         raise NotImplementedError()
 
     def system_setup_coupling(self, matrix_algorithm):
-        for kfrom in matrix_algorithm.port_set_get(self.A.i):
+        for kfrom in matrix_algorithm.port_set_get(self.pe_A.i):
             #if self.system.classical_frequency_test_max(kfrom, self.max_freq):
             #    continue
             freq = self.system.classical_frequency_extract(kfrom)
             pgain = self.S11_by_freq(freq)
             matrix_algorithm.port_coupling_insert(
-                self.A.i,
+                self.pe_A.i,
                 kfrom,
-                self.A.o,
+                self.pe_A.o,
                 kfrom,
                 pgain,
             )
@@ -45,8 +45,8 @@ class SMatrix2PortBase(elements.Electrical2PortBase):
     @decl.mproperty
     def ports_electrical(self):
         return [
-            self.A,
-            self.B,
+            self.pe_A,
+            self.pe_B,
         ]
 
     def system_setup_ports(self, ports_algorithm):
@@ -61,10 +61,10 @@ class SMatrix2PortBase(elements.Electrical2PortBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         for port1, port2, func in [
-            (self.A, self.A, self.S11_by_freq),
-            (self.A, self.B, self.S12_by_freq),
-            (self.B, self.A, self.S21_by_freq),
-            (self.B, self.B, self.S22_by_freq),
+            (self.pe_A, self.pe_A, self.S11_by_freq),
+            (self.pe_A, self.pe_B, self.S12_by_freq),
+            (self.pe_B, self.pe_A, self.S21_by_freq),
+            (self.pe_B, self.pe_B, self.S22_by_freq),
         ]:
             for kfrom in matrix_algorithm.port_set_get(port1.i):
                 #if self.system.classical_frequency_test_max(kfrom, self.max_freq):
@@ -88,7 +88,7 @@ class TerminatorMatched(SMatrix1PortBase):
     def johnson_noise(self):
         if self.system.include_johnson_noise:
             return noise.VoltageFluctuation(
-                port = self.A,
+                port = self.pe_A,
                 Vsq_Hz_by_freq = lambda F : 4 * self.Z_termination.real * self.symbols.temp_K * self.symbols.kB_J_K,
                 sided = 'one-sided',
             )

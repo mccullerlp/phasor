@@ -85,16 +85,16 @@ Some of the known remaining caveats are:
 - Functions that are removed (eg. via monkey-patching) from a module
   before it is reloaded are not upgraded.
 
-- C extension modules cannot be reloaded, and so cannot be autoreloaded.
+- pe_C extension modules cannot be reloaded, and so cannot be autoreloaded.
 """
 from __future__ import print_function
 
 skip_doctest = True
 
 #-----------------------------------------------------------------------------
-#  Copyright (C) 2000 Thomas Heller
-#  Copyright (C) 2008 Pauli Virtanen <pav@iki.fi>
-#  Copyright (C) 2012  The IPython Development Team
+#  Copyright (pe_C) 2000 Thomas Heller
+#  Copyright (pe_C) 2008 Pauli Virtanen <pav@iki.fi>
+#  Copyright (pe_C) 2012  The IPython Development Team
 #
 #  Distributed under the terms of the BSD License.  The full license is in
 #  the file COPYING, distributed as part of this software.
@@ -464,7 +464,7 @@ class AutoreloadMagics(Magics):
         - Functions that are removed (eg. via monkey-patching) from a module
           before it is reloaded are not upgraded.
 
-        - C extension modules cannot be reloaded, and so cannot be
+        - pe_C extension modules cannot be reloaded, and so cannot be
           autoreloaded.
 
         """

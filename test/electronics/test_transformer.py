@@ -21,23 +21,23 @@ def test_transformer():
         L1_inductance_Henries = 1e-6,
         L2_inductance_Henries = 100e-6,
     )
-    sys.bond(sys.Tr1.A, sys.V1.A)
+    sys.bond(sys.Tr1.pe_A, sys.V1.pe_A)
     sys.own.Tr1BT = electronics.TerminatorMatched()
-    sys.bond(sys.Tr1.B, sys.Tr1BT.A)
+    sys.bond(sys.Tr1.pe_B, sys.Tr1BT.pe_A)
     sys.own.Tr1CT = electronics.TerminatorOpen()
-    sys.bond(sys.Tr1.C, sys.Tr1CT.A)
+    sys.bond(sys.Tr1.pe_C, sys.Tr1CT.pe_A)
     sys.own.Tr1DT = electronics.TerminatorMatched()
-    sys.bond(sys.Tr1.D, sys.Tr1DT.A)
+    sys.bond(sys.Tr1.pe_D, sys.Tr1DT.pe_A)
 
     sys.own.R1 = electronics.VoltageReadout(
-        terminal = sys.V1.A,
+        terminal = sys.V1.pe_A,
     )
     sys.own.RAC1 = readouts.ACReadout(
         portD = sys.V1.V.i,
         portN = sys.R1.V.o,
     )
     sys.own.R2 = electronics.VoltageReadout(
-        terminal = sys.Tr1.C,
+        terminal = sys.Tr1.pe_C,
     )
     sys.own.RAC2 = readouts.ACReadout(
         portD = sys.V1.V.i,
@@ -56,27 +56,27 @@ def test_transformer2():
         L1_inductance_Henries = 1e-6,
         L2_inductance_Henries = 100e-6,
     )
-    sys.bond(sys.Tr1.A, sys.V1.A)
+    sys.bond(sys.Tr1.pe_A, sys.V1.pe_A)
     sys.own.Tr1BT = electronics.TerminatorResistor(
         resistance_Ohms = 1,
     )
-    sys.bond(sys.Tr1.B, sys.Tr1BT.A)
+    sys.bond(sys.Tr1.pe_B, sys.Tr1BT.pe_A)
     sys.own.Tr1CT = electronics.TerminatorOpen()
-    sys.bond(sys.Tr1.C, sys.Tr1CT.A)
+    sys.bond(sys.Tr1.pe_C, sys.Tr1CT.pe_A)
     sys.own.Tr1DT = electronics.TerminatorResistor(
         resistance_Ohms = np.linspace(.00001, 1e6, 10)
     )
-    sys.bond(sys.Tr1.D, sys.Tr1DT.A)
+    sys.bond(sys.Tr1.pe_D, sys.Tr1DT.pe_A)
 
     sys.own.R1 = electronics.VoltageReadout(
-        terminal = sys.V1.A,
+        terminal = sys.V1.pe_A,
     )
     sys.own.RAC1 = readouts.ACReadout(
         portD = sys.V1.V.i,
         portN = sys.R1.V.o,
     )
     sys.own.R2 = electronics.VoltageReadout(
-        terminal = sys.Tr1.C,
+        terminal = sys.Tr1.pe_C,
     )
     sys.own.RAC2 = readouts.ACReadout(
         portD = sys.V1.V.i,
@@ -97,27 +97,27 @@ def test_transformer_stepdown():
         L2_inductance_Henries = 1e-6,
         #transformer_k_by_freq = lambda F : .99,
     )
-    sys.bond(sys.Tr1.A, sys.V1.A)
+    sys.bond(sys.Tr1.pe_A, sys.V1.pe_A)
     sys.own.Tr1BT = electronics.TerminatorResistor(
         resistance_Ohms = 1,
     )
-    sys.bond(sys.Tr1.B, sys.Tr1BT.A)
+    sys.bond(sys.Tr1.pe_B, sys.Tr1BT.pe_A)
     sys.own.Tr1CT = electronics.TerminatorOpen()
-    sys.bond(sys.Tr1.C, sys.Tr1CT.A)
+    sys.bond(sys.Tr1.pe_C, sys.Tr1CT.pe_A)
     sys.own.Tr1DT = electronics.TerminatorResistor(
         resistance_Ohms = np.linspace(.00001, 1e6, 10)
     )
-    sys.bond(sys.Tr1.D, sys.Tr1DT.A)
+    sys.bond(sys.Tr1.pe_D, sys.Tr1DT.pe_A)
 
     sys.own.R1 = electronics.VoltageReadout(
-        terminal = sys.V1.A,
+        terminal = sys.V1.pe_A,
     )
     sys.own.RAC1 = readouts.ACReadout(
         portD = sys.V1.V.i,
         portN = sys.R1.V.o,
     )
     sys.own.R2 = electronics.VoltageReadout(
-        terminal = sys.Tr1.C,
+        terminal = sys.Tr1.pe_C,
     )
     sys.own.RAC2 = readouts.ACReadout(
         portD = sys.V1.V.i,

@@ -91,21 +91,21 @@ def test_mirror():
     print("etm_drive", sys.etm_drive.AC_sensitivity)
     #print("etm_Force[N]", sys.DC_readout('etm_ForceZ'))
 
-    #print("A")
+    #print("pm_A")
     #sys.coupling_matrix_print(select_from = b.sys.etm.Z.d.o, select_to = b.sys.etm.po_Fr.o)
-    #print("B")
+    #print("pm_B")
     #sys.solution.coupling_matrix_print(
     #    select_to= b.sys.etm.po_Fr.i,
     #)
     assertions.assertAlmostEqual(sys.etm_DC.DC_readout, .75)
     print("inv")
     #sys.solution.coupling_matrix_inv_print()
-    print('A')
+    print('pm_A')
     sys.solution.coupling_matrix_inv_print(
         select_from = b.sys.etm.Z.d.o,
         select_to = b.sys.etmPD.po_Fr.i,
     )
-    print('B')
+    print('pm_B')
 
     sys.solution.coupling_matrix_print(
         select_from = b.sys.etmPD.po_Fr.i,
@@ -113,7 +113,7 @@ def test_mirror():
         drive_set = 'AC',
         readout_set = 'AC',
     )
-    print('B inv')
+    print('pm_B inv')
     sys.solution.coupling_matrix_inv_print(
         select_from = b.sys.etmPD.po_Fr.i,
         select_to = b.sys.etmPD.Wpd.o,

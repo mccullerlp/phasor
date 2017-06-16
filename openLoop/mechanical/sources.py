@@ -29,14 +29,14 @@ class DisplacementSource(smatrix.SMatrix1PortBase):
 
     def system_setup_ports_initial(self, ports_algorithm):
         if self.d_DC != 0:
-            ports_algorithm.coherent_sources_needed(self.A.o, self.fkey)
+            ports_algorithm.coherent_sources_needed(self.pm_A.o, self.fkey)
         return
 
     def system_setup_ports(self, ports_algorithm):
         super(DisplacementSource, self).system_setup_ports(ports_algorithm)
         for kfrom in ports_algorithm.port_update_get(self.d.i):
-            ports_algorithm.port_coupling_needed(self.A.o, kfrom)
-        for kto in ports_algorithm.port_update_get(self.A.o):
+            ports_algorithm.port_coupling_needed(self.pm_A.o, kfrom)
+        for kto in ports_algorithm.port_update_get(self.pm_A.o):
             ports_algorithm.port_coupling_needed(self.d.i, kto)
         return
 
@@ -46,7 +46,7 @@ class DisplacementSource(smatrix.SMatrix1PortBase):
 
         if self.d_DC != 0:
             matrix_algorithm.coherent_sources_insert(
-                self.A.o,
+                self.pm_A.o,
                 self.fkey,
                 self.d_DC
             )
@@ -55,7 +55,7 @@ class DisplacementSource(smatrix.SMatrix1PortBase):
             matrix_algorithm.port_coupling_insert(
                 self.d.i,
                 kfrom,
-                self.A.o,
+                self.pm_A.o,
                 kfrom,
                 1,
             )
@@ -83,14 +83,14 @@ class ForceSource(smatrix.SMatrix1PortBase):
 
     def system_setup_ports_initial(self, ports_algorithm):
         if self.F_DC != 0:
-            ports_algorithm.coherent_sources_needed(self.A.o, self.fkey)
+            ports_algorithm.coherent_sources_needed(self.pm_A.o, self.fkey)
         return
 
     def system_setup_ports(self, ports_algorithm):
         super(ForceSource, self).system_setup_ports(ports_algorithm)
         for kfrom in ports_algorithm.port_update_get(self.F.i):
-            ports_algorithm.port_coupling_needed(self.A.o, kfrom)
-        for kto in ports_algorithm.port_update_get(self.A.o):
+            ports_algorithm.port_coupling_needed(self.pm_A.o, kfrom)
+        for kto in ports_algorithm.port_update_get(self.pm_A.o):
             ports_algorithm.port_coupling_needed(self.F.i, kto)
         return
 
@@ -100,7 +100,7 @@ class ForceSource(smatrix.SMatrix1PortBase):
 
         if self.F_DC != 0:
             matrix_algorithm.coherent_sources_insert(
-                self.A.o,
+                self.pm_A.o,
                 self.fkey,
                 self.F_DC * self.zM_termination
             )
@@ -109,7 +109,7 @@ class ForceSource(smatrix.SMatrix1PortBase):
             matrix_algorithm.port_coupling_insert(
                 self.F.i,
                 kfrom,
-                self.A.o,
+                self.pm_A.o,
                 kfrom,
                 self.zM_termination,
             )
@@ -118,7 +118,7 @@ class ForceSource(smatrix.SMatrix1PortBase):
 
 class DisplacementSourceBalanced(smatrix.SMatrix2PortBase):
     """
-    TODO consider making this the ForceSource but with the "B" port autoterminate with a short
+    TODO consider making this the ForceSource but with the "pm_B" port autoterminate with a short
     """
     def S11_by_freq(self, F):
         return 0
@@ -156,13 +156,13 @@ class DisplacementSourceBalanced(smatrix.SMatrix2PortBase):
 
     def system_setup_ports_initial(self, ports_algorithm):
         if self.d_DC != 0 or self.F_DC != 0:
-            ports_algorithm.coherent_sources_needed(self.A.o, self.fkey)
-            ports_algorithm.coherent_sources_needed(self.B.o, self.fkey)
+            ports_algorithm.coherent_sources_needed(self.pm_A.o, self.fkey)
+            ports_algorithm.coherent_sources_needed(self.pm_B.o, self.fkey)
         return
 
     def system_setup_ports(self, ports_algorithm):
         super(DisplacementSourceBalanced, self).system_setup_ports(ports_algorithm)
-        for port2 in [self.A, self.B]:
+        for port2 in [self.pm_A, self.pm_B]:
             for kfrom in ports_algorithm.port_update_get(self.F.i):
                 ports_algorithm.port_coupling_needed(port2.o, kfrom)
             for kto in ports_algorithm.port_update_get(port2.o):
@@ -181,26 +181,26 @@ class DisplacementSourceBalanced(smatrix.SMatrix2PortBase):
 
         if self.d_DC != 0:
             matrix_algorithm.coherent_sources_insert(
-                self.A.o,
+                self.pm_A.o,
                 self.fkey,
                 self.d_DC / _2,
             )
 
             matrix_algorithm.coherent_sources_insert(
-                self.B.o,
+                self.pm_B.o,
                 self.fkey,
                 -self.d_DC / _2,
             )
 
         if self.F_DC != 0:
             matrix_algorithm.coherent_sources_insert(
-                self.A.o,
+                self.pm_A.o,
                 self.fkey,
                 self.zM_termination * self.F_DC / _2,
             )
 
             matrix_algorithm.coherent_sources_insert(
-                self.B.o,
+                self.pm_B.o,
                 self.fkey,
                 self.zM_termination * self.F_DC / _2,
             )
@@ -209,14 +209,14 @@ class DisplacementSourceBalanced(smatrix.SMatrix2PortBase):
             matrix_algorithm.port_coupling_insert(
                 self.d.i,
                 kfrom,
-                self.A.o,
+                self.pm_A.o,
                 kfrom,
                 1 / _2,
             )
             matrix_algorithm.port_coupling_insert(
                 self.d.i,
                 kfrom,
-                self.B.o,
+                self.pm_B.o,
                 kfrom,
                 -1 / _2,
             )
@@ -224,14 +224,14 @@ class DisplacementSourceBalanced(smatrix.SMatrix2PortBase):
             matrix_algorithm.port_coupling_insert(
                 self.F.i,
                 kfrom,
-                self.A.o,
+                self.pm_A.o,
                 kfrom,
                 self.zM_termination / _2,
             )
             matrix_algorithm.port_coupling_insert(
                 self.F.i,
                 kfrom,
-                self.B.o,
+                self.pm_B.o,
                 kfrom,
                 self.zM_termination / _2,
             )
@@ -265,13 +265,13 @@ class ForceSourceBalanced(smatrix.SMatrix2PortBase):
         })
 
     def system_setup_ports_initial(self, ports_algorithm):
-        ports_algorithm.coherent_sources_needed(self.A.o, self.fkey)
-        ports_algorithm.coherent_sources_needed(self.B.o, self.fkey)
+        ports_algorithm.coherent_sources_needed(self.pm_A.o, self.fkey)
+        ports_algorithm.coherent_sources_needed(self.pm_B.o, self.fkey)
         return
 
     def system_setup_ports(self, ports_algorithm):
         super(ForceSourceBalanced, self).system_setup_ports(ports_algorithm)
-        for port2 in [self.A, self.B]:
+        for port2 in [self.pm_A, self.pm_B]:
             for kfrom in ports_algorithm.port_update_get(self.F.i):
                 ports_algorithm.port_coupling_needed(port2.o, kfrom)
             for kto in ports_algorithm.port_update_get(port2.o):
@@ -283,13 +283,13 @@ class ForceSourceBalanced(smatrix.SMatrix2PortBase):
         super(ForceSourceBalanced, self).system_setup_coupling(matrix_algorithm)
 
         matrix_algorithm.coherent_sources_insert(
-            self.A.o,
+            self.pm_A.o,
             self.fkey,
             self.zM_termination * self.F_DC,
         )
 
         matrix_algorithm.coherent_sources_insert(
-            self.B.o,
+            self.pm_B.o,
             self.fkey,
             self.zM_termination * self.F_DC,
         )
@@ -298,14 +298,14 @@ class ForceSourceBalanced(smatrix.SMatrix2PortBase):
             matrix_algorithm.port_coupling_insert(
                 self.F.i,
                 kfrom,
-                self.A.o,
+                self.pm_A.o,
                 kfrom,
                 self.zM_termination,
             )
             matrix_algorithm.port_coupling_insert(
                 self.F.i,
                 kfrom,
-                self.B.o,
+                self.pm_B.o,
                 kfrom,
                 self.zM_termination,
             )

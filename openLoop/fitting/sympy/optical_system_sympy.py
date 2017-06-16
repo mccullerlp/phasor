@@ -193,8 +193,8 @@ class projectI(sympy.Function):
 #        factors = arg.as_ordered_factors()
 #        idx = 0
 #        while idx < len(factors):
-#            A = sympy.Wild('A')
-#            phasor = sympy.exp(sympy.I * A)
+#            pe_A = sympy.Wild('pe_A')
+#            phasor = sympy.exp(sympy.I * pe_A)
 #            if factors[idx].match(phasor):
 #                factors.pop(idx)
 #            else:
@@ -203,8 +203,8 @@ class projectI(sympy.Function):
 #
 
 def sympy_count_conjugates(expr):
-    A = sympy.Wild('A')
-    return len(expr.find(sympy.conjugate(A)))
+    pe_A = sympy.Wild('pe_A')
+    return len(expr.find(sympy.conjugate(pe_A)))
 
 
 def choose_fewer_conjugates(expr1, expr2):
@@ -351,16 +351,16 @@ class OpticalSystemSympy(OpticalSystem):
 
                         def tfunc_cc(vlistL, vlistR, sgn1, sgn2):
                             if not use_ratsimp:
-                                simp1_x0 = sympy.sympify(value_La_cc - sgn1 * vlistR[idx_b]).is_zero
-                                simp2_x0 = sympy.sympify(value_Ra_cc - sgn2 * vlistL[idx_b]).is_zero
+                                simpe_1_x0 = sympy.sympify(value_La_cc - sgn1 * vlistR[idx_b]).is_zero
+                                simpe_2_x0 = sympy.sympify(value_Ra_cc - sgn2 * vlistL[idx_b]).is_zero
                             else:
-                                simp1_x0 = sympy.sympify(value_La_cc.expand() - sgn1 * vlistR[idx_b].expand()).is_zero
-                                simp2_x0 = sympy.sympify(value_Ra_cc.expand() - sgn2 * vlistL[idx_b].expand()).is_zero
+                                simpe_1_x0 = sympy.sympify(value_La_cc.expand() - sgn1 * vlistR[idx_b].expand()).is_zero
+                                simpe_2_x0 = sympy.sympify(value_Ra_cc.expand() - sgn2 * vlistL[idx_b].expand()).is_zero
 
                             coeff_b = sgn1*sgn2*coeff_list[idx_b]
                             coeff_a = coeff_list[idx_a]
 
-                            if simp1_x0 and simp2_x0:
+                            if simpe_1_x0 and simpe_2_x0:
                                 coeff_a_cc = self.conjugate(coeff_a)
                                 value_a =  value_La * value_Ra
                                 value_a_cc = value_Ra_cc * value_La_cc
@@ -423,17 +423,17 @@ class OpticalSystemSympy(OpticalSystem):
                         value_Ra_cc = self.conjugate(value_Ra)
 
                         def tfunc(vlistL, vlistR, sgn1, sgn2, do_nest = True):
-                            simp1_x1 = sympy.sympify(value_La    - sgn1 * vlistR[idx_b]).is_zero
-                            simp2_x1 = sympy.sympify(value_Ra    - sgn2 * vlistL[idx_b]).is_zero
+                            simpe_1_x1 = sympy.sympify(value_La    - sgn1 * vlistR[idx_b]).is_zero
+                            simpe_2_x1 = sympy.sympify(value_Ra    - sgn2 * vlistL[idx_b]).is_zero
 
                             coeff_b = sgn1*sgn2*coeff_list[idx_b]
                             coeff_a = coeff_list[idx_a]
                             coeff_a_cc = self.conjugate(coeff_a)
 
-                            if not (simp1_x1 or simp2_x1):
+                            if not (simpe_1_x1 or simpe_2_x1):
                                 return False
 
-                            if simp1_x1 and simp2_x1:
+                            if simpe_1_x1 and simpe_2_x1:
                                 value_a =  value_La * value_Ra
                                 if sympy.sympify(coeff_a + coeff_b).is_zero:
                                     #b.total += 0
@@ -447,7 +447,7 @@ class OpticalSystemSympy(OpticalSystem):
                                 else:
                                     b.total += (coeff_a + coeff_b) * value_a
                                     return True
-                            elif simp1_x1:
+                            elif simpe_1_x1:
                                 if do_nest and tfunc(vlistL, vlistR, sgn1, -sgn2, False):
                                     return True
                                 if sympy.sympify(coeff_a - coeff_b).is_zero:

@@ -13,8 +13,8 @@ def enorm(arr):
     return np.max(abssq(arr))
 
 def matrix_mult_sre(sre1, sre2):
-    seq1, req1, edge_map1 = sre1
-    seq2, req2, edge_map2 = sre2
+    seq1, req1, edge_mape_1 = sre1
+    seq2, req2, edge_mape_2 = sre2
 
     seq = dict()
     req = dict()
@@ -24,12 +24,12 @@ def matrix_mult_sre(sre1, sre2):
         if not mseq:
             continue
         for k_from in req1[k_mid]:
-            e1 = edge_map1[k_from, k_mid]
+            e1 = edge_mape_1[k_from, k_mid]
             seq.setdefault(k_from, set())
             for k_to in mseq:
                 if k_to not in seq2[k_mid]:
                     continue
-                e2 = edge_map2[k_mid, k_to]
+                e2 = edge_mape_2[k_mid, k_to]
                 if k_to in seq[k_from]:
                     edge_map[k_from, k_to] = edge_map[k_from, k_to] + e2 * e1
                 else:
@@ -123,16 +123,16 @@ def edge_matrix_to_unitary_sre(edge_map):
 
 def adjoint_sre(sre):
     seq, req, edge_map = sre
-    edge_map2 = dict()
+    edge_mape_2 = dict()
     for (k_from, k_to), edge in edge_map.items():
-        edge_map2[k_to, k_from] = edge.conjugate()
+        edge_mape_2[k_to, k_from] = edge.conjugate()
     seq2 = dict()
     for k, s in req.items():
         seq2[k] = set(s)
     req2 = dict()
     for k, s in seq.items():
         req2[k] = set(s)
-    return seq2, req2, edge_map2
+    return seq2, req2, edge_mape_2
 
 def SRE_count_sparsity(sre):
     seq, req, edge_map = sre

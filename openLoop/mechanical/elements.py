@@ -46,78 +46,78 @@ class MechanicalNoiseBase(NoiseBase, MechanicalElementBase):
 
 class Mechanical1PortBase(MechanicalElementBase):
     @decl.dproperty
-    def A(self):
-        return ports.MechanicalPort(sname = 'A')
+    def pm_A(self):
+        return ports.MechanicalPort(sname = 'pm_A')
 
     @decl.mproperty
-    def po_Fr(self):
-        return self.A
+    def pm_Fr(self):
+        return self.pm_A
 
     def system_setup_ports(self, ports_algorithm):
-        for kfrom in ports_algorithm.port_update_get(self.A.i):
-            ports_algorithm.port_coupling_needed(self.A.o, kfrom)
-        for kto in ports_algorithm.port_update_get(self.A.o):
-            ports_algorithm.port_coupling_needed(self.A.i, kto)
+        for kfrom in ports_algorithm.port_update_get(self.pm_A.i):
+            ports_algorithm.port_coupling_needed(self.pm_A.o, kfrom)
+        for kto in ports_algorithm.port_update_get(self.pm_A.o):
+            ports_algorithm.port_coupling_needed(self.pm_A.i, kto)
         return
 
 
 class Mechanical2PortBase(MechanicalElementBase):
     @decl.dproperty
-    def A(self):
-        return ports.MechanicalPort(sname = 'A', pchain = 'B')
+    def pm_A(self):
+        return ports.MechanicalPort(sname = 'pm_A', pchain = 'pm_B')
 
     @decl.dproperty
-    def B(self):
-        return ports.MechanicalPort(sname = 'B', pchain = 'A')
+    def pm_B(self):
+        return ports.MechanicalPort(sname = 'pm_B', pchain = 'pm_A')
 
     @decl.mproperty
-    def po_Fr(self):
-        return self.A
+    def pm_Fr(self):
+        return self.pm_A
 
     @decl.mproperty
-    def po_Bk(self):
-        return self.B
+    def pm_Bk(self):
+        return self.pm_B
 
     def bond_series(self, other):
         """
         Takes two 2-port objects and bonds them to form a series connection. With multibonding,
         this can be done and the original can still be connected.
         """
-        self.A.bond(other.A)
-        self.B.bond(other.B)
+        self.pm_A.bond(other.pm_A)
+        self.pm_B.bond(other.pm_B)
 
 class Mechanical4PortBase(MechanicalElementBase):
     @decl.dproperty
-    def A(self):
-        return ports.MechanicalPort(sname = 'A')
+    def pm_A(self):
+        return ports.MechanicalPort(sname = 'pm_A')
 
     @decl.dproperty
-    def B(self):
-        return ports.MechanicalPort(sname = 'B')
+    def pm_B(self):
+        return ports.MechanicalPort(sname = 'pm_B')
 
     @decl.dproperty
-    def C(self):
-        return ports.MechanicalPort(sname = 'C')
+    def pm_C(self):
+        return ports.MechanicalPort(sname = 'pm_C')
 
     @decl.dproperty
-    def D(self):
-        return ports.MechanicalPort(sname = 'D')
+    def pm_D(self):
+        return ports.MechanicalPort(sname = 'pm_D')
 
     @decl.mproperty
-    def po_FrA(self):
-        return self.A
+    def pm_FrA(self):
+        return self.pm_A
 
     @decl.mproperty
-    def po_FrB(self):
-        return self.B
+    def pm_FrB(self):
+        return self.pm_B
 
     @decl.mproperty
-    def po_BkA(self):
-        return self.C
+    def pm_BkA(self):
+        return self.pm_C
 
     @decl.mproperty
-    def po_BkB(self):
-        return self.D
+    def pm_BkB(self):
+        return self.pm_D
 
 
 class Connection(MechanicalElementBase):
@@ -135,13 +135,13 @@ class Connection(MechanicalElementBase):
         total_ports = self.N_ports + len(self.connect)
         ports_mechanical = []
         for idx in range(total_ports):
-            name = 'p{0}'.format(idx)
+            name = 'pm_{0}'.format(idx)
             pobj = ports.MechanicalPort(sname = name)
             pobj = self.insert(pobj, name)
             ports_mechanical.append(pobj)
         self.ports_mechanical = ports_mechanical
         for idx in range(len(self.connect)):
-            name = 'p{0}'.format(idx + self.N_ports)
+            name = 'pm_{0}'.format(idx + self.N_ports)
             port = getattr(self, name)
             self.system.bond(self.connect[idx], port)
         return
@@ -188,8 +188,8 @@ class Cable(Mechanical2PortBase):
     def system_setup_ports(self, ports_algorithm):
         #TODO could reduce these with more information about used S-matrix elements
         for port1, port2 in [
-            (self.A, self.B),
-            (self.B, self.A),
+            (self.pm_A, self.pm_B),
+            (self.pm_B, self.pm_A),
         ]:
             for kfrom in ports_algorithm.port_update_get(port1.i):
                 ports_algorithm.port_coupling_needed(port2.o, kfrom)
@@ -199,8 +199,8 @@ class Cable(Mechanical2PortBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         for port1, port2 in [
-            (self.A, self.B),
-            (self.B, self.A),
+            (self.pm_A, self.pm_B),
+            (self.pm_B, self.pm_A),
         ]:
             for kfrom in matrix_algorithm.port_set_get(port1.i):
                 #if self.system.classical_frequency_test_max(kfrom, self.max_freq):

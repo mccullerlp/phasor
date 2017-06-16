@@ -19,13 +19,13 @@ class HTTS_Flag(mechanical.XYZMomentDriver):
     def __build__(self):
         super(HTTS_Flag, self).__build__()
         self.own.FZ = mechanical.ForceSource()
-        self.own.FZ.A.bond(self.A.Z)
+        self.own.FZ.pm_A.bond(self.pm_A.Z)
 
         self.own.M_teeny = mechanical.XYZMass(mass_kg = 1e-9)
-        self.own.M_teeny.A.bond(self.A)
+        self.own.M_teeny.pm_A.bond(self.pm_A)
 
         self.own.dZ = mechanical.DisplacementReadout(
-            terminal = self.A.Z,
+            terminal = self.pm_A.Z,
         )
 
 
@@ -96,39 +96,39 @@ class HTTS(elements.MechanicalElementBase):
         self.own.S_YAS = mechanical.SeriesSpring(
             elasticity_N_m = -k_pend_AS,
         )
-        self.S_YAS.A.bond(self.S_left.A.Z)
-        self.S_YAS.B.bond(self.S_right.A.Z)
+        self.S_YAS.pm_A.bond(self.S_left.pm_A.Z)
+        self.S_YAS.pm_B.bond(self.S_right.pm_A.Z)
         self.own.D_left = mechanical.XYZTerminatorDamper(
             resistance_Ns_m = [.01, .01, .004],
         )
-        self.D_left.A.bond(self.S_left.A)
+        self.D_left.pm_A.bond(self.S_left.pm_A)
         self.own.D_right = mechanical.XYZTerminatorDamper(
             resistance_Ns_m = [.01, .01, .004],
         )
-        self.D_right.A.bond(self.S_right.A)
+        self.D_right.pm_A.bond(self.S_right.pm_A)
         self.own.Ld_left = mechanical.XYZMomentDriver(
             displacementXYZ = [-self.d_yaw/2 + self.dd_yaw/2, self.d_pitch + self.dd_pitch/2, 0],
         )
         self.own.Ld_left2 = mechanical.XYZMomentDriver(
             displacementXYZ = [-self.d_yaw/2 + self.dd_yaw/2, +self.dd_pitch/2, 0],
         )
-        self.Ld_left.A.bond(self.S_left.A)
-        self.Ld_left2.A.bond(self.S_left.A)
+        self.Ld_left.pm_A.bond(self.S_left.pm_A)
+        self.Ld_left2.pm_A.bond(self.S_left.pm_A)
         self.Ld_left.L.bond(self.L1.L)
-        self.own.M_com.A.bond(self.Ld_left.B)
+        self.own.M_com.pm_A.bond(self.Ld_left.pm_B)
 
         self.own.Ld_right = mechanical.XYZMomentDriver(
             displacementXYZ = [+self.d_yaw/2 + self.dd_yaw/2, self.d_pitch - self.dd_pitch/2, 0],
         )
-        self.Ld_right.A.bond(self.S_right.A)
+        self.Ld_right.pm_A.bond(self.S_right.pm_A)
         self.Ld_right.L.bond(self.L1.L)
-        self.own.M_com.A.bond(self.Ld_right.B)
+        self.own.M_com.pm_A.bond(self.Ld_right.pm_B)
         self.own.Ld_right2 = mechanical.XYZMomentDriver(
             displacementXYZ = [+self.d_yaw/2 + self.dd_yaw/2, -self.dd_pitch/2, 0],
         )
-        self.Ld_right2.A.bond(self.S_right.A)
+        self.Ld_right2.pm_A.bond(self.S_right.pm_A)
 
-        self.Ld_left2.B.bond(self.Ld_right2.B)
+        self.Ld_left2.pm_B.bond(self.Ld_right2.pm_B)
         self.Ld_left2.L.bond(self.Ld_right2.L)
         self.own.L_teeny = mechanical.XYZMoment(moment_kgmsq = 1e-9)
         self.own.L_teeny.L.bond(self.Ld_left2.L)
@@ -136,10 +136,10 @@ class HTTS(elements.MechanicalElementBase):
         self.own.S_p = mechanical.SeriesSpring(
             elasticity_N_m = 9.81 * self.COM_kg / self.d_pitch,
         )
-        self.own.S_p.A.bond(self.M_com.Z.A)
-        self.own.S_p.B.bond(self.Ld_left2.B.Z)
+        self.own.S_p.pm_A.bond(self.M_com.Z.pm_A)
+        self.own.S_p.pm_B.bond(self.Ld_left2.pm_B.Z)
         self.own.M_teeny = mechanical.XYZMass(mass_kg = 1e-9)
-        self.own.M_teeny.A.bond(self.Ld_left2.B)
+        self.own.M_teeny.pm_A.bond(self.Ld_left2.pm_B)
 
         self.own.Ld_UL = HTTS_Flag(
             displacementXYZ = [-.0241, .0251, -.0382],
@@ -154,25 +154,25 @@ class HTTS(elements.MechanicalElementBase):
             displacementXYZ = [+.0241, -.0251, -.0382],
         )
         self.Ld_UL.L.bond(self.L1.L)
-        self.Ld_UL.B.bond(self.M_com.A)
+        self.Ld_UL.pm_B.bond(self.M_com.pm_A)
         self.Ld_UR.L.bond(self.L1.L)
-        self.Ld_UR.B.bond(self.M_com.A)
+        self.Ld_UR.pm_B.bond(self.M_com.pm_A)
         self.Ld_LL.L.bond(self.L1.L)
-        self.Ld_LL.B.bond(self.M_com.A)
+        self.Ld_LL.pm_B.bond(self.M_com.pm_A)
         self.Ld_LR.L.bond(self.L1.L)
-        self.Ld_LR.B.bond(self.M_com.A)
+        self.Ld_LR.pm_B.bond(self.M_com.pm_A)
 
         self.own.F_L = mechanical.ForceSource()
-        self.own.F_L.A.bond(self.M_com.Z.A)
+        self.own.F_L.pm_A.bond(self.M_com.Z.pm_A)
 
         self.own.F_P = mechanical.ForceSource()
-        self.own.F_P.A.bond(self.L1.X.A)
+        self.own.F_P.pm_A.bond(self.L1.X.pm_A)
 
         self.own.F_Y = mechanical.ForceSource()
-        self.own.F_Y.A.bond(self.L1.Y.A)
+        self.own.F_Y.pm_A.bond(self.L1.Y.pm_A)
 
         self.own.R_L = mechanical.DisplacementReadout(
-            terminal = self.M_com.A.Z,
+            terminal = self.M_com.pm_A.Z,
         )
         self.own.R_P = mechanical.DisplacementReadout(
             terminal = self.L1.L.X,

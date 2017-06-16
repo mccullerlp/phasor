@@ -8,7 +8,7 @@ from __future__ import (division, print_function)
 from .. import opamps
 
 
-class Op27(opamps.ImperfectOpAmp):
+class Ope_27(opamps.ImperfectOpAmp):
 
     def V_spectrum_one_sided(self, F):
         return (3e-9)**2 * abs(2.7j / F + 1)
@@ -20,7 +20,7 @@ class Op27(opamps.ImperfectOpAmp):
         return 10**(6) * (1 / (1 - F/8j) ) * self.symbols.math.exp(- self.symbols.i2pi * F / (4 * 10e6))
 
 
-class Op827(opamps.ImperfectOpAmp):
+class Ope_827(opamps.ImperfectOpAmp):
 
     def V_spectrum_one_sided(self, F):
         return (3.8e-9)**2 * abs(((20/3.8)**2 - 1) * 1j / F + 1)
@@ -32,7 +32,7 @@ class Op827(opamps.ImperfectOpAmp):
         return 10**(6) * (1 / (1 - F/20j) ) * self.symbols.math.exp(- self.symbols.i2pi * F / (360/90 * 100e6))
 
 
-class Op209(opamps.ImperfectOpAmp):
+class Ope_209(opamps.ImperfectOpAmp):
 
     def V_spectrum_one_sided(self, F):
         return (2.2e-9)**2 * abs(((3.3/2.2)**2 - 1) * 1j / F + 1)

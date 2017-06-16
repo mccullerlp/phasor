@@ -90,10 +90,10 @@ class HomodyneACReadoutBase(base.SystemElementBase):
     def rotation_matrix_back(self):
         phase_rad = self.phase_deg * np.pi / 180
         S = np.sin(phase_rad)
-        C = np.cos(phase_rad)
+        pe_C = np.cos(phase_rad)
         ROT = np_roll_2D_mat_back(
             np.array(
-                [[C, S], [-S, C]]
+                [[pe_C, S], [-S, pe_C]]
             )
         )
         return ROT
@@ -247,15 +247,15 @@ class HomodyneACReadoutBase(base.SystemElementBase):
         S_1 = np.real(SIQ[1, 1])
         S_c = 2 * np.real(SIQ[0, 1])
 
-        A = (-N_1*S_c + N_c*S_1)
-        B = (2*N_0*S_1 - 2*N_1*S_0)
-        C = (N_0*S_c - N_c*S_0)
+        pe_A = (-N_1*S_c + N_c*S_1)
+        pe_B = (2*N_0*S_1 - 2*N_1*S_0)
+        pe_C = (N_0*S_c - N_c*S_0)
         SGN = (N_0*S_c + N_1*S_c*(N_0*S_1 - N_1*S_0)**2/(N_1*S_c - N_c*S_1)**2 - N_c*S_0 - N_c*S_1*(N_0*S_1 - N_1*S_0)**2/(N_1*S_c - N_c*S_1)**2)
-        where_quad = (abs(A) > 1e-7)
+        where_quad = (abs(pe_A) > 1e-7)
         SGN = (N_0**3*S_c*(S_0 - S_1)**2/(N_0*S_c - N_c*S_1)**2 - N_0**2*N_c*S_1*(S_0 - S_1)**2/(N_0*S_c - N_c*S_1)**2 + N_0*S_c - N_c*S_0)
-        SOL_quad = ((-B + np.sqrt(-4*A*C + B**2)*np.sign(SGN))[where_quad] / (2*A)[where_quad])
+        SOL_quad = ((-pe_B + np.sqrt(-4*pe_A*pe_C + pe_B**2)*np.sign(SGN))[where_quad] / (2*pe_A)[where_quad])
         ang_quad = np.arctan2(np.real(SOL_quad), 1)
-        SOL_lin  = -(C/B)[~where_quad]
+        SOL_lin  = -(pe_C/pe_B)[~where_quad]
         ang_lin = np.arctan2(np.real(SOL_lin), 1)
         ans = np.empty(N_0.shape)
         ans[where_quad] = ang_quad

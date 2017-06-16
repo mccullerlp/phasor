@@ -62,7 +62,7 @@ class QFit(declarative.OverridableObject):
 
     @declarative.mproperty
     def Z0_ZR_fit(self):
-        (z0, zR), hess = scipy.optimize.curve_fit(self.waist_func, self.Z_m, self.R_m, p0 = self.Z0_ZR_init)
+        (z0, zR), hess = scipy.optimize.curve_fit(self.waist_func, self.Z_m, self.R_m, pe_0 = self.Z0_ZR_init)
         return (z0, zR)
 
     @declarative.mproperty

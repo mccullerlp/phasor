@@ -129,23 +129,23 @@ class MatrixBuildAlgorithm(object):
         del self._nmap
         return self.coupling_noise_map
 
-    def noise_pair_insert(self, p1, k1, p2, k2, genfunc):
-        #print('noise pair: ', p1, k2, p2, k2)
-        ptofull1 = self.port_cplgs.get(p1.purge_keys(PostBondKey), declarative.NOARG)
+    def noise_pair_insert(self, pe_1, k1, pe_2, k2, genfunc):
+        #print('noise pair: ', pe_1, k2, pe_2, k2)
+        ptofull1 = self.port_cplgs.get(pe_1.purge_keys(PostBondKey), declarative.NOARG)
         if (k1 not in ptofull1):
-            raise RuntimeError("k1 [{0}] missing for port p1 [{1}]".format(k1, p1))
-        ptofull2 = self.port_cplgs.get(p2.purge_keys(PostBondKey), declarative.NOARG)
+            raise RuntimeError("k1 [{0}] missing for port pe_1 [{1}]".format(k1, pe_1))
+        ptofull2 = self.port_cplgs.get(pe_2.purge_keys(PostBondKey), declarative.NOARG)
         if (k2 not in ptofull2):
-            raise RuntimeError("k2 [{0}] missing for port p2 [{1}]".format(k2, p2))
+            raise RuntimeError("k2 [{0}] missing for port pe_2 [{1}]".format(k2, pe_2))
 
-        self.field_space.keys_add((p1, k1))
-        self.field_space.keys_add((p2, k2))
-        self.noise_pk_set.add((p1, k1))
-        self.noise_pk_set.add((p2, k2))
+        self.field_space.keys_add((pe_1, k1))
+        self.field_space.keys_add((pe_2, k2))
+        self.noise_pk_set.add((pe_1, k1))
+        self.noise_pk_set.add((pe_2, k2))
 
-        #self.coupling_matrix_print(select_from = (p1, k2))
-        nmap_inner = self._nmap.setdefault((p1, k1), dict())
-        nmap_inner.setdefault((p2, k2), []).append((p1, k1, p2, k2, genfunc))
+        #self.coupling_matrix_print(select_from = (pe_1, k2))
+        nmap_inner = self._nmap.setdefault((pe_1, k1), dict())
+        nmap_inner.setdefault((pe_2, k2), []).append((pe_1, k1, pe_2, k2, genfunc))
         return
 
     def port_set_get(self, port):

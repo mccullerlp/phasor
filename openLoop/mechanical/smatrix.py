@@ -13,15 +13,15 @@ class SMatrix1PortBase(elements.Mechanical1PortBase):
         raise NotImplementedError()
 
     def system_setup_coupling(self, matrix_algorithm):
-        for kfrom in matrix_algorithm.port_set_get(self.A.i):
+        for kfrom in matrix_algorithm.port_set_get(self.pm_A.i):
             #if self.system.classical_frequency_test_max(kfrom, self.max_freq):
             #    continue
             freq = self.system.classical_frequency_extract(kfrom)
             pgain = self.S11_by_freq(freq)
             matrix_algorithm.port_coupling_insert(
-                self.A.i,
+                self.pm_A.i,
                 kfrom,
-                self.A.o,
+                self.pm_A.o,
                 kfrom,
                 pgain,
             )
@@ -44,8 +44,8 @@ class SMatrix2PortBase(elements.Mechanical2PortBase):
     @decl.mproperty
     def ports_mechanical(self):
         return [
-            self.A,
-            self.B,
+            self.pm_A,
+            self.pm_B,
         ]
 
     def system_setup_ports(self, ports_algorithm):
@@ -60,10 +60,10 @@ class SMatrix2PortBase(elements.Mechanical2PortBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         for port1, port2, func in [
-            (self.A, self.A, self.S11_by_freq),
-            (self.A, self.B, self.S12_by_freq),
-            (self.B, self.A, self.S21_by_freq),
-            (self.B, self.B, self.S22_by_freq),
+            (self.pm_A, self.pm_A, self.S11_by_freq),
+            (self.pm_A, self.pm_B, self.S12_by_freq),
+            (self.pm_B, self.pm_A, self.S21_by_freq),
+            (self.pm_B, self.pm_B, self.S22_by_freq),
         ]:
             for kfrom in matrix_algorithm.port_set_get(port1.i):
                 #if self.system.classical_frequency_test_max(kfrom, self.max_freq):

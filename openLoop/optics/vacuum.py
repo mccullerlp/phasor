@@ -51,7 +51,7 @@ class OpticalVacuumFluctuation(
             )
         pass
 
-    def noise_2pt_expectation(self, p1, k1, p2, k2):
+    def noise_2pt_expectation(self, pe_1, k1, pe_2, k2):
         #dont need to further check as the setup noise call already selected pairs
         iwavelen_m, freq_Hz = self.system.optical_frequency_extract(k1)
         #this is in the TWO SIDED PSPEC

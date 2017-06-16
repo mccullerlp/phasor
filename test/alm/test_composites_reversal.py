@@ -51,7 +51,7 @@ def test_composites(plot):
         return sys
     sys = gensys(False)
     sysR = gensys(True)
-    #print("A")
+    #print("pm_A")
     q_end = sys.measurements.q_target_z(1.0)
     #print(("INVAL: ", sys.measurements._registry_invalidate))
     #sys = gensys(False)
@@ -60,7 +60,7 @@ def test_composites(plot):
         q_raw = q_end,
     )
     #sys.invalidate()
-    #print("B")
+    #print("pm_B")
     #q_end2 = sys.measurements.q_target_z(1.0)
     sysR.sub1.own.q2 = alm_beam.BeamTarget(
         loc_m = 1.00001,

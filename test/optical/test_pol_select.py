@@ -198,7 +198,7 @@ class TestPolarizations(TestCase):
     def test_split(self):
         sys = system.BGSystem()
         sys.own.test = PolTester()
-        print("A")
+        print("pm_A")
         pprint(sys.ctree.test.PSL)
         self.assertAlmostEqual(sys.test.DC_S.DC_readout, 1)
         self.assertAlmostEqual(sys.test.DC_P.DC_readout, 0)
@@ -209,7 +209,7 @@ class TestPolarizations(TestCase):
             ctree = db,
         )
         sys.own.test = PolTester()
-        print("B")
+        print("pm_B")
         pprint(db)
         pprint(sys.ctree.test.PSL)
 
