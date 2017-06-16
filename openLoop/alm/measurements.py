@@ -20,7 +20,7 @@ from .beam import (
     MatrixAtsBase
 )
 
-from ..bases import (
+from ..base import (
     RootElement,
     Element,
 )
