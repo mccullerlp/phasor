@@ -100,11 +100,16 @@ class NoiseReadout(base.SystemElementBase):
         nmap = self.system.solution.noise_map()
         #pprint(("NMAP: ", nmap))
 
+        ncollect = defaultdict(lambda: defaultdict(lambda: 0))
+        nsums    = dict()
+
         pkviewsP = dict()
         pkviewsN = dict()
         for pname, port in list(self.port_map.items()):
             pkviewsP[pname] = (port, self.keyP)
             pkviewsN[pname] = (port, self.keyN)
+            for pname2, port2 in list(self.port_map.items()):
+                nsums[pname, pname2] = 0
 
         kvecsP = defaultdict(dict)
         kvecsN = defaultdict(dict)
@@ -116,8 +121,6 @@ class NoiseReadout(base.SystemElementBase):
                 if pkto == pkview:
                     kvecsN[pname][pkfrom] = cplg
 
-        ncollect = defaultdict(lambda: defaultdict(lambda: 0))
-        nsums    = dict()
         for pnameP, kvecP in list(kvecsP.items()):
             for pnameN, kvecN in list(kvecsN.items()):
                 nsum = 0

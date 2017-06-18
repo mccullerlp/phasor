@@ -64,7 +64,6 @@ def mgraph_simplify_inplace(
 
     #edge_map.update(edge_map_bcast)
 
-
     reqO = req
     seqO = seq
     req = dict(req)
@@ -1092,15 +1091,19 @@ def wrap_output_node(node):
 def inverse_solve_inplace(
     seq, req,
     edge_map,
-    inputs_set,
     outputs_set,
-    purge_in = True,
-    purge_out = True,
-    verbose = False,
-    negative = False,
-    scattering = False,
+    inputs_set   = frozenset(),
+    inputs_map   = None,
+    edge_map_sym = None,
+    purge_in     = True,
+    purge_out    = True,
+    verbose      = False,
+    negative     = False,
+    scattering   = False,
     **kwargs
 ):
+    if edge_map_sym is None:
+        edge_map_sym = dict()
     if scattering:
         keys = set(seq.keys()) | set(req.keys())
         for node in keys:
@@ -1110,10 +1113,23 @@ def inverse_solve_inplace(
                 edge_map[node, node] = -1
                 seq[node].add(node)
                 req[node].add(node)
+            edge_sym = edge_map_sym.get((node, node), None)
+            if edge_sym is not None:
+                edge_map_sym = edge_sym - 1
         #sign conventions reversed for scattering matrix
         negative = not negative
 
     pre_purge_inplace(seq, req, edge_map)
+
+    VACUUM_STATE = DictKey(special = 'vacuum')
+    if inputs_map is not None:
+        #first dress the nodes. The source vectors is converted into edges with a special
+        #source node
+        #the inputs are from the special state (with implicit vector value of '1')
+        for inode, val in inputs_map.items():
+            seq[VACUUM_STATE].add(inode)
+            req[inode].add(VACUUM_STATE)
+            edge_map[VACUUM_STATE, inode] = val
 
     #first dress the nodes
     wrapped_inodes = set()
@@ -1142,7 +1158,7 @@ def inverse_solve_inplace(
     #purge_out = False
     if purge_in:
         purge_reqless_inplace(
-            except_set = wrapped_inodes,
+            except_set = frozenset([VACUUM_STATE]).union(wrapped_inodes),
             seq = seq,
             req = req,
             edge_map = edge_map,
@@ -1169,6 +1185,17 @@ def inverse_solve_inplace(
         **kwargs
     )
 
+    if inputs_map is not None:
+        #now unwrap the single state
+        outputs_map = dict()
+        for onode in outputs_set:
+            wonode = ('OUTPUT', onode)
+            sourced_edge = edge_map.get((VACUUM_STATE, wonode), None)
+            if sourced_edge is not None:
+                outputs_map[onode] = sourced_edge
+    else:
+        outputs_map = None
+
     #now unwrap the nodes
     unwrapped_edge_map = dict()
     unwrapped_seq_map = defaultdict(set)
@@ -1185,129 +1212,10 @@ def inverse_solve_inplace(
             unwrapped_edge_map[inode, onode] = sourced_edge
             unwrapped_seq_map[inode].add(onode)
             unwrapped_req_map[onode].add(inode)
-    return declarative.Bunch(
-        edge_map = unwrapped_edge_map,
-        seq      = unwrapped_seq_map,
-        req      = unwrapped_req_map,
-    )
 
-def push_solve_inplace(
-    seq, req,
-    edge_map,
-    inputs_map,
-    outputs_set,
-    inputs_AC_set = frozenset(),
-    purge_in = True,
-    purge_out = True,
-    negative = False,
-    scattering = False,
-):
-    if scattering:
-        keys = set(seq.keys()) | set(req.keys())
-        for node in keys:
-            if node in seq[node]:
-                edge_map[node, node] = edge_map[node, node] - 1
-            else:
-                edge_map[node, node] = -1
-                seq[node].add(node)
-                req[node].add(node)
-        #sign conventions reversed for scattering matrix
-        negative = not negative
-
-    pre_purge_inplace(seq, req, edge_map)
-
-    #first dress the nodes. The source vectors is converted into edges with a special
-    #source node
-    #the inputs are from the special state (with implicit vector value of '1')
-    VACUUM_STATE = DictKey(special = 'vacuum')
-    for inode, val in inputs_map.items():
-        seq[VACUUM_STATE].add(inode)
-        req[inode].add(VACUUM_STATE)
-        edge_map[VACUUM_STATE, inode] = val
-
-    wrapped_inodes = set()
-    for inode in inputs_AC_set:
-        winode = wrap_input_node(inode)
-        #print("WINODEA", winode)
-        wrapped_inodes.add(winode)
-        seq[winode].add(inode)
-        req[inode].add(winode)
-        edge_map[winode, inode] = 1
-
-    #this convention is correct for how this solver operates!
-    if negative:
-        value = 1
-    else:
-        value = -1
-    wrapped_onodes = set()
-    for onode in outputs_set:
-        wonode = wrap_output_node(onode)
-        #print("WONODEA", wonode)
-        wrapped_onodes.add(wonode)
-        seq[onode].add(wonode)
-        req[wonode].add(onode)
-        edge_map[onode, wonode] = value
-
-    #purge_in = False
-    #purge_out = False
-    #print_seq(seq, edge_map)
-    if purge_in:
-        purge_reqless_inplace(
-            except_set = frozenset([VACUUM_STATE]).union(wrapped_inodes),
-            seq = seq,
-            req = req,
-            edge_map = edge_map,
-        )
-    if purge_out:
-        purge_seqless_inplace(
-            except_set = wrapped_onodes,
-            seq = seq,
-            req = req,
-            edge_map = edge_map,
-        )
-
-    #print_seq(seq, edge_map)
-
-    #subN = len(wrapped_onodes) + len(wrapped_inodes)
-    #print("SPARSITY ", len(seq) - subN, len(edge_map) - subN, (len(edge_map) - subN) / (len(seq) - subN))
-
-    #simplify with the wrapped nodes
-    mgraph_simplify_inplace(
-        seq = seq, req = req,
-        edge_map = edge_map,
-    )
-
-    #now unwrap the
-    outputs_map = dict()
-    for onode in outputs_set:
-        wonode = ('OUTPUT', onode)
-        sourced_edge = edge_map.get((VACUUM_STATE, wonode), None)
-        if sourced_edge is not None:
-            outputs_map[onode] = sourced_edge
-
-    #now unwrap the nodes
-    unwrapped_edge_map = dict()
-    unwrapped_seq_map = defaultdict(set)
-    unwrapped_req_map = defaultdict(set)
-    for inode in inputs_AC_set:
-        winode = ('INPUT', inode)
-        #print("WINODE", winode)
-        #print("WINODE", seq[winode])
-        #Could get exceptions here if we don't purge and the input maps have spurious
-        #outputs (nodes with no seq) other than the wrapped ones generated here
-        for wonode in seq[winode]:
-            sourced_edge = edge_map[winode, wonode]
-            k, onode = wonode
-            #print("WONODE", wonode)
-            assert(k == 'OUTPUT')
-            unwrapped_edge_map[inode, onode] = sourced_edge
-            unwrapped_seq_map[inode].add(onode)
-            unwrapped_req_map[onode].add(inode)
-
-    #print("AC edge map: ", unwrapped_edge_map)
     return declarative.Bunch(
         outputs_map = outputs_map,
-        AC_edge_map = unwrapped_edge_map,
-        AC_seq      = unwrapped_seq_map,
-        AC_req      = unwrapped_req_map,
+        edge_map    = unwrapped_edge_map,
+        seq         = unwrapped_seq_map,
+        req         = unwrapped_req_map,
     )

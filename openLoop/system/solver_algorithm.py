@@ -22,61 +22,14 @@ from ..math.key_matrix import (
     KeyMatrix,
 )
 
+from ..matrix.solvers_registry import solvers_all
+
 
 def setdict_copy(orig):
     duplicate = defaultdict(set)
     for k, vset in orig.items():
         duplicate[k] = set(vset)
     return duplicate
-
-
-def loop_fast_unstable():
-    from ..matrix import graph_algorithm
-    return graph_algorithm
-
-
-def loop_LUQ():
-    from ..matrix import DAG_algorithm
-    #print("USING DAG ALGO")
-    return DAG_algorithm
-
-
-def scisparse():
-    from ..matrix import scisparse_algorithm
-    return scisparse_algorithm
-
-
-def scisparse_superLU():
-    from ..matrix import scisparse_algorithm
-    from scipy.sparse.linalg import use_solver
-    use_solver(useUmfpack = False)
-    return scisparse_algorithm
-
-
-def scisparse_umfpack():
-    from ..matrix import scisparse_algorithm
-    from scipy.sparse.linalg import use_solver
-    use_solver(useUmfpack = True)
-    return scisparse_algorithm
-
-#TODO: Make a KLU solver since Finesse uses it. We could also reuse the symbolic solver portion!
-
-
-solvers_symbolic = dict(
-    loop_fast_unstable = loop_fast_unstable,
-    loop_LUQ           = loop_LUQ,
-)
-
-
-solvers_numeric = dict(
-    scisparse_umfpack = scisparse_umfpack,
-    scisparse_superLU = scisparse_superLU,
-    scisparse         = scisparse,
-)
-
-solvers_all = dict()
-solvers_all.update(solvers_numeric)
-solvers_all.update(solvers_symbolic)
 
 
 class SystemSolver(object):
@@ -100,7 +53,7 @@ class SystemSolver(object):
         #TODO check if the matrix or ports are symbolic
         if self.system.symbolic:
             #call the function in the solvers lookup to generate the solver to use
-            self.solver = solvers_symbolic[
+            self.solver = solvers_all[
                 self.system.symbolic_solver_name
             ]()
             self.check_zero = dmath.zero_check_heuristic
@@ -405,15 +358,15 @@ class SystemSolver(object):
         #TODO TODO TODO Pre-purge the seq/req list to prevent unnecessary edge-matrix generation
         #this is somewhat done already since there are purged versions
         solution_bunch = self.solver.push_solve_inplace(
-            seq           = seq,
-            req           = req,
-            edge_map      = dict(coupling_matrix.items()),
-            outputs_set   = outputs_set.union(self.matrix_algorithm.AC_out_all),
-            inputs_map    = source_vector,
-            inputs_AC_set = self.matrix_algorithm.AC_in_all,
-            purge_in      = True,
-            purge_out     = True,
-            scattering    = True,
+            seq         = seq,
+            req         = req,
+            edge_map    = dict(coupling_matrix.items()),
+            outputs_set = outputs_set.union(self.matrix_algorithm.AC_out_all),
+            inputs_map  = source_vector,
+            inputs_set  = self.matrix_algorithm.AC_in_all,
+            purge_in    = True,
+            purge_out   = True,
+            scattering  = True,
         )
         solution_dict = solution_bunch.outputs_map
         solution_vector_kv = KeyVector(field_space)
@@ -430,9 +383,9 @@ class SystemSolver(object):
             solution    = solution_vector_kv,
             delta_v     = delta_v,
             k_worst     = k_worst,
-            AC_solution = solution_bunch.AC_edge_map,
-            AC_seq      = solution_bunch.AC_seq,
-            AC_req      = solution_bunch.AC_req,
+            AC_solution = solution_bunch.edge_map,
+            AC_seq      = solution_bunch.seq,
+            AC_req      = solution_bunch.req,
         )
         if self.system.ctree.debug.solver.get('delta_V_max', False):
             print(
