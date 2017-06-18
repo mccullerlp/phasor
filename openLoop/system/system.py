@@ -74,7 +74,7 @@ class BGSystem(RootElement):
     _frozen = False
 
     solver_name_default = 'loop_LUQ'
-    solver_name_default = 'scisparse'
+    #solver_name_default = 'scisparse'
     @declarative.dproperty
     def solver_name(self, val = None):
         if val is None:

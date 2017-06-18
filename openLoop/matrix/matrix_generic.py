@@ -76,27 +76,49 @@ def color_purge_inplace(
 
 
 def purge_reqless_inplace(
-        except_set,
         seq,
         req,
-        edge_map = None,
+        except_set = None,
+        req_alpha  = None,
+        seq_beta   = None,
+        edge_map   = None,
 ):
+    if except_set is None:
+        except_set = set(req_alpha.keys())
     color_purge_inplace(
         except_set, seq,
         seq, req, edge_map,
     )
+    if seq_beta is not None:
+        rmnodes = list()
+        for node in seq_beta.keys():
+            if not req.get(node, None):
+                rmnodes.append(node)
+        for node in rmnodes:
+            del seq_beta[node]
 
 
 def purge_seqless_inplace(
-        except_set,
         seq,
         req,
-        edge_map = None,
+        except_set = None,
+        req_alpha  = None,
+        seq_beta   = None,
+        edge_map   = None,
 ):
+    if except_set is None:
+        except_set = set(seq_beta.keys())
     color_purge_inplace(
         except_set, req,
         seq, req, edge_map,
     )
+    if req_alpha is not None:
+        rmnodes = list()
+        for node in req_alpha.keys():
+            if not seq.get(node, None):
+                rmnodes.append(node)
+        for node in rmnodes:
+            del req_alpha[node]
 
 
 def edgedelwarn(

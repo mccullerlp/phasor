@@ -88,7 +88,6 @@ solvers_symbolic = dict(
     loop_LUQ           = loop_LUQ,
 )
 
-
 solvers_numeric = dict(
     scisparse_umfpack = scisparse_umfpack,
     scisparse_superLU = scisparse_superLU,
