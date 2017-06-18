@@ -138,6 +138,7 @@ def reduceLUQ_row(
         **kwargs
     )
 
+
 def reduceLUQ_col(
     SRABE,
     node,
@@ -235,12 +236,6 @@ def reduceLUQ_col(
     )
     return
 
-def check_graph_at_node(SRABE, node):
-    seq, req, req_alpha, seq_beta, edge_map, = SRABE
-    for snode in seq[node]:
-        assert(node in req[snode])
-    for rnode in req[node]:
-        assert(node in seq[rnode])
 
 def pivotROW_OP(
     SRABE,
@@ -308,6 +303,7 @@ def pivotROW_OP(
 
     edge_map.update(edge_mape_2)
     return
+
 
 def pivotCOL_OP(
     SRABE,
@@ -491,6 +487,7 @@ def householderREFL_ROW_OP(
     #    print("NFROM: ", nfrom, edge_mape_2[node_into, nfrom])
     return
 
+
 def householderREFL_COL_OP(
     SRABE,
     node_into,
@@ -608,6 +605,7 @@ def householderREFL_COL_OP(
     #    print("NFROM: ", nfrom, edge_mape_2[node_into, nfrom])
     return
 
+
 def reduceLU(
     SRABE,
     node,
@@ -704,6 +702,7 @@ def reduceLU(
         del edge_map[rnode, node]
     del req_alpha[node]
     return
+
 
 def reduceLUQ_row(
     SRABE,
@@ -817,6 +816,7 @@ def reduceLUQ_row(
         node_costs_invalid_in_queue = node_costs_invalid_in_queue,
         **kwargs
     )
+
 
 def reduceLUQ_col(
     SRABE,
