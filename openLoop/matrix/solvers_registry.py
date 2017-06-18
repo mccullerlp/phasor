@@ -50,6 +50,16 @@ def loop_LUQ():
     )
 
 
+def loop_LUQ_sym():
+    from ..matrix import DAG_algorithm_sym
+    return declarative.Bunch(
+        inverse_solve_inplace = DAG_algorithm_sym.inverse_solve_inplace,
+        push_solve_inplace    = DAG_algorithm_sym.inverse_solve_inplace,
+        symbolics_supported   = True,
+        symbolics_inline      = False,
+    )
+
+
 def scisparse():
     from ..matrix import scisparse_algorithm
     return declarative.Bunch(
