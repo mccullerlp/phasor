@@ -90,7 +90,7 @@ class FitterRoot(RootElement, FitterBase):
             ctree = bunch.DeepBunch(vpath=True)
             ctree_meta[sysname] = ctree
 
-            prev = self.systems[sysname].ctree.extractidx('previous')
+            prev = self.systems[sysname].ctree.extractidx('previous', dict())
             ctree.update_recursive(prev)
 
             ctree.hints.symbolic = 'casadi'

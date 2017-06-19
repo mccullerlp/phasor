@@ -353,6 +353,12 @@ class SystemSolver(object):
 
         outputs_set = csgb.outputs_set
 
+        kwargs = dict()
+        if source_vector_sym:
+            kwargs['inputs_map_sym'] = source_vector_sym
+        if coupling_matrix_sym:
+            kwargs['edge_map_sym'] = dict(coupling_matrix_sym)
+
         #TODO purging should no longer be necessary
         #print("PERTURBER RUNNING: ")
         #print("COUPLING_SIZE: ", len(coupling_matrix))
@@ -363,13 +369,12 @@ class SystemSolver(object):
             req            = req,
             outputs_set    = outputs_set.union(self.matrix_algorithm.AC_out_all),
             inputs_map     = source_vector,
-            inputs_map_sym = source_vector_sym,
             edge_map       = dict(coupling_matrix.items()),
-            edge_map_sym   = dict(coupling_matrix_sym.items()),
             inputs_set     = self.matrix_algorithm.AC_in_all,
             purge_in       = True,
             purge_out      = True,
             scattering     = True,
+            **kwargs
         )
         solution_dict = solution_bunch.outputs_map
         solution_vector_kv = KeyVector(field_space)
@@ -483,6 +488,12 @@ class SystemSolver(object):
             solution_bunch_prev  = solution_bunch_prev,
         )
 
+        kwargs = dict()
+        if source_vector_sym:
+            kwargs['inputs_map_sym'] = source_vector_sym
+        if coupling_matrix_sym:
+            kwargs['edge_map_sym'] = dict(coupling_matrix_sym)
+
         #TODO purging should no longer be necessary
         #print("PROPAGAGOR RUNNING: ", readout_set)
         solution_bunch = self.solver.push_solve_inplace(
@@ -490,12 +501,11 @@ class SystemSolver(object):
             req            = req,
             outputs_set    = outputs_set,
             inputs_map     = source_vector,
-            inputs_map_sym = source_vector_sym,
             edge_map       = dict(coupling_matrix.items()),
-            edge_map_sym   = dict(coupling_matrix_sym.items()),
             purge_in       = True,
             purge_out      = True,
             scattering     = True,
+            **kwargs
         )
         solution_dict = solution_bunch.outputs_map
         solution_vector_kv = KeyVector(field_space)
@@ -563,6 +573,10 @@ class SystemSolver(object):
             solution_bunch_prev  = solution_bunch_prev,
         )
 
+        kwargs = dict()
+        if coupling_matrix_sym:
+            kwargs['edge_map_sym'] = dict(coupling_matrix_sym)
+
         #TODO purging should no longer be necessary
         #print("SOLVER RUNNING: ", drive_set, readout_set)
         inverse_bunch = self.solver.inverse_solve_inplace(
@@ -571,10 +585,10 @@ class SystemSolver(object):
             inputs_set    = inputs_set,
             outputs_set   = outputs_set,
             edge_map      = dict(coupling_matrix.items()),
-            edge_map_sym  = dict(coupling_matrix_sym.items()),
             purge_in      = True,
             purge_out     = True,
             scattering    = True,
+            **kwargs
         )
 
         solution_bunch = declarative.Bunch(
