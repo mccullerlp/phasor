@@ -609,7 +609,7 @@ def householderREFL_COL_OP(
 def reduceLU(
     SRABE,
     node,
-    SRABE_SYM = None,
+    SRABE_SYM                   = None,
     node_costs_invalid_in_queue = None,
     **kwargs
 ):
@@ -618,13 +618,13 @@ def reduceLU(
             SRABE                       = SRABE,
             SRABE_SYM                   = SRABE_SYM,
             node                        = node,
-            node_costs_invalid_in_queue = node_costs_invalid_in_queue,
         )
     seq, req, req_alpha, seq_beta, edge_map, = SRABE
 
     self_edge = edge_map[node, node]
 
     CLG = -1 / self_edge
+
     #remove the self edge for the simplification stage
     seq[node].remove(node)
     req[node].remove(node)
@@ -716,7 +716,6 @@ def reduceLU_sym(
     SRABE,
     node,
     SRABE_SYM = None,
-    node_costs_invalid_in_queue = None,
     **kwargs
 ):
     seq, req, req_alpha, seq_beta, edge_map, = SRABE
@@ -725,314 +724,191 @@ def reduceLU_sym(
     if node in sym_seq[node]:
         #everything should be inserted to sym!
         self_edge = sym_edge_map[node, node]
+        #delete these immediately so they don't screw up the transfer
         del sym_edge_map[node, node]
+        sym_seq[node].remove(node)
+        sym_req[node].remove(node)
         use_symbolic_A = True
     else:
         self_edge = edge_map[node, node]
         use_symbolic_A = False
 
     CLG = -1 / self_edge
-    #remove the self edge for the simplification stage
-    #sym_seq[node].remove(node)
-    #sym_req[node].remove(node)
 
-    for snode in seq[node]:
-        use_symbolic_B = use_symbolic_A
+    seq_yessym = (sym_seq[node])
+    req_yessym = (sym_req[node])
+    seq_nosym  = seq[node] - seq_yessym - set([node])
+    req_nosym  = req[node] - req_yessym - set([node])
 
-        print(sym_req[node])
-        if snode in sym_seq[node]:
-            sedge = sym_edge_map[node, snode]
-            use_symbolic_B = True
-        else:
-            sedge = edge_map[node, snode]
+    seq_beta_yessym  = (sym_seq_beta[node])
+    req_alpha_yessym = (sym_req_alpha[node])
+    seq_beta_nosym   = seq_beta[node]  - seq_beta_yessym
+    req_alpha_nosym  = req_alpha[node] - req_alpha_yessym
+    done_pairs = set()
 
-        prod_L = sedge * CLG
-
-        for rnode in req[node]:
-            redge = edge_map[rnode, node]
-            prod = prod_L * redge
-
-            prev_edge = edge_map.get((rnode, snode), None)
-            if prev_edge is not None:
-                sym_edge_map[(rnode, snode)] = prev_edge + prod
+    def transfer_full(
+            seq, seq_is_sym,
+            req, req_is_sym,
+            seq_to,
+            req_to,
+            force_inject = True,
+    ):
+        for snode in seq:
+            if seq_is_sym:
+                sedge = sym_edge_map[node, snode]
             else:
-                sym_edge_map[(rnode, snode)] = prod
+                sedge = edge_map[node, snode]
 
-            seq.setdefault(rnode, set()).add(snode)
-            req.setdefault(snode, set()).add(rnode)
+            prod_L = sedge * CLG
 
-        for rnode in req_alpha[node]:
-            redge = edge_map[rnode, node]
-            prod = prod_L * redge
-
-            prev_edge = edge_map.get((rnode, snode), None)
-            if prev_edge is not None:
-                sym_edge_map[(rnode, snode)] = prev_edge + prod
-            else:
-                sym_edge_map[(rnode, snode)] = prod
-
-            req_alpha.setdefault(snode, set()).add(rnode)
-
-    for snode in seq_beta[node]:
-        sedge = edge_map[node, snode]
-        prod_L = sedge * CLG
-
-        for rnode in req[node]:
-            redge = edge_map[rnode, node]
-            prod = prod_L * redge
-
-            prev_edge = edge_map.get((rnode, snode), None)
-            if prev_edge is not None:
-                sym_edge_map[(rnode, snode)] = prev_edge + prod
-            else:
-                sym_edge_map[(rnode, snode)] = prod
-
-            seq_beta.setdefault(rnode, set()).add(snode)
-
-        for rnode in req_alpha[node]:
-            redge = edge_map[rnode, node]
-            prod = prod_L * redge
-
-            prev_edge = edge_map.get((rnode, snode), None)
-            if prev_edge is not None:
-                sym_edge_map[(rnode, snode)] = prev_edge + prod
-            else:
-                sym_edge_map[(rnode, snode)] = prod
-
-            seq_beta.setdefault(rnode, set()).add(snode)
-            req_alpha.setdefault(snode, set()).add(rnode)
-
-    #for snode in seq[node]:
-    #    if node_costs_invalid_in_queue:
-    #        node_costs_invalid_in_queue.add(snode)
-    #    del edge_map[node, snode]
-    #    sym_req[snode].remove(node)
-    #del seq[node]
-
-    #for snode in seq_beta[node]:
-    #    del edge_map[node, snode]
-    #del seq_beta[node]
-
-    #for rnode in req[node]:
-    #    if node_costs_invalid_in_queue:
-    #        node_costs_invalid_in_queue.add(rnode)
-    #    del edge_map[rnode, node]
-    #    sym_seq[rnode].remove(node)
-    #del req[node]
-
-    #for rnode in sym_req_alpha[node]:
-    #    del edge_map[rnode, node]
-    #del req_alpha[node]
-    return
-
-
-def reduceLUQ_row(
-    SRABE,
-    node,
-    node_costs_invalid_in_queue,
-    vprint = lambda *x: None,
-    **kwargs
-):
-    seq, req, seq_beta, req_alpha, edge_map, = SRABE
-
-    normr = 0
-    for rnode in req[node]:
-        normr = normr + abs(edge_map[rnode, node])**2
-    normr = normr ** .5
-
-    vprint("Using ROW Operations")
-
-    assert(req[node])
-    rvec = []
-    rvec_N = []
-    rvec_self_idx = None
-    for idx, rnode in enumerate(req[node]):
-        if node == rnode:
-            rvec_self_idx = idx
-        rvec.append(np.max(abs(edge_map[rnode, node] / normr)))
-        rvec_N.append(rnode)
-
-    vprint("RVEC: ", rvec)
-    if not np.all(np.isfinite(rvec)):
-        print("NORMR: ", normr)
-        assert(False)
-    bignodes_r = np.array(rvec) >= 1./(len(req[node]))**.5
-    rcount = np.count_nonzero(bignodes_r)
-    vprint("R: ", np.count_nonzero(bignodes_r), len(req[node]), bignodes_r[rvec_self_idx])
-
-    do_save = False
-    if rcount >= 2:
-        if rvec_self_idx is not None:
-            if not bignodes_r[rvec_self_idx]:
-                if rvec[rvec_self_idx] > 1./(len(req[node]))**.5 / N_limit_rel:
-                    #print("COULD SAVE! ", node, len(seq), len(edge_map))
-                    do_save = True
+            for rnode in req:
+                if req_is_sym:
+                    redge = sym_edge_map[rnode, node]
                 else:
-                    #print("CANT SAVE! ", node)
-                    pass
-        vprint("MUST USE HOUSEHOLDER {0}x".format(rcount))
-        if not do_save and rvec_self_idx is None or not bignodes_r[rvec_self_idx]:
-            vprint("MUST PIVOT")
-            idx_pivot = np.nonzero(bignodes_r)[0][0]
-            vprint("SELF: ", rvec_self_idx)
-            vprint("PIVO: ", idx_pivot)
-            node_pivot = rvec_N[idx_pivot]
-            vprint("SWAP: ", node, node_pivot)
-            pivotROW_OP(
-                SRABE = SRABE,
-                node1 = node,
-                node2 = node_pivot,
-                node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-                **kwargs
-            )
-            node_costs_invalid_in_queue.add(node)
-            node_costs_invalid_in_queue.add(node_pivot)
-            node = node_pivot
-        #make more efficient
-        nfrom = set()
-        vprint(bignodes_r.shape)
-        for idx in range(bignodes_r.shape[0]):
-            if np.any(bignodes_r[idx]):
-                nfrom.add(rvec_N[idx])
-        vprint("NFROM: ", nfrom, node)
-        nfrom.remove(node)
-        for kf in nfrom:
-            assert(node in seq[kf])
-        vprint("NFROM: ", nfrom, node)
-        householderREFL_ROW_OP(
-            SRABE = SRABE,
-            node_into = node,
-            nodes_from = nfrom,
-            node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-            **kwargs
-        )
-    elif rcount == 1:
-        vprint("DIRECT")
-        if rvec_self_idx is not None:
-            if not bignodes_r[rvec_self_idx] and rvec[rvec_self_idx] > 1./(len(req[node]))**.5 / N_limit_rel:
-                #print("COULD PREVENT PIVOT! ", node)
-                do_save = True
-        if not do_save and rvec_self_idx is None or not bignodes_r[rvec_self_idx]:
-            vprint("MUST PIVOT")
-            vprint('bignodes', bignodes_r)
-            #could choose pivot node based on projected fill-in
-            idx_pivot = np.nonzero(bignodes_r)[0][0]
-            vprint("SELF: ", rvec_self_idx)
-            vprint("PIVO: ", idx_pivot)
-            node_pivot = rvec_N[idx_pivot]
-            vprint("SWAP: ", node, node_pivot)
-            pivotROW_OP(
-                SRABE = SRABE,
-                node1 = node,
-                node2 = node_pivot,
-                node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-                **kwargs
-            )
-            node_costs_invalid_in_queue.add(node)
-            node_costs_invalid_in_queue.add(node_pivot)
-            node = node_pivot
-            #continue
-    reduceLU(
-        SRABE = SRABE,
-        node = node,
-        node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-        **kwargs
+                    redge = edge_map[rnode, node]
+
+                prod = prod_L * redge
+
+                prev_edge = sym_edge_map.get((rnode, snode), None)
+                if prev_edge is None:
+                    if not force_inject:
+                        continue
+                    prev_edge = edge_map.get((rnode, snode), None)
+
+                if prev_edge is not None:
+                    sym_edge_map[(rnode, snode)] = prev_edge + prod
+                else:
+                    sym_edge_map[(rnode, snode)] = prod
+
+                if seq_to is not None:
+                    seq_to.setdefault(rnode, set()).add(snode)
+                if req_to is not None:
+                    req_to.setdefault(snode, set()).add(rnode)
+                assert((rnode, snode) not in done_pairs)
+                done_pairs.add((rnode, snode))
+
+    #force_inject ensures that the edge is updated if there is already
+    #a symbolic edge there
+    transfer_full(
+        seq_nosym, False,
+        req_nosym, False,
+        seq_to = sym_seq,
+        req_to = sym_req,
+        force_inject = use_symbolic_A,
+    )
+    transfer_full(
+        seq_beta_nosym, False,
+        req_nosym, False,
+        seq_to = sym_seq_beta,
+        req_to = None,
+        force_inject = use_symbolic_A,
+    )
+    transfer_full(
+        seq_nosym, False,
+        req_alpha_nosym, False,
+        seq_to = None,
+        req_to = sym_req_alpha,
+        force_inject = use_symbolic_A,
+    )
+    transfer_full(
+        seq_beta_nosym, False,
+        req_alpha_nosym, False,
+        seq_to = sym_seq_beta,
+        req_to = sym_req_alpha,
+        force_inject = use_symbolic_A,
     )
 
-
-def reduceLUQ_col(
-    SRABE,
-    node,
-    node_costs_invalid_in_queue,
-    vprint = lambda *x: None,
-    **kwargs
-):
-    seq, req, seq_beta, req_alpha, edge_map, = SRABE
-
-    normc = 0
-    for snode in seq[node]:
-        normc = normc + abs(edge_map[node, snode])**2
-    normc = normc ** .5
-
-    vprint("Using COLUMN Operations")
-
-    assert(seq[node])
-    cvec = []
-    cvec_N = []
-    cvec_self_idx = None
-    for idx, snode in enumerate(seq[node]):
-        if node == snode:
-            cvec_self_idx = idx
-            vprint(cvec_self_idx, idx, node)
-        cvec.append(np.max(abs(edge_map[node, snode] / normc)))
-        cvec_N.append(snode)
-    vprint("CVEC: ", cvec)
-    if not np.all(np.isfinite(cvec)):
-        print("NORMC: ", normc)
-        assert(False)
-    bignodes_c = np.array(cvec) >= 1./(len(seq[node]))**.5
-    ccount = np.count_nonzero(bignodes_c)
-    vprint(bignodes_c, cvec_self_idx, ccount)
-    vprint("pe_C: ", np.count_nonzero(bignodes_c), len(seq[node]), bignodes_c[cvec_self_idx])
-
-    vprint("bignodes_c[cvec_self_idx]", bignodes_c[cvec_self_idx])
-    if ccount >= 2:
-        vprint("MUST USE HOUSEHOLDER {0}x".format(ccount))
-        if cvec_self_idx is None or not bignodes_c[cvec_self_idx]:
-            vprint("MUST PIVOT")
-            vprint('bignodes', bignodes_c)
-            #could choose pivot node based on projected fill-in
-            idx_pivot = np.nonzero(bignodes_c)[0][0]
-            vprint(idx_pivot)
-            node_pivot = cvec_N[idx_pivot]
-            vprint("SWAP: ", node, node_pivot)
-            pivotCOL_OP(
-                SRABE = SRABE,
-                node1 = node,
-                node2 = node_pivot,
-                node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-            )
-            node_costs_invalid_in_queue.add(node)
-            node_costs_invalid_in_queue.add(node_pivot)
-            node = node_pivot
-        #make more efficient
-        nfrom = set()
-        vprint(bignodes_c.shape)
-        for idx in range(bignodes_c.shape[0]):
-            if np.any(bignodes_c[idx]):
-                nfrom.add(cvec_N[idx])
-        vprint("NFROM: ", nfrom, node)
-        nfrom.remove(node)
-        householderREFL_COL_OP(
-            SRABE = SRABE,
-            node_into = node,
-            nodes_from = nfrom,
-            node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-        )
-    elif ccount == 1:
-        vprint("DIRECT")
-        if cvec_self_idx is None or not bignodes_c[cvec_self_idx]:
-            vprint("MUST PIVOT")
-            vprint('bignodes', bignodes_c)
-            #could choose pivot node based on projected fill-in
-            idx_pivot = np.nonzero(bignodes_c)[0][0]
-            vprint(idx_pivot)
-            node_pivot = cvec_N[idx_pivot]
-            vprint("SWAP: ", node, node_pivot)
-            pivotCOL_OP(
-                SRABE = SRABE,
-                node1 = node,
-                node2 = node_pivot,
-                node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-            )
-            node_costs_invalid_in_queue.add(node)
-            node_costs_invalid_in_queue.add(node_pivot)
-            node = node_pivot
-            #continue
-    reduceLU(
-        SRABE = SRABE,
-        node = node,
-        node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-        **kwargs
+    transfer_full(
+        seq_yessym, True,
+        req_nosym, False,
+        seq_to = sym_seq,
+        req_to = sym_req,
     )
+    transfer_full(
+        seq_beta_yessym, True,
+        req_nosym, False,
+        seq_to = sym_seq_beta,
+        req_to = None,
+    )
+    transfer_full(
+        seq_yessym, True,
+        req_alpha_nosym, False,
+        seq_to = None,
+        req_to = sym_req_alpha,
+    )
+    transfer_full(
+        seq_beta_yessym, True,
+        req_alpha_nosym, False,
+        seq_to = sym_seq_beta,
+        req_to = sym_req_alpha,
+    )
+
+    transfer_full(
+        seq_yessym, True,
+        req_yessym, True,
+        seq_to = sym_seq,
+        req_to = sym_req,
+    )
+    transfer_full(
+        seq_beta_yessym, True,
+        req_yessym, True,
+        seq_to = sym_seq_beta,
+        req_to = None,
+    )
+    transfer_full(
+        seq_yessym, True,
+        req_alpha_yessym, True,
+        seq_to = None,
+        req_to = sym_req_alpha,
+    )
+    transfer_full(
+        seq_beta_yessym, True,
+        req_alpha_yessym, True,
+        seq_to = sym_seq_beta,
+        req_to = sym_req_alpha,
+    )
+
+    transfer_full(
+        seq_nosym, False,
+        req_yessym, True,
+        seq_to = sym_seq,
+        req_to = sym_req,
+    )
+    transfer_full(
+        seq_beta_nosym, False,
+        req_yessym, True,
+        seq_to = sym_seq_beta,
+        req_to = None,
+    )
+    transfer_full(
+        seq_nosym, False,
+        req_alpha_yessym, True,
+        seq_to = None,
+        req_to = sym_req_alpha,
+    )
+    transfer_full(
+        seq_beta_nosym, False,
+        req_alpha_yessym, True,
+        seq_to = sym_seq_beta,
+        req_to = sym_req_alpha,
+    )
+
+    for snode in seq_yessym:
+        del sym_edge_map[node, snode]
+        sym_req[snode].remove(node)
+    del sym_seq[node]
+
+    for snode in seq_beta_yessym:
+        del sym_edge_map[node, snode]
+    del sym_seq_beta[node]
+
+    for rnode in req_yessym:
+        del sym_edge_map[rnode, node]
+        sym_seq[rnode].remove(node)
+    del sym_req[node]
+
+    for rnode in req_alpha_yessym:
+        del sym_edge_map[rnode, node]
+    del sym_req_alpha[node]
     return
+

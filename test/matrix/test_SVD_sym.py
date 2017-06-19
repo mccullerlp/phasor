@@ -77,11 +77,11 @@ def SVD_gen_check_sym(
         if (k_t == k_f):
             em1_ll[k_t, k_f] = -np.log10(np.maximum(abs(edge - 1), 1e-30))
             if not prevent_assert:
-                np_test.assert_almost_equal(edge - 1, 0)
+                np_test.assert_almost_equal(edge - 1, 0, 5)
         else:
             em0_ll[k_t, k_f] = -np.log10(np.maximum(abs(edge), 1e-30))
             if not prevent_assert:
-                np_test.assert_almost_equal(edge, 0)
+                np_test.assert_almost_equal(edge, 0, 5)
     #pprint(em1_ll)
     #pprint(em0_ll)
     #double check that diagonal exists
@@ -89,7 +89,7 @@ def SVD_gen_check_sym(
         edge = Meye[2][k_t, k_t]
         em1_ll[k_t, k_t] = -np.log10(np.maximum(abs(edge - 1), 1e-30))
         if not prevent_assert:
-            np_test.assert_almost_equal(edge - 1, 0)
+            np_test.assert_almost_equal(edge - 1, 0, 5)
 
 def test_sparse_SVDinv_sym():
     SVD_gen_check_sym()

@@ -458,20 +458,41 @@ def inverse_solve_inplace(
     unwrapped_req_map = defaultdict(set)
 
     if sym:
-        seq_beta = sym.seq_beta
-        print(seq_beta)
+        sym_seq_beta = sym.seq_beta
+        sym_edge_map = sym.edge_map
+        for inode in inputs_set:
+            winode = ('INPUT', inode)
+            #Could get exceptions here if we don't purge and the input maps have spurious
+            #outputs (nodes with no seq) other than the wrapped ones generated here
+            sbeta_sym = sym_seq_beta[winode]
+            sbeta_nosym = seq_beta[winode] - sbeta_sym
 
-    for inode in inputs_set:
-        winode = ('INPUT', inode)
-        #Could get exceptions here if we don't purge and the input maps have spurious
-        #outputs (nodes with no seq) other than the wrapped ones generated here
-        for wonode in seq_beta[winode]:
-            sourced_edge = edge_map[winode, wonode]
-            k, onode = wonode
-            assert(k == 'OUTPUT')
-            unwrapped_edge_map[inode, onode] = sourced_edge
-            unwrapped_seq_map[inode].add(onode)
-            unwrapped_req_map[onode].add(inode)
+            for wonode in sbeta_sym:
+                sourced_edge = sym_edge_map[winode, wonode]
+                k, onode = wonode
+                assert(k == 'OUTPUT')
+                unwrapped_edge_map[inode, onode] = sourced_edge
+                unwrapped_seq_map[inode].add(onode)
+                unwrapped_req_map[onode].add(inode)
+            for wonode in sbeta_nosym:
+                sourced_edge = edge_map[winode, wonode]
+                k, onode = wonode
+                assert(k == 'OUTPUT')
+                unwrapped_edge_map[inode, onode] = sourced_edge
+                unwrapped_seq_map[inode].add(onode)
+                unwrapped_req_map[onode].add(inode)
+    else:
+        for inode in inputs_set:
+            winode = ('INPUT', inode)
+            #Could get exceptions here if we don't purge and the input maps have spurious
+            #outputs (nodes with no seq) other than the wrapped ones generated here
+            for wonode in seq_beta[winode]:
+                sourced_edge = edge_map[winode, wonode]
+                k, onode = wonode
+                assert(k == 'OUTPUT')
+                unwrapped_edge_map[inode, onode] = sourced_edge
+                unwrapped_seq_map[inode].add(onode)
+                unwrapped_req_map[onode].add(inode)
 
     return declarative.Bunch(
         outputs_map = outputs_map,
