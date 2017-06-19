@@ -40,7 +40,7 @@ def enorm(arr):
 def mgraph_simplify_inplace(
     SRABE,
     verbose        = False,
-    sorted_order   = True,
+    sorted_order   = False,
     **kwargs
 ):
     if verbose:
@@ -75,9 +75,9 @@ def mgraph_simplify_inplace(
         mgraph_simplify_sorted(SRABE = SRABE, **kwargs)
     else:
         vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
-        mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
+        #mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
         vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
-        mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
+        #mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
         print("BADGUY STAGE, REMAINING {0}".format(len(req)))
         mgraph_simplify_badguys(SRABE = SRABE, **kwargs)
     return
