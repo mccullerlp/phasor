@@ -81,11 +81,18 @@ class FitterRoot(RootElement, FitterBase):
 
     @declarative.mproperty
     @invalidate_auto
-    def fit_systems(self):
+    def fit_systems(self, value = declarative.NOARG, oldvalue = None):
+        #allow this to be replaced
+        assert(value is declarative.NOARG)
+
         ctree_meta = declarative.Bunch()
         for sysname in list(self.systems.keys()):
             ctree = bunch.DeepBunch(vpath=True)
             ctree_meta[sysname] = ctree
+
+            prev = self.systems[sysname].ctree.extractidx('previous')
+            ctree.update_recursive(prev)
+
             ctree.hints.symbolic = 'casadi'
             ctree.hints.symbolic_fiducials = self.symbol_fiducials
             ctree.hints.symbolic_fiducial_substitute = self.symbol_fiducial_substitute

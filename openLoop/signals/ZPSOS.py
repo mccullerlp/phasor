@@ -247,7 +247,7 @@ class SRationalFilter(SZPCascade):
         Combination of all subordinate fitter parameters to fully fit this function
         """
         fitters = self.fitter_data_()
-        #fitters.extend(self.delay.fitter_data)
-        #fitters.extend(self.gain.fitter_data)
+        fitters.extend(self.delay.fitter_data)
+        fitters.extend(self.gain.fitter_data)
         return fitters
 

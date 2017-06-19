@@ -75,9 +75,9 @@ def mgraph_simplify_inplace(
         mgraph_simplify_sorted(SRABE = SRABE, **kwargs)
     else:
         vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
-        #mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
+        mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
         vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
-        #mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
+        mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
         print("BADGUY STAGE, REMAINING {0}".format(len(req)))
         mgraph_simplify_badguys(SRABE = SRABE, **kwargs)
     return
@@ -181,6 +181,7 @@ def mgraph_simplify_trivial(
             SRABE,
             node = node,
             node_costs_invalid_in_queue = node_costs_invalid_in_queue,
+            **kwargs,
         )
     return
 
@@ -341,11 +342,12 @@ def inverse_solve_inplace(
                 edge_map[node, node] = -1
                 seq[node].add(node)
                 req[node].add(node)
-            edge_sym = edge_map_sym.get((node, node), None)
-            if edge_sym is not None:
-                edge_map_sym[node, node] = edge_sym - 1
-            else:
-                edge_map_sym[node, node] = -1
+            if edge_map_sym is not None:
+                edge_sym = edge_map_sym.get((node, node), None)
+                if edge_sym is not None:
+                    edge_map_sym[node, node] = edge_sym - 1
+                else:
+                    edge_map_sym[node, node] = -1
         #sign conventions reversed for scattering matrix
         negative = not negative
 
@@ -362,6 +364,7 @@ def inverse_solve_inplace(
         sym.edge_map = edge_map_sym
     else:
         sym = None
+
 
     pre_purge_inplace(seq, req, edge_map)
 
@@ -416,7 +419,6 @@ def inverse_solve_inplace(
         for kf, kt in sym.edge_map:
             sym.seq[kf].add(kt)
             sym.req[kt].add(kf)
-        pprint(sym.edge_map)
 
         for node, rset in req_alpha.items():
             e = inputs_map_sym.get(node, None)

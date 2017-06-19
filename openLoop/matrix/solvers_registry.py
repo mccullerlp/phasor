@@ -41,10 +41,10 @@ def loop_fast_unstable():
 
 
 def loop_LUQ():
-    from ..matrix import DAG_algorithm
+    from ..matrix import DAG_algorithm_sym
     return declarative.Bunch(
-        inverse_solve_inplace = DAG_algorithm.inverse_solve_inplace,
-        push_solve_inplace    = DAG_algorithm.inverse_solve_inplace,
+        inverse_solve_inplace = DAG_algorithm_sym.inverse_solve_inplace,
+        push_solve_inplace    = DAG_algorithm_sym.inverse_solve_inplace,
         symbolics_supported   = True,
         symbolics_inline      = False,
     )

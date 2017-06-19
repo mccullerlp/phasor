@@ -310,6 +310,7 @@ class SystemSolver(object):
 
         for pktf, edge in coupling_matrix_sym.items():
             coupling_matrix[pktf] = self.symbolic_subs(edge)
+            #print("SYM: ", pktf, edge)
 
         #TODO return coupling_matrix_sym too
         return coupling_matrix, coupling_matrix_sym
@@ -358,15 +359,17 @@ class SystemSolver(object):
         #TODO TODO TODO Pre-purge the seq/req list to prevent unnecessary edge-matrix generation
         #this is somewhat done already since there are purged versions
         solution_bunch = self.solver.push_solve_inplace(
-            seq         = seq,
-            req         = req,
-            edge_map    = dict(coupling_matrix.items()),
-            outputs_set = outputs_set.union(self.matrix_algorithm.AC_out_all),
-            inputs_map  = source_vector,
-            inputs_set  = self.matrix_algorithm.AC_in_all,
-            purge_in    = True,
-            purge_out   = True,
-            scattering  = True,
+            seq            = seq,
+            req            = req,
+            outputs_set    = outputs_set.union(self.matrix_algorithm.AC_out_all),
+            inputs_map     = source_vector,
+            inputs_map_sym = source_vector_sym,
+            edge_map       = dict(coupling_matrix.items()),
+            edge_map_sym   = dict(coupling_matrix_sym.items()),
+            inputs_set     = self.matrix_algorithm.AC_in_all,
+            purge_in       = True,
+            purge_out      = True,
+            scattering     = True,
         )
         solution_dict = solution_bunch.outputs_map
         solution_vector_kv = KeyVector(field_space)
@@ -483,14 +486,16 @@ class SystemSolver(object):
         #TODO purging should no longer be necessary
         #print("PROPAGAGOR RUNNING: ", readout_set)
         solution_bunch = self.solver.push_solve_inplace(
-            seq           = seq,
-            req           = req,
-            outputs_set   = outputs_set,
-            inputs_map    = source_vector,
-            edge_map      = dict(coupling_matrix.items()),
-            purge_in      = True,
-            purge_out     = True,
-            scattering    = True,
+            seq            = seq,
+            req            = req,
+            outputs_set    = outputs_set,
+            inputs_map     = source_vector,
+            inputs_map_sym = source_vector_sym,
+            edge_map       = dict(coupling_matrix.items()),
+            edge_map_sym   = dict(coupling_matrix_sym.items()),
+            purge_in       = True,
+            purge_out      = True,
+            scattering     = True,
         )
         solution_dict = solution_bunch.outputs_map
         solution_vector_kv = KeyVector(field_space)
@@ -566,6 +571,7 @@ class SystemSolver(object):
             inputs_set    = inputs_set,
             outputs_set   = outputs_set,
             edge_map      = dict(coupling_matrix.items()),
+            edge_map_sym  = dict(coupling_matrix_sym.items()),
             purge_in      = True,
             purge_out     = True,
             scattering    = True,
@@ -587,6 +593,7 @@ class SystemSolver(object):
             while len(self.driven_solution_bunches) <= self.system.exact_order:
                 self.driven_solution_bunches.append(dict())
                 sbunch = self._perturbation_iterate(N = len(self.driven_solution_bunches) - 1)
+            self.driven_solution_bunches.append(dict())
         else:
 
             if order is None:
@@ -609,9 +616,9 @@ class SystemSolver(object):
                         sbunch.k_worst[0], np.max(sbunch.k_worst[1]),
                     )
 
-        if len(self.driven_solution_bunches) == to_order:
-            #append one last dictionary for this set of solutions to use the previous
-            self.driven_solution_bunches.append(dict())
+            if len(self.driven_solution_bunches) == to_order:
+                #append one last dictionary for this set of solutions to use the previous
+                self.driven_solution_bunches.append(dict())
         return
 
     def solution_vector_print(

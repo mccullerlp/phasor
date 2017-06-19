@@ -200,11 +200,16 @@ def unitless_refval_attribute(
                     ooa.setdefault("ref",   arg.ref)
                     ooa.setdefault("val",   arg.val)
             else:
-                self.ctree.useidx('immediate')[ctree_name] = arg
+                ooa = self.ctree.useidx('immediate')
+                if not ctree_name in ooa:
+                    ooa[ctree_name] = arg
+                else:
+                    #TODO maybe should do something here?
+                    pass
 
         return simple_units.UnitlessElementRefValue(
-            ctree    = self.ctree[ctree_name],
-            ctree_name      = ctree_name,
+            ctree         = self.ctree[ctree_name],
+            ctree_name    = ctree_name,
             allow_fitting = allow_fitting,
         )
 
