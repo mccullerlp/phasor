@@ -141,17 +141,25 @@ class PortUpdatesAlgorithm(object):
         self._coherent_sources_needed(pto, kto)
         #TODO: make this dispersal occur during resolve_port_updates
 
-        ptolink_dict = self.system.bond_pairs.get(pto, declarative.NOARG)
-        if ptolink_dict is not declarative.NOARG:
-            for ptolink in ptolink_dict:
-                #print('link port: ', ptolink, kto)
-                self._coherent_sources_needed(ptolink, kto)
+        to_extend = set([pto])
+        already_extended = set()
 
-        ptolink_set = self.bond_pairsR.get(pto, declarative.NOARG)
-        if ptolink_set is not declarative.NOARG:
-            for ptolink in ptolink_set:
-                #print('link portR: ', ptolink, kto)
-                self._coherent_sources_needed(ptolink, kto)
+        #performs a transitive completion keys at every port that is logically connected
+        while to_extend:
+            pto_next = to_extend.pop()
+            if pto_next in already_extended:
+                continue
+            already_extended.add(pto_next)
+
+            ptolink_dict = self.system.bond_pairs.get(pto_next, declarative.NOARG)
+            if ptolink_dict is not declarative.NOARG:
+                to_extend.update(ptolink_dict.keys())
+            ptolink_set = self.bond_pairsR.get(pto_next, declarative.NOARG)
+            if ptolink_set is not declarative.NOARG:
+                to_extend.update(ptolink_set)
+
+            self._coherent_sources_needed(pto_next, kto)
+        return
 
     def coherent_sources_perturb_needed(self, pto, kto):
         self.coherent_sources_needed(pto, kto)

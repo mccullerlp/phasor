@@ -173,20 +173,32 @@ class TripletCoupling(FactorCouplingBase):
         self.pkto       = pkto
         self.cplg       = cplg
 
-        self.sources_pk_dict = {
-            self.pkto : self.source_func
-        }
-        self.sources_NZ_pkset_dict = {
-            self.pkto : frozenset([self.pkfrom1, self.pkfrom2]),
-        }
-        self.edges_pkpk_dict = {
-            (self.pkfrom1, self.pkto) : self.edge1_func,
-            (self.pkfrom2, self.pkto) : self.edge2_func,
-        }
-        self.edges_NZ_pkset_dict = {
-            (self.pkfrom1, self.pkto) : frozenset([self.pkfrom2]),
-            (self.pkfrom2, self.pkto) : frozenset([self.pkfrom1]),
-        }
+        if self.pkfrom1 != self.pkfrom2:
+            self.sources_pk_dict = {
+                self.pkto : self.source_func
+            }
+            self.sources_NZ_pkset_dict = {
+                self.pkto : frozenset([self.pkfrom1, self.pkfrom2]),
+            }
+            self.edges_pkpk_dict = {
+                (self.pkfrom1, self.pkto) : self.edge1_func,
+                (self.pkfrom2, self.pkto) : self.edge2_func,
+            }
+            self.edges_NZ_pkset_dict = {
+                (self.pkfrom1, self.pkto) : frozenset([self.pkfrom2]),
+                (self.pkfrom2, self.pkto) : frozenset([self.pkfrom1]),
+            }
+        else:
+            #if the sources are identical, then the combinatorics change.
+            #these dictionaries cannot double count the edges, so we don't need to compensate with a source
+            self.sources_pk_dict = {}
+            self.sources_NZ_pkset_dict = {}
+            self.edges_pkpk_dict = {
+                (self.pkfrom1, self.pkto) : self.edge1_func,
+            }
+            self.edges_NZ_pkset_dict = {
+                (self.pkfrom1, self.pkto) : frozenset([self.pkfrom2]),
+            }
 
     def edge1_func(self, sol_vector, sB):
         val = self.cplg * sol_vector.get(self.pkfrom2, 0)
@@ -235,27 +247,44 @@ class TripletNormCoupling(FactorCouplingBase):
         self.pknorm      = pknorm
         self.pknorm_func = pknorm_func
 
-        self.sources_pk_dict = {
-            self.pkto : self.source_func
-        }
-        self.sources_NZ_pkset_dict = {
-            self.pkto : frozenset([self.pkfrom1, self.pkfrom2]),
-        }
-        self.sources_req_pkset_dict = {
-            self.pkto : frozenset([self.pkfrom1, self.pkfrom2, self.pknorm]),
-        }
-        self.edges_pkpk_dict = {
-            (self.pkfrom1, self.pkto) : self.edge1_func,
-            (self.pkfrom2, self.pkto) : self.edge2_func,
-        }
-        self.edges_NZ_pkset_dict = {
-            (self.pkfrom1, self.pkto) : frozenset([self.pkfrom2]),
-            (self.pkfrom2, self.pkto) : frozenset([self.pkfrom1]),
-        }
-        self.edges_req_pkset_dict = {
-            (self.pkfrom1, self.pkto) : frozenset([self.pkfrom2, self.pknorm]),
-            (self.pkfrom2, self.pkto) : frozenset([self.pkfrom1, self.pknorm]),
-        }
+        if self.pkfrom1 != self.pkfrom2:
+            self.sources_pk_dict = {
+                self.pkto : self.source_func
+            }
+            self.sources_NZ_pkset_dict = {
+                self.pkto : frozenset([self.pkfrom1, self.pkfrom2]),
+            }
+            self.sources_req_pkset_dict = {
+                self.pkto : frozenset([self.pkfrom1, self.pkfrom2, self.pknorm]),
+            }
+            self.edges_pkpk_dict = {
+                (self.pkfrom1, self.pkto) : self.edge1_func,
+                (self.pkfrom2, self.pkto) : self.edge2_func,
+            }
+            self.edges_NZ_pkset_dict = {
+                (self.pkfrom1, self.pkto) : frozenset([self.pkfrom2]),
+                (self.pkfrom2, self.pkto) : frozenset([self.pkfrom1]),
+            }
+            self.edges_req_pkset_dict = {
+                (self.pkfrom1, self.pkto) : frozenset([self.pkfrom2, self.pknorm]),
+                (self.pkfrom2, self.pkto) : frozenset([self.pkfrom1, self.pknorm]),
+            }
+        else:
+            #if the sources are identical, then the combinatorics change.
+            #these dictionaries cannot double count the edges, so we don't need to compensate with a source
+            self.sources_pk_dict = {}
+            self.sources_NZ_pkset_dict = {}
+            self.sources_req_pkset_dict = {}
+
+            self.edges_pkpk_dict = {
+                (self.pkfrom1, self.pkto) : self.edge1_func,
+            }
+            self.edges_NZ_pkset_dict = {
+                (self.pkfrom1, self.pkto) : frozenset([self.pkfrom2]),
+            }
+            self.edges_req_pkset_dict = {
+                (self.pkfrom1, self.pkto) : frozenset([self.pkfrom2, self.pknorm]),
+            }
 
     def edge1_func(self, sol_vector, sB):
         val = self.cplg * sol_vector.get(self.pkfrom2, 0) / self.pknorm_func(sol_vector.get(self.pknorm, 1e12))

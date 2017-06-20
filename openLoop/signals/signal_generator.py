@@ -15,6 +15,8 @@ from . import ports
 
 from ..optics import standard_attrs as standard_attrs_opt
 
+#from ..utilities.print import pprint
+
 
 class SignalGenerator(bases.SignalElementBase):
 
@@ -64,49 +66,50 @@ class SignalGenerator(bases.SignalElementBase):
         for Hidx, gain in list(self.harmonic_gains.items()):
             #just to check that it is a number
             Hidx + 1
+
             self.insert(
                 ports.SignalOutPort(sname = 'OutH{0}'.format(Hidx)),
                 'OutH{0}'.format(Hidx),
             )
         return
 
-    def system_setup_ports_initial(self, system):
-        system.coherent_sources_needed(
+    def system_setup_ports_initial(self, ports_algorithm):
+        ports_algorithm.coherent_sources_needed(
             self.Out.o,
             ports.DictKey({ports.ClassicalFreqKey: self.f_key}),
         )
-        system.coherent_sources_needed(
+        ports_algorithm.coherent_sources_needed(
             self.Out.o,
             ports.DictKey({ports.ClassicalFreqKey: -self.f_key}),
         )
         for Hidx, gain in list(self.harmonic_gains.items()):
             port = getattr(self, 'OutH{0}'.format(Hidx))
-            system.coherent_sources_needed(
+            ports_algorithm.coherent_sources_needed(
                 port.o,
                 ports.DictKey({ports.ClassicalFreqKey: Hidx * self.f_key}),
             )
-            system.coherent_sources_needed(
+            ports_algorithm.coherent_sources_needed(
                 port.o,
                 ports.DictKey({ports.ClassicalFreqKey: -Hidx * self.f_key}),
             )
         return
 
-    def system_setup_ports(self, system):
+    def system_setup_ports(self, ports_algorithm):
         return
 
-    def system_setup_coupling(self, system):
+    def system_setup_coupling(self, matrix_algorithm):
         if self.phase_rad.val is not 0:
             cplg = self.symbols.math.exp(self.symbols.i * self.phase_rad.val)
             cplgC = self.symbols.math.exp(-self.symbols.i * self.phase_rad.val)
         else:
             cplg = 1
             cplgC = 1
-        system.coherent_sources_insert(
+        matrix_algorithm.coherent_sources_insert(
             self.Out.o,
             ports.DictKey({ports.ClassicalFreqKey: self.f_key}),
             cplg * self.amplitude,
         )
-        system.coherent_sources_insert(
+        matrix_algorithm.coherent_sources_insert(
             self.Out.o,
             ports.DictKey({ports.ClassicalFreqKey: -self.f_key}),
             cplgC * self.amplitudeC,
@@ -119,12 +122,12 @@ class SignalGenerator(bases.SignalElementBase):
             else:
                 cplg = 1
                 cplgC = 1
-            system.coherent_sources_insert(
+            matrix_algorithm.coherent_sources_insert(
                 port.o,
                 ports.DictKey({ports.ClassicalFreqKey: Hidx * self.f_key}),
                 cplg * gain,
             )
-            system.coherent_sources_insert(
+            matrix_algorithm.coherent_sources_insert(
                 port.o,
                 ports.DictKey({ports.ClassicalFreqKey: -Hidx * self.f_key}),
                 cplgC * np.conjugate(gain),

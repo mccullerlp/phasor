@@ -9,7 +9,7 @@ import declarative
 from . import ports
 from . import bases
 from ..system.matrix_injections import TripletNormCoupling
-from ..utilities.print import pprint
+#from ..utilities.print import pprint
 
 
 
@@ -149,16 +149,6 @@ class AOMBasic(
             self.po_Bk: self.po_Fr,
         }
 
-        for port in [
-            self.po_Fr.i,
-            self.po_Bk.i,
-            self.po_Fr.o,
-            self.po_Bk.o,
-            self.Drv.i,
-        ]:
-            print("SET: ", port)
-            pprint(matrix_algorithm.port_set_get(port))
-
         fdkey  = ports.DictKey({ports.ClassicalFreqKey: ports.FrequencyKey({})})
         pknorm = (self.Drv_Pwr.MS.o, fdkey)
         for port, direction in [
@@ -192,14 +182,6 @@ class AOMBasic(
                             ports.QuantumKey       : qkey,
                         })
 
-                        pprint(
-                            dict(
-                                pkfrom1 = (port.i, kfrom),
-                                pkfrom2 = (self.Drv.i, kfrom2),
-                                pkto    = (tmap[port].o, kto),
-                                pknorm  = pknorm,
-                            )
-                        )
                         matrix_algorithm.injection_insert(
                             TripletNormCoupling(
                                 pkfrom1 = (port.i, kfrom),

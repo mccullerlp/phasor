@@ -662,7 +662,7 @@ class SystemSolver(object):
         for key, value in solution_bunch.source:
             dk = key[0] | key[1]
             if dk.contains(select_to):
-                print(("[{0: <50}]={1}".format(key, value)))
+                print(("[{0: <50}]={1}".format(repr(key), value)))
 
     def coupling_matrix_print(
             self,

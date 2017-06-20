@@ -245,20 +245,45 @@ class Harmonic2Generator(bases.SignalElementBase):
                 if self.system.reject_classical_frequency_order(f_new):
                     continue
                 ports_algorithm.port_coupling_needed(self.Out.o, ports.DictKey({ports.ClassicalFreqKey: f_new}))
+
             for kto in ports_algorithm.port_full_get(self.Out.o):
                 f1 = kfrom1[ports.ClassicalFreqKey]
                 f2 = kto[ports.ClassicalFreqKey]
-                freq_center_f1 = self.system.classical_frequency_extract_center(f1)
-                freq_center_f2 = self.system.classical_frequency_extract_center(f2)
                 #make sure the frequencies have the same sign
+                f_new = f2 - f1
+
+                freq_center_f1 = self.system.classical_frequency_extract_center(f1)
+                freq_center_f2 = self.system.classical_frequency_extract_center(f_new)
+
                 if freq_center_f1 > 0:
                     if freq_center_f2 < 0:
                         continue
                 else:
                     if freq_center_f2 > 0:
                         continue
-                f_new = f2 - f2
 
+                if self.system.reject_classical_frequency_order(f_new):
+                    continue
+
+                ports_algorithm.port_coupling_needed(self.In.i, ports.DictKey({ports.ClassicalFreqKey: f_new}))
+        for kto in ports_algorithm.port_update_get(self.Out.o):
+            for kfrom1 in ports_algorithm.port_full_get(self.In.i):
+                f1 = kfrom1[ports.ClassicalFreqKey]
+                f2 = kto[ports.ClassicalFreqKey]
+                #make sure the frequencies have the same sign
+                f_new = f2 - f1
+
+                freq_center_f1 = self.system.classical_frequency_extract_center(f1)
+                freq_center_f2 = self.system.classical_frequency_extract_center(f_new)
+
+                if freq_center_f1 > 0:
+                    if freq_center_f2 <= 0:
+                        continue
+                elif freq_center_f1 == 0:
+                    continue
+                else:
+                    if freq_center_f2 >= 0:
+                        continue
                 if self.system.reject_classical_frequency_order(f_new):
                     continue
 
@@ -277,10 +302,12 @@ class Harmonic2Generator(bases.SignalElementBase):
                 freq_center_f2 = self.system.classical_frequency_extract_center(f2)
                 #make sure the frequencies have the same sign
                 if freq_center_f1 > 0:
-                    if freq_center_f2 < 0:
+                    if freq_center_f2 <= 0:
                         continue
+                elif freq_center_f1 == 0:
+                    continue
                 else:
-                    if freq_center_f2 > 0:
+                    if freq_center_f2 >= 0:
                         continue
                 f_new = f1 + f2
 
