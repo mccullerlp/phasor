@@ -34,27 +34,15 @@ def loop_fast_unstable():
     from ..matrix import graph_algorithm
     return declarative.Bunch(
         inverse_solve_inplace = graph_algorithm.inverse_solve_inplace,
-        push_solve_inplace    = graph_algorithm.inverse_solve_inplace,
         symbolics_supported   = True,
         symbolics_inline      = True,
     )
 
 
 def loop_LUQ():
-    from ..matrix import DAG_algorithm_sym
+    from ..matrix import DAG_algorithm
     return declarative.Bunch(
-        inverse_solve_inplace = DAG_algorithm_sym.inverse_solve_inplace,
-        push_solve_inplace    = DAG_algorithm_sym.inverse_solve_inplace,
-        symbolics_supported   = True,
-        symbolics_inline      = False,
-    )
-
-
-def loop_LUQ_sym():
-    from ..matrix import DAG_algorithm_sym
-    return declarative.Bunch(
-        inverse_solve_inplace = DAG_algorithm_sym.inverse_solve_inplace,
-        push_solve_inplace    = DAG_algorithm_sym.inverse_solve_inplace,
+        inverse_solve_inplace = DAG_algorithm.inverse_solve_inplace,
         symbolics_supported   = True,
         symbolics_inline      = False,
     )
@@ -64,7 +52,6 @@ def scisparse():
     from ..matrix import scisparse_algorithm
     return declarative.Bunch(
         inverse_solve_inplace = scisparse_algorithm.inverse_solve_inplace,
-        push_solve_inplace    = scisparse_algorithm.inverse_solve_inplace,
         symbolics_supported   = False,
     )
 
@@ -75,7 +62,6 @@ def scisparse_superLU():
     use_solver(useUmfpack = False)
     return declarative.Bunch(
         inverse_solve_inplace = scisparse_algorithm.inverse_solve_inplace,
-        push_solve_inplace    = scisparse_algorithm.push_solve_inplace,
         symbolics_supported   = False,
     )
 
@@ -86,7 +72,6 @@ def scisparse_umfpack():
     use_solver(useUmfpack = True)
     return declarative.Bunch(
         inverse_solve_inplace = scisparse_algorithm.inverse_solve_inplace,
-        push_solve_inplace    = scisparse_algorithm.push_solve_inplace,
         symbolics_supported   = False,
     )
 

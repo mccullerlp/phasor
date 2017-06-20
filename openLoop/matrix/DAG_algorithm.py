@@ -10,7 +10,7 @@ import declarative
 #from ..math.dispatched import abs_sq
 
 from ..utilities.priority_queue import HeapPriorityQueue, Empty
-#from ..utilities.print import pprint
+from ..utilities.print import pprint
 
 from .matrix_generic import (
     pre_purge_inplace,
@@ -72,7 +72,7 @@ def mgraph_simplify_inplace(
     SRABE = (seq, req, req_alpha, seq_beta, edge_map)
 
     if sorted_order:
-        mgraph_simplify_sorted(SRABE = SRABE)
+        mgraph_simplify_sorted(SRABE = SRABE, **kwargs)
     else:
         vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
         mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
@@ -181,6 +181,7 @@ def mgraph_simplify_trivial(
             SRABE,
             node = node,
             node_costs_invalid_in_queue = node_costs_invalid_in_queue,
+            **kwargs,
         )
     return
 
@@ -321,18 +322,17 @@ def inverse_solve_inplace(
     seq, req,
     edge_map,
     outputs_set,
-    inputs_set   = frozenset(),
-    inputs_map   = None,
-    edge_map_sym = None,
-    purge_in     = True,
-    purge_out    = True,
-    verbose      = False,
-    negative     = False,
-    scattering   = False,
+    inputs_set     = frozenset(),
+    inputs_map     = None,
+    inputs_map_sym = None,
+    edge_map_sym   = None,
+    purge_in       = True,
+    purge_out      = True,
+    verbose        = False,
+    negative       = False,
+    scattering     = False,
     **kwargs
 ):
-    if edge_map_sym is None:
-        edge_map_sym = dict()
     if scattering:
         keys = set(seq.keys()) | set(req.keys())
         for node in keys:
@@ -342,11 +342,29 @@ def inverse_solve_inplace(
                 edge_map[node, node] = -1
                 seq[node].add(node)
                 req[node].add(node)
-            edge_sym = edge_map_sym.get((node, node), None)
-            if edge_sym is not None:
-                edge_map_sym = edge_sym - 1
+            if edge_map_sym is not None:
+                edge_sym = edge_map_sym.get((node, node), None)
+                if edge_sym is not None:
+                    edge_map_sym[node, node] = edge_sym - 1
+                else:
+                    edge_map_sym[node, node] = -1
         #sign conventions reversed for scattering matrix
         negative = not negative
+
+    if edge_map_sym or inputs_map_sym:
+        sym = declarative.Bunch()
+        sym.seq       = defaultdict(set)
+        sym.req       = defaultdict(set)
+        sym.seq_beta  = defaultdict(set)
+        sym.req_alpha = defaultdict(set)
+        if inputs_map_sym is None:
+            inputs_map_sym = dict()
+        if edge_map_sym is None:
+            edge_map_sym = dict()
+        sym.edge_map = edge_map_sym
+    else:
+        sym = None
+
 
     pre_purge_inplace(seq, req, edge_map)
 
@@ -396,6 +414,21 @@ def inverse_solve_inplace(
             req_alpha  = req_alpha,
             edge_map   = edge_map,
         )
+
+    if sym:
+        for kf, kt in sym.edge_map:
+            sym.seq[kf].add(kt)
+            sym.req[kt].add(kf)
+
+        for node, rset in req_alpha.items():
+            e = inputs_map_sym.get(node, None)
+            if e is not None:
+                sym.req_alpha[node].add(VACUUM_STATE)
+                sym.edge_map[VACUUM_STATE, node] = e
+        SRABE_SYM = sym.seq, sym.req, sym.req_alpha, sym.seq_beta, sym.edge_map
+    else:
+        SRABE_SYM = None
+
     #print("SEQ")
     #print_seq(seq, edge_map)
 
@@ -404,8 +437,9 @@ def inverse_solve_inplace(
 
     #simplify with the wrapped nodes
     mgraph_simplify_inplace(
-        SRABE   = (seq, req, req_alpha, seq_beta, edge_map,),
-        verbose = verbose,
+        SRABE     = (seq, req, req_alpha, seq_beta, edge_map,),
+        verbose   = verbose,
+        SRABE_SYM = SRABE_SYM,
         **kwargs
     )
 
@@ -425,17 +459,42 @@ def inverse_solve_inplace(
     unwrapped_seq_map = defaultdict(set)
     unwrapped_req_map = defaultdict(set)
 
-    for inode in inputs_set:
-        winode = ('INPUT', inode)
-        #Could get exceptions here if we don't purge and the input maps have spurious
-        #outputs (nodes with no seq) other than the wrapped ones generated here
-        for wonode in seq_beta[winode]:
-            sourced_edge = edge_map[winode, wonode]
-            k, onode = wonode
-            assert(k == 'OUTPUT')
-            unwrapped_edge_map[inode, onode] = sourced_edge
-            unwrapped_seq_map[inode].add(onode)
-            unwrapped_req_map[onode].add(inode)
+    if sym:
+        sym_seq_beta = sym.seq_beta
+        sym_edge_map = sym.edge_map
+        for inode in inputs_set:
+            winode = ('INPUT', inode)
+            #Could get exceptions here if we don't purge and the input maps have spurious
+            #outputs (nodes with no seq) other than the wrapped ones generated here
+            sbeta_sym = sym_seq_beta[winode]
+            sbeta_nosym = seq_beta[winode] - sbeta_sym
+
+            for wonode in sbeta_sym:
+                sourced_edge = sym_edge_map[winode, wonode]
+                k, onode = wonode
+                assert(k == 'OUTPUT')
+                unwrapped_edge_map[inode, onode] = sourced_edge
+                unwrapped_seq_map[inode].add(onode)
+                unwrapped_req_map[onode].add(inode)
+            for wonode in sbeta_nosym:
+                sourced_edge = edge_map[winode, wonode]
+                k, onode = wonode
+                assert(k == 'OUTPUT')
+                unwrapped_edge_map[inode, onode] = sourced_edge
+                unwrapped_seq_map[inode].add(onode)
+                unwrapped_req_map[onode].add(inode)
+    else:
+        for inode in inputs_set:
+            winode = ('INPUT', inode)
+            #Could get exceptions here if we don't purge and the input maps have spurious
+            #outputs (nodes with no seq) other than the wrapped ones generated here
+            for wonode in seq_beta[winode]:
+                sourced_edge = edge_map[winode, wonode]
+                k, onode = wonode
+                assert(k == 'OUTPUT')
+                unwrapped_edge_map[inode, onode] = sourced_edge
+                unwrapped_seq_map[inode].add(onode)
+                unwrapped_req_map[onode].add(inode)
 
     return declarative.Bunch(
         outputs_map = outputs_map,

@@ -264,23 +264,34 @@ class Mirror(
         rmapL = dict((k.i, [v.o]) for k, v in list(rmap.items()))
         rmapL.update((k.o, [v.i]) for k, v in list(rmap.items()))
 
+        #TODO these will have to be made symbolic compatible
+        R = 1 - self.T_hr - self.L_hr - self.R_backscatter
+        R_nonzero = np.any(R != 0)
+
+        T = self.T_hr - self.L_t
+        T_nonzero = np.any(T != 0)
+
         #direct couplings
         #TODO some of these may be excessive, need more test cases
         for port in self.ports_optical:
             for kfrom in ports_algorithm.port_update_get(port.i):
                 ports_algorithm.port_coupling_needed(port.o, kfrom)
-                ports_algorithm.port_coupling_needed(tmap[port].o, kfrom)
+                if T_nonzero:
+                    ports_algorithm.port_coupling_needed(tmap[port].o, kfrom)
                 if self._has_loss:
                     ports_algorithm.port_coupling_needed(lmap[port].o, kfrom)
-                ports_algorithm.port_coupling_needed(rmap[port].o, kfrom)
+                if R_nonzero:
+                    ports_algorithm.port_coupling_needed(rmap[port].o, kfrom)
                 if self.R_backscatter != 0:
                     ports_algorithm.port_coupling_needed(rBSmap[port].o, kfrom)
             for kto in ports_algorithm.port_update_get(port.o):
                 ports_algorithm.port_coupling_needed(port.i, kto)
-                ports_algorithm.port_coupling_needed(tmap[port].i, kto)
+                if T_nonzero:
+                    ports_algorithm.port_coupling_needed(tmap[port].i, kto)
                 if self._has_loss:
                     ports_algorithm.port_coupling_needed(lmap[port].i, kto)
-                ports_algorithm.port_coupling_needed(rmap[port].i, kto)
+                if R_nonzero:
+                    ports_algorithm.port_coupling_needed(rmap[port].i, kto)
                 if self.R_backscatter != 0:
                     ports_algorithm.port_coupling_needed(rBSmap[port].i, kto)
 
@@ -315,6 +326,11 @@ class Mirror(
         lT  = +self.symbols.math.sqrt(1 - L)
         r   = self.symbols.math.sqrt(R)
         rBS = self.symbols.math.sqrt(self.R_backscatter)
+
+        #TODO these will have to be made symbolic compatible
+        R_nonzero = np.any(R != 0)
+        T_nonzero = np.any(T != 0)
+        rBS_nonzero = np.any(self.R_backscatter != 0)
 
         if self.flip_sign:
             r   = -r
@@ -377,14 +393,15 @@ class Mirror(
         for port in self.ports_optical:
             mod_sign = mod_sign_map[port]
             for kfrom in matrix_algorithm.port_set_get(port.i):
-                pto, cplg = tmap[port]
-                matrix_algorithm.port_coupling_insert(
-                    port.i,
-                    kfrom,
-                    pto.o,
-                    kfrom,
-                    cplg,
-                )
+                if T_nonzero:
+                    pto, cplg = tmap[port]
+                    matrix_algorithm.port_coupling_insert(
+                        port.i,
+                        kfrom,
+                        pto.o,
+                        kfrom,
+                        cplg,
+                    )
 
                 if self._has_loss:
                     val = lmap.get(port, None)
@@ -412,22 +429,25 @@ class Mirror(
                     R_cplg   = R_cplg * self.symbols.math.exp(self.symbols.i * self.phase_rad.val)
                     R_cplgC  = R_cplgC * self.symbols.math.exp(-self.symbols.i * self.phase_rad.val)
 
-                modulations_fill_2optical_2classical(
-                    self.system,
-                    matrix_algorithm,
-                    port, kfrom,
-                    ptoOpt,
-                    self.Z.d.o,
-                    self.Z.F.i,
-                    R_cplg,
-                    R_cplgC,
-                    mod_sign * +self.symbols.i * index_coupling,
-                    mod_sign * -self.symbols.i * index_couplingC,
-                    mod_sign * force_coupling / self.symbols.c_m_s,
-                    mod_sign * force_couplingC / self.symbols.c_m_s,
-                )
+                #everything scales with Stdcplg, so don't run if there are no reflections
+                if R_nonzero:
+                    modulations_fill_2optical_2classical(
+                        system             = self.system,
+                        matrix_algorithm   = matrix_algorithm,
+                        pfrom              = port,
+                        kfrom              = kfrom,
+                        ptoOpt             = ptoOpt,
+                        in_port_classical  = self.Z.d.o,
+                        out_port_classical = self.Z.F.i,
+                        Stdcplg            = R_cplg,
+                        StdcplgC           = R_cplgC,
+                        CLcplg             = mod_sign * +self.symbols.i * index_coupling,
+                        CLcplgC            = mod_sign * -self.symbols.i * index_couplingC,
+                        BAcplg             = mod_sign * force_coupling / self.symbols.c_m_s,
+                        BAcplgC            = mod_sign * force_couplingC / self.symbols.c_m_s,
+                    )
 
-                if self.R_backscatter != 0:
+                if rBS_nonzero:
                     ptoOpt, R_cplgF  = rBSmap[port]
                     R_cplg   = R_cplgF
                     R_cplgC  = R_cplg
@@ -437,18 +457,19 @@ class Mirror(
                         R_cplgC  = R_cplgC * self.symbols.math.exp(-self.symbols.i * self.phase_rad.val)
 
                     modulations_fill_2optical_2classical(
-                        self.system,
-                        matrix_algorithm,
-                        port, kfrom,
-                        ptoOpt,
-                        self.Z.d.o,
-                        self.Z.F.i,
-                        R_cplg,
-                        R_cplgC,
-                        mod_sign * +self.symbols.i * index_coupling,
-                        mod_sign * -self.symbols.i * index_couplingC,
-                        mod_sign * force_coupling / self.symbols.c_m_s,
-                        mod_sign * force_couplingC / self.symbols.c_m_s,
+                        system             = self.system,
+                        matrix_algorithm   = matrix_algorithm,
+                        pfrom              = port,
+                        kfrom              = kfrom,
+                        ptoOpt             = ptoOpt,
+                        in_port_classical  = self.Z.d.o,
+                        out_port_classical = self.Z.F.i,
+                        Stdcplg            = R_cplg,
+                        StdcplgC           = R_cplgC,
+                        CLcplg             = mod_sign * +self.symbols.i * index_coupling,
+                        CLcplgC            = mod_sign * -self.symbols.i * index_couplingC,
+                        BAcplg             = mod_sign * force_coupling / self.symbols.c_m_s,
+                        BAcplgC            = mod_sign * force_couplingC / self.symbols.c_m_s,
                     )
 
         #to keep the matrix with loss ports unitary

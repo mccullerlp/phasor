@@ -364,7 +364,7 @@ class SystemSolver(object):
         #print("COUPLING_SIZE: ", len(coupling_matrix))
         #TODO TODO TODO Pre-purge the seq/req list to prevent unnecessary edge-matrix generation
         #this is somewhat done already since there are purged versions
-        solution_bunch = self.solver.push_solve_inplace(
+        solution_bunch = self.solver.inverse_solve_inplace(
             seq            = seq,
             req            = req,
             outputs_set    = outputs_set.union(self.matrix_algorithm.AC_out_all),
@@ -496,7 +496,7 @@ class SystemSolver(object):
 
         #TODO purging should no longer be necessary
         #print("PROPAGAGOR RUNNING: ", readout_set)
-        solution_bunch = self.solver.push_solve_inplace(
+        solution_bunch = self.solver.inverse_solve_inplace(
             seq            = seq,
             req            = req,
             outputs_set    = outputs_set,

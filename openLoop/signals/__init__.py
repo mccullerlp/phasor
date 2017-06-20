@@ -6,6 +6,7 @@ from .bases import (
 from .mixer import (
     Mixer,
     Modulator,
+    Harmonic2Generator,
 )
 
 from .signal_generator import (

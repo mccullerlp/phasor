@@ -83,7 +83,7 @@ class KVSpace(object):
         if self.frozen_is():
             for key in args:
                 if key not in self._key_set:
-                    raise RuntimeError("Cannot add keys to frozen key group")
+                    raise RuntimeError("Cannot add keys ({0}) to frozen key group".format(repr(key)))
         else:
             self._key_set.update(args)
         return

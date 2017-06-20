@@ -155,10 +155,10 @@ class Modulator(bases.SignalElementBase):
     def system_setup_coupling(self, matrix_algorithm):
         for kfrom1 in matrix_algorithm.port_set_get(self.In.i):
             freq_In = self.system.classical_frequency_extract(kfrom1)
-            freq_center_In = self.system.classical_frequency_extract_center(kfrom1[ports.ClassicalFreqKey])
-            if freq_center_In > 0:
+            freq_center_in = self.system.classical_frequency_extract_center(kfrom1[ports.ClassicalFreqKey])
+            if freq_center_in > 0:
                 cplg = self.symbols.math.exp(self.symbols.i * self.phase_rad.val)
-            elif freq_center_In < 0:
+            elif freq_center_in < 0:
                 cplg = self.symbols.math.exp(-self.symbols.i * self.phase_rad.val)
             else:
                 cplg = 1
@@ -217,12 +217,6 @@ class Modulator(bases.SignalElementBase):
 
 
 class Harmonic2Generator(bases.SignalElementBase):
-    @declarative.dproperty
-    def not_ready(self):
-        raise NotImplementedError("Can't instantiate since this class isn't fully implemented")
-
-    def harmonicN(self, val = 2):
-        return val
 
     @declarative.dproperty
     def In(self):
@@ -237,55 +231,70 @@ class Harmonic2Generator(bases.SignalElementBase):
             for kfrom2 in ports_algorithm.port_full_get(self.In.i):
                 f1 = kfrom1[ports.ClassicalFreqKey]
                 f2 = kfrom2[ports.ClassicalFreqKey]
-                f_new = self.harmonicN * f1 + f2
+                freq_center_f1 = self.system.classical_frequency_extract_center(f1)
+                freq_center_f2 = self.system.classical_frequency_extract_center(f2)
+                #make sure the frequencies have the same sign
+                if freq_center_f1 > 0:
+                    if freq_center_f2 < 0:
+                        continue
+                else:
+                    if freq_center_f2 > 0:
+                        continue
+                f_new = f1 + f2
+
                 if self.system.reject_classical_frequency_order(f_new):
                     continue
-                ports_algorithm.port_coupling_needed(self.R_I.o, ports.DictKey({ports.ClassicalFreqKey: f_new}))
-                ports_algorithm.port_coupling_needed(self.R_Q.o, ports.DictKey({ports.ClassicalFreqKey: f_new}))
+                ports_algorithm.port_coupling_needed(self.Out.o, ports.DictKey({ports.ClassicalFreqKey: f_new}))
+            for kto in ports_algorithm.port_full_get(self.Out.o):
+                f1 = kfrom1[ports.ClassicalFreqKey]
+                f2 = kto[ports.ClassicalFreqKey]
+                freq_center_f1 = self.system.classical_frequency_extract_center(f1)
+                freq_center_f2 = self.system.classical_frequency_extract_center(f2)
+                #make sure the frequencies have the same sign
+                if freq_center_f1 > 0:
+                    if freq_center_f2 < 0:
+                        continue
+                else:
+                    if freq_center_f2 > 0:
+                        continue
+                f_new = f2 - f2
+
+                if self.system.reject_classical_frequency_order(f_new):
+                    continue
+
+                ports_algorithm.port_coupling_needed(self.In.i, ports.DictKey({ports.ClassicalFreqKey: f_new}))
         return
 
     def system_setup_coupling(self, matrix_algorithm):
         #beware of combinatoric factors for high harmonics
 
         #so far copied from Mixer
-        for kfrom1 in matrix_algorithm.port_set_get(self.LO.i):
-            for kfrom2 in matrix_algorithm.port_set_get(self.I.i):
+        for kfrom1 in matrix_algorithm.port_set_get(self.In.i):
+            for kfrom2 in matrix_algorithm.port_set_get(self.In.i):
                 f1 = kfrom1[ports.ClassicalFreqKey]
                 f2 = kfrom2[ports.ClassicalFreqKey]
+                freq_center_f1 = self.system.classical_frequency_extract_center(f1)
+                freq_center_f2 = self.system.classical_frequency_extract_center(f2)
+                #make sure the frequencies have the same sign
+                if freq_center_f1 > 0:
+                    if freq_center_f2 < 0:
+                        continue
+                else:
+                    if freq_center_f2 > 0:
+                        continue
                 f_new = f1 + f2
+
                 if self.system.reject_classical_frequency_order(f_new):
                     continue
 
-                freq_LO = self.system.classical_frequency_extract(kfrom1)
                 kto = ports.DictKey({ports.ClassicalFreqKey: f_new})
 
-                if not f_new.DC_is():
-                    #TODO add inhomogenous term
-                    matrix_algorithm.nonlinear_triplet_insert(
-                        (self.LO.i,  kfrom1),
-                        (self.I.i,   kfrom2),
-                        (self.R_I.o, kto),
-                        1 / 2,
-                    )
-                    matrix_algorithm.nonlinear_triplet_insert(
-                        (self.LO.i,  kfrom1),
-                        (self.I.i,   kfrom2),
-                        (self.R_Q.o, kto),
-                        self.symbols.i * np.sign(freq_LO) / 2,
-                    )
-                else:
-                    #TODO add inhomogenous term
-                    matrix_algorithm.nonlinear_triplet_insert(
-                        (self.LO.i,  kfrom1),
-                        (self.I.i,   kfrom2),
-                        (self.R_I.o, kto),
-                        1 / 4,
-                    )
-                    matrix_algorithm.nonlinear_triplet_insert(
-                        (self.LO.i,  kfrom1),
-                        (self.I.i,   kfrom2),
-                        (self.R_Q.o, kto),
-                        self.symbols.i * np.sign(freq_LO) / 4,
-                    )
+                #TODO add inhomogenous term
+                matrix_algorithm.nonlinear_triplet_insert(
+                    (self.In.i,  kfrom1),
+                    (self.In.i,  kfrom2),
+                    (self.Out.o, kto),
+                    1,
+                )
         return
 

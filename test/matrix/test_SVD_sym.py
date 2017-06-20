@@ -8,7 +8,7 @@ import numpy as np
 
 #import numpy as np
 
-from openLoop.matrix import DAG_algorithm_sym
+from openLoop.matrix import DAG_algorithm
 from openLoop.matrix import SRE_matrix_algorithms
 from openLoop.utilities.print import pprint
 
