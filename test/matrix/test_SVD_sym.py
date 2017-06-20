@@ -20,7 +20,7 @@ from test_SVD import mfunc, mfunc_randargs, gen_rand_unitary
 def SVD_gen_check_sym(
     N = 10,
     length = 10,
-    solver = DAG_algorithm_sym,
+    solver = DAG_algorithm,
     benchmark = None,
     prevent_assert = False,
 ):
