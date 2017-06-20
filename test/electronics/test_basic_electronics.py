@@ -252,7 +252,7 @@ def test_bdVIR_AC():
     )
     sys.own.RAC1 = readouts.ACReadout(
         portD = sys.V1.V.i,
-        portN = sys.R1.I.o,
+        portN = sys.R1.ps_In.o,
     )
     test.assert_almost_equal(sys.RAC1.AC_sensitivity, 1 / 30)
 

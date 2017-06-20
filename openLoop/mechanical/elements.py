@@ -1,11 +1,11 @@
 """
-The zM_termination uses mechanical mobility in its calculations, folling the electrical/mechanical impedance analogy. In this case using mobility/admittance rather than impedance to preserve the mechanical topology.
+The zM_termination uses mechanical mobility in its calculations, folling the electrical/mechanical impedance analogy. ps_In this case using mobility/admittance rather than impedance to preserve the mechanical topology.
 
 https://en.wikipedia.org/wiki/Impedance_analogy
 https://en.wikipedia.org/wiki/Mobility_analogy
 
 This implementation is more interested in measuring displacements rather than velocities so that the DC term may be
-calculated. In the standard mobility analogy, current becomes force and voltage becomes velocity and admittance [I/V] is [kg/s]. This allows wave parameters to carry W as in the electrical case and the ports may be easily converted to vel and force. Displacement can be calculated as charge is, which requires knowing the DC force on all spring (capacitive) elements.
+calculated. ps_In the standard mobility analogy, current becomes force and voltage becomes velocity and admittance [ps_In/V] is [kg/s]. This allows wave parameters to carry W as in the electrical case and the ports may be easily converted to vel and force. Displacement can be calculated as charge is, which requires knowing the DC force on all spring (capacitive) elements.
 
 Instead this implementation uses a different convention, where voltage->displacement current->force. This means all of the wave parameters carry J and mobility is in units of [kg/s^2].
 

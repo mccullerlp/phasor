@@ -25,8 +25,8 @@ def pendulum_k(
     #FROM P930018 eq. 6
     T = mass_kg * 9.81
     Y = 200e9
-    I = np.pi * r_fiber_m**4 / 2
-    theta_pen = theta * N_wires * (T * Ymod * I)**.5 / (2 * mgl)
+    ps_In = np.pi * r_fiber_m**4 / 2
+    theta_pen = theta * N_wires * (T * Ymod * ps_In)**.5 / (2 * mgl)
     return k_pendL, theta_pen
 
 
@@ -513,7 +513,7 @@ class LIGOOutputBasic(base.SystemElementBase):
         )
         self.own.ASPD_AC = readouts.ACReadout(
             portN = self.ASPD.Wpd.o,
-            portD = LIGO_obj.actuate_DARM_h.In.i,
+            portD = LIGO_obj.actuate_DARM_h.ps_In.i,
         )
 
         self.OUTPUT_ATTACH_POINT = self.ASPD.po_Fr
@@ -560,40 +560,40 @@ class LIGOOutputHomodyne(base.SystemElementBase):
         )
         self.own.ASPDHD_AC_I = readouts.ACReadout(
             portN = self.ASPDHD.rtWpdI.o,
-            portD = LIGO_obj.actuate_DARM_h.In.i,
+            portD = LIGO_obj.actuate_DARM_h.ps_In.i,
         )
         self.own.ASPDHD_DC_Q = readouts.DCReadout(
             port = self.ASPDHD.rtWpdQ.o,
         )
         self.own.ASPDHD_AC_Q = readouts.ACReadout(
             portN = self.ASPDHD.rtWpdQ.o,
-            portD = LIGO_obj.actuate_DARM_h.In.i,
+            portD = LIGO_obj.actuate_DARM_h.ps_In.i,
         )
 
         self.own.ASPDHDm_AC = readouts.HomodyneACReadout(
             portNI = self.ASPDHD.rtWpdI.o,
             portNQ = self.ASPDHD.rtWpdQ.o,
-            portD = LIGO_obj.actuate_DARM_m.In.i,
+            portD = LIGO_obj.actuate_DARM_m.ps_In.i,
         )
         self.own.ASPDHD_AC = readouts.HomodyneACReadout(
             portNI = self.ASPDHD.rtWpdI.o,
             portNQ = self.ASPDHD.rtWpdQ.o,
-            portD = LIGO_obj.actuate_DARM_h.In.i,
+            portD = LIGO_obj.actuate_DARM_h.ps_In.i,
         )
         self.own.ASPDHDll_AC = readouts.HomodyneACReadout(
             portNI = self.ASPDHD_lossless.rtWpdI.o,
             portNQ = self.ASPDHD_lossless.rtWpdQ.o,
-            portD = LIGO_obj.actuate_DARM_h.In.i,
+            portD = LIGO_obj.actuate_DARM_h.ps_In.i,
         )
         self.own.qASPDHD_AC = readouts.HomodyneACReadout(
             portNI = self.ASPDHD.rtQuantumI.o,
             portNQ = self.ASPDHD.rtQuantumQ.o,
-            portD = LIGO_obj.actuate_DARM_h.In.i,
+            portD = LIGO_obj.actuate_DARM_h.ps_In.i,
         )
         self.own.qASPDHDll_AC = readouts.HomodyneACReadout(
             portNI = self.ASPDHD_lossless.rtQuantumI.o,
             portNQ = self.ASPDHD_lossless.rtQuantumQ.o,
-            portD = LIGO_obj.actuate_DARM_h.In.i,
+            portD = LIGO_obj.actuate_DARM_h.ps_In.i,
         )
 
         self.own.ASPD_DC = readouts.DCReadout(
@@ -601,11 +601,11 @@ class LIGOOutputHomodyne(base.SystemElementBase):
         )
         self.own.ASPD_AC = readouts.ACReadout(
             portN = self.ASPD.Wpd.o,
-            portD = LIGO_obj.actuate_DARM_h.In.i,
+            portD = LIGO_obj.actuate_DARM_h.ps_In.i,
         )
         self.own.ASPDm_AC = readouts.ACReadout(
             portN = self.ASPD.Wpd.o,
-            portD = LIGO_obj.actuate_DARM_m.In.i,
+            portD = LIGO_obj.actuate_DARM_m.ps_In.i,
         )
 
         #TODO add loss

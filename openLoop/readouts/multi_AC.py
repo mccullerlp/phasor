@@ -214,11 +214,11 @@ class MultiACReadoutView(ReadoutViewBase):
     @declarative.mproperty
     def AC_sensitivity_vec(self):
         phase_rad = self.phase_deg * np.pi / 180
-        I = self._AC_sensitivity(self.readout.portNI)
+        ps_In = self._AC_sensitivity(self.readout.portNI)
         Q = self._AC_sensitivity(self.readout.portNQ)
         return np.array([
-            np.cos(phase_rad) * I + np.sin(phase_rad) * Q,
-            -np.sin(phase_rad) * I + np.cos(phase_rad) * Q,
+            np.cos(phase_rad) * ps_In + np.sin(phase_rad) * Q,
+            -np.sin(phase_rad) * ps_In + np.cos(phase_rad) * Q,
         ])
 
     def _AC_sensitivity(self, portN):

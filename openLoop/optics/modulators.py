@@ -72,7 +72,7 @@ class PM(Optical2PortModulator):
 
     @declarative.mproperty
     def DrvFM(self):
-        return self.FM2PM.In
+        return self.FM2PM.ps_In
 
     @declarative.dproperty
     def FM2PM(self):
@@ -81,7 +81,7 @@ class PM(Optical2PortModulator):
 
     @declarative.dproperty
     def FM2PM_setup(self):
-        self.FM2PM.Out.bond(self.DrvPM)
+        self.FM2PM.ps_Out.bond(self.DrvPM)
         return
 
     def system_setup_coupling(self, matrix_algorithm):
@@ -177,7 +177,7 @@ class AMPM(
 
     @declarative.mproperty
     def DrvFM(self):
-        return self.FM2PM.In
+        return self.FM2PM.ps_In
 
     @declarative.dproperty
     def FM2PM(self):
@@ -186,7 +186,7 @@ class AMPM(
 
     @declarative.dproperty
     def FM2PM_setup(self):
-        self.FM2PM.Out.bond(self.DrvPM)
+        self.FM2PM.ps_Out.bond(self.DrvPM)
         return
 
     @declarative.mproperty

@@ -270,9 +270,9 @@ def householderREFL_ROW_OP(
     #for k, edge in u_vec.items():
     #    print("UVEC: ", k , edge[0])
 
-    #Q = I - 2 u * u^dagger / |u|**2
+    #Q = ps_In - 2 u * u^dagger / |u|**2
     #tau = |u|**2 / 2
-    #Q = I - u * u^dagger / tau
+    #Q = ps_In - u * u^dagger / tau
 
     fnode_edges = dict()
 
@@ -585,7 +585,7 @@ def reduceLU_sym(
     SRABE_SYM = None,
     **kwargs
 ):
-    #I'm not sure that I am thrilled about this 16x set breakdown that is currently required
+    #ps_In'm not sure that ps_In am thrilled about this 16x set breakdown that is currently required
     #to preserve edge_map separation
     seq, req, req_alpha, seq_beta, edge_map, = SRABE
     sym_seq, sym_req, sym_req_alpha, sym_seq_beta, sym_edge_map, = SRABE_SYM
@@ -1006,9 +1006,9 @@ def householderREFL_COL_OP(
     #for k, edge in u_vec.items():
     #    print("UVEC: ", k , edge[0])
 
-    #Q = I - 2 u * u^dagger / |u|**2
+    #Q = ps_In - 2 u * u^dagger / |u|**2
     #tau = |u|**2 / 2
-    #Q = I - u * u^dagger / tau
+    #Q = ps_In - u * u^dagger / tau
 
     fnode_edges = dict()
 

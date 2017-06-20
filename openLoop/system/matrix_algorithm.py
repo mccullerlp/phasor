@@ -314,7 +314,7 @@ class MatrixBuildAlgorithm(object):
         #now couple to all of the in-out pairs via virtual nodes for the subgraph detection
         for idx_inj, inj in enumerate(self.floating_in_out_func_pair_injlist):
             for idx, (ins, outs, func) in enumerate(inj.floating_in_out_func_pairs):
-                #I wish these were more abstract, but the deepcopy later
+                #ps_In wish these were more abstract, but the deepcopy later
                 #can mess with using the inj object itself. Could use str(inj) if debugging
                 vnode = (idx_inj, idx)
                 virtual_nodes.add(vnode)

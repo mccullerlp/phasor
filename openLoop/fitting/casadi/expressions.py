@@ -57,7 +57,7 @@ class FitterExpression(FitterBase):
     def expression_remapped(self):
         expr = self.expression
 
-        #type I
+        #type ps_In
         tlengths = []
         sbunches_w_trans = []
         for sbunch in self.symbol_map.sbunch_list:

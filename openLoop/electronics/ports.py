@@ -82,7 +82,7 @@ class ElectricalPort(ElectricalPortRaw, bases.SystemElementBase):
             self.system.bond_completion_raw(self, self.connection.pe_0, self)
             self.connection.pe_0.bond_completion()
             for idx, partner in enumerate(b_p_set):
-                #TODO not sure if I like the connection object not knowing who it is bound to
+                #TODO not sure if ps_In like the connection object not knowing who it is bound to
                 #maybe make a more explicit notification for the raw bonding
                 port = self.connection.ports_electrical[idx + 1]
                 #print("PORTSSS", port)

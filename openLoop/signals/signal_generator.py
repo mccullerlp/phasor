@@ -61,7 +61,7 @@ class SignalGenerator(bases.SignalElementBase):
 
     def __build__(self):
         super(SignalGenerator, self).__build__()
-        self.own.Out = ports.SignalOutPort(sname = 'Out')
+        self.own.ps_Out = ports.SignalOutPort(sname = 'ps_Out')
 
         for Hidx, gain in list(self.harmonic_gains.items()):
             #just to check that it is a number
@@ -75,11 +75,11 @@ class SignalGenerator(bases.SignalElementBase):
 
     def system_setup_ports_initial(self, ports_algorithm):
         ports_algorithm.coherent_sources_needed(
-            self.Out.o,
+            self.ps_Out.o,
             ports.DictKey({ports.ClassicalFreqKey: self.f_key}),
         )
         ports_algorithm.coherent_sources_needed(
-            self.Out.o,
+            self.ps_Out.o,
             ports.DictKey({ports.ClassicalFreqKey: -self.f_key}),
         )
         for Hidx, gain in list(self.harmonic_gains.items()):
@@ -105,12 +105,12 @@ class SignalGenerator(bases.SignalElementBase):
             cplg = 1
             cplgC = 1
         matrix_algorithm.coherent_sources_insert(
-            self.Out.o,
+            self.ps_Out.o,
             ports.DictKey({ports.ClassicalFreqKey: self.f_key}),
             cplg * self.amplitude,
         )
         matrix_algorithm.coherent_sources_insert(
-            self.Out.o,
+            self.ps_Out.o,
             ports.DictKey({ports.ClassicalFreqKey: -self.f_key}),
             cplgC * self.amplitudeC,
         )

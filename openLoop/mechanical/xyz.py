@@ -286,7 +286,7 @@ class XYZMomentDriver(elements.Mechanical1PortBase):
         L_ports = [self.L.X, self.L.Y, self.L.Z]
         d_vec = np.asarray(self.displacementXYZ)
 
-        I = np.eye(3)
+        ps_In = np.eye(3)
         dLsq = np.dot(d_vec, d_vec)
         d = dLsq**.5
         P_d = np.outer(d_vec, d_vec) / dLsq
@@ -298,7 +298,7 @@ class XYZMomentDriver(elements.Mechanical1PortBase):
         ]) / d
 
         P_torque = -P_force
-        I_sub = I - P_d
+        I_sub = ps_In - P_d
 
         #print("d_vec: ")
         #print(d_vec)
@@ -420,7 +420,7 @@ class MomentDriver(elements.Mechanical1PortBase):
         d_vec = np.array(self.displacementXYZ)
         v_vec = np.array(self.driveXYZ)
 
-        I = np.eye(3)
+        ps_In = np.eye(3)
         dLsq = np.dot(d_vec, d_vec)
         vLsq = np.dot(v_vec, v_vec)
 
@@ -447,7 +447,7 @@ class MomentDriver(elements.Mechanical1PortBase):
 
         P_ff = np.dot(P_force, P_force.T)
         P_X = P_d + P_vp
-        I_sub = I - P_d
+        I_sub = ps_In - P_d
 
         def matrix_inject(ports1, ports2, matrix):
             for idx1, port1 in enumerate(ports1):
@@ -474,7 +474,7 @@ class MomentDriver(elements.Mechanical1PortBase):
         #may need to sqrt the 1-r**2
         matrix_inject(A_ports, A_ports,  np.array([[(1-r**2)**.5 * d**2/den]]))
         matrix_inject(B_ports, B_ports, d**2/den * P_vNvnD + P_FT)
-        matrix_inject(L_ports, L_ports, (2-d**2)/den * P_FT + (I - P_FT))
+        matrix_inject(L_ports, L_ports, (2-d**2)/den * P_FT + (ps_In - P_FT))
 
         matrix_inject(A_ports, L_ports, 2*d/den * P_torque)
         matrix_inject(L_ports, A_ports, 2*d/den * P_force)

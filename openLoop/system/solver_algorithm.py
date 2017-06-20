@@ -34,7 +34,7 @@ def setdict_copy(orig):
 
 class SystemSolver(object):
     field_space_proto = KVSpace('ports', dtype=np.complex128)
-    #TODO, I loath how the iterative state is stored for this object, clean it up...
+    #TODO, ps_In loath how the iterative state is stored for this object, clean it up...
 
     #TODO make this take ctree
     def __init__(

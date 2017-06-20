@@ -68,10 +68,10 @@ def gensys(
         L_m = 1,
         #L_detune_m = 1064e-9 / 4,
     )
-    sys.bond(sled.mix_LO.Out, sled.mixer.LO)
-    sys.bond(sled.PD2.Wpd,   sled.mixer.I)
-    #sys.link(sled.mixer.R_I, sled.mixerIRMS.I)
-    #sys.link(sled.mixer.R_Q, sled.mixerQRMS.I)
+    sys.bond(sled.mix_LO.ps_Out, sled.mixer.LO)
+    sys.bond(sled.PD2.Wpd,   sled.mixer.ps_In)
+    #sys.link(sled.mixer.ps_R_I, sled.mixerIRMS.ps_In)
+    #sys.link(sled.mixer.ps_R_Q, sled.mixerQRMS.ps_In)
 
     sys.bond_sequence(
         sled.laser_upper.po_Fr,
@@ -86,13 +86,13 @@ def gensys(
 
     sled.own.PD1_DC       = readouts.DCReadout(port = sled.PD1.Wpd.o)
     sled.own.PD2_DC       = readouts.DCReadout(port = sled.PD2.Wpd.o)
-    sled.own.PD1_MIX_I    = readouts.DCReadout(port = sled.mixer.R_I.o)
-    sled.own.PD1_MIX_Q    = readouts.DCReadout(port = sled.mixer.R_Q.o)
+    sled.own.PD1_MIX_I    = readouts.DCReadout(port = sled.mixer.ps_R_I.o)
+    sled.own.PD1_MIX_Q    = readouts.DCReadout(port = sled.mixer.ps_R_Q.o)
     #sled.own.PD1_MIX_IRMS = readouts.DCReadout(port = sled.mixerIRMS.RMS.o)
     #sled.own.PD1_MIX_QRMS = readouts.DCReadout(port = sled.mixerQRMS.RMS.o)
     sled.own.PD1_AC       = readouts.NoiseReadout(portN = sled.PD1.Wpd.o)
-    sled.own.PD1_MIX_I_N  = readouts.NoiseReadout(portN = sled.mixer.R_I.o)
-    sled.own.PD1_MIX_Q_N  = readouts.NoiseReadout(portN = sled.mixer.R_Q.o)
+    sled.own.PD1_MIX_I_N  = readouts.NoiseReadout(portN = sled.mixer.ps_R_I.o)
+    sled.own.PD1_MIX_Q_N  = readouts.NoiseReadout(portN = sled.mixer.ps_R_Q.o)
     return declarative.Bunch(locals())
 
 def test_cyclostationary():
@@ -129,8 +129,8 @@ def test_cyclostationary():
     np_test.assert_almost_equal(sys.PD1_MIX_Q_N.CSD['R', 'R'] / N_expect, 1, 2)
     #print("DC1_MIX_Q_RMS",  sys.PD1_MIX_QRMS.DC_readout)
     #sol.coupling_matrix_print(select_to = b.sled.mixerIRMS.RMS.o)
-    sys.solution.solution_vector_print(select_to = b.sled.mixer.R_I.o)
-    sys.solution.solution_vector_print(select_to = b.sled.mixer.R_Q.o)
+    sys.solution.solution_vector_print(select_to = b.sled.mixer.ps_R_I.o)
+    sys.solution.solution_vector_print(select_to = b.sled.mixer.ps_R_Q.o)
 
     #TODO isolate this test
     #from openLoop.system_graphs import (
@@ -153,24 +153,24 @@ def test_cyclostationary():
     ##print("Active: ")
     ##lprint(gdata.active)
 
-    #sys.coupling_matrix_print(select_to = b.sled.mixer.R_Q.o)
+    #sys.coupling_matrix_print(select_to = b.sled.mixer.ps_R_Q.o)
 
     #sys.coupling_matrix_inv_print(
-    #    select_to = b.sled.mixer.R_I.o,
+    #    select_to = b.sled.mixer.ps_R_I.o,
     #    select_from = b.sled.laser_upper.po_Fr.o,
     #)
     #sys.coupling_matrix_inv_print(
-    #    select_to = b.sled.mixer.R_I.o,
+    #    select_to = b.sled.mixer.ps_R_I.o,
     #    select_from = b.sled.laser_lower.po_Fr.o,
     #)
 
     #print()
     #sys.coupling_matrix_inv_print(
-    #    select_to = b.sled.mixer.R_Q.o,
+    #    select_to = b.sled.mixer.ps_R_Q.o,
     #    select_from = b.sled.laser_upper.po_Fr.o,
     #)
     #sys.coupling_matrix_inv_print(
-    #    select_to = b.sled.mixer.R_Q.o,
+    #    select_to = b.sled.mixer.ps_R_Q.o,
     #    select_from = b.sled.laser_lower.po_Fr.o,
     #)
 

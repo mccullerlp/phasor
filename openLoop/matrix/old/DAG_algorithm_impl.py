@@ -419,9 +419,9 @@ def householderREFL_ROW_OP(
     #for k, edge in u_vec.items():
     #    print("UVEC: ", k , edge[0])
 
-    #Q = I - 2 u * u^dagger / |u|**2
+    #Q = ps_In - 2 u * u^dagger / |u|**2
     #tau = |u|**2 / 2
-    #Q = I - u * u^dagger / tau
+    #Q = ps_In - u * u^dagger / tau
 
     fnode_edges = dict()
 
@@ -534,9 +534,9 @@ def householderREFL_COL_OP(
     #for k, edge in u_vec.items():
     #    print("UVEC: ", k , edge[0])
 
-    #Q = I - 2 u * u^dagger / |u|**2
+    #Q = ps_In - 2 u * u^dagger / |u|**2
     #tau = |u|**2 / 2
-    #Q = I - u * u^dagger / tau
+    #Q = ps_In - u * u^dagger / tau
 
     fnode_edges = dict()
 

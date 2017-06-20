@@ -36,7 +36,7 @@ class PDTransimpedance(electronics.ElectricalElementBase):
             terminal = self.amp.out,
         )
         self.own.VOutTrans_AC = readouts.ACReadout(
-            portD = self.PD.I.i,
+            portD = self.PD.ps_In.i,
             portN = self.VOutTrans.V.o,
         )
 

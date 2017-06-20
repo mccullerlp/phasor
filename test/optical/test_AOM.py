@@ -90,7 +90,7 @@ def test_AOMBasic():
         F         = sys.F_LO2,
         amplitude = 1,
     )
-    sys.test.aom.Drv.bond(sys.LO2.Out)
+    sys.test.aom.Drv.bond(sys.LO2.ps_Out)
 
     db = sys.ctree_shadow()
 

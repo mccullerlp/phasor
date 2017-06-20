@@ -194,7 +194,7 @@ class projectI(sympy.Function):
 #        idx = 0
 #        while idx < len(factors):
 #            pe_A = sympy.Wild('pe_A')
-#            phasor = sympy.exp(sympy.I * pe_A)
+#            phasor = sympy.exp(sympy.ps_In * pe_A)
 #            if factors[idx].match(phasor):
 #                factors.pop(idx)
 #            else:
@@ -215,7 +215,7 @@ class OpticalSystemSympy(OpticalSystem):
     c_m_s         = sympy.var('c', real = True, positive = True)
     lambda_m      = sympy.var('lambda', real = True, positive = True)
     pi            = sympy.pi
-    i             = sympy.I
+    i             = sympy.ps_In
     math          = sympy
     project_re    = projectR
     project_im    = projectI
@@ -384,9 +384,9 @@ class OpticalSystemSympy(OpticalSystem):
                                     return True
                                 elif sympy.sympify(coeff_a_cc + coeff_b).is_zero:
                                     if choose_fewer_conjugates(coeff_a * value_a, coeff_a_cc * value_a_cc):
-                                        b.total += 2 * self.I * self.project_im(coeff_a * value_a)
+                                        b.total += 2 * self.ps_In * self.project_im(coeff_a * value_a)
                                     else:
-                                        b.total += -2 * self.I * self.project_im(coeff_a_cc * value_a_cc)
+                                        b.total += -2 * self.ps_In * self.project_im(coeff_a_cc * value_a_cc)
                                     return True
                                 return False
 

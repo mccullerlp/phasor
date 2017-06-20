@@ -103,6 +103,34 @@ class ACReadout(base.SystemElementBase):
         return N_tot / D_tot
 
     @decl.mproperty
+    def AC_sensitivityCL(self):
+        pk_NP = (self.portN, self.keyP)
+        pk_NN = (self.portN, self.keyN)
+
+        pk_DrP = (self.portDrv, self.keyP)
+        pk_DrN = (self.portDrv, self.keyN)
+
+        cbunch = self.system.solution.coupling_solution_get(
+            drive_set = self.port_set,
+            readout_set = self.port_set,
+        )
+
+        coupling_matrix_inv = cbunch.coupling_matrix_inv
+
+        #print("PP", coupling_matrix_inv.get((pk_DrP, pk_NP), 0))
+        #print("NN", coupling_matrix_inv.get((pk_DrN, pk_NP), 0))
+        #print("PN", coupling_matrix_inv.get((pk_DrP, pk_NN), 0))
+        #print("NN", coupling_matrix_inv.get((pk_DrN, pk_NN), 0))
+        N_tot = (
+            + coupling_matrix_inv.get((pk_DrP, pk_NP), 0)
+            + coupling_matrix_inv.get((pk_DrN, pk_NP), 0)
+            #+ coupling_matrix_inv.get((pk_DrP, pk_NN), 0)
+            #+ coupling_matrix_inv.get((pk_DrN, pk_NN), 0)
+        )
+        return N_tot
+
+
+    @decl.mproperty
     def AC_noise_limited_sensitivity(self):
         return self.AC_ASD / abs(self.AC_sensitivity)
 

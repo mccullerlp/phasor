@@ -36,12 +36,12 @@ class TransferFunctionSISOBase(SignalElementBase):
         return val
 
     @declarative.dproperty
-    def In(self):
-        return ports.SignalInPort(pchain = lambda : self.Out)
+    def ps_In(self):
+        return ports.SignalInPort(pchain = lambda : self.ps_Out)
 
     @declarative.dproperty
-    def Out(self):
-        return ports.SignalOutPort(pchain = lambda : self.In)
+    def ps_Out(self):
+        return ports.SignalOutPort(pchain = lambda : self.ps_In)
 
     def filter_func(self, freq):
         return 0
@@ -56,26 +56,26 @@ class TransferFunctionSISOBase(SignalElementBase):
         return xfer
 
     def system_setup_ports(self, ports_algorithm):
-        for kfrom in ports_algorithm.port_update_get(self.In.i):
+        for kfrom in ports_algorithm.port_update_get(self.ps_In.i):
             if abs(self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey])) > self.F_cutoff:
                 continue
             if abs(self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey])) < self.F_cutoff_low:
                 continue
             if self.no_DC and self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey]) == 0:
                 continue
-            ports_algorithm.port_coupling_needed(self.Out.o, kfrom)
-        for kto in ports_algorithm.port_update_get(self.Out.o):
+            ports_algorithm.port_coupling_needed(self.ps_Out.o, kfrom)
+        for kto in ports_algorithm.port_update_get(self.ps_Out.o):
             if abs(self.system.classical_frequency_extract_center(kto[ports.ClassicalFreqKey])) > self.F_cutoff:
                 continue
             if abs(self.system.classical_frequency_extract_center(kto[ports.ClassicalFreqKey])) < self.F_cutoff_low:
                 continue
             if self.no_DC and self.system.classical_frequency_extract_center(kto[ports.ClassicalFreqKey]) == 0:
                 continue
-            ports_algorithm.port_coupling_needed(self.In.i, kto)
+            ports_algorithm.port_coupling_needed(self.ps_In.i, kto)
         return
 
     def system_setup_coupling(self, matrix_algorithm):
-        for kfrom in matrix_algorithm.port_set_get(self.In.i):
+        for kfrom in matrix_algorithm.port_set_get(self.ps_In.i):
             F_center_Hz = self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey])
             if abs(F_center_Hz) > self.F_cutoff:
                 continue
@@ -86,9 +86,9 @@ class TransferFunctionSISOBase(SignalElementBase):
             freq = self.system.classical_frequency_extract(kfrom)
             pgain = self.filter_func_run(freq)
             matrix_algorithm.port_coupling_insert(
-                self.In.i,
+                self.ps_In.i,
                 kfrom,
-                self.Out.o,
+                self.ps_Out.o,
                 kfrom,
                 pgain,
             )

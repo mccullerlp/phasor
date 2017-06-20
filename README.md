@@ -15,7 +15,7 @@ After reading the features, it is easiest to dive in to some examples before con
 ## Features
 
 ### General
- * Numerical values are duck-typed. This allows numpy broadcasting. In particular this allows simulating many parameters simultaneously by using a an array for the parameter value. These parameters could be things like the sideband frequency for noise analysis, the nonlinear gain in a crystal. 2d array parameter sweeps are also possible.
+ * Numerical values are duck-typed. This allows numpy broadcasting. ps_In particular this allows simulating many parameters simultaneously by using a an array for the parameter value. These parameters could be things like the sideband frequency for noise analysis, the nonlinear gain in a crystal. 2d array parameter sweeps are also possible.
  
  * Configuration management! Using the declarative library, all (in principle) configurable parameters are stored in a heirarchical dictionary. This allows easy modification of even deep components. It also hooks into the fitting system and can be used to archive simulations by parameters for comparison (see declarative.HDFDeepBunch).
  

@@ -44,7 +44,7 @@ class VCOTest(signals.SignalElementBase):
     @declarative.dproperty
     def AC_I(self, val = None):
         val = readouts.ACReadout(
-            portN = self.mix.R_I.o,
+            portN = self.mix.ps_R_I.o,
             portD  = self.modulate.Mod_amp.i,
         )
         return val
@@ -52,7 +52,7 @@ class VCOTest(signals.SignalElementBase):
     @declarative.dproperty
     def AC_IQ(self, val = None):
         val = readouts.ACReadout(
-            portN = self.mix.R_Q.o,
+            portN = self.mix.ps_R_Q.o,
             portD  = self.modulate.Mod_amp.i,
         )
         return val
@@ -60,7 +60,7 @@ class VCOTest(signals.SignalElementBase):
     @declarative.dproperty
     def AC_QI(self, val = None):
         val = readouts.ACReadout(
-            portN = self.mix.R_Q.o,
+            portN = self.mix.ps_R_Q.o,
             portD  = self.modulate.Mod_amp.i,
         )
         return val
@@ -68,19 +68,19 @@ class VCOTest(signals.SignalElementBase):
     @declarative.dproperty
     def AC_Q(self, val = None):
         val = readouts.ACReadout(
-            portN = self.mix.R_Q.o,
+            portN = self.mix.ps_R_Q.o,
             portD  = self.modulate.Mod_phase.i,
         )
         return val
 
     def __build__(self):
         super(VCOTest, self).__build__()
-        self.generate.Out.bond(
-            self.modulate.In,
+        self.generate.ps_Out.bond(
+            self.modulate.ps_In,
         )
-        self.mix.LO.bond(self.generate.Out)
-        self.modulate.Out.bond(
-            self.mix.I,
+        self.mix.LO.bond(self.generate.ps_Out)
+        self.modulate.ps_Out.bond(
+            self.mix.ps_In,
         )
 
 

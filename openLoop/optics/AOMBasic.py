@@ -33,7 +33,7 @@ class AOMBasic(
     def Drv_Pwr(self):
         from .. import signals
         return signals.MeanSquareMixer(
-            I = self.Drv,
+            ps_In = self.Drv,
         )
 
     @declarative.mproperty

@@ -13,7 +13,7 @@ class ComplexBeamParam(object):
     All distances should be in the same units as the wavelength.
     """
     pi = np.pi
-    I = 1j
+    ps_In = 1j
     complex = Complex
     nominal_wavelen = 1.064e-6
     gouy_phasor = 1
@@ -43,7 +43,7 @@ class ComplexBeamParam(object):
             wavelen = cls.nominal_wavelen
         ZR = cls.pi*W0**2/wavelen
         return cls(
-            Z + cls.I*ZR,
+            Z + cls.ps_In*ZR,
             wavelen = wavelen,
             gouy_phasor = gouy_phasor,
         )
@@ -57,7 +57,7 @@ class ComplexBeamParam(object):
             gouy_phasor = None,
     ):
         return cls(
-            Z + cls.I*ZR,
+            Z + cls.ps_In*ZR,
             wavelen = wavelen,
             gouy_phasor = gouy_phasor,
         )
@@ -154,7 +154,7 @@ class ComplexBeamParam(object):
         return (
             (self.value * other.value.conjugate()) / (other.value.conjugate() - self.value)
             * (2 * self.wavelen / (other.W * self.W * self.pi))
-        ) * -self.I
+        ) * -self.ps_In
 
     def __str__(self):
         if self.R_inv != 0:

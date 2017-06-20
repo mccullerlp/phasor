@@ -75,12 +75,12 @@ class CurrentReadout(readouts.DCReadout, elements.ElectricalElementBase):
         return port
 
     @decl.dproperty
-    def I(self):
-        return ports.SignalOutPort(sname = 'I')
+    def ps_In(self):
+        return ports.SignalOutPort(sname = 'ps_In')
 
     @decl.dproperty
     def port(self):
-        return self.I.o
+        return self.ps_In.o
 
     def system_setup_ports(self, ports_algorithm):
         #TODO hackish, need better system support for binding
@@ -88,8 +88,8 @@ class CurrentReadout(readouts.DCReadout, elements.ElectricalElementBase):
         ports = [self.terminal.i, self.terminal.o]
         for port1 in ports:
             #for kfrom in ports_algorithm.port_update_get(port1):
-            #    ports_algorithm.port_coupling_needed(self.I.o, kfrom)
-            for kto in ports_algorithm.port_update_get(self.I.o):
+            #    ports_algorithm.port_coupling_needed(self.ps_In.o, kfrom)
+            for kto in ports_algorithm.port_update_get(self.ps_In.o):
                 ports_algorithm.port_coupling_needed(port1, kto)
         return
 
@@ -106,7 +106,7 @@ class CurrentReadout(readouts.DCReadout, elements.ElectricalElementBase):
                 matrix_algorithm.port_coupling_insert(
                     port,
                     kfrom,
-                    self.I.o,
+                    self.ps_In.o,
                     kfrom,
                     direction_cplg * pcplg,
                 )

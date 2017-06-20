@@ -7,19 +7,19 @@ This makes for example the following workflow possible:
 
 .. sourcecode:: ipython
 
-   In [1]: %load_ext autoreload
+   ps_In [1]: %load_ext autoreload
 
-   In [2]: %autoreload 2
+   ps_In [2]: %autoreload 2
 
-   In [3]: from foo import some_function
+   ps_In [3]: from foo import some_function
 
-   In [4]: some_function()
-   Out[4]: 42
+   ps_In [4]: some_function()
+   ps_Out[4]: 42
 
-   In [5]: # open foo.py in an editor and change some_function to return 43
+   ps_In [5]: # open foo.py in an editor and change some_function to return 43
 
-   In [6]: some_function()
-   Out[6]: 43
+   ps_In [6]: some_function()
+   ps_Out[6]: 43
 
 The module was reloaded without reloading it explicitly, and the object
 imported with ``from foo import ...`` was also updated.

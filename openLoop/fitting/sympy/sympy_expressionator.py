@@ -214,7 +214,7 @@ class SympyExpressionGenerator(object):
             func_vars_to_selfname[func] = "self._m.{0}".format(name)
 
         def hypersubs(expr):
-            expr = expr.subs(sympy.I, sympy.var('1j'))
+            expr = expr.subs(sympy.ps_In, sympy.var('1j'))
             for func, name in list(func_vars_to_selfname.items()):
                 expr = expr.replace(func, sympy.var(name))
             for var, name in list(expr_vars_to_selfname.items()):

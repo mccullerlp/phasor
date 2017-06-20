@@ -27,8 +27,8 @@ def test_Xfer():
         gain    = 1,
     )
     sys.own.R1 = readouts.ACReadout(
-        portN = sys.X1.Out.o,
-        portD = sys.X1.In.i,
+        portN = sys.X1.ps_Out.o,
+        portD = sys.X1.ps_In.i,
     )
     compare = 1/(1 + 1j*sys.F_AC.F_Hz.val)
     np_test.assert_almost_equal(sys.R1.AC_sensitivity / compare, 1)
@@ -49,8 +49,8 @@ def test_XFer_fit():
         gain    = 1.1,
     )
     sys.own.R1 = readouts.ACReadout(
-        portN = sys.X1.Out.o,
-        portD = sys.X1.In.i,
+        portN = sys.X1.ps_Out.o,
+        portD = sys.X1.ps_In.i,
     )
 
     size = len(sys.R1.F_Hz.val)

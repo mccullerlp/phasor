@@ -69,9 +69,9 @@ class HomodyneACReadoutBase(base.SystemElementBase):
     def AC_PSD_by_source(self):
         eachCSD = dict()
         for nobj, subCSD in list(self.noise.CSD_by_source.items()):
-            II = subCSD['I', 'I']
-            IQ = subCSD['I', 'Q']
-            QI = subCSD['Q', 'I']
+            II = subCSD['ps_In', 'ps_In']
+            IQ = subCSD['ps_In', 'Q']
+            QI = subCSD['Q', 'ps_In']
             QQ = subCSD['Q', 'Q']
             arr = np_roll_2D_mat_back(
                 np.array(
@@ -100,9 +100,9 @@ class HomodyneACReadoutBase(base.SystemElementBase):
 
     @declarative.mproperty
     def AC_CSD_IQ_back(self):
-        II = self.noise.CSD['I', 'I']
-        IQ = self.noise.CSD['I', 'Q']
-        QI = self.noise.CSD['Q', 'I']
+        II = self.noise.CSD['ps_In', 'ps_In']
+        IQ = self.noise.CSD['ps_In', 'Q']
+        QI = self.noise.CSD['Q', 'ps_In']
         QQ = self.noise.CSD['Q', 'Q']
         arr = np_roll_2D_mat_back(
             np.array(
@@ -160,7 +160,7 @@ class HomodyneACReadoutBase(base.SystemElementBase):
         Imin           = NIQ[0, 0] - abs(NIQ[1, 0])**2 / NIQ[1, 1]
         Qmin           = NIQ[1, 1] - abs(NIQ[1, 0])**2 / NIQ[0, 0]
         return declarative.Bunch(
-            I    = self.AC_CSD_IQ[0, 0],
+            ps_In    = self.AC_CSD_IQ[0, 0],
             Q    = self.AC_CSD_IQ[1, 1],
             IQ   = self.AC_CSD_IQ[0, 1],
             min  = min_eig,
@@ -272,11 +272,11 @@ class HomodyneACReadoutBase(base.SystemElementBase):
     @declarative.mproperty
     def AC_sensitivity_IQ(self):
         phase_rad = self.phase_deg * np.pi / 180
-        I = self._AC_sensitivity(self.portNI)
+        ps_In = self._AC_sensitivity(self.portNI)
         Q = self._AC_sensitivity(self.portNQ)
         return np.array([
-            np.cos(phase_rad) * I + np.sin(phase_rad) * Q,
-            -np.sin(phase_rad) * I + np.cos(phase_rad) * Q,
+            np.cos(phase_rad) * ps_In + np.sin(phase_rad) * Q,
+            -np.sin(phase_rad) * ps_In + np.cos(phase_rad) * Q,
         ])
 
     @declarative.mproperty
@@ -322,7 +322,7 @@ class HomodyneNoiseReadout(noise.NoiseReadout):
 
         super(HomodyneNoiseReadout, self).__init__(
             port_map = dict(
-                I = self.portNI,
+                ps_In = self.portNI,
                 Q = self.portNQ,
             ),
             **kwargs

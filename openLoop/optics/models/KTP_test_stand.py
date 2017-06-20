@@ -347,10 +347,10 @@ class OPOTestStandResonant(optics.OpticalCouplerBase):
         self.own.EOM = optics.PM()
 
         self.own.ditherPM = optics.PM()
-        self.ditherPM.Drv.bond(self.generateF_PM.Out)
+        self.ditherPM.Drv.bond(self.generateF_PM.ps_Out)
 
         self.own.ditherPMRead = optics.PM()
-        self.ditherPMRead.Drv.bond(self.generateF_PMRead.Out)
+        self.ditherPMRead.Drv.bond(self.generateF_PMRead.ps_Out)
 
         self.own.faraday = optics.OpticalCirculator(
             N_ports = 3,

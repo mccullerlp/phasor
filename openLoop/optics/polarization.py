@@ -389,7 +389,7 @@ class UnmountedQuarterWavePlate(WavePlate):
     def __init__(self, **kwargs):
         super(UnmountedQuarterWavePlate, self).__init__(
             cplgS  = 1,
-            cplgP  = 1j,  # #TODO, use global/system I
+            cplgP  = 1j,  # #TODO, use global/system ps_In
             **kwargs
         )
 

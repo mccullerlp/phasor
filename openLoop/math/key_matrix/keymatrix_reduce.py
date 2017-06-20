@@ -117,7 +117,7 @@ def SCC_reduce(scc):
     #also for indexing
     loop_edges = loop_edges + loop_edges
 
-    #so that I don't have to have tricky indexing later
+    #so that ps_In don't have to have tricky indexing later
     loop_seq = loop_seq + loop_seq
     #now pop the loop
     if not non_commutative:

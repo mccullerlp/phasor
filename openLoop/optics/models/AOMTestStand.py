@@ -29,10 +29,10 @@ class VCO(optics.OpticalCouplerBase):
 
     def __build__(self):
         super(VCO, self).__build__()
-        self.generate.Out.bond(
-            self.modulate.In,
+        self.generate.ps_Out.bond(
+            self.modulate.ps_In,
         )
-        self.Out = self.modulate.Out
+        self.ps_Out = self.modulate.ps_Out
 
 
 class AOM2VCO(optics.OpticalCouplerBase):
@@ -41,11 +41,11 @@ class AOM2VCO(optics.OpticalCouplerBase):
     def __build__(self):
         super(AOM2VCO, self).__build__()
         self.AOM1.Drv.bond(
-            self.VCO_AOM1.Out,
+            self.VCO_AOM1.ps_Out,
         )
         if self.VCO2_use:
             self.VCO_AOM1.modulate.Mod_amp.bond(
-                self.VCO_AOM2.Out
+                self.VCO_AOM2.ps_Out
             )
         self.po_Fr = self.AOM1.po_FrA
         self.po_Bk = self.AOM1.po_BkB
@@ -99,11 +99,11 @@ class AOM2VCOBasic(optics.OpticalCouplerBase):
     def __build__(self):
         super(AOM2VCOBasic, self).__build__()
         self.AOM1.Drv.bond(
-            self.VCO_AOM1.Out,
+            self.VCO_AOM1.ps_Out,
         )
         if self.VCO2_use:
             self.VCO_AOM1.modulate.Mod_amp.bond(
-                self.VCO_AOM2.Out
+                self.VCO_AOM2.ps_Out
             )
         self.po_Fr = self.AOM1.po_Fr
         self.po_Bk = self.AOM1.po_Bk
@@ -259,11 +259,11 @@ class AOM2VCOTestStand(optics.OpticalCouplerBase):
             self.aoms.po_Fr,
         )
         if self.VCO2_use:
-            self.mix.LO.bond(self.aoms.VCO_AOM2.Out)
-        self.PD_R.Wpd.bond(self.mix.I)
+            self.mix.LO.bond(self.aoms.VCO_AOM2.ps_Out)
+        self.PD_R.Wpd.bond(self.mix.ps_In)
 
         self.own.DC_RR = readouts.DCReadout(
-            port = self.mix.R_I.o,
+            port = self.mix.ps_R_I.o,
         )
 
         self.aoms.po_Bk.bond_sequence(
@@ -297,7 +297,7 @@ class AOMTestStand(optics.OpticalCouplerBase):
         self.own.aom = optics.AOM(
             N_ode = 100,
         )
-        self.aom.Drv.bond(self.LO.Out)
+        self.aom.Drv.bond(self.LO.ps_Out)
 
         self.PSL.po_Fr.bond_sequence(
             self.aom.po_FrA,
@@ -334,7 +334,7 @@ class AOMTestStandBasic(optics.OpticalCouplerBase):
         )
 
         self.own.aom = optics.AOMBasic()
-        self.aom.Drv.bond(self.LO.Out)
+        self.aom.Drv.bond(self.LO.ps_Out)
 
         self.PSL.po_Fr.bond_sequence(
             self.aom.po_Fr,
