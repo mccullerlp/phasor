@@ -113,6 +113,20 @@ class Modulator(bases.SignalElementBase):
         return ports.SignalInPort()
 
     @declarative.dproperty
+    def Mod_freq(self):
+        return self.FM2PM.In
+
+    @declarative.dproperty
+    def FM2PM(self):
+        from .. import signals
+        return signals.Integrator()
+
+    @declarative.dproperty
+    def FM2PM_setup(self):
+        self.FM2PM.Out.bond(self.Mod_phase)
+        return
+
+    @declarative.dproperty
     def Out(self):
         return ports.SignalOutPort()
 

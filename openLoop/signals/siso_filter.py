@@ -76,11 +76,12 @@ class TransferFunctionSISOBase(SignalElementBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         for kfrom in matrix_algorithm.port_set_get(self.In.i):
-            if abs(self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey])) > self.F_cutoff:
+            F_center_Hz = self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey])
+            if abs(F_center_Hz) > self.F_cutoff:
                 continue
-            if abs(self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey])) < self.F_cutoff_low:
+            if abs(F_center_Hz) < self.F_cutoff_low:
                 continue
-            if self.no_DC and self.system.classical_frequency_extract_center(kfrom[ports.ClassicalFreqKey]) == 0:
+            if self.no_DC and F_center_Hz == 0:
                 continue
             freq = self.system.classical_frequency_extract(kfrom)
             pgain = self.filter_func_run(freq)
@@ -113,7 +114,7 @@ class TransferFunctionSISO(TransferFunctionSISOBase):
 class Integrator(TransferFunctionSISOBase):
     def filter_func(self, freq):
         freq = np.asarray(freq)
-        return 1/freq
+        return 1/(-1j * freq)
 
     @declarative.dproperty
     def no_DC(self, val = True):

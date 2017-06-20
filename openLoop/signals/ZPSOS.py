@@ -231,6 +231,7 @@ class SRationalFilter(SZPCascade):
             return val
 
     def filter_func(self, freq):
+        #print("FREQ: ", self, freq)
         pre = self.gain.val
         if self.delay_s.val is not None:
             pre *= self.symbols.math.exp(self.symbols.i2pi * freq * self.delay_s.val)

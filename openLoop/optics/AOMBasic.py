@@ -189,7 +189,7 @@ class AOMBasic(
                                 pkto    = (tmap[port].o, kto),
                                 pknorm  = pknorm,
                                 cplg    = 1,
-                                pknorm_func = lambda val : (2 * val)**.5 if np.any(val != 0) else 1,
+                                pknorm_func = lambda val : (2 * val)**.5 if np.any(val != 0) else 1e8,
                             )
                         )
         return

@@ -185,7 +185,7 @@ class BGSystem(RootElement):
         return defaultdict(set)
 
     @declarative.dproperty
-    def F_AC(self, val = 0):
+    def F_AC(self, val = 1e-4):
         #TODO make this detect a PropertyTransforming or injected frequency object
         self.environment.own.F_AC = Frequency(
             F_Hz  = val,
