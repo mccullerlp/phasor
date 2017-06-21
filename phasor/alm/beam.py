@@ -8,7 +8,7 @@ import declarative
 #import sympy
 
 
-from declarative.substrate import (
+from ..base.autograft import (
     Element,
     invalidate_auto
 )

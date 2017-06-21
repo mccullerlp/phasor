@@ -25,7 +25,7 @@ from ..base import (
     Element,
 )
 
-from declarative.substrate import (
+from ..base.autograft import (
     invalidate_auto,
 )
 

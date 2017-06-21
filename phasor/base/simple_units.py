@@ -5,7 +5,7 @@ from __future__ import division, print_function
 import declarative
 import collections
 
-from declarative.substrate import Element
+from .autograft import Element
 
 from . import pint
 

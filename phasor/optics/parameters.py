@@ -4,9 +4,9 @@ TODO: Add additional data to "ref" for a standard width. Ref can be the center, 
 from __future__ import division, print_function
 import declarative
 
-from declarative.substrate import Element
+from ..base.autograft import Element
 
-from . import pint
+#from . import pint
 
 
 class PolarizationCPLG(declarative.OverridableObject):

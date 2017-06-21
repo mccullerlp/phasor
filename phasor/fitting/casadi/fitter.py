@@ -11,7 +11,7 @@ from ...math.complex import Complex
 
 from . import visitors as VISIT
 
-from declarative.substrate import (
+from ...base.autograft import (
     RootElement,
     invalidate_auto,
 )

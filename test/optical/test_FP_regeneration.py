@@ -93,13 +93,13 @@ def test_FP_sensitivity():
     print("etm_DC",       sys.etm_DC.DC_readout)
     print("etm_Force[N]", sys.etm_ForceZ.DC_readout)
 
-    AC = sys.ITM_Drive.AC_sensitivity
+    AC = abs(sys.ITM_Drive.AC_sensitivity)
     print("AC:", AC)
     print ("AC ratio: ", AC / b.dPcavITMdL)
     np_test.assert_almost_equal(AC , b.dPcavITMdL, 1 )
 
     sys2 = sys.regenerate()
-    AC2 = sys2.ITM_Drive.AC_sensitivity
+    AC2 = abs(sys2.ITM_Drive.AC_sensitivity)
     np_test.assert_almost_equal(AC2/AC, 1 )
 
 

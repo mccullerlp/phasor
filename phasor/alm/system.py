@@ -8,7 +8,7 @@ import numpy as np
 
 import declarative
 
-from declarative.substrate import (
+from ..base.autograft import (
     invalidate_auto,
     Element,
 )

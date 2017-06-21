@@ -7,12 +7,12 @@ import declarative
 from declarative.utilities import SuperBase
 from declarative import bunch
 
-import declarative.substrate as dsubstrate
+from . import autograft
 from . import visitors as VISIT
 import warnings
 
 
-class Element(dsubstrate.Element):
+class Element(autograft.Element):
     def __mid_init__(self):
         super(Element, self).__mid_init__()
         with self.building:
@@ -48,7 +48,7 @@ class Element(dsubstrate.Element):
     #    print("REG: ", self._registry_children)
 
 
-class RootElement(Element, dsubstrate.RootElement):
+class RootElement(Element, autograft.RootElement):
     pass
 
 
