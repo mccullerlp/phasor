@@ -5,7 +5,7 @@ from __future__ import absolute_import
 
 import numpy as np
 from ..math.complex import Complex
-import ..math.dispatched as dmath
+from ..math import dispatched as dmath
 from .utils import str_m
 
 class ComplexBeamParam(object):
