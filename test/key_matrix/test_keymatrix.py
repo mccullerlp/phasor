@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from openLoop.math.key_matrix import keymatrix
+from phasor.math.key_matrix import keymatrix
 
 
 @pytest.mark.skip("Need to revisit")

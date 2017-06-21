@@ -8,16 +8,16 @@ import declarative
 
 #import numpy as np
 
-from openLoop import base
-from openLoop import system
-from openLoop import readouts
-from openLoop import optics
-from openLoop import signals
-from openLoop.optics.nonlinear_crystal import NonlinearCrystal
-from openLoop.utilities.print import pprint
-from openLoop.optics.models import AOMTestStand
+from phasor import base
+from phasor import system
+from phasor import readouts
+from phasor import optics
+from phasor import signals
+from phasor.optics.nonlinear_crystal import NonlinearCrystal
+from phasor.utilities.print import pprint
+from phasor.optics.models import AOMTestStand
 
-#from openLoop.utilities.np import logspaced
+#from phasor.utilities.np import logspaced
 
 
 

@@ -8,8 +8,8 @@ from declarative.bunch import (
     DeepBunch
 )
 
-from openLoop.utilities.np import logspaced
-from openLoop import system
+from phasor.utilities.np import logspaced
+from phasor import system
 
 from ligo_sled import (
     LIGOBasicOperation

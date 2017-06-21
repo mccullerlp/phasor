@@ -6,10 +6,10 @@ import numpy.testing as test
 
 from declarative import Bunch
 
-import openLoop.electronics as electronics
-import openLoop.readouts as readouts
+import phasor.electronics as electronics
+import phasor.readouts as readouts
 
-from openLoop.system import (
+from phasor.system import (
     BGSystem
 )
 

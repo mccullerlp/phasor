@@ -7,9 +7,9 @@ import numpy as np
 
 from declarative import Bunch
 
-import openLoop.electronics as electronics
-import openLoop.readouts as readouts
-import openLoop.system as system
+import phasor.electronics as electronics
+import phasor.readouts as readouts
+import phasor.system as system
 
 
 def test_transformer():

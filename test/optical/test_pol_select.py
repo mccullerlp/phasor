@@ -10,12 +10,12 @@ from declarative.bunch import (
 
 #import numpy as np
 
-from openLoop import system
-from openLoop import readouts
-from openLoop import optics
-from openLoop.utilities.print import pprint
+from phasor import system
+from phasor import readouts
+from phasor import optics
+from phasor.utilities.print import pprint
 
-#from openLoop.utilities.np import logspaced
+#from phasor.utilities.np import logspaced
 
 class PolTester(
     optics.OpticalCouplerBase, optics.SystemElementBase

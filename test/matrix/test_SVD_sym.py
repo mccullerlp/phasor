@@ -8,13 +8,13 @@ import numpy as np
 
 #import numpy as np
 
-from openLoop.matrix import DAG_algorithm
-from openLoop.matrix import SRE_matrix_algorithms
-from openLoop.utilities.print import pprint
+from phasor.matrix import DAG_algorithm
+from phasor.matrix import SRE_matrix_algorithms
+from phasor.utilities.print import pprint
 
 from test_SVD import mfunc, mfunc_randargs, gen_rand_unitary
 
-#from openLoop.utilities.np import logspaced
+#from phasor.utilities.np import logspaced
 
 
 def SVD_gen_check_sym(

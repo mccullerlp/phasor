@@ -6,11 +6,11 @@ import numpy.testing as np_test
 import pytest
 import declarative
 
-from openLoop.utilities.print import pprint
+from phasor.utilities.print import pprint
 
-from openLoop import system
-from openLoop import optics
-from openLoop import readouts
+from phasor import system
+from phasor import optics
+from phasor import readouts
 
 
 def gensys(
@@ -122,11 +122,11 @@ def test_FP_base():
     #    select_to = b.etm.po_Fr.o,
     #)
 
-    #from openLoop.optics.dictionary_keys import (
+    #from phasor.optics.dictionary_keys import (
     #    DictKey,
     #    FrequencyKey,
     #)
-    #from openLoop.optics.optical_elements import (
+    #from phasor.optics.optical_elements import (
     #    OpticalFreqKey, ClassicalFreqKey,
     #    LOWER, RAISE,
     #)
@@ -149,7 +149,7 @@ def test_FP_base():
     AC = sys.ETM_Drive.AC_sensitivity
     print("AC:", AC)
 
-    #from openLoop.utilities.mpl.autoniceplot import (mplfigB)
+    #from phasor.utilities.mpl.autoniceplot import (mplfigB)
     #F = mplfigB(Nrows = 2)
     #F.ax0.loglog(sys.F_AC_Hz, abs(AC))
     #F.ax1.semilogx(sys.F_AC_Hz, np.angle(AC))
