@@ -146,7 +146,7 @@ def test_FP_base():
     #print("LSBLU: ", rt_inv.get((b.etm.po_Fr.o, lsb_keyL), (b.etm.Z.d.o, ucl_key), 0))
     #print("LSBRU: ", rt_inv.get((b.etm.po_Fr.o, lsb_keyR), (b.etm.Z.d.o, ucl_key), 0))
 
-    AC = sys.ETM_Drive.AC_sensitivity
+    AC = abs(sys.ETM_Drive.AC_sensitivity)
     print("AC:", AC)
 
     #from phasor.utilities.mpl.autoniceplot import (mplfigB)
@@ -197,7 +197,7 @@ def test_FP_sensitivity():
     print("etm_DC",       sys.etm_DC.DC_readout)
     print("etm_Force[N]", sys.etm_ForceZ.DC_readout)
 
-    AC = sys.ITM_Drive.AC_sensitivity
+    AC = abs(sys.ITM_Drive.AC_sensitivity)
     print("AC:", AC)
     print ("AC ratio: ", AC / b.dPcavITMdL)
     np_test.assert_almost_equal(AC , b.dPcavITMdL, 1 )

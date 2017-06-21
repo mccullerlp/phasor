@@ -4,8 +4,8 @@ from __future__ import absolute_import
 #from builtins import object
 
 import numpy as np
-from phasor.math.complex import Complex
-import phasor.math.dispatched as dmath
+from ..math.complex import Complex
+import ..math.dispatched as dmath
 from .utils import str_m
 
 class ComplexBeamParam(object):

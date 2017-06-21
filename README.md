@@ -79,7 +79,7 @@ After reading the features, it is easiest to dive in to some examples before con
  
  * Fitting is fast and can/(should) support parameter variations during the fits.
  
- * Can implement resonant mode systems to get the cavity eigenmode. Advanced: if done using substrate copies (see documentation for declarative.substrate), then parameter variation will affect event the cavity eigenmodes.
+ * Can implement resonant mode systems to get the cavity eigenmode. Advanced: if done using substrate copies (see documentation for phasor.base.autograft), then parameter variation will affect event the cavity eigenmodes.
 
 ## Generation Stages
 
