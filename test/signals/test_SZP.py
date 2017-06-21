@@ -6,15 +6,15 @@ import declarative
 import numpy as np
 import numpy.testing as np_test
 
-import openLoop.signals as signals
-import openLoop.readouts as readouts
-import openLoop.system as system
+import phasor.signals as signals
+import phasor.readouts as readouts
+import phasor.system as system
 
-from openLoop.utilities.np import logspaced
+from phasor.utilities.np import logspaced
 
-from openLoop.utilities.print import pprint
+from phasor.utilities.print import pprint
 
-import openLoop.math.dispatched as dmath
+import phasor.math.dispatched as dmath
 
 
 def test_Xfer():
@@ -62,8 +62,8 @@ def test_XFer_fit():
     )
     #print(sys.X1.ctree_as_yaml())
 
-    import openLoop.fitting.casadi as FIT
-    import openLoop.fitting.casadi.transfer_functions as FIT_TF
+    import phasor.fitting.casadi as FIT
+    import phasor.fitting.casadi.transfer_functions as FIT_TF
     froot = FIT.FitterRoot()
     froot.own.sym = FIT.FitterSym()
     froot.systems.xfer = sys

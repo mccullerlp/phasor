@@ -14,7 +14,7 @@ if sys.version_info < (3,0):
     extra_install_requires.append('future')
 
 setup(
-    name='openLoop',
+    name='phasor',
     version=version,
     url='',
     author='Lee McCuller',

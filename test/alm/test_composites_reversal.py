@@ -3,7 +3,7 @@
 from __future__ import print_function, division
 import pytest
 
-from openLoop.utilities.mpl.autoniceplot import (
+from phasor.utilities.mpl.autoniceplot import (
     #AutoPlotSaver,
     #mplfigB,
     asavefig,
@@ -13,11 +13,11 @@ from IPython.lib.pretty import pprint as print
 
 import os.path as path
 
-import openLoop.alm.beam as alm_beam
-import openLoop.alm.system as alm_system
-import openLoop.alm.measurements as alm_measurements
-import openLoop.alm.mplot as alm_mplot
-import openLoop.alm.composites as alm_composites
+import phasor.alm.beam as alm_beam
+import phasor.alm.system as alm_system
+import phasor.alm.measurements as alm_measurements
+import phasor.alm.mplot as alm_mplot
+import phasor.alm.composites as alm_composites
 
 mplot = alm_mplot.MPlotter()
 asavefig.org_subfolder = path.join(path.dirname(__file__), 'tests')

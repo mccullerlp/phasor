@@ -3,7 +3,7 @@
 from __future__ import print_function, division
 import pytest
 
-from openLoop.utilities.mpl.autoniceplot import (
+from phasor.utilities.mpl.autoniceplot import (
     #AutoPlotSaver,
     #mplfigB,
     asavefig,
@@ -13,11 +13,11 @@ import matplotlib as mpl
 import os.path as path
 
 #from YALL.alm.beam import *
-from openLoop.alm.measurements import CRootSystem
-import openLoop.alm.beam as CB
-#from openLoop.alm.beam_param import ComplexBeamParam
-#import openLoop.alm.system as CS
-from openLoop.alm.mplot import MPlotter
+from phasor.alm.measurements import CRootSystem
+import phasor.alm.beam as CB
+#from phasor.alm.beam_param import ComplexBeamParam
+#import phasor.alm.system as CS
+from phasor.alm.mplot import MPlotter
 mplot = MPlotter()
 asavefig.org_subfolder = path.join(path.dirname(__file__), 'tests')
 

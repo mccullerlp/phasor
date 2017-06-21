@@ -6,5 +6,5 @@ include MANIFEST.in
 include setup.cfg
 include setup.py
 
-recursive-include openLoop/ *.py
+recursive-include phasor/ *.py
 recursive-include test/ *.py

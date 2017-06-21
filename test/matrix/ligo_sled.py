@@ -5,11 +5,11 @@ from __future__ import (division, print_function)
 import declarative
 import numpy as np
 
-from openLoop import optics
-from openLoop import signals
-from openLoop import readouts
-from openLoop import mechanical
-from openLoop import base
+from phasor import optics
+from phasor import signals
+from phasor import readouts
+from phasor import mechanical
+from phasor import base
 
 
 def pendulum_k(

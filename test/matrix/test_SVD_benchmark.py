@@ -4,7 +4,7 @@ from __future__ import (division, print_function)
 import pytest
 from os import path
 
-from openLoop.utilities.mpl import mplfigB
+from phasor.utilities.mpl import mplfigB
 
 import numpy.testing as np_test
 import numpy as np
@@ -14,12 +14,12 @@ import pickle
 
 #import numpy as np
 
-from openLoop.matrix import DAG_algorithm
-from openLoop.matrix import scisparse_algorithm
-from openLoop.matrix import SRE_matrix_algorithms
-from openLoop.utilities.print import pprint
+from phasor.matrix import DAG_algorithm
+from phasor.matrix import scisparse_algorithm
+from phasor.matrix import SRE_matrix_algorithms
+from phasor.utilities.print import pprint
 
-#from openLoop.utilities.np import logspaced
+#from phasor.utilities.np import logspaced
 
 from test_SVD import SVD_gen_check
 
