@@ -2,7 +2,7 @@
 """
 from __future__ import division
 
-import declarative as decl
+import declarative
 
 from . import ports
 from . import bases
@@ -23,22 +23,26 @@ sided_conversions = {
 }
 
 class WhiteNoise(bases.SignalElementBase, bases.NoiseBase):
-    @decl.dproperty
+    @declarative.dproperty
     def port(self, val):
         #self.system.own_port_virtual(self, val.i)
         return val
 
-    @decl.dproperty
+    @declarative.dproperty
     def sided(self, val):
         assert(val in sided_conversions)
         return val
 
-    @decl.mproperty
+    @declarative.mproperty
     def conversion(self):
         return sided_conversions[self.sided]
 
+    @declarative.dproperty
+    def magnitude(self, val = 1):
+        return val
+
     def Fsq_Hz_by_freq(self, F):
-        return 1
+        return self.magnitude
 
     def system_setup_noise(self, matrix_algorithm):
         #print("SETUP NOISE: ", self.name_noise)

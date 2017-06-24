@@ -80,6 +80,26 @@ class PortInOutRaw(PortRawBase):
         return pkey
 
 
+class PortNodeRaw(PortRawBase):
+    @declarative.dproperty
+    def node(self):
+        #pkey = self.element.name_system + self.sname + '.i'
+        pkey = DictKey({
+            ElementKey: self.element.name_system,
+            PortKey    : self.sname + u'●',
+        })
+        self.system.port_add(self.element, pkey)
+        return pkey
+
+    @declarative.dproperty
+    def i(self):
+        return self.node
+
+    @declarative.dproperty
+    def o(self):
+        return self.node
+
+
 class PortIndirect(bases.SystemElementBase):
     """
     Holds an inner port and forwards bonding calls to it.

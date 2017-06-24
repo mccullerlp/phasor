@@ -63,7 +63,7 @@ class MultiACReadout(base.SystemElementBase):
         return
 
     def system_setup_ports_initial(self, system):
-        portsets = [self.port_set, 'AC_sensitivitys', 'readouts']
+        portsets = [self.port_set, 'AC_sensitivities', 'readouts']
         for pname, port in list(self.port_map.items()):
             system.readout_port_needed(port, self.keyP, portsets)
             system.readout_port_needed(port, self.keyN, portsets)

@@ -81,6 +81,11 @@ def generate_stacked_plot_ax(
             hide_xlabels(ax_local)
         return finalize
 
+    def scale_finalizer(ax_local, scale):
+        def finalize():
+            ax_local.set_xscale(scale)
+        return finalize
+
     axB = generate_ax(ax_group)
     axB.fig = fig
     def save(rootname, **kwargs):
@@ -102,8 +107,8 @@ def generate_stacked_plot_ax(
                 axB[name] = ax_local
             if ax_top is None:
                 ax_top = ax_local
-            ax_local.set_xscale(xscales[col_idx])
             ax_list.append(ax_local)
+            axB.finalizers.append(scale_finalizer(ax_local, xscales[col_idx]))
             if idx < len(view_names) - 1:
                 axB.finalizers.append(hide_finalizer(axB, ax_local))
         axB['ax_bottom_{0}'.format(col_idx)] = ax_local

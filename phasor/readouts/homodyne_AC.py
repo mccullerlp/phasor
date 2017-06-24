@@ -367,7 +367,7 @@ class HomodyneACReadout(HomodyneACReadoutBase, base.SystemElementBase):
         return
 
     def system_setup_ports_initial(self, ports_algorithm):
-        portsets = [self.port_set, 'AC_sensitivitys', 'readouts']
+        portsets = [self.port_set, 'AC_sensitivities', 'readouts']
         ports_algorithm.readout_port_needed(self.portNI, self.keyP, portsets)
         ports_algorithm.readout_port_needed(self.portNI, self.keyN, portsets)
         ports_algorithm.readout_port_needed(self.portNQ, self.keyP, portsets)

@@ -3,6 +3,10 @@ from .bases import (
     SignalElementBase,
 )
 
+from .ports import (
+    SignalNode,
+)
+
 from .mixer import (
     Mixer,
     Modulator,
@@ -30,6 +34,7 @@ from .siso_filter import (
     Integrator,
     TransferFunctionSISOMechSingleResonance,
     Gain,
+    TFACArray,
 )
 
 from .mimo_filter import (

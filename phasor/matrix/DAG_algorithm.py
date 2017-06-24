@@ -181,7 +181,7 @@ def mgraph_simplify_trivial(
             SRABE,
             node = node,
             node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-            **kwargs,
+            **kwargs
         )
     return
 

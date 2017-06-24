@@ -166,3 +166,77 @@ class TransferFunctionSISOMechSingleResonance(TransferFunctionSISOBase):
         xfer = gain / (-freq**2 + self.symbols.i * self.FWHM_Hz * freq + self.center_Hz**2)
         return xfer
 
+
+class TFACArray(SignalElementBase):
+    @declarative.dproperty
+    def ps_In(self):
+        return ports.SignalInPort(pchain = lambda : self.ps_Out)
+
+    @declarative.dproperty
+    def ps_Out(self):
+        return ports.SignalOutPort(pchain = lambda : self.ps_In)
+
+    @declarative.dproperty
+    def gain_array(self, arr):
+        return arr
+
+    @declarative.dproperty
+    def gain_arrayC(self, arr = None):
+        if arr is None:
+            arr = self.gain_array.conjugate()
+        return arr
+
+    @declarative.dproperty
+    def F_AC(self, val = None):
+        #TODO make this able to handle regeneration
+        if val is None:
+            val = self.system.environment.F_AC
+        return val
+
+    def check_F_AC_only(self, kfrom):
+        ffrom = kfrom[ports.ClassicalFreqKey]
+        AC_level = 0
+        proceed = True
+        for Fobj, Fnum in ffrom.F_dict.items():
+            if Fobj is self.F_AC:
+                AC_level = Fnum
+            else:
+                if Fnum != 0:
+                    proceed = False
+        if AC_level not in [1, -1]:
+            proceed = False
+        return proceed
+
+    def system_setup_ports(self, ports_algorithm):
+        for kfrom in ports_algorithm.port_update_get(self.ps_In.i):
+            if not self.check_F_AC_only(kfrom):
+                continue
+
+            ports_algorithm.port_coupling_needed(self.ps_Out.o, kfrom)
+        for kto in ports_algorithm.port_update_get(self.ps_Out.o):
+            if not self.check_F_AC_only(kto):
+                continue
+            ports_algorithm.port_coupling_needed(self.ps_In.i, kto)
+        return
+
+    def system_setup_coupling(self, matrix_algorithm):
+        for kfrom in matrix_algorithm.port_set_get(self.ps_In.i):
+            if not self.check_F_AC_only(kfrom):
+                continue
+
+            ffrom = kfrom[ports.ClassicalFreqKey]
+            count = ffrom.F_dict[self.F_AC]
+            if count > 0:
+                pgain = self.gain_array
+            elif count < 0:
+                pgain = self.gain_arrayC
+
+            matrix_algorithm.port_coupling_insert(
+                self.ps_In.i,
+                kfrom,
+                self.ps_Out.o,
+                kfrom,
+                pgain,
+            )
+        return
+

@@ -146,5 +146,7 @@ def check_symbolic_type(arg):
     else:
         return check_symbolic_type_run(arg)
 
+#doing this here to prevent a weird error where np is overridden
+import numpy as np
 
 

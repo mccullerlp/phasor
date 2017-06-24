@@ -234,7 +234,7 @@ class SRationalFilter(SZPCascade):
         #print("FREQ: ", self, freq)
         pre = self.gain.val
         if self.delay_s.val is not None:
-            pre *= self.symbols.math.exp(self.symbols.i2pi * freq * self.delay_s.val)
+            pre *= self.symbols.math.exp(-self.symbols.i2pi * freq * self.delay_s.val)
         xfer = super(SRationalFilter, self).filter_func(freq) * pre
 
         if self.gain_F_Hz != 0:

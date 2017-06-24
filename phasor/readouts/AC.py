@@ -50,7 +50,7 @@ class ACReadout(base.SystemElementBase):
         return
 
     def system_setup_ports_initial(self, system):
-        portsets = [self.port_set, 'AC_sensitivitys', 'readouts']
+        portsets = [self.port_set, 'AC_sensitivities', 'readouts']
         system.readout_port_needed(self.portN, self.keyP, portsets)
         system.readout_port_needed(self.portN, self.keyN, portsets)
         system.readout_port_needed(self.portD, self.keyP, portsets)
@@ -184,7 +184,7 @@ class ACReadoutCLG(base.SystemElementBase):
         return
 
     def system_setup_ports_initial(self, system):
-        portsets = [self.port_set, 'AC_sensitivitys', 'readouts']
+        portsets = [self.port_set, 'AC_sensitivities', 'readouts']
         system.readout_port_needed(self.portN, self.keyP, portsets)
         system.readout_port_needed(self.portN, self.keyN, portsets)
         system.drive_port_needed(self.portD, self.keyP, portsets)
@@ -284,7 +284,7 @@ class ACReadoutLG(base.SystemElementBase):
         return
 
     def system_setup_ports_initial(self, system):
-        portsets = [self.port_set, 'AC_sensitivitys', 'readouts']
+        portsets = [self.port_set, 'AC_sensitivities', 'readouts']
         if self.portAct is not None:
             system.readout_port_needed(self.portAct, self.keyP, portsets)
             system.readout_port_needed(self.portAct, self.keyN, portsets)
@@ -354,11 +354,11 @@ class ACReadoutLG(base.SystemElementBase):
         coupling_matrix_inv = cbunch.coupling_matrix_inv
         N_tot = (
             + coupling_matrix_inv.get((pk_DrP, pk_NP), 0)
-            + coupling_matrix_inv.get((pk_DrN, pk_NP), 0)
+            #+ coupling_matrix_inv.get((pk_DrN, pk_NP), 0)
         )
         D_tot = (
             + coupling_matrix_inv.get((pk_DrP, pk_DP), 0)
-            + coupling_matrix_inv.get((pk_DrN, pk_DP), 0)
+            #+ coupling_matrix_inv.get((pk_DrN, pk_DP), 0)
             #+ coupling_matrix_inv.get((pk_DrP, pk_DN), 0)
             #+ coupling_matrix_inv.get((pk_DrN, pk_DN), 0)
         )

@@ -6,6 +6,8 @@ import declarative
 from ..base.ports import (
     PortInRaw,
     PortOutRaw,
+    PortInOutRaw,
+    PortNodeRaw,
     PortIndirect,
     ClassicalFreqKey,
     DictKey,
@@ -26,30 +28,12 @@ class SignalOutPortRaw(PortOutRaw):
     #TODO remove when possible
     multiple_attach = True
 
+class SignalNodePortRaw(PortNodeRaw):
+    typename = 'signal_node'
+    #TODO remove when possible
+    multiple_attach = True
 
-class SignalInPort(SignalInPortRaw, bases.SystemElementBase):
-    typename = 'signal_in'
-
-    def _complete(self):
-        if not super(SignalInPort, self)._complete():
-            prein = self.inst_preincarnation
-            if prein is not None:
-                for built, bpartner in zip(prein._bond_partners_building, prein._bond_partners):
-                    if not built:
-                        new_bpartner = self.root[bpartner.name_system]
-                        self._bond_partners.append(new_bpartner)
-                        assert(self.root is new_bpartner.root)
-                        self._bond_partners_building.append(built)
-        return
-
-    @declarative.mproperty
-    def _bond_partners(self):
-        return []
-
-    @declarative.mproperty
-    def _bond_partners_building(self):
-        return []
-
+class SignalCommonPortBase(bases.SystemElementBase):
     @declarative.mproperty
     def bond_key(self):
         return self
@@ -60,51 +44,6 @@ class SignalInPort(SignalInPortRaw, bases.SystemElementBase):
 
     def bond_sequence(self, *others):
         return self.system.bond_sequence(self, *others)
-
-    def bond_inform(self, other_key):
-        #TODO make this smarter
-        self._bond_partners.append(other_key)
-        if self.building:
-            self._bond_partners_building.append(True)
-        else:
-            self._bond_partners_building.append(False)
-
-    """TODO
-    def bond_completion(self):
-        if len(self._bond_partners) == 1:
-            self.system.bond_completion_raw(self, self._bond_partners[0], self)
-        elif len(self._bond_partners) == 0:
-            raise RuntimeError("Must be Terminated")
-        else:
-            from .elements import Connection
-            self.own.connection = Connection(
-                N_ports = 1 + len(self._bond_partners)
-            )
-            self.system._include(self.connection)
-            self.connection.pe_0.bond_inform(self)
-            self.system.bond_completion_raw(self, self.connection.pe_0, self)
-            self.connection.pe_0.bond_completion()
-            for idx, partner in enumerate(self._bond_partners):
-                #TODO not sure if ps_In like the connection object not knowing who it is bound to
-                #maybe make a more explicit notification for the raw bonding
-                port = self.connection.ports_electrical[idx + 1]
-                #print("PORTSSS", port)
-                self.system.bond_completion_raw(self, partner, port)
-        return
-    """
-
-    def bond_completion(self):
-        for partner in self._bond_partners:
-            self.system.bond_completion_raw(self, partner, self)
-        return
-
-    def targets_list(self, typename):
-        if typename == VISIT.bond_completion:
-            #TODO make a system algorithm object for this
-            self.bond_completion()
-            return self
-        else:
-            return super(SignalInPort, self).targets_list(typename)
 
     pchain = None
 
@@ -120,73 +59,124 @@ class SignalInPort(SignalInPortRaw, bases.SystemElementBase):
         else:
             return None
 
+    def targets_list(self, typename):
+        if typename == VISIT.bond_completion:
+            #TODO make a system algorithm object for this
+            self.bond_completion()
+            return self
+        else:
+            return super(SignalCommonPortBase, self).targets_list(typename)
 
-class SignalOutPort(SignalOutPortRaw, bases.SystemElementBase):
-    typename = 'signal_out'
-
+class SignalInPortBase(bases.SystemElementBase):
     def _complete(self):
-        if not super(SignalOutPort, self)._complete():
+        if not super(SignalInPortBase, self)._complete():
             prein = self.inst_preincarnation
             if prein is not None:
-                for built, bpartner in zip(prein._bond_partners_building, prein._bond_partners):
+                for built, bpartner in zip(prein._bond_partners_in_building, prein._bond_partners_in):
                     if not built:
                         new_bpartner = self.root[bpartner.name_system]
-                        self._bond_partners.append(new_bpartner)
+                        self._bond_partners_in.append(new_bpartner)
                         assert(self.root is new_bpartner.root)
-                        self._bond_partners_building.append(built)
+                        self._bond_partners_in_building.append(built)
         return
 
     @declarative.mproperty
-    def _bond_partners(self):
+    def _bond_partners_in(self):
         return []
 
     @declarative.mproperty
-    def _bond_partners_building(self):
+    def _bond_partners_in_building(self):
         return []
-
-    @declarative.mproperty
-    def bond_key(self):
-        return self
-
-    def bond(self, other):
-        self.bond_inform(other.bond_key)
-        other.bond_inform(self)
-
-    def bond_sequence(self, *others):
-        return self.system.bond_sequence(self, *others)
 
     def bond_inform(self, other_key):
         #TODO make this smarter
-        self._bond_partners.append(other_key)
+        self._bond_partners_in.append(other_key)
         if self.building:
-            self._bond_partners_building.append(True)
+            self._bond_partners_in_building.append(True)
         else:
-            self._bond_partners_building.append(False)
+            self._bond_partners_in_building.append(False)
+
+    def bond_completion(self):
+        for partner in self._bond_partners_in:
+            self.system.bond_completion_raw(self, partner, self)
+        return
+
+
+class SignalInPort(
+        SignalInPortRaw,
+        SignalInPortBase,
+        SignalCommonPortBase
+):
+    typename = 'signal_in'
+
+
+class SignalOutPortBase(bases.SystemElementBase):
+    def _complete(self):
+        if not super(SignalOutPortBase, self)._complete():
+            prein = self.inst_preincarnation
+            if prein is not None:
+                for built, bpartner in zip(prein._bond_partners_out_building, prein._bond_partners_out):
+                    if not built:
+                        new_bpartner = self.root[bpartner.name_system]
+                        self._bond_partners_out.append(new_bpartner)
+                        assert(self.root is new_bpartner.root)
+                        self._bond_partners_out_building.append(built)
+        return
+
+    @declarative.mproperty
+    def _bond_partners_out(self):
+        return []
+
+    @declarative.mproperty
+    def _bond_partners_out_building(self):
+        return []
+
+    def bond_inform(self, other_key):
+        #TODO make this smarter
+        self._bond_partners_out.append(other_key)
+        if self.building:
+            self._bond_partners_out_building.append(True)
+        else:
+            self._bond_partners_out_building.append(False)
 
     def bond_completion(self):
         #it should have been autoterminated if anything
-        for partner in self._bond_partners:
+        for partner in self._bond_partners_out:
             self.system.bond_completion_raw(self, partner, self)
         return
 
-    def targets_list(self, typename):
-        if typename == VISIT.bond_completion:
-            #TODO make a system algorithm object for this
-            self.bond_completion()
-            return self
-        else:
-            return super(SignalOutPort, self).targets_list(typename)
+class SignalOutPort(
+        SignalOutPortRaw,
+        SignalOutPortBase,
+        SignalCommonPortBase
+):
+    typename = 'signal_out'
 
-    pchain = None
 
-    @declarative.mproperty
-    def chain_next(self):
-        if self.pchain is not None:
-            if isinstance(self.pchain, str):
-                return getattr(self.element, self.pchain)
-            elif callable(self.pchain):
-                return self.pchain()
+class SignalNode(SignalNodePortRaw, SignalInPortBase, SignalOutPortBase, SignalCommonPortBase):
+    typename = 'signal_node'
+
+    def bond_inform(self, other_key):
+        #TODO make this smarter
+        if other_key.typename == 'signal_in':
+            self._bond_partners_out.append(other_key)
+            if self.building:
+                self._bond_partners_out_building.append(True)
             else:
-                return self.pchain
+                self._bond_partners_out_building.append(False)
+        elif other_key.typename == 'signal_out':
+            self._bond_partners_in.append(other_key)
+            if self.building:
+                self._bond_partners_in_building.append(True)
+            else:
+                self._bond_partners_in_building.append(False)
         else:
-            return None
+            raise RuntimeError("Can't handle port of type: {0}".format(other_key.typename))
+
+    def bond_completion(self):
+        #it should have been autoterminated if anything
+        for partner in self._bond_partners_out:
+            self.system.bond_completion_raw(self, partner, self)
+        for partner in self._bond_partners_in:
+            self.system.bond_completion_raw(self, partner, self)
+        return
