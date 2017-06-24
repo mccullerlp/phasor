@@ -64,7 +64,7 @@ class ACReadout(base.SystemElementBase):
         return self.F_sep.F_Hz
 
     @decl.mproperty
-    def AC_sensitivity(self):
+    def AC_sensitivityOL(self):
 
         pk_DP = (self.portD, self.keyP)
         pk_DN = (self.portD, self.keyN)
@@ -103,7 +103,7 @@ class ACReadout(base.SystemElementBase):
         return N_tot / D_tot
 
     @decl.mproperty
-    def AC_sensitivityCL(self):
+    def AC_sensitivity(self):
         pk_NP = (self.portN, self.keyP)
         pk_NN = (self.portN, self.keyN)
 
@@ -366,3 +366,5 @@ class ACReadoutLG(base.SystemElementBase):
         #print("DOT: ", D_tot)
         #The factor of 2 captures the missing readout power from the negative frequencies
         return N_tot / D_tot
+
+

@@ -11,7 +11,9 @@ from phasor.utilities.mpl import (
 
 
 
-def plot_loop(F, h, full = True):
+def plot_loop(F, h, inv = True, full = True):
+    if inv:
+        h = -h
     fig = pyplot.figure()
     fig.set_size_inches(10, 4)
     gs = gridspec.GridSpec(

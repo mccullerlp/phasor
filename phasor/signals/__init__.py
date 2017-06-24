@@ -5,6 +5,8 @@ from .bases import (
 
 from .ports import (
     SignalNode,
+    SignalInPort,
+    SignalOutPort,
 )
 
 from .mixer import (

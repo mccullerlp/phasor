@@ -3,7 +3,7 @@
 import scipy.signal
 import numpy as np
 
-#from phasor.utilities.np import logspaced
+from phasor.utilities.print import pprint
 
 
 def cheby_boost_7(
@@ -111,9 +111,9 @@ def ledge_boost(
     k = k * zpk_cheby[2]
 
     p.append(-1.2+1.5j)
-    z.append(-2+1.5j)
-    p.append(-1.5+1.5j)
-    z.append(-3+1.5j)
+    z.append(-2.4+1.5j)
+    p.append(-1.2-1.5j)
+    z.append(-2.4-1.5j)
 
     z = F_center/shift * np.asarray(z)
     p = F_center/shift * np.asarray(p)
@@ -151,8 +151,8 @@ def cheby_boost(
 
     z.append(-.7 + 1j)
     p.append(-.2 + 1j)
-    #z.append(-.5 + .8j)
-    #p.append(-.2 + .8j)
+    z.append(-.7 - 1j)
+    p.append(-.2 - 1j)
 
     p.extend([-.01] * N_tot)
 
@@ -198,24 +198,37 @@ def zpk_div(zpkN, zpkD):
     return zs, ps, ks
 
 
-def controller_10x1e3_20x1e8(UGF):
+def controller_10x1e3_20x1e8(UGF, out = 'zpk'):
     """
     Controller with prodigious gain
     """
-    return zpk_mult(
+    zpk = zpk_mult(
         ledge_controller(F_center = UGF, shift = 15., N =3),
         ledge_boost(F_center = UGF, shift = 15., N =3),
         ledge_boost(F_center = UGF, shift = 20., N =3),
         ledge_boost(F_center = UGF, shift = 15., N =3),
         ledge_boost(F_center = UGF, shift = 20., N =3),
-        ((-UGF,), (0,), .7)
+        ((-UGF,), (-.001,), -.7)
     )
+    if out == 'zpk':
+        return zpk
+    elif out == 'SRationalFilter':
+        d = zpk2rcpz_dict(zpk)
+        return dict(
+            poles_c = d['poles_c'],
+            poles_r = d['poles_r'],
+            zeros_c = d['zeros_c'],
+            zeros_r = d['zeros_r'],
+            gain = -1,
+            gain_F_Hz = UGF,
+        )
 
-def controller_20x1e9(UGF):
+
+def controller_20x1e9(UGF, out = 'zpk'):
     """
     Controller with prodigious gain
     """
-    return zpk_mult(
+    zpk = zpk_mult(
         ledge_controller(F_center = UGF, shift = 20., N =3),
         ledge_boost(F_center = UGF, shift = 20., N =3),
         ledge_boost(F_center = UGF, shift = 20., N =3),
@@ -223,8 +236,20 @@ def controller_20x1e9(UGF):
         ledge_boost(F_center = UGF, shift = 25., N =3),
         ledge_boost(F_center = UGF, shift = 25., N =3),
         ledge_boost(F_center = UGF, shift = 25., N =3),
-        ((-UGF,), (-.01,), .7),
+        ((-UGF,), (-.001,), -.7),
     )
+    if out == 'zpk':
+        return zpk
+    elif out == 'SRationalFilter':
+        d = zpk2rcpz_dict(zpk)
+        return dict(
+            poles_c = d['poles_c'],
+            poles_r = d['poles_r'],
+            zeros_c = d['zeros_c'],
+            zeros_r = d['zeros_r'],
+            gain = -1,
+            gain_F_Hz = UGF,
+        )
 
 
 def sort_roots(rootlist):
@@ -247,13 +272,17 @@ def zpk2rcpz_dict(zpk):
     z, p, k = zpk
     zr, zp, zn = sort_roots(z)
     pr, pp, pn = sort_roots(p)
-    return dict(
+
+    #pprint(zpk)
+    d = dict(
         poles_r = pr,
         poles_c = pp,
         zeros_r = zr,
         zeros_c = zp,
         gain    = k,
     )
+    #pprint(d)
+    return d
 
 
 

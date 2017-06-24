@@ -38,11 +38,8 @@ class WhiteNoise(bases.SignalElementBase, bases.NoiseBase):
         return sided_conversions[self.sided]
 
     @declarative.dproperty
-    def magnitude(self, val = 1):
+    def magnitude_ASD(self, val = 1):
         return val
-
-    def Fsq_Hz_by_freq(self, F):
-        return self.magnitude
 
     def system_setup_noise(self, matrix_algorithm):
         #print("SETUP NOISE: ", self.name_noise)
@@ -59,5 +56,5 @@ class WhiteNoise(bases.SignalElementBase, bases.NoiseBase):
 
     def noise_2pt_expectation(self, pe_1, k1, pe_2, k2):
         #print("APPLY NOISE: ", self.name_noise)
-        Fsq_Hz = 1 / self.conversion
+        Fsq_Hz = self.magnitude_ASD**2 / self.conversion
         return Fsq_Hz

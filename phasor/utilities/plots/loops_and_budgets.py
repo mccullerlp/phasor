@@ -64,7 +64,7 @@ class ACReadoutPlots(declarative.OverridableObject):
             color_CLG     = 'red',
             color_plant   = 'blue',
             label_plant   = 'Plant',
-            unwrap        = True,
+            unwrap        = False,
             ugf_line      = True,
             preferred_UGF = None,
     ):

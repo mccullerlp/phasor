@@ -22,3 +22,7 @@ from .noise import (
 from .homodyne_AC import (
     HomodyneACReadout,
 )
+
+from .testpoint import (
+    Testpoint
+)
