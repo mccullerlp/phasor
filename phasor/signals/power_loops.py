@@ -198,60 +198,6 @@ def zpk_div(zpkN, zpkD):
     return zs, ps, ks
 
 
-def controller_10x1e3_20x1e8(UGF, out = 'zpk'):
-    """
-    Controller with prodigious gain
-    """
-    zpk = zpk_mult(
-        ledge_controller(F_center = UGF, shift = 15., N =3),
-        ledge_boost(F_center = UGF, shift = 15., N =3),
-        ledge_boost(F_center = UGF, shift = 20., N =3),
-        ledge_boost(F_center = UGF, shift = 15., N =3),
-        ledge_boost(F_center = UGF, shift = 20., N =3),
-        ((-UGF,), (-.001,), -.7)
-    )
-    if out == 'zpk':
-        return zpk
-    elif out == 'SRationalFilter':
-        d = zpk2rcpz_dict(zpk)
-        return dict(
-            poles_c = d['poles_c'],
-            poles_r = d['poles_r'],
-            zeros_c = d['zeros_c'],
-            zeros_r = d['zeros_r'],
-            gain = -1,
-            gain_F_Hz = UGF,
-        )
-
-
-def controller_20x1e9(UGF, out = 'zpk'):
-    """
-    Controller with prodigious gain
-    """
-    zpk = zpk_mult(
-        ledge_controller(F_center = UGF, shift = 20., N =3),
-        ledge_boost(F_center = UGF, shift = 20., N =3),
-        ledge_boost(F_center = UGF, shift = 20., N =3),
-        ledge_boost(F_center = UGF, shift = 20., N =3),
-        ledge_boost(F_center = UGF, shift = 25., N =3),
-        ledge_boost(F_center = UGF, shift = 25., N =3),
-        ledge_boost(F_center = UGF, shift = 25., N =3),
-        ((-UGF,), (-.001,), -.7),
-    )
-    if out == 'zpk':
-        return zpk
-    elif out == 'SRationalFilter':
-        d = zpk2rcpz_dict(zpk)
-        return dict(
-            poles_c = d['poles_c'],
-            poles_r = d['poles_r'],
-            zeros_c = d['zeros_c'],
-            zeros_r = d['zeros_r'],
-            gain = -1,
-            gain_F_Hz = UGF,
-        )
-
-
 def sort_roots(rootlist):
     real_roots = []
     cplx_pos_roots = []
@@ -284,5 +230,105 @@ def zpk2rcpz_dict(zpk):
     #pprint(d)
     return d
 
+
+def controller_10x1e3_20x1e8(UGF, out = 'zpk'):
+    """
+    Controller with prodigious gain
+    """
+    zpk = zpk_mult(
+        ledge_controller(F_center = UGF, shift = 15., N =3),
+        ledge_boost(F_center = UGF, shift = 15., N =3),
+        ledge_boost(F_center = UGF, shift = 20., N =3),
+        ledge_boost(F_center = UGF, shift = 15., N =3),
+        ledge_boost(F_center = UGF, shift = 20., N =3),
+        ((-UGF,), (-.001,), -.7)
+    )
+    return zpk_convert(
+        UGF = UGF,
+        zpk = zpk,
+        out = out
+    )
+
+
+def zpk_convert(UGF, zpk, out):
+    if out == 'zpk':
+        return zpk
+    elif out == 'SRationalFilter':
+        d = zpk2rcpz_dict(zpk)
+        return dict(
+            poles_c = d['poles_c'],
+            poles_r = d['poles_r'],
+            zeros_c = d['zeros_c'],
+            zeros_r = d['zeros_r'],
+            gain = -1,
+            gain_F_Hz = UGF,
+        )
+
+
+def controller_10x1e3_20x1e8(
+        UGF,
+        shift = 1,
+        out = 'zpk'
+):
+    """
+    Controller with prodigious gain
+    """
+    zpk = zpk_mult(
+        ledge_controller(F_center = UGF, shift = shift * 15., N =3),
+        ledge_boost(F_center      = UGF, shift = shift * 15., N =3),
+        ledge_boost(F_center      = UGF, shift = shift * 20., N =3),
+        ledge_boost(F_center      = UGF, shift = shift * 15., N =3),
+        ledge_boost(F_center      = UGF, shift = shift * 20., N =3),
+        ((-UGF/shift,), (-.001,), -.7),
+        ((-UGF*3,), (-UGF * 3 - 3j*UGF,-UGF * 3 + 3j*UGF), (3000)),
+    )
+    return zpk_convert(
+        UGF = UGF,
+        zpk = zpk,
+        out = out
+    )
+
+
+def controller_20x1e9(UGF, out = 'zpk'):
+    """
+    Controller with prodigious gain
+    """
+    zpk = zpk_mult(
+        ledge_controller(F_center = UGF, shift = 20., N =3),
+        ledge_boost(F_center = UGF, shift = 20., N =3),
+        ledge_boost(F_center = UGF, shift = 20., N =3),
+        ledge_boost(F_center = UGF, shift = 20., N =3),
+        ledge_boost(F_center = UGF, shift = 25., N =3),
+        ledge_boost(F_center = UGF, shift = 25., N =3),
+        ledge_boost(F_center = UGF, shift = 25., N =3),
+        ((-UGF,), (-.001,), -.7),
+        ((-UGF*3,), (-UGF * 3 - 3j*UGF,-UGF * 3 + 3j*UGF), (3000)),
+    )
+    return zpk_convert(
+        UGF = UGF,
+        zpk = zpk,
+        out = out
+    )
+
+
+def controller_fast_2p5x1e1(UGF, out = 'zpk'):
+    """
+    Controller with prodigious gain
+    """
+    pp = np.array([-UGF*.8 - UGF * 1j, -UGF*.8 + UGF * 1j])
+    zp = np.array([-UGF*.5 - UGF * 1j, -UGF*.5 + UGF * 1j])
+    zpk = zpk_mult(
+        ledge_controller(F_center = UGF, shift = 7, N =3),
+        ledge_boost(F_center = UGF, shift = 4., N =3),
+        ((-UGF/8. - UGF * 1j/8., -UGF/8. + UGF * 1j/8), (-.001, -.001), 1.0),
+        (pp * .6, zp * .6, .8),
+        (zp * .3, pp * .3, 1.0),
+        ((-UGF*3,), (-UGF * 3 - 3j*UGF,-UGF * 3 + 3j*UGF), (180))
+    )
+    return zpk_convert(
+        UGF = UGF,
+        zpk = zpk,
+        out = out
+    )
 
 

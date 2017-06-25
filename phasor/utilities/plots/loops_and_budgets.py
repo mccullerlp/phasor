@@ -172,6 +172,7 @@ class ACReadoutPlots(declarative.OverridableObject):
         self,
         readout,
         ax,
+        limit = 2e-8,
     ):
         ax.loglog(
             self.X.val,
@@ -186,7 +187,7 @@ class ACReadoutPlots(declarative.OverridableObject):
             mratio = np.max(ratio)
             mpsd = np.max(psd)
             #print(source.name_noise, mratio, mpsd)
-            if mratio > 2e-8 and mpsd > 1e-2:
+            if mratio > limit:
                 sgroups.append((mpsd, str(source), source, psd))
         sgroups.sort()
 
