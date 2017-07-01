@@ -52,28 +52,31 @@ class SummingAmplifier(bases.CouplerBase, bases.SystemElementBase):
         super(SummingAmplifier, self).__init__(**kwargs)
         bases.PTREE_ASSIGN(self).port_gains = port_gains
 
-        self.own.O  = ports.SignalOutPort(sname = 'LO')
+        self.own.ps_Out  = ports.SignalOutPort()
 
         for pname in self.port_gains:
-            self.insert(ports.SignalInPort(sname = pname), pname)
+            self.insert(
+                ports.SignalInPort(),
+                pname,
+            )
         return
 
     def system_setup_ports(self, ports_algorithm):
-        for kto in ports_algorithm.port_update_get(self.O.o):
+        for kto in ports_algorithm.port_update_get(self.ps_Out.o):
             for pname in self.port_gains:
                 port = getattr(self, pname)
                 ports_algorithm.port_coupling_needed(port.i, kto)
         for pname in self.port_gains:
             port = getattr(self, pname)
             for kfrom in ports_algorithm.port_update_get(port.i):
-                ports_algorithm.port_coupling_needed(self.O.o, kfrom)
+                ports_algorithm.port_coupling_needed(self.ps_Out.o, kfrom)
         return
 
     def system_setup_coupling(self, matrix_algorithm):
         for pname, pgain in list(self.port_gains.items()):
             port = getattr(self, pname)
             for kfrom in matrix_algorithm.port_set_get(port.i):
-                matrix_algorithm.port_coupling_insert(port.i,  kfrom, self.O.o, kfrom, pgain)
+                matrix_algorithm.port_coupling_insert(port.i,  kfrom, self.ps_Out.o, kfrom, pgain)
         return
 
 
