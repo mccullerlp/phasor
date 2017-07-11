@@ -9,7 +9,6 @@ import declarative
 
 
 from .. import base
-from .. import signals
 from .noise import NoiseReadout
 
 class Testpoint(base.SystemElementBase):
@@ -19,6 +18,8 @@ class Testpoint(base.SystemElementBase):
     """
     @declarative.dproperty
     def port(self, val = None):
+        #TODO fix this import
+        from .. import signals
         if val is None:
             if isinstance(self.parent, signals.SignalInPort):
                 val = self.parent.i
