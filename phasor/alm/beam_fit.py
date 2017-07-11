@@ -19,6 +19,7 @@ from phasor.utilities.mpl.autoniceplot import (
 
 class QFit(declarative.OverridableObject):
     wavelen_nm = 1064
+    m2 = 1.00
 
     @declarative.mproperty
     def R_um(self, arg):
@@ -55,7 +56,7 @@ class QFit(declarative.OverridableObject):
         return arg
 
     def waist_func(self, z, z_0, z_R):
-        return (self.wavelen_nm * 1e-9 / (np.pi * z_R) * ((z + z_0)**2 + z_R**2))**.5
+        return (self.m2 * self.wavelen_nm * 1e-9 / (np.pi * z_R) * ((z + z_0)**2 + z_R**2))**.5
 
     def waist_func_fit(self, z):
         return self.waist_func(z, *self.Z0_ZR_fit)

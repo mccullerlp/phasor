@@ -88,6 +88,8 @@ class AutoPlotSaver(declarative.OverridableObject):
     formats.jpg.facecolorize = True
     formats.png.use = False
 
+    embed = False
+
     def __call__(self, fbasename, fig_or_fbunch = None):
         if fig_or_fbunch is None:
             return SaveToken(
@@ -143,15 +145,24 @@ class AutoPlotSaver(declarative.OverridableObject):
             fname = fbasename + '.png'
             print("figure: {0}".format(fname))
             print("[[file:{0}]]".format(fname))
-            try:
-                import IPython.display
-                import time
-                #IPython.display.display(IPython.display.Image(filename=fname, embed=False))
-                html_bit = '<img src="{1}/../{0}?{1}">'.format(fname, int(time.time()))
-                IPython.display.display(IPython.display.HTML(html_bit))
-                plt.close(fig)
-            except ImportError:
-                pass
+            if not self.embed:
+                try:
+                    import IPython.display
+                    import time
+                    #IPython.display.display(IPython.display.Image(filename=fname, embed=False))
+                    html_bit = '<img src="{1}/../{0}?{1}">'.format(fname, int(time.time()))
+                    IPython.display.display(IPython.display.HTML(html_bit))
+                    plt.close(fig)
+                except ImportError:
+                    pass
+            else:
+                try:
+                    import IPython.display
+                    import time
+                    IPython.display.display(IPython.display.Image("{0}".format(fname)))
+                    plt.close(fig)
+                except ImportError:
+                    pass
 
         fig.set_dpi(144)
         return
