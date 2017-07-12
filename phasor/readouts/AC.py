@@ -334,7 +334,7 @@ class ACReadoutLG(base.SystemElementBase):
 
     @decl.mproperty
     def OLG(self):
-        return (self.CLG - 1) / self.CLG
+        return (1 - self.CLG) / self.CLG
 
     @decl.mproperty
     def GPlant(self):

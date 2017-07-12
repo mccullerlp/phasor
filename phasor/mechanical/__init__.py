@@ -22,6 +22,11 @@ from .passive import (
     SeriesSpring,
 )
 
+from .string import (
+    ZConverter,
+    String,
+)
+
 from .noise import (
     ForceFluctuation,
     DisplacementFluctuation,

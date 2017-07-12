@@ -64,11 +64,11 @@ class Mechanical1PortBase(MechanicalElementBase):
 class Mechanical2PortBase(MechanicalElementBase):
     @decl.dproperty
     def pm_A(self):
-        return ports.MechanicalPort(sname = 'pm_A', pchain = 'pm_B')
+        return ports.MechanicalPort(pchain = 'pm_B')
 
     @decl.dproperty
     def pm_B(self):
-        return ports.MechanicalPort(sname = 'pm_B', pchain = 'pm_A')
+        return ports.MechanicalPort(pchain = 'pm_A')
 
     @decl.mproperty
     def pm_Fr(self):
@@ -89,19 +89,19 @@ class Mechanical2PortBase(MechanicalElementBase):
 class Mechanical4PortBase(MechanicalElementBase):
     @decl.dproperty
     def pm_A(self):
-        return ports.MechanicalPort(sname = 'pm_A')
+        return ports.MechanicalPort()
 
     @decl.dproperty
     def pm_B(self):
-        return ports.MechanicalPort(sname = 'pm_B')
+        return ports.MechanicalPort()
 
     @decl.dproperty
     def pm_C(self):
-        return ports.MechanicalPort(sname = 'pm_C')
+        return ports.MechanicalPort()
 
     @decl.dproperty
     def pm_D(self):
-        return ports.MechanicalPort(sname = 'pm_D')
+        return ports.MechanicalPort()
 
     @decl.mproperty
     def pm_FrA(self):
@@ -179,11 +179,15 @@ class Cable(Mechanical2PortBase):
     Basically a longitudinal wave string with. This should be designed to have certain characteristic mobility
     """
     @decl.dproperty
-    def length_ns(self, val = 0):
+    def delay_s(self, val = 0):
+        return val
+
+    @decl.dproperty
+    def Loss(self, val = 0):
         return val
 
     def phase_advance(self, F):
-        return self.symbols.exp(-2 * self.symbols.i * self.symbols.pi * F * self.length_ns)
+        return self.symbols.math.exp(-2 * self.symbols.i * self.symbols.pi * F * self.delay_s)
 
     def system_setup_ports(self, ports_algorithm):
         #TODO could reduce these with more information about used S-matrix elements
@@ -198,6 +202,11 @@ class Cable(Mechanical2PortBase):
         return
 
     def system_setup_coupling(self, matrix_algorithm):
+        if self.Loss != 0:
+            loss_coeff = (1 - self.Loss)**.5
+        else:
+            loss_coeff = 1
+
         for port1, port2 in [
             (self.pm_A, self.pm_B),
             (self.pm_B, self.pm_A),
@@ -206,7 +215,7 @@ class Cable(Mechanical2PortBase):
                 #if self.system.classical_frequency_test_max(kfrom, self.max_freq):
                 #    continue
                 freq = self.system.classical_frequency_extract(kfrom)
-                pgain = self.phase_advance(freq)
+                pgain = self.phase_advance(freq) * loss_coeff
                 matrix_algorithm.port_coupling_insert(
                     port1.i,
                     kfrom,
