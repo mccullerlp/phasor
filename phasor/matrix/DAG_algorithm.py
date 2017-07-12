@@ -78,7 +78,7 @@ def mgraph_simplify_inplace(
         mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
         vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
         mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
-        print("BADGUY STAGE, REMAINING {0}".format(len(req)))
+        vprint("BADGUY STAGE, REMAINING {0}".format(len(req)))
         mgraph_simplify_badguys(SRABE = SRABE, **kwargs)
     return
 
