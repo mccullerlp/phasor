@@ -56,7 +56,7 @@ def generate_dispatched(func_name):
         else:
             raise RuntimeError("Could not find function {0} for argument of type {1}".format(func_name, type(arg)))
         return act_func(arg, **kwargs)
-    func.__name__ = func_name
+    func.__name__ = str(func_name)
     return func
 
 
