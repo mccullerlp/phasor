@@ -2,6 +2,7 @@
 """
 """
 from __future__ import (division, print_function)
+from ..utilities.future_from_2 import str
 import numpy as np
 from collections import defaultdict
 import declarative
@@ -18,7 +19,10 @@ from .matrix_generic import (
     check_seq_req_balance,
 )
 
-def pk_prefs(*preflist, cut = False):
+def pk_prefs(*preflist, **kwargs):
+    #split kwargs for py2.7
+    cut = kwargs.get('cut', False)
+
     def key(pk):
         if cut:
             inout, pk = pk
