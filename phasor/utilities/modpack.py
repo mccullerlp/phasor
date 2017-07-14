@@ -1,7 +1,7 @@
 """
 Run after a notebook to generate a zip containing all python code not in any site-packages (custom script code)
 """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 import sys
 import re
 import tempfile

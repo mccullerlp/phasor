@@ -123,7 +123,7 @@ def {name}(self, value):
 
 MODULE_TEMPLATE = canonicalize_TQStrings(
 """
-from __future__ import division
+from __future__ import absolute_import, division, print_function, unicode_literals
 import numpy as np
 from numpy import pi
 

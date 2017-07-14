@@ -9,7 +9,7 @@ These are medium-duty implementations, they still use a hash-table for lookup, r
 
 .. autofunction:: topological_sort
 """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 #from builtins import str
 
 
