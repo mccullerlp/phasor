@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division, print_function, unicode_literals
-#from builtins import object
+from ..utilities.future_from_2 import object
 
 import numpy as np
 from ..math.complex import Complex

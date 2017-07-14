@@ -2,6 +2,7 @@
 """
 """
 from __future__ import division, print_function, unicode_literals
+#from ..utilities.future_from_2 import str, object, repr_compat
 import numpy as np
 
 from pprint import pprint
