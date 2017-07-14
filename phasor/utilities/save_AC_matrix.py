@@ -1,7 +1,7 @@
 """
 simple interface for saving matrix problems to pickles for later analysis and work on the matrix solving subsystem
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import division, print_function, unicode_literals
 import pickle
 
 

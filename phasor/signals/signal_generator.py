@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import division, print_function, unicode_literals
 #from phasor.utilities.print import print
 import declarative
 
@@ -10,8 +10,8 @@ import numpy as np
 #from numbers import Number
 #import warnings
 
-from . import bases
 from . import ports
+from . import bases
 
 from ..optics import standard_attrs as standard_attrs_opt
 

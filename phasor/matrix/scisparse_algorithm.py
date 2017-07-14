@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-from ..utilities.future_from_2 import str
+from __future__ import division, print_function, unicode_literals
 import numpy as np
 from collections import defaultdict
 import declarative

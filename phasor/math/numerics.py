@@ -10,7 +10,7 @@ Numerical Utilities
 
 .. autofunction:: _generate_bitfill
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import division, print_function, unicode_literals
 
 def linear_interpolate(start, finish, x):
     return (finish - start) * x + start

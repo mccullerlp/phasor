@@ -1,6 +1,6 @@
 """
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import division, print_function, unicode_literals
 from matplotlib import pyplot
 from matplotlib import gridspec
 import numpy as np

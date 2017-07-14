@@ -87,7 +87,7 @@ Some of the known remaining caveats are:
 
 - pe_C extension modules cannot be reloaded, and so cannot be autoreloaded.
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import division, print_function, unicode_literals
 
 skip_doctest = True
 

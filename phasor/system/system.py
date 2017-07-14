@@ -7,7 +7,7 @@ have measurement objects inject objects into the solver, so that the solver stat
 
 have coherent measurement systems able to run the solver independently to generate system-altering measurements
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import division, print_function, unicode_literals
 from phasor.utilities.print import print
 from collections import defaultdict
 from declarative import bunch
