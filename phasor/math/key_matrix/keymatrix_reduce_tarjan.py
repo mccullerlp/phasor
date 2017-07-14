@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Generators implementing Topological Sort and Strongly-connected-component detection using the `Tarjan Algorithm<http://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm>`_ for `Strongly-connected-components<http://en.wikipedia.org/wiki/Strongly_connected_component>`_
 

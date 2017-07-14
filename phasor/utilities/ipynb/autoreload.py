@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """IPython extension to reload modules before executing user code.
 
 ``autoreload`` reloads modules automatically before entering the execution of

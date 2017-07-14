@@ -57,8 +57,8 @@ class DictKey(MappingABC):
     def __repr__(self):
         l = tuple(sorted(self._dict.items()))
         #print(unicode(repr(l), 'utf-8'))
-        l2 = [u'{0}:{1}'.format(i, j) for i, j in l]
-        return u"DK{{{0}}}".format(u'|'.join(l2))
+        l2 = ['{0}:{1}'.format(i, j) for i, j in l]
+        return ("DK{{{0}}}".format('|'.join(l2)))
 
     def __or__(self, other):
         cp = dict(self._dict)

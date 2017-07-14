@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 simple interface for saving matrix problems to pickles for later analysis and work on the matrix solving subsystem
 """

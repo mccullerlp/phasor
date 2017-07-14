@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Run after a notebook to generate a zip containing all python code not in any site-packages (custom script code)
 """

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 The zM_termination uses mechanical mobility in its calculations, folling the electrical/mechanical impedance analogy. ps_In this case using mobility/admittance rather than impedance to preserve the mechanical topology.
 

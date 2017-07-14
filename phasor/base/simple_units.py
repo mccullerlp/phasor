@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 TODO: Add additional data to "ref" for a standard width. Ref can be the center, there can be a width, and val is the true (possibly symbolic) value
 """

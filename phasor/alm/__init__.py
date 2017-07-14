@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 from .beam_param import (
     ComplexBeamParam,
