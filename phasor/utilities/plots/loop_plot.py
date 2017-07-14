@@ -1,5 +1,6 @@
 """
 """
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 from matplotlib import pyplot
 from matplotlib import gridspec
 import numpy as np
@@ -126,7 +127,7 @@ def plot_loop(F, h, inv = True, full = True):
         axF2.CLG.set_ylabel("Gain")
         axF2.CLG_zoom.set_ylabel("Gain")
         #axF2.CLG_phase.set_ylabel("Phase [deg]")
-    
+
     axF.OLG.set_title("OLTF Gain")
     axF.OLG_zoom.set_title("OLTF Gain (zoomed)")
     axF.OLG_phase.set_title("OLTF Phase")
@@ -138,7 +139,7 @@ def plot_loop(F, h, inv = True, full = True):
     axF.ax_bottom.set_xlabel('Frequency [Hz]')
     axF.ax_bottom.set_xscale('log_zoom')
     axF.finalize()
-    
+
     if full:
         axF2.ax_bottom.set_xlabel('Frequency [Hz]')
         axF2.ax_bottom.set_xscale('log_zoom')

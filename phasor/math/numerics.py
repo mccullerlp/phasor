@@ -10,6 +10,7 @@ Numerical Utilities
 
 .. autofunction:: _generate_bitfill
 """
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 def linear_interpolate(start, finish, x):
     return (finish - start) * x + start
@@ -29,7 +30,7 @@ def _generate_bitfill(p):
 
     :param p: prime number which is also a primitive root of 2
 
-    Generates a lookup list for powers of two (called here a bitfill). To generate a valid bitfill, 
+    Generates a lookup list for powers of two (called here a bitfill). To generate a valid bitfill,
     p must be prime and 2 must be a primitive root of p. 37 is a good number for p as it is the smallest p above 32.
     """
     n = 0
@@ -37,7 +38,7 @@ def _generate_bitfill(p):
     bitfill = [None] * p
     while n < (len(bitfill) - 1):
         bitfill[num] = n
-        num = (num * 2) % len(bitfill) 
+        num = (num * 2) % len(bitfill)
         n += 1
     return bitfill
 
