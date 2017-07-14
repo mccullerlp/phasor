@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division, print_function, unicode_literals
+from ..utilities.future_from_2 import str
 #from phasor.utilities.print import print
 
 import declarative

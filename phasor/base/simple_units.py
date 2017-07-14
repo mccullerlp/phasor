@@ -2,6 +2,7 @@
 TODO: Add additional data to "ref" for a standard width. Ref can be the center, there can be a width, and val is the true (possibly symbolic) value
 """
 from __future__ import division, print_function, unicode_literals
+from ..utilities.future_from_2 import str
 import declarative
 import collections
 
