@@ -3,6 +3,7 @@
 """
 from __future__ import division, print_function, unicode_literals
 import sys
+from ..utilities.future_from_2 import repr_compat
 
 from collections import namedtuple
 from .dispatched import sin, cos, atan
@@ -46,6 +47,7 @@ class Complex(ReprMixin):
             self.imag = 0.
         return
 
+    @repr_compat
     def __repr__(self):
         return ''.join((self.__class__.__name__, "(", repr(self.real), ", ", repr(self.imag), ")"))
 

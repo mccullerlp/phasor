@@ -2,6 +2,7 @@
 """
 """
 from __future__ import division, print_function, unicode_literals
+from ..utilities.future_from_2 import repr_compat
 
 import declarative
 from declarative.utilities import SuperBase
@@ -63,6 +64,7 @@ class SystemElementBase(Element, SuperBase):
         self.owned_port_keys = dict()
         super(SystemElementBase, self).__init__(**kwargs)
 
+    @repr_compat
     def __repr__(self):
         if self.name is not None:
             return "{cls}({name})".format(cls = self.__class__.__name__, name = self.name)

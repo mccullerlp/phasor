@@ -2,7 +2,7 @@
 """
 """
 from __future__ import division, print_function, unicode_literals
-from ..utilities.future_from_2 import str
+from ..utilities.future_from_2 import str, repr_compat
 #from builtins import object
 from functools import wraps
 
@@ -184,6 +184,7 @@ class ElementBase(object):
     ):
         super(ElementBase, self).__init__(**kwargs)
 
+    @repr_compat
     def __repr__(self):
         if self.name is not None:
             return self.name

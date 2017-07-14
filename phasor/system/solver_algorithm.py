@@ -2,7 +2,7 @@
 """
 """
 from __future__ import division, print_function, unicode_literals
-from ..utilities.future_from_2 import str, object
+from ..utilities.future_from_2 import str, object, repr_compat
 
 import numpy as np
 from collections import defaultdict
@@ -726,23 +726,6 @@ class SystemSolver(object):
             dk_to = key_to[0] | key_to[1]
 
             if dk_from.contains(select_from) and dk_to.contains(select_to):
-                print(type(key_from[0]))
-                for k, y in key_from[0].items():
-                    print(type(k))
-                    print(type(y))
-                    print(k)
-                    print(k.encode('utf-8').decode('utf-8'))
-                    print(y.encode('utf-8').decode('utf-8'))
-                    print(k.__repr__())
-                    print(y.__repr__())
-                (key_from[0].__repr__())
-                print((key_from[0].__repr__()))
-                print((key_from[1].__repr__()))
-                print(repr(key_from[1].__repr__().encode('utf-8')).encode('utf-8'))
-                print(repr(key_from[1]))
-                unicode(key_from),
-                (key_to),
-                (value),
                 vals.append((
                     u"[{0: <50},{1: <60}]={2}".format(
                         (key_from.__str__()),

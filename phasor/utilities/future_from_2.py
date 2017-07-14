@@ -32,6 +32,15 @@ if sys.version_info < (3, 0, 0):
 
     from future.standard_library import install_aliases
     install_aliases()
+
+    #decode any unicode repr functions as py27 cannot handle them
+    def repr_compat(func):
+        def __repr__(self, *args, **kwargs):
+            return repr(func(self, *args, **kwargs).encode('utf-8').decode('utf-8'))
+        #wrap it
+        __repr__.__name__ = func.__name__
+        __repr__.__doc__ = func.__doc__
+        return __repr__
 else:
     super  = super
     object = object
@@ -52,3 +61,6 @@ else:
     round  = round
     str    = str
     zip    = zip
+
+    def repr_compat(func):
+        return func

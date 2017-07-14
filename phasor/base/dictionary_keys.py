@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division, print_function, unicode_literals
-from ..utilities.future_from_2 import str, object
+from ..utilities.future_from_2 import str, object, repr_compat
 
 from collections import Mapping as MappingABC
 import declarative
@@ -54,6 +54,7 @@ class DictKey(MappingABC):
         o1 = tuple(sorted(self._dict.items()))
         return l1 < o1
 
+    @repr_compat
     def __repr__(self):
         l = tuple(sorted(self._dict.items()))
         #print(unicode(repr(l), 'utf-8'))
