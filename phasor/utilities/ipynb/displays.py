@@ -4,19 +4,20 @@
 from __future__ import division, print_function, unicode_literals
 
 import IPython
+
 _ip = IPython.get_ipython()
+if _ip is not None:
+    _ip.magic("load_ext phasor.utilities.ipynb.autoreload")
+    _ip.magic("autoreload 2")
 
-_ip.magic("load_ext phasor.utilities.ipynb.autoreload")
-_ip.magic("autoreload 2")
-
-#if this is run from the console then inline can't be found. This hack seems to get around it
-try:
-    _ip.magic("matplotlib inline")
-    _ip.magic("pylab inline")
-except Exception:
-    _ip.magic("matplotlib")
-    _ip.magic("pylab")
-#mpl.use('GTK3Cairo')
+    #if this is run from the console then inline can't be found. This hack seems to get around it
+    try:
+        _ip.magic("matplotlib inline")
+        _ip.magic("pylab inline")
+    except Exception:
+        _ip.magic("matplotlib")
+        _ip.magic("pylab")
+    #mpl.use('GTK3Cairo')
 
 import numpy as np
 import matplotlib as mpl
@@ -61,8 +62,8 @@ from phasor.utilities.mpl.stacked_plots import (
     generate_stacked_plot_ax,
 )
 import matplotlib
-matplotlib.rcParams['savefig.dpi'] = 144
 
+matplotlib.rcParams['savefig.dpi'] = 144
 mpl.rcParams['axes.facecolor'] = 'FFFFFF'
 mpl.rcParams['figure.facecolor'] = 'FFFFFF'
 mpl.rcParams['figure.dpi'] = 130

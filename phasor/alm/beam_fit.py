@@ -50,8 +50,13 @@ class QFit(declarative.OverridableObject):
     @declarative.mproperty
     def Z0_ZR_init(self, arg = declarative.NOARG):
         if arg is declarative.NOARG:
-            Z0 = -(np.max(self.Z_m) + np.min(self.Z_m)) / 2
-            ZR = (np.max(self.Z_m) - np.min(self.Z_m)) / 2
+            idx_W0 = np.argsort(self.R_m)
+            W0 = self.R_m[idx_W0[0]]  * 1
+
+            print(W0)
+            ZR = np.pi*W0**2/(self.wavelen_nm * 1e-9)
+            Z0 = -np.mean(self.Z_m[idx_W0[:4]])
+            print(Z0 / .0254)
             arg = (Z0, ZR)
         return arg
 
@@ -61,9 +66,31 @@ class QFit(declarative.OverridableObject):
     def waist_func_fit(self, z):
         return self.waist_func(z, *self.Z0_ZR_fit)
 
+    no_prefit = False
     @declarative.mproperty
     def Z0_ZR_fit(self):
-        (z0, zR), hess = scipy.optimize.curve_fit(self.waist_func, self.Z_m, self.R_m, p0 = self.Z0_ZR_init)
+        idx_W0 = np.argmin(self.R_m)
+        init = self.Z0_ZR_init
+        #do a prefit to try and find tiny waists using a subset of the data
+        if idx_W0 > 1 and idx_W0 < len(self.R_m) - 1 and not self.no_prefit and len(self.R_m) > 3:
+            #don't include the point
+            if idx_W0 < len(self.R_m) / 2:
+                idx_W0 += 1
+                #ignore the actual point itself as it may be across a gap
+                init, hess = scipy.optimize.curve_fit(
+                    self.waist_func,
+                    self.Z_m[idx_W0:],
+                    self.R_m[idx_W0:],
+                    p0 = self.Z0_ZR_init
+                )
+            else:
+                init, hess = scipy.optimize.curve_fit(
+                    self.waist_func,
+                    self.Z_m[:idx_W0],
+                    self.R_m[:idx_W0],
+                    p0 = self.Z0_ZR_init
+                )
+        (z0, zR), hess = scipy.optimize.curve_fit(self.waist_func, self.Z_m, self.R_m, p0 = init)
         return (z0, zR)
 
     @declarative.mproperty
@@ -75,12 +102,15 @@ class QFit(declarative.OverridableObject):
         )
 
     @declarative.mproperty
-    def q_init(self):
-        return ComplexBeamParam.from_Z_ZR(
-            self.Z0_ZR_init[0],
-            self.Z0_ZR_init[1],
-            wavelen = self.wavelen_nm * 1e-9,
-        )
+    def q_init(self, initval = None):
+        if initval is None:
+            return ComplexBeamParam.from_Z_ZR(
+                self.Z0_ZR_init[0],
+                self.Z0_ZR_init[1],
+                wavelen = self.wavelen_nm * 1e-9,
+            )
+        else:
+            return initval
 
     def rep(self, place_in = 0):
         print(self.Z0_ZR_fit)

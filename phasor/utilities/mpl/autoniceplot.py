@@ -3,6 +3,7 @@
 """
 from __future__ import division, print_function, unicode_literals
 
+import warnings
 import os
 from os import path
 
@@ -113,6 +114,10 @@ class AutoPlotSaver(declarative.OverridableObject):
         subfolder = ''
         if self.org_subfolder:
             subfolder = self.org_subfolder
+
+        if '_' in fbasename:
+            warnings.warn("Image name contains '_' which will be changed to '-' to fix nbsphinx export")
+            fbasename = fbasename.replace('_', '-')
         fbasename = path.join(subfolder, fbasename)
         dirname = path.dirname(fbasename)
         if dirname and not os.path.exists(dirname):
@@ -144,15 +149,30 @@ class AutoPlotSaver(declarative.OverridableObject):
 
         if org_mode or self.org_subfolder:
             fname = fbasename + '.png'
-            print("figure: {0}".format(fname))
-            print("[[file:{0}]]".format(fname))
+            if org_mode:
+                print("figure: {0}".format(fname))
+                print("[[file:{0}]]".format(fname))
             if not self.embed:
                 try:
                     import IPython.display
                     import time
                     #IPython.display.display(IPython.display.Image(filename=fname, embed=False))
-                    html_bit = '<img src="{1}/../{0}?{1}">'.format(fname, int(time.time()))
-                    IPython.display.display(IPython.display.HTML(html_bit))
+                    #html_bit = '<img src="{1}/../{0}?{1}">'.format(fname, int(time.time()))
+                    #IPython.display.display(IPython.display.HTML(html_bit))
+                    ftype_md = []
+                    for fmt, fB in self.formats.items():
+                        if fB.use or fmt == 'png':
+                            md = "[{ftype}]({fbasename}.{ftype})".format(
+                                ftype = fmt,
+                                fbasename = fbasename
+                            )
+                            ftype_md.append(md)
+                    markdown_bit = '![{fbasename}]({0}?{1} "{fbasename}")'.format(
+                        fname,
+                        int(time.time()),
+                        fbasename = fbasename,
+                    )
+                    IPython.display.display(IPython.display.Markdown(markdown_bit + "\n" + ",  ".join(ftype_md)))
                     plt.close(fig)
                 except ImportError:
                     pass
