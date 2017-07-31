@@ -41,6 +41,7 @@ def pk_prefs(*preflist, **kwargs):
             return pk
     return key
 
+#TODO organize this sortkeys algorithm into system or somewhere
 def sortkeys_inplace(pklist):
     from ..optics import ports
     pklist.sort(key = pk_prefs(

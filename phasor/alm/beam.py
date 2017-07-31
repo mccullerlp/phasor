@@ -87,7 +87,7 @@ class MatrixAtsBase(Element):
         self.ctree.env_reversed = arg
         return self.ctree.env_reversed
 
-    @declarative.mproperty
+    @declarative.mproperty(simple_delete = True)
     @invalidate_auto
     def matrix_inv(self):
         #print(self.__class__)
@@ -209,7 +209,7 @@ class CNoP(CThinBase):
     def matrix(self):
         return np.matrix([[1, 0], [0, 1]])
 
-    @declarative.mproperty
+    @declarative.mproperty(simple_delete = True)
     def matrix_inv(self):
         return np.matrix([[1, 0], [0, 1]])
 
@@ -533,20 +533,28 @@ class CMirror(CThinBase):
             ])
         else:
             mat = np.matrix([
-                [1 ,     0],
-                [2/self.R_m.val , 1],
+                [1 , 0],
+                [0 , 1],
             ])
         return mat
 
     def mirror_description(self, z, from_target):
-        f_m = -1/self.matrix[1, 0]
-        return declarative.Bunch(
-            R_m = self.R_m.val,
-            f_m = f_m,
-            z = z,
-            type = 'mirror',
-            str = 'Mirror, R_m = {R_m}, f_m = {R_m}'.format(R_m = str_m(self.R_m.val), f_m = str_m(f_m)),
-        )
+        if self.R_m.val is not None:
+            f_m = -1/self.matrix[1, 0]
+            return declarative.Bunch(
+                R_m = self.R_m.val,
+                f_m = f_m,
+                z = z,
+                type = 'mirror',
+                str = 'Mirror, R_m = {R_m}, f_m = {R_m}'.format(R_m = str_m(self.R_m.val), f_m = str_m(f_m)),
+            )
+        else:
+            return declarative.Bunch(
+                R_m = self.R_m.val,
+                z = z,
+                type = 'mirror',
+                str = 'Mirror, flat',
+            )
 
     def system_data_targets(self, typename):
         dmap = {}

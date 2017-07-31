@@ -78,8 +78,12 @@ def generate_unitary_by_gram_schmidt(edge_dict_SRE, added_vect, vect_from):
             proj = proj + e.conjugate() * added_vect.get(k_to, 0)
             norm_sq = norm_sq + abssq(e)
 
-        for k_to in fseq:
-            added_vect[k_to] = added_vect.get(k_to, 0) - proj * edge_map[k_from, k_to] / norm_sq
+        if np.any(proj != 0):
+            for k_to in fseq:
+                added_vect[k_to] = added_vect.get(k_to, 0) - proj * edge_map[k_from, k_to] / norm_sq
+        else:
+            for k_to in fseq:
+                added_vect[k_to] = added_vect.get(k_to, 0)
 
     finfo = np.finfo(float)
     norm_sq = 0

@@ -3,10 +3,12 @@
 """
 from __future__ import division, print_function, unicode_literals
 import numpy as np
+from phasor.utilities.print import pprint
 
 #from ..math.dispatched import abs_sq
 
 N_limit_rel = 100
+N_limit_rel = 1.
 
 
 def abssq(arr):
@@ -41,7 +43,20 @@ def reduceLUQ_row(
 
     vprint("Using ROW Operations")
 
-    assert(req[node])
+    #if no req nodes then the Q operations are unnecessary
+    if not req[node]:
+        assert(not req[node])
+        assert(not seq[node])
+        assert(not req_alpha[node])
+        assert(not seq_beta[node])
+        return
+        return reduceLU(
+            SRABE = SRABE,
+            node = node,
+            node_costs_invalid_in_queue = node_costs_invalid_in_queue,
+            **kwargs
+        )
+
     rvec = []
     rvec_N = []
     rvec_self_idx = None
@@ -798,7 +813,20 @@ def reduceLUQ_col(
 
     vprint("Using COLUMN Operations")
 
-    assert(seq[node])
+    #if no req nodes then the Q operations are unnecessary
+    if not seq[node]:
+        assert(not req[node])
+        assert(not seq[node])
+        assert(not req_alpha[node])
+        assert(not seq_beta[node])
+        return
+        return reduceLU(
+            SRABE = SRABE,
+            node = node,
+            node_costs_invalid_in_queue = node_costs_invalid_in_queue,
+            **kwargs
+        )
+
     cvec = []
     cvec_N = []
     cvec_self_idx = None

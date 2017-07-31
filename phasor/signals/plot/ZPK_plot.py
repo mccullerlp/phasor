@@ -27,6 +27,7 @@ def eng_string(x, format='%.3f', si=False):
     and with si=True:
           1230.0 => 1.23k
       -1230000.0 => -1.23M
+
     '''
     sign = ''
     if x < 0:

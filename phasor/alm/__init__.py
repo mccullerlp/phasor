@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from ..base.autograft import (
+    Element,
+)
+
 from .beam_param import (
     ComplexBeamParam,
 )

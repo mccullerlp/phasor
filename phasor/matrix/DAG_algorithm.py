@@ -10,7 +10,7 @@ import declarative
 #from ..math.dispatched import abs_sq
 
 from ..utilities.priority_queue import HeapPriorityQueue, Empty
-from ..utilities.print import pprint
+from .metis_reorder import METIS_reorder
 
 from .matrix_generic import (
     pre_purge_inplace,
@@ -22,6 +22,7 @@ from .matrix_generic import (
 from .DAG_algorithm_impl import (
     reduceLU,
     reduceLUQ_row,
+    #reduceLUQ_col,
 )
 
 from ..base import (
@@ -41,6 +42,7 @@ def mgraph_simplify_inplace(
     SRABE,
     verbose        = False,
     sorted_order   = False,
+    order          = None,
     **kwargs
 ):
     if verbose:
@@ -71,8 +73,37 @@ def mgraph_simplify_inplace(
 
     SRABE = (seq, req, req_alpha, seq_beta, edge_map)
 
-    if sorted_order:
-        mgraph_simplify_sorted(SRABE = SRABE, **kwargs)
+    if order is not None:
+        vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
+        mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
+        vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
+        mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
+
+        import tempfile
+        if len(seq) > 3:
+            order = METIS_reorder(
+                SRABE = (seq, req, req_alpha, seq_beta, edge_map,),
+                METIS_fname = tempfile,
+            )
+            vprint("METIS STAGE, REMAINING {0}".format(len(req)))
+            #mgraph_simplify_badguys(SRABE = SRABE, **kwargs)
+            #TODO should check that the order exhausts the nodes to reduce
+
+            mgraph_simplify_ordered(
+                SRABE = SRABE,
+                order = order,
+                **kwargs
+            )
+            vprint("BADGUY STAGE, REMAINING {0}".format(len(req)))
+            mgraph_simplify_badguys(SRABE = SRABE, **kwargs)
+        else:
+            vprint("BADGUY STAGE, REMAINING {0}".format(len(req)))
+            mgraph_simplify_badguys(SRABE = SRABE, **kwargs)
+    elif sorted_order:
+        mgraph_simplify_sorted(
+            SRABE = SRABE,
+            **kwargs
+        )
     else:
         vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
         mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
@@ -104,6 +135,22 @@ def mgraph_simplify_sorted(
         reduceLU(
             SRABE = SRABE,
             node  = node,
+            **kwargs
+        )
+
+
+def mgraph_simplify_ordered(
+    SRABE,
+    order,
+    **kwargs
+):
+    seq, req, req_alpha, seq_beta, edge_map, = SRABE
+
+    for node in order:
+        reduceLUQ_row(
+            SRABE = SRABE,
+            node  = node,
+            node_costs_invalid_in_queue = set(),
             **kwargs
         )
 
@@ -237,7 +284,7 @@ def mgraph_simplify_badguys(
                 norm = enorm(edge_map[node, snode])
                 edge_norms[node, snode] = norm
             tot_norm = tot_norm + norm
-        return tot_norm
+        return tot_norm + 1
 
     def generate_col_cost(node):
         tot_norm = 0
@@ -247,12 +294,12 @@ def mgraph_simplify_badguys(
                 norm = enorm(edge_map[rnode, node])
                 edge_norms[node, rnode] = norm
             tot_norm = tot_norm + norm
-        return tot_norm
+        return tot_norm + 1
 
     def generate_max_cost(node):
         rcost = generate_row_cost(node)
         ccost = generate_col_cost(node)
-        return max(rcost, ccost)
+        return max(rcost, ccost) + 1
     generate_node_cost = generate_max_cost
 
     pqueue = HeapPriorityQueue()
@@ -331,6 +378,7 @@ def inverse_solve_inplace(
     verbose        = False,
     negative       = False,
     scattering     = False,
+    METIS_fname    = None,
     **kwargs
 ):
     if scattering:
@@ -435,11 +483,20 @@ def inverse_solve_inplace(
     #subN = len(wrapped_onodes) + len(wrapped_inodes)
     #print("SPARSITY ", len(seq) - subN, len(edge_map) - subN, (len(edge_map) - subN) / (len(seq) - subN))
 
+    order = None
+    if METIS_fname is not None:
+        #Use the SRABE representation and the edge map data to generate a metis file
+        order = METIS_reorder(
+            SRABE = (seq, req, req_alpha, seq_beta, edge_map,),
+            METIS_fname = METIS_fname,
+        )
+
     #simplify with the wrapped nodes
     mgraph_simplify_inplace(
         SRABE     = (seq, req, req_alpha, seq_beta, edge_map,),
         verbose   = verbose,
         SRABE_SYM = SRABE_SYM,
+        order     = order,
         **kwargs
     )
 
@@ -502,3 +559,4 @@ def inverse_solve_inplace(
         seq         = unwrapped_seq_map,
         req         = unwrapped_req_map,
     )
+

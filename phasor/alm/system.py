@@ -402,6 +402,8 @@ class CSystemStack(CSystem):
                     components_pos = components_pos,
                 )
         except Exception as E:
+            print("inside components_pos_pairings")
             print(E)
+            raise
 
 

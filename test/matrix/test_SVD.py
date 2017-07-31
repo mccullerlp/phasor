@@ -129,20 +129,37 @@ def test_sparse_SVD():
             np_test.assert_almost_equal(edge, 0)
     return
 
-def gen_rand_unitary(N = 10, length = 10):
+def gen_rand_unitary(
+        N = 10,
+        length = 10,
+        edge_density = 0.5,
+        unit_density = 0.9,
+        poisson_N = 3,
+):
     edge_map = dict()
-    for idx in range(N):
-        to1 = idx
-        edge_map[idx, to1] = mfunc(length, *mfunc_randargs())
 
-        if np.random.randint(0, 2) == 0:
-            to2 = np.random.randint(0, N)
-            if to2 == to1:
-                if idx + 1 != N:
-                    to2 = to1 + 1
-                else:
-                    to2 = to1 - 1
-            edge_map[idx, to2] = mfunc(length, *mfunc_randargs())
+    def edge_add(idx, to_idx):
+        if np.random.uniform() < unit_density:
+            #sometimes it is 1 to check sparsity speed
+            edge_map[idx, to_idx] = 1
+        else:
+            edge_map[idx, to_idx] = mfunc(length, *mfunc_randargs())
+
+    dither = 0
+    for idx in range(N):
+        #always adds a diagonal
+        to1 = idx
+        edge_add(idx, to1)
+
+        edge_count = dither + edge_density * poisson_N
+        dither = edge_count % 1.0
+        for _ in range(0, int(edge_count)):
+            if np.random.randint(0, poisson_N) == 0:
+                to2 = np.random.randint(0, N-1)
+                if to2 >= to1:
+                    #always avoid the self edge but add totally random edge
+                    to2 += 1
+                edge_add(idx, to2)
     sre1 = SRE_matrix_algorithms.edge_matrix_to_unitary_sre(edge_map)
     return sre1
 
