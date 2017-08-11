@@ -172,7 +172,7 @@ class FitterExpression(FitterBase):
                 expr_expanded = expr / N_expr,
             )
 
-    print_level = 3
+    print_level = 0
     def minimize_function(self):
         #TODO expression remapping
         print_time = True

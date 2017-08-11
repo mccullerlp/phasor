@@ -11,12 +11,6 @@ import declarative
 
 from .utils import (
     str_m,
-    #unit_str,
-    #eigen_q,
-    #TargetLeft,
-    #TargetRight,
-    #TargetIdx,
-    #np_check_sorted,
 )
 
 #from phasor.utilities.mpl.autoniceplot import (
@@ -31,21 +25,37 @@ from phasor.utilities.mpl.stacked_plots import (
 
 
 class MPlotter(declarative.OverridableObject):
-    sys = None
-    z = None
-    N_points = 300
-    overlap_target = None
+    sys       = None
+    fname     = None
+    z         = None
+    N_points  = 300
+    padding_m = None
+    padding_rel = .05
+
+    _overridable_object_save_kwargs = True
+    _overridable_object_kwargs = None
+
+    def regenerate(self, **kwargs):
+        usekwargs = dict(self._overridable_object_kwargs)
+        usekwargs.update(kwargs)
+        return self.__class__(
+            **usekwargs
+        )
+
+    def __call__(self, *args, **kwargs):
+        self.plot(*args, **kwargs)
 
     def plot(
             self,
-            fname = None,
-            sys = None,
-            z = None,
-            overlap_target = None,
-            annotate = 'full',
-            use_in = True,
-            padding_m = .1,
+            fname       = None,
+            sys         = None,
+            z           = None,
+            annotate    = 'full',
+            use_in      = True,
+            padding_m   = None,
+            padding_rel = None,
     ):
+        fname = declarative.first_non_none(fname, self.fname)
         if fname is None:
             raise RuntimeError("Must specify fname")
 
@@ -56,11 +66,17 @@ class MPlotter(declarative.OverridableObject):
             z_unit = 1
             z_unit_top = 1/.0254
 
-        sys = declarative.first_non_none(sys, self.sys)
-        z = declarative.first_non_none(z, self.z)
-        overlap_target = declarative.first_non_none(overlap_target, self.overlap_target)
+        sys         = declarative.first_non_none(sys, self.sys)
+        z           = declarative.first_non_none(z, self.z)
+        padding_m   = declarative.first_non_none(padding_m, self.padding_m)
+        padding_rel = declarative.first_non_none(padding_rel, self.padding_rel)
+
+        if sys is None:
+            raise RuntimeError("Must Provide a system to plot")
 
         if z is None:
+            if padding_m is None:
+                padding_m = sys.layout.width_m * padding_rel
             z = np.linspace(-padding_m, float(sys.layout.width_m) + padding_m, self.N_points)
 
         #fB = mplfigB(Nrows = 3)
@@ -100,9 +116,6 @@ class MPlotter(declarative.OverridableObject):
             last_phase = phase[-1]
             last_zsub = z_sub[-1]
             fB.Gouy.plot(z_unit * z_sub, 180 / np.pi * phase, label = tname)
-            if overlap_target is not None:
-                q_target = sys.target_obj(overlap_target).beam_q(sys.environment)
-                fB.ax3.semilogy(z_unit * z_sub, 1-(abs(qs1.overlap_with(q_target))**4))
         legend = fB.Gouy.legend(
             loc = 'upper left',
             ncol = 2,

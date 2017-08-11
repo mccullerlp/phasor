@@ -4,8 +4,8 @@
 from __future__ import division, print_function, unicode_literals
 
 import IPython
-
 _ip = IPython.get_ipython()
+
 if _ip is not None:
     _ip.magic("load_ext phasor.utilities.ipynb.autoreload")
     _ip.magic("autoreload 2")
@@ -39,18 +39,20 @@ from IPython.display import (
     SVG,
     clear_output,
     Audio,
+    Javascript,
 )
 
 #for more options in mpl
 import phasor.utilities.mpl
-from phasor.utilities.mpl.utils import indexed_cmap
-from phasor.utilities.np import logspaced, first_non_NaN
 
-#_ip.magic("load_ext utilities.ipynb.diagmagic")
-#try:
-#    _ip.magic("load_ext utilities.ipynb.hierarchymagic")
-#except ImportError:
-#    pass
+from phasor.utilities.mpl.utils import (
+    indexed_cmap,
+)
+
+from phasor.utilities.np import (
+    logspaced,
+    first_non_NaN
+)
 
 from phasor.utilities.mpl.autoniceplot import (
     AutoPlotSaver,
@@ -61,12 +63,37 @@ from phasor.utilities.mpl.autoniceplot import (
 from phasor.utilities.mpl.stacked_plots import (
     generate_stacked_plot_ax,
 )
+
 import matplotlib
 
+try:
+    import tabulate
+except ImportError:
+    pass
+
+#TODO remove from here
 matplotlib.rcParams['savefig.dpi'] = 144
 mpl.rcParams['axes.facecolor'] = 'FFFFFF'
 mpl.rcParams['figure.facecolor'] = 'FFFFFF'
 mpl.rcParams['figure.dpi'] = 130
 mpl.rcParams['savefig.dpi'] = 92
 mpl.rcParams['figure.figsize'] = [7.0, 3.0]
+mpl.rcParams['font.family'] = 'DejaVu Sans'
+
+
+def setup_asavefig(ipynb_name):
+    from os import path
+    asavefig.org_subfolder = path.splitext(ipynb_name)[0]
+
+
+def save_folder_js_hack(): 
+    display(
+        Javascript('IPython.notebook.kernel.execute("setup_asavefig(\'"+IPython.notebook.notebook_name+"\')");')
+    )
+
+    return
+
+save_folder_js_hack()
+
+
 

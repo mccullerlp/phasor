@@ -30,6 +30,21 @@ def generate_loc_m():
     return loc_m
 
 
+def generate_reference_m():
+    @decl.group_dproperty
+    def reference_m(desc):
+        return generate_refval_attribute(
+            desc,
+            ubunch = lengths_small,
+            stems = ['ref', ],
+            ctree_name = 'reference',
+            preferred_attr = 'ref_preferred',
+            default_attr = '_ref_default',
+            prototypes = ['full', 'base'],
+        )
+    return reference_m
+
+
 def generate_f_m():
     @decl.group_dproperty
     def f_m(desc):
