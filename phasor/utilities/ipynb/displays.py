@@ -72,7 +72,8 @@ except ImportError:
     pass
 
 #TODO remove from here
-matplotlib.rcParams['savefig.dpi'] = 144
+mpl.rcParams['savefig.dpi'] = 144
+mpl.rcParams['lines.linewidth'] = 1.0
 mpl.rcParams['axes.facecolor'] = 'FFFFFF'
 mpl.rcParams['figure.facecolor'] = 'FFFFFF'
 mpl.rcParams['figure.dpi'] = 130

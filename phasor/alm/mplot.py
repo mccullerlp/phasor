@@ -4,6 +4,7 @@
 from __future__ import division, print_function, unicode_literals
 #from ..utilities.future_from_2 import str, object, repr_compat
 import numpy as np
+from matplotlib.ticker import MultipleLocator, AutoMinorLocator
 
 from pprint import pprint
 from matplotlib.text import OffsetFrom
@@ -31,6 +32,14 @@ class MPlotter(declarative.OverridableObject):
     N_points  = 300
     padding_m = None
     padding_rel = .05
+
+    bbox_args = dict(boxstyle="round", fc="0.8")
+    bbox_args = dict()
+    arrow_args = dict(
+        arrowstyle="->",
+        connectionstyle="angle,angleB=90,angleA=180,rad=3",
+        linewidth = .5,
+    )
 
     _overridable_object_save_kwargs = True
     _overridable_object_kwargs = None
@@ -128,15 +137,15 @@ class MPlotter(declarative.OverridableObject):
         fB.Gouy.set_ylabel("Gouy Phase [deg]")
 
         fB.ax_bottom.set_xlim(z_unit * min(z), z_unit * max(z))
-        fB.ax_tope_2 = fB.ax_top.twiny()
-        fB.ax_tope_2.set_xlim(z_unit_top * min(z), z_unit_top * max(z))
+        fB.ax_top_2 = fB.ax_top.twiny()
+        fB.ax_top_2.set_xlim(z_unit_top * min(z), z_unit_top * max(z))
 
         if use_in:
             l = fB.ax_bottom.set_xlabel('Path [in]')
-            l2 = fB.ax_tope_2.set_xlabel('Path [m]')
+            l2 = fB.ax_top_2.set_xlabel('Path [m]')
         else:
             l = fB.ax_bottom.set_xlabel('Path [m]')
-            l2 = fB.ax_tope_2.set_xlabel('Path [in]')
+            l2 = fB.ax_top_2.set_xlabel('Path [in]')
         l.set_horizontalalignment('right')
         l.set_position((0.9, 0))
         l2.set_horizontalalignment('left')
@@ -145,17 +154,24 @@ class MPlotter(declarative.OverridableObject):
         if annotate:
             self.annotate(sys, fB, use_in = use_in, annotate = annotate)
         fB.finalize()
+        fB.ax_bottom.minorticks_on()
+        fB.ax_top_2.minorticks_on()
+        fB.width.minorticks_on()
+        fB.iROC.minorticks_on()
+        fB.Gouy.minorticks_on()
+
+        fB.width.grid(which='minor', linewidth = 0.5, ls = ':')
+        fB.iROC.grid(which='minor', linewidth = 0.5, ls = ':')
+        fB.Gouy.grid(which='minor', linewidth = 0.5, ls = ':')
+
+        fB.width.grid(which = 'major', linewidth = 1)
+        fB.iROC.grid(which = 'major', linewidth = 1)
+        fB.Gouy.grid(which = 'major', linewidth = 1)
+
+
         if fname is not None:
             fB.save(fname)
         return fB
-
-    bbox_args = dict(boxstyle="round", fc="0.8")
-    bbox_args = dict()
-    arrow_args = dict(
-        arrowstyle="->",
-        connectionstyle="angle,angleB=90,angleA=180,rad=3",
-        linewidth = .5,
-    )
 
     def annotate(self, sys, F, use_in = False, annotate = 'full'):
         all_desc_by_z = []
@@ -359,6 +375,7 @@ class MPlotter(declarative.OverridableObject):
                 F.width.axvline(z_unit * float(z), **lkw)
                 F.iROC.axvline(z_unit * float(z), **lkw)
                 F.Gouy.axvline(z_unit * float(z), **lkw)
+        F.width.set_ylim(0, None)
         return
 
 

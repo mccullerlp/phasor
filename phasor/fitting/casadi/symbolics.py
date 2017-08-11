@@ -39,6 +39,7 @@ class FitterSym(FitterBase):
             self,
             pvalue,
     ):
+        #TODO add the ability to set upper and lower bounds here for single non-complex variables
         for fdatum in pvalue.fitter_data:
             usecomplex = fdatum.get('usecomplex', False)
             system = pvalue.root
