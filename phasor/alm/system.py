@@ -53,6 +53,12 @@ class CSystem(
     _loc_default = ('loc_m', None)
     loc_m = attrs.generate_loc_m()
 
+    _boundary_left_default = ('boundary_left_m', None)
+    boundary_left = attrs.generate_boundary_left_m()
+
+    _boundary_right_default = ('boundary_right_m', None)
+    boundary_right = attrs.generate_boundary_right_m()
+
     @declarative.mproperty(simple_delete = True)
     @invalidate_auto
     def offset_m(self, arg = declarative.NOARG):
@@ -107,13 +113,44 @@ class CSystem(
             loc_m = 0
             loc_m_prev = None
             pos_list = []
-            if not self.env_reversed:
-                comp_iter = iter(self.components)
+
+            if self.boundary_left_m.ref is not None:
+                for idx, comp in enumerate(self.components):
+                    if comp.loc_m.ref >= self.boundary_left_m.ref:
+                        lslice = idx
+                        break
+                    else:
+                        if comp.loc_m.ref + comp.width_m >= self.boundary_left_m.ref:
+                            raise NotImplementedError("currently does not support system truncation that cuts objects (including subsystems)")
+                else:
+                    #if all of the components are behind the truncation, then index outside the component list
+                    lslice = idx + 1
             else:
-                comp_iter = iter(reversed(self.components))
+                lslice = None
+
+            if self.boundary_right_m.ref is not None:
+                for idx, comp in enumerate(reversed(self.components)):
+                    if comp.loc_m.ref <= self.boundary_right_m.ref:
+                        if comp.loc_m.ref + comp.width_m >= self.boundary_right_m.ref:
+                            raise NotImplementedError("currently does not support system truncation that cuts objects (including subsystems)")
+                        #this gives the actual (non reversed) index + 1
+                        rslice = len(self.components) - idx
+                        break
+                else:
+                    #if all of the components are behind the truncation, then index outside the component list
+                    rslice = 0
+            else:
+                rslice = None
+
+            if not self.env_reversed:
+                comp_iter = iter(self.components[slice(lslice, rslice)])
+            else:
+                comp_iter = iter(reversed(self.components[slice(lslice, rslice)]))
+
             for idx, comp in enumerate(comp_iter):
                 loc_m = None
                 if comp.loc_m.val is not None:
+                    #builds using negative indices when reversed
                     if not self.env_reversed:
                         loc_m = comp.loc_m.val
                     else:
@@ -139,14 +176,62 @@ class CSystem(
                                 invalidate = False,
                             )
                         )
+                    elif (
+                            (lslice is not None and not self.env_reversed) or
+                            (rslice is not None and self.env_reversed)
+                    ) :
+                        #put in a space for the gap the truncation edge
+                        if self.env_reversed:
+                            loc_m_prev = -self.boundary_right_m.val
+                        else:
+                            loc_m_prev = self.boundary_left_m.val
+                        pos_list.append(loc_m_prev)
+                        name = 'auto_space{0}'.format(idx)
+                        components_filled.append(
+                            self._internal.insert(
+                                obj = CSpace(
+                                    L_m = loc_m - loc_m_prev,
+                                    loc_m = loc_m,
+                                    #ctree = self.ctree['internal'][name],
+                                ),
+                                name = name,
+                                invalidate = False,
+                            )
+                        )
                 else:
                     loc_m = loc_m_prev
+
                 pos_list.append(loc_m)
                 components_pos.append(loc_m)
                 components_filled.append(comp)
                 #print comp, loc_m
                 loc_m += comp.width_m
                 loc_m_prev = loc_m
+
+            #now add the final space if there is a truncation
+            if (
+                    (rslice is not None and not self.env_reversed) or
+                    (lslice is not None and self.env_reversed)
+            ) :
+                #put in a space for the gap the truncation edge
+                if self.env_reversed:
+                    loc_m = -self.boundary_left_m.val
+                else:
+                    loc_m = self.boundary_right_m.val
+
+                pos_list.append(loc_m_prev)
+                name = 'auto_space{0}'.format(idx + 1)
+                components_filled.append(
+                    self._internal.insert(
+                        obj = CSpace(
+                            L_m = loc_m - loc_m_prev,
+                            loc_m = loc_m,
+                            #ctree = self.ctree['internal'][name],
+                        ),
+                        name = name,
+                        invalidate = False,
+                    )
+                )
             pos_list.append(loc_m)
             pos_list = np.asarray(pos_list) - pos_list[0]
             return declarative.Bunch(
@@ -349,6 +434,11 @@ class CSystem(
             for tidx, dfunc in list(comp.system_data_targets(typename).items()):
                 dmap[TargetIdx(tidx + (subidx,))] = dfunc
         return dmap
+
+    def _target_to_child(self, sub):
+        sub_target = self.parent._target_to_child(self)
+        subidx = self.filled_list.index(sub)
+        return TargetIdx((subidx, ) + sub_target )
 
     @declarative.mproperty(simple_delete = True)
     @invalidate_auto

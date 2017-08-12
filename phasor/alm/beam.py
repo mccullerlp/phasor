@@ -146,6 +146,15 @@ class MatrixAtsBase(Element):
     def constraints(self):
         return []
 
+    def as_target(self, direction = 'left'):
+        sub_target = self.parent._target_to_child(self)
+        if direction == 'left':
+            return TargetIdx(TargetLeft + sub_target)
+        elif direction == 'right':
+            return TargetIdx(TargetRight + sub_target)
+        else:
+            return None
+
     def environment_query_local(self, query):
         if query == (MatrixAtsBase, "reversed"):
             return self.env_reversed

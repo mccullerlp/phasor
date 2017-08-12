@@ -71,11 +71,12 @@ class PLCX(CSystemStack):
     def lens_description(self, z, from_target):
         f_m = -1/self.matrix[1, 0]
         return declarative.Bunch(
-            f_m = f_m,
+            f_m     = f_m,
             width_m = self.width_m * (-1 if from_target == TargetRight else 1),
-            z = z,
-            type = 'lens',
-            str = 'PLCX R_m={R_m} f_m = {f_m}'.format(R_m = str_m(self.R_m.val), f_m = str_m(f_m)),
+            z       = z,
+            type    = 'lens',
+            obj     = self,
+            str     = 'PLCX R_m={R_m} f_m={f_m}'.format(R_m = str_m(self.R_m.val), f_m = str_m(f_m)),
         )
 
     def system_data_targets(self, typename):
@@ -131,6 +132,7 @@ class CXCX(CSystemStack):
             R1_m = self.R1_m.val,
             R2_m = self.R2_m.val,
             z = z,
+            obj     = self,
             type = 'lens',
             str = 'CXCX R1_m={R1_m} R2_m={R2_m} f_m = {f_m}'.format(
                 R1_m = str_m(self.R1_m.val),

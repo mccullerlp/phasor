@@ -63,6 +63,7 @@ class MPlotter(declarative.OverridableObject):
             use_in      = True,
             padding_m   = None,
             padding_rel = None,
+            object_0    = None,
     ):
         fname = declarative.first_non_none(fname, self.fname)
         if fname is None:
@@ -79,6 +80,11 @@ class MPlotter(declarative.OverridableObject):
         z           = declarative.first_non_none(z, self.z)
         padding_m   = declarative.first_non_none(padding_m, self.padding_m)
         padding_rel = declarative.first_non_none(padding_rel, self.padding_rel)
+
+        if object_0 is not None:
+            z0 = sys.object_z(object_0)
+        else:
+            z0 = 0
 
         if sys is None:
             raise RuntimeError("Must Provide a system to plot")
@@ -113,8 +119,8 @@ class MPlotter(declarative.OverridableObject):
                 z_to = beam_zs[idx + 1]
                 z_sub = z_sub[z_sub < z_to]
             qs1 = sys.q_target_z(z_sub, tname)
-            fB.width.plot(z_unit * z_sub, 2 * 1e3 * qs1.W, label = tname)
-            fB.iROC.plot(z_unit * z_sub, qs1.R_inv, label = tname)
+            fB.width.plot(z_unit * (z_sub - z0), 2 * 1e3 * qs1.W, label = tname)
+            fB.iROC.plot(z_unit * (z_sub - z0), qs1.R_inv, label = tname)
             #fB.iROC.plot(z_unit * z_sub, qs1.W * qs1.R_inv, label = tname)
             #fB.iROC.plot(z_unit * z_sub, qs1.divergence_rad/2, label = tname)
             phase = np.unwrap(np.angle(qs1.gouy_phasor))
@@ -124,7 +130,7 @@ class MPlotter(declarative.OverridableObject):
             phase = phase - phase[zp_idx] + last_phase
             last_phase = phase[-1]
             last_zsub = z_sub[-1]
-            fB.Gouy.plot(z_unit * z_sub, 180 / np.pi * phase, label = tname)
+            fB.Gouy.plot(z_unit * (z_sub - z0), 180 / np.pi * phase, label = tname)
         legend = fB.Gouy.legend(
             loc = 'upper left',
             ncol = 2,
@@ -136,9 +142,9 @@ class MPlotter(declarative.OverridableObject):
         fB.iROC.set_ylabel('iROC [1/m]')
         fB.Gouy.set_ylabel("Gouy Phase [deg]")
 
-        fB.ax_bottom.set_xlim(z_unit * min(z), z_unit * max(z))
+        fB.ax_bottom.set_xlim(z_unit * min(z - z0), z_unit * max(z - z0))
         fB.ax_top_2 = fB.ax_top.twiny()
-        fB.ax_top_2.set_xlim(z_unit_top * min(z), z_unit_top * max(z))
+        fB.ax_top_2.set_xlim(z_unit_top * min(z - z0), z_unit_top * max(z - z0))
 
         if use_in:
             l = fB.ax_bottom.set_xlabel('Path [in]')
@@ -152,7 +158,13 @@ class MPlotter(declarative.OverridableObject):
         l2.set_position((0.1, 0))
 
         if annotate:
-            self.annotate(sys, fB, use_in = use_in, annotate = annotate)
+            self.annotate(
+                sys,
+                fB,
+                use_in = use_in,
+                annotate = annotate,
+                z0 = z0,
+            )
         fB.finalize()
         fB.ax_bottom.minorticks_on()
         fB.ax_top_2.minorticks_on()
@@ -173,7 +185,14 @@ class MPlotter(declarative.OverridableObject):
             fB.save(fname)
         return fB
 
-    def annotate(self, sys, F, use_in = False, annotate = 'full'):
+    def annotate(
+            self,
+            sys,
+            F,
+            use_in = False,
+            annotate = 'full',
+            z0 = 0,
+    ):
         all_desc_by_z = []
         if use_in:
             z_unit = 1/.0254
@@ -182,7 +201,8 @@ class MPlotter(declarative.OverridableObject):
 
         for wdesc in sys.waist_descriptions():
             all_desc_by_z.append((
-                wdesc.z, None,
+                wdesc.z - z0,
+                None,
                 wdesc.str,
                 dict(
                     color = 'green',
@@ -198,7 +218,8 @@ class MPlotter(declarative.OverridableObject):
         for wdesc in sys.mount_descriptions():
             if wdesc.type == 'mirror_mount':
                 all_desc_by_z.append((
-                    wdesc.z, wdesc.get('width_m', None),
+                    wdesc.z - z0,
+                    wdesc.get('width_m', None),
                     wdesc.str,
                     dict(
                         color = 'red',
@@ -213,7 +234,8 @@ class MPlotter(declarative.OverridableObject):
 
         for wdesc in sys.lens_descriptions():
             all_desc_by_z.append((
-                wdesc.z, wdesc.get('width_m', None),
+                wdesc.z - z0,
+                wdesc.get('width_m', None),
                 wdesc.str,
                 dict(
                     color = 'blue',
@@ -228,7 +250,8 @@ class MPlotter(declarative.OverridableObject):
 
         for wdesc in sys.mirror_descriptions():
             all_desc_by_z.append((
-                wdesc.z, wdesc.get('width_m', None),
+                wdesc.z - z0,
+                wdesc.get('width_m', None),
                 wdesc.str,
                 dict(
                     color = 'red',
@@ -243,7 +266,8 @@ class MPlotter(declarative.OverridableObject):
 
         for wdesc in sys.target_descriptions():
             all_desc_by_z.append((
-                wdesc.z, -float('inf'),
+                wdesc.z - z0,
+                -float('inf'),
                 wdesc.str,
                 dict(
                     color = 'orange',
@@ -257,7 +281,8 @@ class MPlotter(declarative.OverridableObject):
             ))
         for wdesc in sys.extra_descriptions():
             all_desc_by_z.append((
-                wdesc.z, wdesc.get('width_m', None),
+                wdesc.z - z0,
+                wdesc.get('width_m', None),
                 wdesc.str,
                 dict(
                     color = wdesc.get('color', ),
@@ -276,7 +301,7 @@ class MPlotter(declarative.OverridableObject):
         zs = np.array([tup[0] for tup in all_desc_by_z])
         xlow, xhigh = F.ax_top.get_xlim()
         xmid = (xlow + xhigh)/2
-        idx_mid = np.searchsorted(z_unit * zs, xmid)
+        idx_mid = np.searchsorted(z_unit * (zs), xmid)
 
         left_list = all_desc_by_z[:idx_mid]
         right_list = all_desc_by_z[idx_mid:]
@@ -298,7 +323,7 @@ class MPlotter(declarative.OverridableObject):
             if annotate == 'full':
                 an = F.ax_top.annotate(
                     desc, #'',
-                    xy=(z_unit * z, 1), xycoords=F.ax_top.get_xaxis_transform(),
+                    xy=(z_unit * (z), 1), xycoords=F.ax_top.get_xaxis_transform(),
                     xytext=(0, 15 + fsize_sep*idx), textcoords=OffsetFrom(F.ax_top.bbox, (1, 1), "points"),
                     ha = "right", va = "bottom",
                     bbox = self.bbox_args,

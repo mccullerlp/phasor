@@ -45,6 +45,36 @@ def generate_reference_m():
     return reference_m
 
 
+def generate_boundary_left_m():
+    @decl.group_dproperty
+    def boundary_left_m(desc):
+        return generate_refval_attribute(
+            desc,
+            ubunch = lengths_small,
+            stems = ['boundary_left', ],
+            ctree_name = 'boundary_left',
+            preferred_attr = 'boundary_left_preferred',
+            default_attr = '_boundary_left_default',
+            prototypes = ['full', 'base'],
+        )
+    return boundary_left_m
+
+
+def generate_boundary_right_m():
+    @decl.group_dproperty
+    def boundary_right_m(desc):
+        return generate_refval_attribute(
+            desc,
+            ubunch = lengths_small,
+            stems = ['boundary_right', ],
+            ctree_name = 'boundary_right',
+            preferred_attr = 'boundary_right_preferred',
+            default_attr = '_boundary_right_default',
+            prototypes = ['full', 'base'],
+        )
+    return boundary_right_m
+
+
 def generate_f_m():
     @decl.group_dproperty
     def f_m(desc):

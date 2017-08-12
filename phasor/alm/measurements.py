@@ -79,6 +79,11 @@ class CRootSystem(RootElement, CSystem):
             return self.env_wavelength_nm
         return super(CRootSystem, self).environment_query_local(query)
 
+    def _target_to_child(self, sub):
+        subidx = self.filled_list.index(sub)
+        return TargetIdx((subidx, ))
+
+
 
 class CMeasurements(Element):
     @declarative.dproperty
@@ -192,6 +197,10 @@ class CMeasurements(Element):
         tidx2 = self.target_idx(tname2)
         mat = self.layout.matrix_between(tidx1, tidx2)
         return mat
+
+    def object_z(self, oname, direction = 'left'):
+        tidx = oname.as_target(direction = direction)
+        return self.layout.target_pos(tidx)
 
     def target_z(self, tname):
         tidx = self.target_idx(tname)
