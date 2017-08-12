@@ -22,7 +22,7 @@ from .utils import (
 )
 
 from .beam import (
-    CSpace,
+    Space,
     MatrixAtsCompositeBase,
     MatrixAtsBase,
 )
@@ -35,7 +35,7 @@ from .mplot import MPlotter
 default_plotter = MPlotter()
 
 
-class CSystem(
+class System(
     MatrixAtsCompositeBase,
 ):
     plotter = default_plotter
@@ -167,7 +167,7 @@ class CSystem(
                         name = 'auto_space{0}'.format(idx)
                         components_filled.append(
                             self._internal.insert(
-                                obj = CSpace(
+                                obj = Space(
                                     L_m = loc_m - loc_m_prev,
                                     loc_m = loc_m,
                                     #ctree = self.ctree['internal'][name],
@@ -189,7 +189,7 @@ class CSystem(
                         name = 'auto_space{0}'.format(idx)
                         components_filled.append(
                             self._internal.insert(
-                                obj = CSpace(
+                                obj = Space(
                                     L_m = loc_m - loc_m_prev,
                                     loc_m = loc_m,
                                     #ctree = self.ctree['internal'][name],
@@ -223,7 +223,7 @@ class CSystem(
                 name = 'auto_space{0}'.format(idx + 1)
                 components_filled.append(
                     self._internal.insert(
-                        obj = CSpace(
+                        obj = Space(
                             L_m = loc_m - loc_m_prev,
                             loc_m = loc_m,
                             #ctree = self.ctree['internal'][name],
@@ -453,7 +453,7 @@ class CSystem(
                 constraints.extend(sub_constraints)
         return constraints
 
-class CSystemStack(CSystem):
+class SystemStack(System):
     @declarative.mproperty(simple_delete = True)
     def components(self, comp_list):
         components = []

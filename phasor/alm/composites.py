@@ -12,12 +12,12 @@ from .utils import (
 )
 
 from .beam import (
-    CLensInterface,
-    CSpace,
+    LensInterface,
+    Space,
 )
 
 from .system import (
-    CSystemStack,
+    SystemStack,
 )
 
 from .substrates import (
@@ -27,7 +27,7 @@ from .substrates import (
 
 from . import standard_attrs as attrs
 
-class PLCX(CSystemStack):
+class PLCX(SystemStack):
     substrate_inner = substrate_fused_silica
     substrate_outer = substrate_environment
 
@@ -36,7 +36,7 @@ class PLCX(CSystemStack):
 
     @declarative.dproperty
     def interface1(self):
-        return CLensInterface(
+        return LensInterface(
             ROC_preferred = self.ROC_preferred,
             substrate_from = self.substrate_outer,
             substrate_to   = self.substrate_inner,
@@ -45,7 +45,7 @@ class PLCX(CSystemStack):
 
     @declarative.dproperty
     def space(self):
-        return CSpace(
+        return Space(
             L_preferred = self.L_preferred,
             substrate = self.substrate_inner,
             loc_m = None,
@@ -53,7 +53,7 @@ class PLCX(CSystemStack):
 
     @declarative.dproperty
     def interface2(self):
-        return CLensInterface(
+        return LensInterface(
             ROC_preferred = None,
             substrate_from = self.substrate_inner,
             substrate_to   = self.substrate_outer,
@@ -86,7 +86,7 @@ class PLCX(CSystemStack):
         return dmap
 
 
-class CXCX(CSystemStack):
+class CXCX(SystemStack):
     substrate_inner = substrate_fused_silica
     substrate_outer = substrate_environment
 
@@ -96,21 +96,21 @@ class CXCX(CSystemStack):
 
     @declarative.dproperty
     def interface1(self):
-        return CLensInterface(
+        return LensInterface(
             ROC_preferred = self.ROC1_preferred,
             substrate_from = self.substrate_outer,
             substrate_to   = self.substrate_inner,
         )
     @declarative.dproperty
     def space(self):
-        return CSpace(
+        return Space(
             L_preferred = self.L_preferred,
             substrate = self.substrate_inner,
         )
 
     @declarative.dproperty
     def interface2(self):
-        return CLensInterface(
+        return LensInterface(
             ROC_preferred  = -self.ROC2_preferred,
             substrate_from = self.substrate_inner,
             substrate_to   = self.substrate_outer,

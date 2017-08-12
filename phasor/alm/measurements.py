@@ -31,12 +31,12 @@ from ..base.autograft import (
 )
 
 from .substrates import substrate_nitrogen
-from .system import CSystem
+from .system import System
 
 from declarative.bunch import DeepBunchSingleAssign
 
 
-class CRootSystem(RootElement, CSystem):
+class RootSystem(RootElement, System):
     _defer_build = False
 
     env_principle_target = None
@@ -56,7 +56,7 @@ class CRootSystem(RootElement, CSystem):
 
     @declarative.dproperty
     def measurements(self):
-        arg = CMeasurements(
+        arg = Measurements(
             layout = self,
         )
         return arg
@@ -77,7 +77,7 @@ class CRootSystem(RootElement, CSystem):
             return self.env_substrate
         elif query == (MatrixAtsBase, "wavelength_nm"):
             return self.env_wavelength_nm
-        return super(CRootSystem, self).environment_query_local(query)
+        return super(RootSystem, self).environment_query_local(query)
 
     def _target_to_child(self, sub):
         subidx = self.filled_list.index(sub)
@@ -85,7 +85,7 @@ class CRootSystem(RootElement, CSystem):
 
 
 
-class CMeasurements(Element):
+class Measurements(Element):
     @declarative.dproperty
     def layout(self, sys):
         return sys

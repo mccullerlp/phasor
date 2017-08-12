@@ -9,7 +9,7 @@ from . import standard_attrs as attrs
 
 from .beam import (
     MatrixAtsBase,
-    CNoP,
+    NoP,
 )
 
 from .utils import (
@@ -212,7 +212,7 @@ class LensMount(MountBase):
 
 class MirrorMount(MountBase):
     _target_type = 'mirror_mount'
-    subsystem    = CNoP()
+    subsystem    = NoP()
     substrate = substrate_environment
 
     detune_m = attrs.generate_detune_m()
@@ -249,12 +249,12 @@ class TargetMount(MountBase):
 
     @declarative.dproperty
     def subsystem(self):
-        return CNoP()
+        return NoP()
 
 
 class ConjMirrorMount(MountBase):
     _target_type = 'mirror_mount'
-    subsystem    = CNoP()
+    subsystem    = NoP()
     substrate = substrate_environment
 
     detune_m = attrs.generate_detune_m()

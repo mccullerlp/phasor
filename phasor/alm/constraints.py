@@ -25,11 +25,11 @@ from .measurements import (
     substrate_environment,
 )
 
-from .beam import CNoP
+from .beam import NoP
 
 
 
-class WaistLocation(CNoP):
+class WaistLocation(NoP):
 
     ZR_minimum = None
     ZR_maximum = None
@@ -53,7 +53,7 @@ class WaistLocation(CNoP):
         return dmap
 
 
-class BeamApertureConstraint(CNoP):
+class BeamApertureConstraint(NoP):
     W_minimum = None
     W_maximum = None
 

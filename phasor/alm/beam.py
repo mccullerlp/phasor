@@ -169,7 +169,7 @@ class MatrixAtsCompositeBase(MatrixAtsBase):
     pass
 
 
-class CThinBase(MatrixAtsBase, declarative.OverridableObject):
+class ThinBase(MatrixAtsBase, declarative.OverridableObject):
     width_m      = 0
 
     _loc_default = ('loc_m', None)
@@ -213,7 +213,7 @@ class CThinBase(MatrixAtsBase, declarative.OverridableObject):
         return dmap
 
 
-class CNoP(CThinBase):
+class NoP(ThinBase):
     @declarative.mproperty
     def matrix(self):
         return np.matrix([[1, 0], [0, 1]])
@@ -223,7 +223,7 @@ class CNoP(CThinBase):
         return np.matrix([[1, 0], [0, 1]])
 
 
-class BeamTargetBase(CNoP):
+class BeamTargetBase(NoP):
     def target_description(self, z):
         beam_q = self.beam_q
         return declarative.Bunch(
@@ -314,7 +314,7 @@ class BeamTarget(BeamTargetBase):
         return q_obj
 
 
-class CThinLens(CThinBase):
+class ThinLens(ThinBase):
 
     f_m = attrs.generate_f_m()
 
@@ -343,7 +343,7 @@ class CThinLens(CThinBase):
         return dmap
 
 
-class CSpace(MatrixAtsBase, declarative.OverridableObject):
+class Space(MatrixAtsBase, declarative.OverridableObject):
     substrate = substrate_environment
 
     L_m = attrs.generate_L_m()
@@ -467,7 +467,7 @@ class CSpace(MatrixAtsBase, declarative.OverridableObject):
         return dmap
 
 
-class CLensInterface(CThinBase):
+class LensInterface(ThinBase):
     substrate_from = substrate_environment
     substrate_to   = substrate_environment
 
@@ -530,7 +530,7 @@ class CLensInterface(CThinBase):
         return mat
 
 
-class CMirror(CThinBase):
+class Mirror(ThinBase):
     R_m = attrs.generate_R_m()
 
     @declarative.mproperty

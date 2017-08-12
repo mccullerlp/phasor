@@ -9,10 +9,10 @@ from .beam_param import (
 )
 
 from .beam import (
-    CSpace,
-    CThinLens,
+    Space,
+    ThinLens,
     BeamTarget,
-    CMirror,
+    Mirror,
 )
 
 from .composites import (
@@ -46,12 +46,12 @@ from .substrates import (
 
 
 from .system import (
-    CSystem,
-    CSystemStack,
+    System,
+    SystemStack,
 )
 
 from .measurements import (
-    CRootSystem
+    RootSystem
 )
 
 
