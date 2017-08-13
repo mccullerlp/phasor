@@ -35,6 +35,11 @@ from .system import System
 
 from declarative.bunch import DeepBunchSingleAssign
 
+from .mplot import MPlotter
+
+default_plotter = MPlotter()
+
+
 
 class RootSystem(RootElement, System):
     _defer_build = False
@@ -44,6 +49,14 @@ class RootSystem(RootElement, System):
     env_wavelength_nm    = 1064
 
     _loc_default = ('loc_m', 0)
+
+    plotter = default_plotter
+
+    @declarative.mproperty
+    def plot(self):
+        return self.plotter.regenerate(
+            sys = self.measurements,
+        )
 
     @declarative.mproperty
     def env_reversed(self):
@@ -423,6 +436,37 @@ class Measurements(Element):
         for z, q, target_side, dfunc in data:
             ret = dfunc(z = z, q = q, from_target = target_side)
             if ret is not None:
+                z_descs.append(ret)
+        return z_descs
+
+    def detune_descriptions(self, beam_source = None):
+        funcmap = self.layout.system_data_targets('detune_description')
+        data = []
+        N = len(self.beam_targets.tname)
+        for idx in range(N):
+            target = self.beam_targets.tname[idx]
+            if idx != 0:
+                z1 = self.beam_targets.z[idx]
+            else:
+                z1 = -float('inf')
+            if idx + 1 == N:
+                z2 = float('inf')
+            else:
+                z2 = self.beam_targets.z[idx+1]
+            for z, q, target_side, dfunc in self._z_q_descmap(funcmap, target):
+                if z > z1 and z <= z2:
+                    data.append((z, q, target_side, dfunc))
+
+        z_descs = []
+        for z, q, target_side, dfunc in data:
+            print(target_side)
+            if target_side == TargetRight:
+                continue
+            ret = dfunc(z = z, q_left = q)
+            if ret is not None:
+                ret.z = z
+                ret.mag = abs(ret.cplg02)
+                ret.deg = np.angle(ret.cplg02.real + 1j * ret.cplg02.imag, deg = True)
                 z_descs.append(ret)
         return z_descs
 

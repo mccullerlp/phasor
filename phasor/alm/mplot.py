@@ -52,7 +52,7 @@ class MPlotter(declarative.OverridableObject):
         )
 
     def __call__(self, *args, **kwargs):
-        self.plot(*args, **kwargs)
+        return self.plot(*args, **kwargs)
 
     def plot(
             self,
@@ -64,6 +64,7 @@ class MPlotter(declarative.OverridableObject):
             padding_m   = None,
             padding_rel = None,
             object_0    = None,
+            **kwargs
     ):
         fname = declarative.first_non_none(fname, self.fname)
         if fname is None:
@@ -123,6 +124,7 @@ class MPlotter(declarative.OverridableObject):
             fB.iROC.plot(z_unit * (z_sub - z0), qs1.R_inv, label = tname)
             #fB.iROC.plot(z_unit * z_sub, qs1.W * qs1.R_inv, label = tname)
             #fB.iROC.plot(z_unit * z_sub, qs1.divergence_rad/2, label = tname)
+            #phase = np.unwrap(np.angle(qs1.gouy_phasor))
             phase = np.unwrap(np.angle(qs1.gouy_phasor))
             zp_idx = np.searchsorted(z_sub, last_zsub)
             if zp_idx >= len(z_sub):
@@ -164,6 +166,7 @@ class MPlotter(declarative.OverridableObject):
                 use_in = use_in,
                 annotate = annotate,
                 z0 = z0,
+                **kwargs
             )
         fB.finalize()
         fB.ax_bottom.minorticks_on()
@@ -180,10 +183,9 @@ class MPlotter(declarative.OverridableObject):
         fB.iROC.grid(which = 'major', linewidth = 1)
         fB.Gouy.grid(which = 'major', linewidth = 1)
 
-
         if fname is not None:
             fB.save(fname)
-        return fB
+        return declarative.Bunch(locals())
 
     def annotate(
             self,
@@ -192,6 +194,7 @@ class MPlotter(declarative.OverridableObject):
             use_in = False,
             annotate = 'full',
             z0 = 0,
+            include_detuning = False,
     ):
         all_desc_by_z = []
         if use_in:
@@ -294,6 +297,23 @@ class MPlotter(declarative.OverridableObject):
                     lw = .5,
                 ),
             ))
+
+        if include_detuning:
+            for wdesc in sys.detune_descriptions():
+                all_desc_by_z.append((
+                    wdesc.z - z0,
+                    wdesc.get('width_m', None),
+                    "02 detuning: {0:.1f}/m , {1:.1f}deg".format(wdesc.mag, wdesc.deg),
+                    dict(
+                        color = wdesc.get('color', 'cyan'),
+                        ls = '--',
+                        lw = .5,
+                    ),
+                    dict(
+                        color = wdesc.get('color', 'cyan'),
+                        lw = .5,
+                    ),
+                ))
 
         none_to_zero = lambda v : v if v is not None else 0
         all_desc_by_z.sort(key = lambda v: tuple(none_to_zero(x) for x in v[:2]))

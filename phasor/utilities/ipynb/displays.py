@@ -84,7 +84,7 @@ mpl.rcParams['font.family'] = 'DejaVu Sans'
 
 def setup_asavefig(ipynb_name):
     from os import path
-    asavefig.org_subfolder = path.splitext(ipynb_name)[0]
+    asavefig.org_subfolder = path.splitext(ipynb_name)[0] + '-ipynb'
 
 
 def save_folder_js_hack(): 

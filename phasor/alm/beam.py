@@ -336,10 +336,21 @@ class ThinLens(ThinBase):
             str = 'thin lens f_m = {f_m}'.format(f_m = str_m(self.f_m.val)),
         )
 
+    def detune_description(self, z, q_left):
+        q_right = q_left.propagate_matrix(self.matrix)
+        cplg02 = q_right.cplg02 - q_left.cplg02
+        return declarative.Bunch(
+            cplg02   = cplg02,
+            type    = 'mirror',
+            obj     = self,
+        )
+
     def system_data_targets(self, typename):
         dmap = {}
         if typename == 'lens_description':
             dmap[TargetIdx()] = self.lens_description
+        elif typename == 'detune_description':
+            dmap[TargetIdx()] = self.detune_description
         return dmap
 
 
@@ -565,10 +576,21 @@ class Mirror(ThinBase):
                 str = 'Mirror, flat',
             )
 
+    def detune_description(self, z, q_left):
+        q_right = q_left.propagate_matrix(self.matrix)
+        cplg02 = q_right.cplg02 + q_left.cplg02
+        return declarative.Bunch(
+            cplg02   = cplg02,
+            type    = 'mirror',
+            obj     = self,
+        )
+
     def system_data_targets(self, typename):
         dmap = {}
         if typename == 'mirror_description':
             dmap[TargetIdx()] = self.mirror_description
+        elif typename == 'detune_description':
+            dmap[TargetIdx()] = self.detune_description
         return dmap
 
 

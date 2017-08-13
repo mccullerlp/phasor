@@ -12,8 +12,13 @@ class ComplexBeamParam(object):
     All distances should be in the same units as the wavelength.
     """
     pi = np.pi
-    ps_In = 1j
+    I = 1j
+
+
+    #make this complex number dispatch smarter
     complex = Complex
+
+
     nominal_wavelen = 1.064e-6
     gouy_phasor = 1
 
@@ -42,7 +47,7 @@ class ComplexBeamParam(object):
             wavelen = cls.nominal_wavelen
         ZR = cls.pi*W0**2/wavelen
         return cls(
-            Z + cls.ps_In*ZR,
+            Z + cls.I*ZR,
             wavelen = wavelen,
             gouy_phasor = gouy_phasor,
         )
@@ -56,7 +61,7 @@ class ComplexBeamParam(object):
             gouy_phasor = None,
     ):
         return cls(
-            Z + cls.ps_In*ZR,
+            Z + cls.I*ZR,
             wavelen = wavelen,
             gouy_phasor = gouy_phasor,
         )
@@ -91,6 +96,11 @@ class ComplexBeamParam(object):
     @property
     def ZR(self):
         return dmath.im(self.value)
+
+    @property
+    def cplg02(self):
+        #the order matters right now because the Complex class is stupid
+        return (self.value / self.value.conjugate()) / self.ZR * (self.gouy_phasor / self.gouy_phasor.conjugate())
 
     @property
     def W(self):
@@ -153,7 +163,13 @@ class ComplexBeamParam(object):
         return (
             (self.value * other.value.conjugate()) / (other.value.conjugate() - self.value)
             * (2 * self.wavelen / (other.W * self.W * self.pi))
-        ) * -self.ps_In
+        ) * -self.I
+
+    def diff_self_overlap_m(self, other):
+        return (
+            (self.value * other.value.conjugate()) / (other.value.conjugate() - self.value)
+            * (2 * self.wavelen / (other.W * self.W * self.pi))
+        ) * -self.I
 
     def __str__(self):
         if self.R_inv != 0:

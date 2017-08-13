@@ -79,10 +79,21 @@ class PLCX(SystemStack):
             str     = 'PLCX R_m={R_m} f_m={f_m}'.format(R_m = str_m(self.R_m.val), f_m = str_m(f_m)),
         )
 
+    def detune_description(self, z, q_left):
+        q_right = q_left.propagate_matrix(self.matrix)
+        cplg02 = q_right.cplg02 - q_left.cplg02
+        return declarative.Bunch(
+            cplg02   = cplg02,
+            type    = 'lens',
+            obj     = self,
+        )
+
     def system_data_targets(self, typename):
         dmap = {}
         if typename == 'lens_description':
             dmap[TargetIdx()] = self.lens_description
+        elif typename == 'detune_description':
+            dmap[TargetIdx()] = self.detune_description
         return dmap
 
 
@@ -141,9 +152,20 @@ class CXCX(SystemStack):
             ),
         )
 
+    def detune_description(self, z, q_left):
+        q_right = q_left.propagate_matrix(self.matrix)
+        cplg02 = q_right.cplg02 - q_left.cplg02
+        return declarative.Bunch(
+            cplg02   = cplg02,
+            type    = 'lens',
+            obj     = self,
+        )
+
     def system_data_targets(self, typename):
         dmap = {}
         if typename == 'lens_description':
             dmap[TargetIdx()] = self.lens_description
+        elif typename == 'detune_description':
+            dmap[TargetIdx()] = self.detune_description
         return dmap
 

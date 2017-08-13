@@ -29,23 +29,9 @@ from .beam import (
 
 from . import standard_attrs as attrs
 
-from .mplot import MPlotter
-
-
-default_plotter = MPlotter()
-
-
 class System(
     MatrixAtsCompositeBase,
 ):
-    plotter = default_plotter
-
-    @declarative.mproperty
-    def plot(self):
-        return self.plotter.regenerate(
-            sys = self.measurements,
-        )
-
     @declarative.mproperty
     def _internal(self):
         return Element()
