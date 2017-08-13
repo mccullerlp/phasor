@@ -271,9 +271,9 @@ class System(
         if result is not None:
             return result
         if tidx1 == TargetLeft:
-            if tidx2 is TargetLeft:
+            if tidx2 == TargetLeft:
                 mat = np.eye(2)
-            elif tidx2 is TargetRight:
+            elif tidx2 == TargetRight:
                 mat = self.matrix
             else:
                 tidx2_outer = tidx2[-1]
@@ -283,9 +283,9 @@ class System(
                     mat = comp.matrix * mat
                 mat = self.filled_list[tidx2_outer].matrix_between(TargetLeft, tidx2_inner) * mat
         elif tidx1 == TargetRight:
-            if tidx2 is TargetLeft:
+            if tidx2 == TargetLeft:
                 mat = self.matrix**(-1)
-            elif tidx2 is TargetRight:
+            elif tidx2 == TargetRight:
                 mat = np.eye(2)
             else:
                 tidx2_outer = tidx2[-1]

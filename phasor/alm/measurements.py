@@ -459,7 +459,6 @@ class Measurements(Element):
 
         z_descs = []
         for z, q, target_side, dfunc in data:
-            print(target_side)
             if target_side == TargetRight:
                 continue
             ret = dfunc(z = z, q_left = q)
