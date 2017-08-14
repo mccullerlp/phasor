@@ -10,10 +10,8 @@ import declarative
 #import sympy
 
 
-from ..base.autograft import (
-    Element,
-    invalidate_auto
-)
+from ..base.autograft import invalidate_auto
+from ..base.bases import Element
 
 from .beam_param import (
     ComplexBeamParam

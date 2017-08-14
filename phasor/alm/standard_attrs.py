@@ -32,7 +32,7 @@ def generate_loc_m():
 
 def generate_reference_m():
     @decl.group_dproperty
-    def reference_m(desc):
+    def ref_m(desc):
         return generate_refval_attribute(
             desc,
             ubunch = lengths_small,
@@ -42,7 +42,7 @@ def generate_reference_m():
             default_attr = '_ref_default',
             prototypes = ['full', 'base'],
         )
-    return reference_m
+    return ref_m
 
 
 def generate_boundary_left_m():

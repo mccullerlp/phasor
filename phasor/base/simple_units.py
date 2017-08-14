@@ -28,12 +28,12 @@ class SimpleUnitfulGroup(declarative.OverridableObject):
         return val
 
     @declarative.mproperty
-    def refQ(self, val):
-        return val * self.units
+    def refQ(self):
+        return self.ref * self.units
 
     @declarative.mproperty
-    def valQ(self, val):
-        return val * self.units
+    def valQ(self):
+        return self.val * self.units
 
     def __add__(self, other):
         units_to = self.units

@@ -58,6 +58,7 @@ def generate_refval_attribute(
                     default = None
                 else:
                     default = getattr(self, default_attr)
+
                 if default is None:
                     raise RuntimeError("Must Provide one in: {0}".format(list(group.keys())))
                 else:

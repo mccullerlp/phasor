@@ -93,6 +93,7 @@ class FitterSym(FitterBase):
             #TODO: document or describe what this bunch type should hold
             sbunch = declarative.Bunch(
                 datum         = datum,
+                sysname       = sysname,
                 symbol        = symbol,
                 initial_value = ival,
                 upper_bound   = datum.get('upper_bound', float('inf')),

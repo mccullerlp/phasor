@@ -27,10 +27,13 @@ class QFitBeamTarget(BeamTargetBase):
 
     @declarative.dproperty
     def beam_q(self):
-        if self.ref_m is None:
-            return self.qfit.q_fit
+        if self.ref_m.val is None:
+            q_value = self.qfit.q_fit
         else:
-            return self.qfit.q_fit.propagate_distance(self.loc_m.val - self.ref_m.val)
+            q_value = self.qfit.q_fit.propagate_distance(self.loc_m.val - self.ref_m.val)
+        if self.env_reversed:
+            q_value = q_value.reversed()
+        return q_value
 
     _ref_default = ('ref_m', None)
     ref_m = attrs.generate_reference_m()

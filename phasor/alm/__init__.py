@@ -13,6 +13,7 @@ from .beam import (
     ThinLens,
     BeamTarget,
     Mirror,
+    NoP,
 )
 
 from .composites import (

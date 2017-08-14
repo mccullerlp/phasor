@@ -82,19 +82,7 @@ mpl.rcParams['figure.figsize'] = [7.0, 3.0]
 mpl.rcParams['font.family'] = 'DejaVu Sans'
 
 
-def setup_asavefig(ipynb_name):
+def setup_auto_savefig(ipynb_name, check_warn = False):
     from os import path
-    asavefig.org_subfolder = path.splitext(ipynb_name)[0] + '-ipynb'
-
-
-def save_folder_js_hack(): 
-    display(
-        Javascript('IPython.notebook.kernel.execute("setup_asavefig(\'"+IPython.notebook.notebook_name+"\')");')
-    )
-
-    return
-
-save_folder_js_hack()
-
-
-
+    new =  path.splitext(ipynb_name)[0] + '-ipynb'
+    asavefig.org_subfolder = new

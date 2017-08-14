@@ -156,6 +156,85 @@ class FitterRoot(RootElement, FitterBase):
         #TODO expression remapping on the constraints
         return ret
 
+    def symbol_values_table(self):
+        all_symbols = []
+        smappers   = self.targets_recurse(VISIT.symbol_map)
+        for smapper in smappers:
+            for sbunch in smapper():
+                all_symbols.append(
+                    (sbunch.datum.name_global, sbunch.initial_value, sbunch.units)
+                )
+        all_symbols.sort()
+        return all_symbols
+
+    def symbol_values_table_print(self):
+        import tabulate
+        tab = []
+        for name, val, unit in self.symbol_values_table():
+            if isinstance(val, Complex):
+                valstr = "{0:.3e}+{1:.3e}".format(val.real, val.imag)
+            else:
+                valstr = "{0:.3e}".format(val)
+            if unit.startswith('1 '):
+                unit = unit[2:]
+            tab.append((name, val, unit))
+
+        print(tabulate.tabulate(tab))
+        return
+
+    def symbol_values_fitted_table(self):
+        all_symbols = []
+        #get the symbol list from the parent, but use the current root map
+        smappers   = self.inst_preincarnation.targets_recurse(VISIT.symbol_map)
+        for smapper in smappers:
+            for sbunch in smapper():
+                fitted_val = sbunch.datum.initial(self.meta_ooa[sbunch.sysname])
+                all_symbols.append(
+                    (sbunch.datum.name_global, sbunch.initial_value, fitted_val, sbunch.units)
+                )
+        all_symbols.sort()
+        return all_symbols
+
+    def symbol_values_fitted_table_print(
+        self,
+        ipymd = False,
+    ):
+        import tabulate
+        tab = []
+        for name, vali, valf, unit in self.symbol_values_fitted_table():
+            if isinstance(vali, Complex):
+                valistr = "{0:.3e}+{1:.3e}".format(vali.real, vali.imag)
+                valfstr = "{0:.3e}+{1:.3e}".format(valf.real, valf.imag)
+            else:
+                valistr = "{0:.3e}".format(vali)
+                valfstr = "{0:.3e}".format(valf)
+            if unit.startswith('1 '):
+                unit = unit[2:]
+                tab.append((name, valistr, valfstr, unit))
+
+        if not ipymd:
+            print(tabulate.tabulate(tab, headers = ['name', 'init', 'fit', 'units']))
+        else:
+            print()
+            from IPython.display import (
+                display,
+                Markdown
+            )
+            display(Markdown(
+                tabulate.tabulate(
+                    tab,
+                    headers = [
+                        'name',
+                        'init',
+                        'fit',
+                        'units'
+                    ],
+                    tablefmt='pipe',
+            )))
+        return
+
+
+
     @declarative.mproperty
     @invalidate_auto
     def symbol_map(self):
