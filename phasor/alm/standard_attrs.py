@@ -112,7 +112,7 @@ def generate_R_m(variant = ''):
             stems = ['R{0}'.format(variant), 'ROC{0}'.format(variant)],
             ctree_name = 'ROC{0}'.format(variant),
             preferred_attr = 'ROC{0}_preferred'.format(variant),
-            default_attr = '_ROC_default',
+            default_attr = '_ROC{0}_default'.format(variant),
             prototypes = ['full', 'base'],
         )
     return R_m

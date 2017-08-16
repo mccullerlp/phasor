@@ -236,10 +236,14 @@ class MPlotter(declarative.OverridableObject):
                 ))
 
         for wdesc in sys.lens_descriptions():
+            str_tag = ''
+            obj = wdesc.get('obj', None)
+            if obj is not None and hasattr(obj, 'DCC'):
+                str_tag = '[{}] '.format(obj.DCC)
             all_desc_by_z.append((
                 wdesc.z - z0,
                 wdesc.get('width_m', None),
-                wdesc.str,
+                str_tag + wdesc.str,
                 dict(
                     color = 'blue',
                     ls = '--',

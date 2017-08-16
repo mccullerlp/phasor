@@ -8,7 +8,7 @@ from distutils.sysconfig import get_python_lib
 from setuptools import find_packages, setup
 
 
-version = '1.0.0.dev2'
+version = '1.0.0.dev3'
 
 extra_install_requires = []
 if sys.version_info < (3,0):

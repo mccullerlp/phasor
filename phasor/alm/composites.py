@@ -32,6 +32,7 @@ class PLCX(SystemStack):
     substrate_inner = substrate_fused_silica
     substrate_outer = substrate_environment
 
+    _length_default = ('L_mm', 6.35)
     L_m = attrs.generate_L_m()
     R_m = attrs.generate_R_m()
 
@@ -102,6 +103,7 @@ class CXCX(SystemStack):
     substrate_inner = substrate_fused_silica
     substrate_outer = substrate_environment
 
+    _length_default = ('L_mm', 6.35)
     L_m = attrs.generate_L_m()
     R1_m = attrs.generate_R_m(variant = '1')
     R2_m = attrs.generate_R_m(variant = '2')
