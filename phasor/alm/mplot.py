@@ -64,6 +64,7 @@ class MPlotter(declarative.OverridableObject):
             padding_m   = None,
             padding_rel = None,
             object_0    = None,
+            full_beams  = False,
             **kwargs
     ):
         fname = declarative.first_non_none(fname, self.fname)
@@ -113,12 +114,13 @@ class MPlotter(declarative.OverridableObject):
         last_zsub = 0
         for idx, tname in enumerate(sys.beam_targets.tname):
             z_sub = z
-            if idx > 0:
-                z_from = beam_zs[idx - 1]
-                z_sub = z_sub[z_sub > z_from]
-            if idx < len(beam_zs) - 1:
-                z_to = beam_zs[idx + 1]
-                z_sub = z_sub[z_sub < z_to]
+            if not full_beams:
+                if idx > 0:
+                    z_from = beam_zs[idx - 1]
+                    z_sub = z_sub[z_sub > z_from]
+                if idx < len(beam_zs) - 1:
+                    z_to = beam_zs[idx + 1]
+                    z_sub = z_sub[z_sub < z_to]
             qs1 = sys.q_target_z(z_sub, tname)
             fB.width.plot(z_unit * (z_sub - z0), 2 * 1e3 * qs1.W, label = tname)
             fB.iROC.plot(z_unit * (z_sub - z0), qs1.R_inv, label = tname)
@@ -304,10 +306,15 @@ class MPlotter(declarative.OverridableObject):
 
         if include_detuning:
             for wdesc in sys.detune_descriptions():
+
+                if wdesc.type == 'mirror':
+                    label = "02 detuning: {0:.1f}/m , {1:.1f}deg : gouy {2:.1f}deg".format(wdesc.mag, wdesc.deg, np.angle(wdesc.q.gouy_phasor, deg = True))
+                else:
+                    label = "02 detuning: {0:.1f}/m , {1:.1f}deg".format(wdesc.mag, wdesc.deg)
                 all_desc_by_z.append((
                     wdesc.z - z0,
                     wdesc.get('width_m', None),
-                    "02 detuning: {0:.1f}/m , {1:.1f}deg".format(wdesc.mag, wdesc.deg),
+                    label,
                     dict(
                         color = wdesc.get('color', 'cyan'),
                         ls = '--',

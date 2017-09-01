@@ -17,6 +17,10 @@ from .beam_param import (
     ComplexBeamParam
 )
 
+from ..base.multi_unit_args import (
+    unitless_refval_attribute,
+)
+
 from .utils import (
     TargetLeft,
     TargetRight,
@@ -339,7 +343,8 @@ class ThinLens(ThinBase):
         cplg02 = q_right.cplg02 - q_left.cplg02
         return declarative.Bunch(
             cplg02   = cplg02,
-            type    = 'mirror',
+            type    = 'lens',
+            q       = q_left,
             obj     = self,
         )
 
@@ -580,6 +585,7 @@ class Mirror(ThinBase):
         return declarative.Bunch(
             cplg02   = cplg02,
             type    = 'mirror',
+            q       = q_left,
             obj     = self,
         )
 
@@ -591,4 +597,43 @@ class Mirror(ThinBase):
             dmap[TargetIdx()] = self.detune_description
         return dmap
 
+
+class ABCDGeneric(ThinBase):
+    _A_default = 1
+    @declarative.dproperty_adv
+    def A(desc):
+        return unitless_refval_attribute(
+            desc,
+            prototypes    = ['full', 'base'],
+            default_attr  = '_A_default',
+            allow_fitting = True,
+        )
+
+    _B_default = 0
+    @declarative.dproperty_adv
+    def B(desc):
+        return unitless_refval_attribute(
+            desc,
+            prototypes    = ['full', 'base'],
+            default_attr  = '_B_default',
+            allow_fitting = True,
+        )
+
+    _C_default = 0
+    @declarative.dproperty_adv
+    def C(desc):
+        return unitless_refval_attribute(
+            desc,
+            prototypes    = ['full', 'base'],
+            default_attr  = '_C_default',
+            allow_fitting = True,
+        )
+
+    @declarative.dproperty
+    def D(self):
+        return (self.C.val * self.B.val + 1)/self.A.val
+
+    @declarative.mproperty
+    def matrix(self):
+        return np.matrix([[self.A.val, self.B.val], [self.C.val, self.D]])
 

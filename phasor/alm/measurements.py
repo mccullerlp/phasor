@@ -15,6 +15,7 @@ from .utils import (
     TargetRight,
     TargetIdx,
     np_check_sorted,
+    unit_str,
 )
 
 from .beam import (
@@ -228,6 +229,16 @@ class Measurements(Element):
                 olap *= abs(self.overlap(tprev, tnext))**4
             tprev = tnext
         return olap
+
+    def overlap_list(self, *tlist):
+        tprev = self.beam_targets.tname[0]
+        olaps = []
+        for tnext in self.beam_targets.tname[1:]:
+            tnext = tnext
+            if (not tlist) or (tnext in tlist):
+                olaps.append(abs(self.overlap(tprev, tnext))**4)
+            tprev = tnext
+        return olaps
 
     def overlap(self, tname1 = None, tname2 = None):
         if (tname1 is None) and (tname2 is None):
@@ -501,4 +512,154 @@ class Measurements(Element):
             funcmap_inv[name] = tidx
         #TODO, deal with non-uniques
         return funcmap_inv[tname]
+
+    def target_excursions_angle(
+            self,
+            targets,
+            overlap_reduction = 0.1,
+            beam_source       = None,
+            matrix_output     = False,
+            excursions_output = False,
+            print_ipy_table   = False,
+    ):
+        """
+        """
+        headers = ['target', 'max', 'sv1', 'sv2']
+        if beam_source is None:
+            beam_target = self.target_idx(self.beam_targets.tname[-1])
+            target_obj = self.layout.target_obj(beam_target)
+            q_in = target_obj.beam_q
+        tmat_sense = q_in.sensitivity_matrix
+        bigmat = []
+        for target in targets:
+            tname = target.as_target()
+            M = self.layout.matrix_between(tname, beam_target)
+            mat = M
+            #mat =  tmat_sense.T * M
+            #q_new = q_in.propagate_matrix(self.layout.matrix_between(tname, beam_target)**-1)
+            #print(q_new)
+            #print()
+            #print(mat.T * mat)
+            #print(q_new.sensitivity_matrix_sqrt.T * q_new.sensitivity_matrix_sqrt)
+            #print(mat)
+            #print(q_new.sensitivity_matrix_sqrt)
+            vect_angle = np.array(mat)[:, 1]
+            bigmat.append(vect_angle)
+        fullmat = np.matrix(bigmat).T
+        fullmat = fullmat.T * q_in.sensitivity_matrix * fullmat
+        if matrix_output:
+            return fullmat
+
+        s, v = np.linalg.eig(-np.asarray(fullmat))
+        gains = []
+        for idx, sval in enumerate(s):
+            if sval < 1e-12:
+                continue
+            gain = overlap_reduction**.5 / sval**.5
+            gains.append(gain * v[:, idx])
+        gains = np.asarray(gains)
+        max_excursion = np.max(abs(gains), axis = 0)
+        if excursions_output:
+            return max_excursion
+        values = np.vstack([targets, max_excursion, gains]).T
+
+        if print_ipy_table:
+            import tabulate
+            if len(targets) >= 2:
+                table = np.vstack([np.asarray(['SVal inv * 1000', '', 1/s[0]**.5, 1/s[1]**.5], dtype = object), values])
+            else:
+                table = np.vstack([np.asarray(['SVal inv * 1000', '', 1/s[0]**.5], dtype = object), values])
+            def tostr(val):
+                if isinstance(val, float):
+                    return unit_str(val, d = 3, unit = 'rad')
+                return val
+            table = np.asarray([tostr(v) for v in table.flatten()], dtype = object).reshape(table.shape)
+
+            from IPython.display import (
+                display,
+                Markdown
+            )
+            display(Markdown(
+                tabulate.tabulate(
+                    table,
+                    headers = headers,
+                    tablefmt='pipe',
+            )))
+        return max_excursion
+
+
+
+    def target_excursions_displacement(
+            self,
+            targets,
+            overlap_reduction = 0.1,
+            beam_source       = None,
+            matrix_output     = False,
+            excursions_output = False,
+            print_ipy_table   = False,
+    ):
+        """
+        """
+        headers = ['target', 'max', 'sv1', 'sv2']
+        if beam_source is None:
+            beam_target = self.target_idx(self.beam_targets.tname[-1])
+            target_obj = self.layout.target_obj(beam_target)
+            q_in = target_obj.beam_q
+        tmat_sense = q_in.sensitivity_matrix
+        bigmat = []
+        for target in targets:
+            tname = target.as_target()
+            M = self.layout.matrix_between(tname, beam_target)
+            mat = M
+            vect_angle = np.array(mat)[:, 0]
+            bigmat.append(vect_angle)
+        fullmat = np.matrix(bigmat).T
+        fullmat = fullmat.T * q_in.sensitivity_matrix * fullmat
+        if matrix_output:
+            return fullmat
+
+        s, v = np.linalg.eig(-np.asarray(fullmat))
+        gains = []
+        for idx, sval in enumerate(s):
+            if sval < 1e-12:
+                continue
+            gain = overlap_reduction**.5 / sval**.5
+            gains.append(gain * v[:, idx])
+        gains = np.asarray(gains)
+        max_excursion = np.max(abs(gains), axis = 0)
+        if excursions_output:
+            return max_excursion
+        values = np.vstack([targets, max_excursion, gains]).T
+
+        if print_ipy_table:
+            import tabulate
+            if len(targets) >= 2:
+                table = np.vstack([np.asarray(['SVal inv * 1000', '', 1/s[0]**.5, 1/s[1]**.5], dtype = object), values])
+            else:
+                table = np.vstack([np.asarray(['SVal inv * 1000', '', 1/s[0]**.5], dtype = object), values])
+            def tostr(val):
+                if isinstance(val, float):
+                    return unit_str(val, d = 3, unit = 'm')
+                return val
+            table = np.asarray([tostr(v) for v in table.flatten()], dtype = object).reshape(table.shape)
+
+            from IPython.display import (
+                display,
+                Markdown
+            )
+            display(Markdown(
+                tabulate.tabulate(
+                    table,
+                    headers = headers,
+                    tablefmt='pipe',
+            )))
+        return max_excursion
+
+
+
+
+
+
+
+
 

@@ -208,9 +208,11 @@ class FitterRoot(RootElement, FitterBase):
             else:
                 valistr = "{0:.3e}".format(vali)
                 valfstr = "{0:.3e}".format(valf)
+            if unit is None:
+                unit = 'None'
             if unit.startswith('1 '):
                 unit = unit[2:]
-                tab.append((name, valistr, valfstr, unit))
+            tab.append((name, valistr, valfstr, unit))
 
         if not ipymd:
             print(tabulate.tabulate(tab, headers = ['name', 'init', 'fit', 'units']))

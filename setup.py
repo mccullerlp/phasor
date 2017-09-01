@@ -39,7 +39,9 @@ setup(
         'IPython',
         'pyyaml',
         'declarative',
-        'scikit-umfpack',
+        #'scikit-umfpack',
+        'casadi',
+
     ] + extra_install_requires,
     tests_require = [
         'pytest',

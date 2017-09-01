@@ -14,11 +14,13 @@ from .beam import (
     BeamTarget,
     Mirror,
     NoP,
+    ABCDGeneric,
 )
 
 from .composites import (
     PLCX,
     CXCX,
+    PLCXMirror,
 )
 
 from .mounts import (

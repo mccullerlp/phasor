@@ -191,14 +191,14 @@ class QFit(declarative.OverridableObject):
 
         F.ax0.plot(
             Z_pts / .0254,
-            2 * 1e6 * self.q_fit.propagate_distance(Z_pts).W,
+            self.m2**.5 * 2 * 1e6 * self.q_fit.propagate_distance(Z_pts).W,
             color = color_fit,
             label = fit_label,
         )
         if init:
             F.ax0.plot(
                 Z_pts / .0254,
-                2 * 1e6 * self.q_init.propagate_distance(Z_pts).W,
+                self.m2**.5 * 2 * 1e6 * self.q_init.propagate_distance(Z_pts).W,
                 color = color_init,
                 label = 'Initial',
             )

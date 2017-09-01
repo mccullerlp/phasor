@@ -122,6 +122,25 @@ class ComplexBeamParam(object):
     def k(self):
         return 2 * self.pi / self.wavelen
 
+    @property
+    def sensitivity_matrix(self):
+        ZR = self.ZR
+        Z = -self.Z
+        return -self.k / (4*ZR) * np.matrix([[1, Z], [Z, Z**2 + ZR**2]])
+
+    @property
+    def sensitivity_matrix_sqrt(self):
+        SM = self.sensitivity_matrix
+        a = -SM[0, 0]
+        b = -SM[0, 1]
+        c = -SM[1, 0]
+        d = -SM[1, 1]
+        det = a*d - b*c
+        trace = a + d
+        s = det**.5
+        t = (trace + 2 * s)**.5
+        return np.matrix([[a + s, b], [c, d + s]]) / t
+
     def propagate_matrix(self, abcd_mat):
         a = abcd_mat[0, 0]
         b = abcd_mat[0, 1]
