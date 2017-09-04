@@ -14,7 +14,7 @@ import matplotlib as mpl
 import os.path as path
 
 #from YALL.alm.beam import *
-from phasor.alm.measurements import CRootSystem
+from phasor.alm.measurements import RootSystem
 import phasor.alm.beam as CB
 import phasor.alm.system as CS
 #from phasor.alm.beam_param import ComplexBeamParam
@@ -29,22 +29,22 @@ from IPython.lib.pretty import pprint as print
 
 
 def test_cavity(plot):
-    print(CRootSystem.loc_m)
-    sys = CRootSystem()
+    print(RootSystem.loc_m)
+    sys = RootSystem()
     sys.own.q1 = CB.BeamTarget(
         loc_m = 0,
-        q_system = CS.CSystem(loc_m = 0),
+        q_system = CS.System(loc_m = 0),
         #q_raw = CB.ComplexBeamParam.from_Z_ZR(0, .04),
     )
-    sys.q1.q_system.own.m1 = CB.CMirror(
+    sys.q1.q_system.own.m1 = CB.Mirror(
         R_m = .2,
         loc_m = 0,
     )
-    sys.q1.q_system.own.m2 = CB.CMirror(
+    sys.q1.q_system.own.m2 = CB.Mirror(
         R_m = .2,
         loc_m = .1,
     )
-    sys.q1.q_system.own.c_return = CB.CNoP(
+    sys.q1.q_system.own.c_return = CB.NoP(
         loc_m = .2,
     )
     sys.own.cav = sys.q1.q_system.replica_generate(loc_m = .0001)

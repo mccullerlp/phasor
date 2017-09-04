@@ -14,7 +14,7 @@ import os.path as path
 
 import phasor.fitting.casadi as FIT
 #from YALL.alm.beam import *
-from phasor.alm.measurements import CRootSystem
+from phasor.alm.measurements import RootSystem
 import phasor.alm.beam as CB
 #from phasor.alm.beam_param import ComplexBeamParam
 #import phasor.alm.system as CS
@@ -27,23 +27,23 @@ asavefig.org_subfolder = path.join(path.dirname(__file__), 'tests')
 
 
 def buildsys():
-    sys = CRootSystem(
+    sys = RootSystem(
         env_principle_target = 'q1',
     )
     sys.own.q1 = CB.BeamTarget(
         loc_m = 0,
         q_raw = CB.ComplexBeamParam.from_Z_ZR(0, .04),
     )
-    sys.own.lens1 = CB.CThinLens(
+    sys.own.lens1 = CB.ThinLens(
         f_m = .1,
         loc_in = 7,
     )
-    sys.own.lens2 = CB.CThinLens(
+    sys.own.lens2 = CB.ThinLens(
         f_m = .1,
         loc_in = 21,
     )
 
-    sys2 = CRootSystem(
+    sys2 = RootSystem(
         env_principle_target = 'q1',
     )
     sys2.own.q1 = CB.BeamTarget(
@@ -54,11 +54,11 @@ def buildsys():
         loc_in = 28,
         q_raw = sys.measurements.q_target_z(.4, 'q1'),
     )
-    sys2.own.lens1 = CB.CThinLens(
+    sys2.own.lens1 = CB.ThinLens(
         f_m = .1,
         loc_in = 5,
     )
-    sys2.own.lens2 = CB.CThinLens(
+    sys2.own.lens2 = CB.ThinLens(
         f_m = .1,
         loc_in = 23,
     )

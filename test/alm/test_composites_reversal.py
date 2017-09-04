@@ -28,8 +28,8 @@ asavefig.org_subfolder = path.join(path.dirname(__file__), 'tests')
 
 def test_composites(plot):
     def gensys(reversed):
-        sys = alm_measurements.CRootSystem()
-        sys.own.sub1 = alm_system.CSystem(
+        sys = alm_measurements.RootSystem()
+        sys.own.sub1 = alm_system.System(
             loc_m = 0,
             reversed = reversed,
         )
@@ -37,7 +37,7 @@ def test_composites(plot):
             loc_m = 0,
             q_raw = alm_beam.ComplexBeamParam.from_Z_ZR(0, .5),
         )
-        #sys.sub1.own.m1 = alm_beam.CThinLens(
+        #sys.sub1.own.m1 = alm_beam.ThinLens(
         #    f_m = .5,
         #    loc_m = .5,
         #)
@@ -46,7 +46,7 @@ def test_composites(plot):
             loc_m = .5,
             L_m = .02,
         )
-        sys.sub1.own.c_return = alm_beam.CNoP(
+        sys.sub1.own.c_return = alm_beam.NoP(
             loc_m = 1,
         )
         return sys

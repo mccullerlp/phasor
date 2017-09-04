@@ -14,7 +14,7 @@ import matplotlib as mpl
 import os.path as path
 
 #from YALL.alm.beam import *
-from phasor.alm.measurements import CRootSystem
+from phasor.alm.measurements import RootSystem
 import phasor.alm.beam as CB
 #from phasor.alm.beam_param import ComplexBeamParam
 #import phasor.alm.system as CS
@@ -28,7 +28,7 @@ from IPython.lib.pretty import pprint as print
 
 
 def test_layout(plot):
-    sys = CRootSystem(
+    sys = RootSystem(
         env_principle_target = 'q1',
     )
 
@@ -36,7 +36,7 @@ def test_layout(plot):
         loc_m = 0,
         q_raw = CB.ComplexBeamParam.from_Z_ZR(0, .04),
     )
-    sys.own.lens1 = CB.CThinLens(
+    sys.own.lens1 = CB.ThinLens(
         f_m = .1,
         loc_in = 7,
     )
