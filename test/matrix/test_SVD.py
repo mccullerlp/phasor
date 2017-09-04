@@ -136,31 +136,53 @@ def gen_rand_unitary(
         unit_density = 0.9,
         poisson_N = 3,
 ):
-    edge_map = dict()
+    while True:
+        edge_map = dict()
+        edge_map_temp = dict()
+        groups = set()
 
-    def edge_add(idx, to_idx):
-        if np.random.uniform() < unit_density:
-            #sometimes it is 1 to check sparsity speed
-            edge_map[idx, to_idx] = 1
-        else:
-            edge_map[idx, to_idx] = mfunc(length, *mfunc_randargs())
+        def edge_add(idx, to_idx):
+            if np.random.uniform() < unit_density:
+                #sometimes it is 1 to check sparsity speed
+                edge_map_temp[idx, to_idx] = 1
+            else:
+                edge_map_temp[idx, to_idx] = mfunc(length, *mfunc_randargs())
 
-    dither = 0
-    for idx in range(N):
-        #always adds a diagonal
-        to1 = idx
-        edge_add(idx, to1)
+        dither = 0
+        idx = 0
+        while idx < N:
+            edge_map_temp.clear()
+            new_group = []
+            #always adds a diagonal
+            to1 = idx
+            edge_add(idx, to1)
+            new_group.append(to1)
 
-        edge_count = dither + edge_density * poisson_N
-        dither = edge_count % 1.0
-        for _ in range(0, int(edge_count)):
-            if np.random.randint(0, poisson_N) == 0:
-                to2 = np.random.randint(0, N-1)
-                if to2 >= to1:
-                    #always avoid the self edge but add totally random edge
-                    to2 += 1
-                edge_add(idx, to2)
-    sre1 = SRE_matrix_algorithms.edge_matrix_to_unitary_sre(edge_map)
+            edge_count = dither + edge_density * poisson_N
+            dither = edge_count % 1.0
+            for _ in range(0, int(edge_count)):
+                if np.random.randint(0, poisson_N) == 0:
+                    to2 = np.random.randint(0, N-1)
+                    if to2 >= to1:
+                        #always avoid the self edge but add totally random edge
+                        to2 += 1
+                    edge_add(idx, to2)
+                    new_group.append(to2)
+            new_group.sort()
+            new_group = tuple(new_group)
+            #void singular matrices by preventing common assignment (since many of the entries are 1)
+            if new_group in groups:
+                continue
+            else:
+                print("GROUP: ", new_group)
+                edge_map.update(edge_map_temp)
+                groups.add(new_group)
+                idx += 1
+        pprint(edge_map)
+        sre1 = SRE_matrix_algorithms.edge_matrix_to_unitary_sre(edge_map)
+        #check that we got something since we can accidentally generate degenerate matrices
+        if sre1 is not None:
+            break
     return sre1
 
 def test_sparse_SVDinv():
@@ -181,6 +203,9 @@ def test_sparse_SVDinv():
     M = SRE_matrix_algorithms.matrix_mult_sre(
         SRE_matrix_algorithms.matrix_mult_sre(U, S), V
     )
+    pprint(U)
+    pprint(V)
+    pprint(S)
 
     SRE_matrix_algorithms.check_sre(M)
 
@@ -190,6 +215,17 @@ def test_sparse_SVDinv():
     outputs_set = set(range(N))
 
     Mseq, Mreq, Medge_map = SRE_matrix_algorithms.copy_sre(M)
+    sbunch = scisparse_algorithm.inverse_solve_inplace(
+        seq = Mseq,
+        req = Mreq,
+        edge_map = Medge_map,
+        inputs_set = inputs_set,
+        outputs_set = outputs_set,
+        verbose = True,
+        negative = False,
+    )
+    Mseq, Mreq, Medge_map = SRE_matrix_algorithms.copy_sre(M)
+    pprint(Medge_map)
     sbunch = DAG_algorithm.inverse_solve_inplace(
         seq = Mseq,
         req = Mreq,

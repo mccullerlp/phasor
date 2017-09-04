@@ -47,8 +47,8 @@ def reduceLUQ_row(
     if not req[node]:
         assert(not req[node])
         assert(not seq[node])
-        assert(not req_alpha[node])
         assert(not seq_beta[node])
+        assert(not req_alpha[node])
         return
         return reduceLU(
             SRABE = SRABE,
@@ -85,6 +85,18 @@ def reduceLUQ_row(
                     #print("CANT SAVE! ", node)
                     pass
         vprint("MUST USE HOUSEHOLDER {0}x".format(rcount))
+
+        #make more efficient
+        nfrom = set()
+        vprint(bignodes_r.shape)
+        for idx in range(bignodes_r.shape[0]):
+            if np.any(bignodes_r[idx]):
+                nfrom.add(rvec_N[idx])
+        vprint("NFROM: ", nfrom, node)
+        for kf in nfrom:
+            assert(node in seq[kf])
+        vprint("NFROM: ", nfrom, node)
+
         if not do_save and rvec_self_idx is None or not bignodes_r[rvec_self_idx]:
             vprint("MUST PIVOT")
             idx_pivot = np.nonzero(bignodes_r)[0][0]
@@ -92,7 +104,7 @@ def reduceLUQ_row(
             vprint("PIVO: ", idx_pivot)
             node_pivot = rvec_N[idx_pivot]
             vprint("SWAP: ", node, node_pivot)
-            pivotROW_OP(
+            pivotCOL_OP(
                 SRABE = SRABE,
                 node1 = node,
                 node2 = node_pivot,
@@ -101,18 +113,10 @@ def reduceLUQ_row(
             )
             node_costs_invalid_in_queue.add(node)
             node_costs_invalid_in_queue.add(node_pivot)
-            node = node_pivot
-        #make more efficient
-        nfrom = set()
-        vprint(bignodes_r.shape)
-        for idx in range(bignodes_r.shape[0]):
-            if np.any(bignodes_r[idx]):
-                nfrom.add(rvec_N[idx])
-        vprint("NFROM: ", nfrom, node)
-        nfrom.remove(node)
-        for kf in nfrom:
-            assert(node in seq[kf])
-        vprint("NFROM: ", nfrom, node)
+            nfrom.remove(node_pivot)
+            assert(node not in nfrom)
+        else:
+            nfrom.remove(node)
         householderREFL_ROW_OP(
             SRABE = SRABE,
             node_into = node,
@@ -135,7 +139,7 @@ def reduceLUQ_row(
             vprint("PIVO: ", idx_pivot)
             node_pivot = rvec_N[idx_pivot]
             vprint("SWAP: ", node, node_pivot)
-            pivotROW_OP(
+            pivotCOL_OP(
                 SRABE = SRABE,
                 node1 = node,
                 node2 = node_pivot,
@@ -144,7 +148,6 @@ def reduceLUQ_row(
             )
             node_costs_invalid_in_queue.add(node)
             node_costs_invalid_in_queue.add(node_pivot)
-            node = node_pivot
             #continue
     reduceLU(
         SRABE = SRABE,
@@ -163,7 +166,7 @@ def pivotROW_OP(
     **kwargs
 ):
     """
-    Swaps ROWS within a column. So all edges TO node1 go to node2 and vice-versa.
+    Swaps ROWS. So all edges TO node1 go to node2 and vice-versa.
 
     column ops affect ALPHA.
     """
@@ -502,6 +505,7 @@ def reduceLU(
             node                        = node,
         )
     seq, req, req_alpha, seq_beta, edge_map, = SRABE
+    print("NODE:", node)
 
     self_edge = edge_map[node, node]
 
@@ -908,7 +912,6 @@ def reduceLUQ_col(
     return
 
 
-
 def pivotCOL_OP(
     SRABE,
     node1,
@@ -918,7 +921,7 @@ def pivotCOL_OP(
     **kwargs
 ):
     """
-    Swaps COLUMNS within a row . So all edges FROM node1 go to node2 and vice-versa.
+    Swaps COLUMNS . So all edges FROM node1 go to node2 and vice-versa.
 
     row ops affect BETA.
     """

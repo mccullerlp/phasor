@@ -91,14 +91,18 @@ def generate_unitary_by_gram_schmidt(edge_dict_SRE, added_vect, vect_from):
         norm_sq = norm_sq + abssq(edge)
     norm = norm_sq**.5
     seq[vect_from] = set()
+
+    any_added = False
     for k_to, edge in added_vect.items():
         lval = abs(edge.real) + abs(edge.imag)
         #only add if sufficiently large
 
-        if np.all(lval > finfo.eps * 10):
+        if np.any(lval > finfo.eps * 10):
             seq[vect_from].add(k_to)
             req.setdefault(k_to, set()).add(vect_from)
             edge_map[vect_from, k_to] = edge / norm
+            any_added = True
+    return any_added
 
 def edge_matrix_to_unitary_sre(edge_map):
     seq = defaultdict(set)
@@ -114,7 +118,8 @@ def edge_matrix_to_unitary_sre(edge_map):
         for k_t in seq[k_f]:
             vect[k_t] = edge_map[k_f, k_t]
 
-        generate_unitary_by_gram_schmidt((useq, ureq, uemap), vect, k_f)
+        if not generate_unitary_by_gram_schmidt((useq, ureq, uemap), vect, k_f):
+            return None
     return useq, ureq, uemap
 
 #def srq_prune_eps(sre):

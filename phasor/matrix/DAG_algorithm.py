@@ -22,7 +22,7 @@ from .matrix_generic import (
 from .DAG_algorithm_impl import (
     reduceLU,
     reduceLUQ_row,
-    #reduceLUQ_col,
+    reduceLUQ_col,
 )
 
 from ..base import (
@@ -40,18 +40,11 @@ def enorm(arr):
 
 def mgraph_simplify_inplace(
     SRABE,
-    verbose        = False,
     sorted_order   = False,
     order          = None,
     **kwargs
 ):
-    if verbose:
-        def vprint(*p):
-            print(*p)
-    else:
-        def vprint(*p):
-            return
-
+    vprint = kwargs.get('vprint', lambda x: None)
     (seq, req, req_alpha, seq_beta, edge_map) = SRABE
     check_seq_req_balance(seq, req, edge_map)
 
@@ -105,6 +98,8 @@ def mgraph_simplify_inplace(
             **kwargs
         )
     else:
+        vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
+        mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
         vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
         mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
         vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
@@ -234,18 +229,10 @@ def mgraph_simplify_trivial(
 
 def mgraph_simplify_badguys(
     SRABE,
-    verbose = False,
     **kwargs
 ):
+    vprint = kwargs.get('vprint', lambda x: None)
     seq, req, seq_beta, req_alpha, edge_map, = SRABE
-
-    #verbose = True
-    if verbose:
-        def vprint(*p):
-            print(*p)
-    else:
-        def vprint(*p):
-            return
 
     edge_norms = dict()
 
@@ -352,7 +339,6 @@ def mgraph_simplify_badguys(
                 SRABE  = SRABE,
                 node   = node,
                 node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-                vprint = vprint,
                 **kwargs
             )
     except Empty:
@@ -381,6 +367,13 @@ def inverse_solve_inplace(
     METIS_fname    = None,
     **kwargs
 ):
+    if verbose:
+        def vprint(*p):
+            print(*p)
+    else:
+        def vprint(*p):
+            return
+
     if scattering:
         keys = set(seq.keys()) | set(req.keys())
         for node in keys:
@@ -494,9 +487,9 @@ def inverse_solve_inplace(
     #simplify with the wrapped nodes
     mgraph_simplify_inplace(
         SRABE     = (seq, req, req_alpha, seq_beta, edge_map,),
-        verbose   = verbose,
         SRABE_SYM = SRABE_SYM,
         order     = order,
+        vprint    = vprint,
         **kwargs
     )
 
