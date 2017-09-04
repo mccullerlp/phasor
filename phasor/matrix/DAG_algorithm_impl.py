@@ -157,6 +157,85 @@ def reduceLUQ_row(
     )
 
 
+def pivotCOL_OP(
+    SRABE,
+    node1,
+    node2,
+    node_costs_invalid_in_queue,
+    SRABE_SYM = None,
+    **kwargs
+):
+    """
+    Swaps COLUMNS . So all edges FROM node1 go to node2 and vice-versa.
+
+    row ops affect BETA.
+    """
+    #print("SEQ 1: ", node1, seq[node1])
+    #print("REQ 1: ", node1, req[node1])
+    #print("SEQ 2: ", node2, seq[node2])
+    #print("REQ 2: ", node2, req[node2])
+
+    if SRABE_SYM is not None:
+        pivotCOL_OP(
+            SRABE = SRABE_SYM,
+            node1 = node1,
+            node2 = node2,
+            node_costs_invalid_in_queue = node_costs_invalid_in_queue,
+        )
+
+    seq, req, req_alpha, seq_beta, edge_map, = SRABE
+
+    check_graph_at_node(SRABE, node1)
+    check_graph_at_node(SRABE, node2)
+
+    edge_map_2 = dict()
+    #gets all edges from node1/2
+    for snode in seq[node1]:
+        edge = edge_map.pop((node1, snode))
+        edge_map_2[node2, snode] = edge
+        #if snode != node2:
+        req[snode].remove(node1)
+        req[snode].add(node2)
+        node_costs_invalid_in_queue.add(snode)
+
+    for snode in seq_beta[node1]:
+        edge = edge_map.pop((node1, snode))
+        edge_map_2[node2, snode] = edge
+
+    for snode in seq[node2]:
+        edge = edge_map.pop((node2, snode))
+        edge_map_2[node1, snode] = edge
+        #since this one follows the other, we must be careful about uniqueness of removes
+        if snode not in seq[node1]:
+            req[snode].remove(node2)
+        req[snode].add(node1)
+        node_costs_invalid_in_queue.add(snode)
+
+    for snode in seq_beta[node2]:
+        edge = edge_map.pop((node2, snode))
+        edge_map_2[node1, snode] = edge
+
+    sn1 = seq[node1]
+    snB1 = seq_beta[node1]
+
+    seq[node1] = seq[node2]
+    seq_beta[node1] = seq_beta[node2]
+
+    seq[node2] = sn1
+    seq_beta[node2] = snB1
+
+    check_graph_at_node(SRABE, node1)
+    check_graph_at_node(SRABE, node2)
+
+    #print("SEQ 1: ", node1, seq[node1])
+    #print("REQ 1: ", node1, req[node1])
+    #print("SEQ 2: ", node2, seq[node2])
+    #print("REQ 2: ", node2, req[node2])
+
+    edge_map.update(edge_map_2)
+    return
+
+
 def pivotROW_OP(
     SRABE,
     node1,
@@ -852,6 +931,15 @@ def reduceLUQ_col(
     vprint("bignodes_c[cvec_self_idx]", bignodes_c[cvec_self_idx])
     if ccount >= 2:
         vprint("MUST USE HOUSEHOLDER {0}x".format(ccount))
+
+        #make more efficient
+        nfrom = set()
+        vprint(bignodes_c.shape)
+        for idx in range(bignodes_c.shape[0]):
+            if np.any(bignodes_c[idx]):
+                nfrom.add(cvec_N[idx])
+        vprint("NFROM: ", nfrom, node)
+
         if cvec_self_idx is None or not bignodes_c[cvec_self_idx]:
             vprint("MUST PIVOT")
             vprint('bignodes', bignodes_c)
@@ -860,7 +948,7 @@ def reduceLUQ_col(
             vprint(idx_pivot)
             node_pivot = cvec_N[idx_pivot]
             vprint("SWAP: ", node, node_pivot)
-            pivotCOL_OP(
+            pivotROW_OP(
                 SRABE = SRABE,
                 node1 = node,
                 node2 = node_pivot,
@@ -868,15 +956,9 @@ def reduceLUQ_col(
             )
             node_costs_invalid_in_queue.add(node)
             node_costs_invalid_in_queue.add(node_pivot)
-            node = node_pivot
-        #make more efficient
-        nfrom = set()
-        vprint(bignodes_c.shape)
-        for idx in range(bignodes_c.shape[0]):
-            if np.any(bignodes_c[idx]):
-                nfrom.add(cvec_N[idx])
-        vprint("NFROM: ", nfrom, node)
-        nfrom.remove(node)
+            nfrom.remove(node_pivot)
+        else:
+            nfrom.remove(node)
         householderREFL_COL_OP(
             SRABE = SRABE,
             node_into = node,
@@ -893,7 +975,7 @@ def reduceLUQ_col(
             vprint(idx_pivot)
             node_pivot = cvec_N[idx_pivot]
             vprint("SWAP: ", node, node_pivot)
-            pivotCOL_OP(
+            pivotROW_OP(
                 SRABE = SRABE,
                 node1 = node,
                 node2 = node_pivot,
@@ -901,7 +983,6 @@ def reduceLUQ_col(
             )
             node_costs_invalid_in_queue.add(node)
             node_costs_invalid_in_queue.add(node_pivot)
-            node = node_pivot
             #continue
     reduceLU(
         SRABE = SRABE,
@@ -909,85 +990,6 @@ def reduceLUQ_col(
         node_costs_invalid_in_queue = node_costs_invalid_in_queue,
         **kwargs
     )
-    return
-
-
-def pivotCOL_OP(
-    SRABE,
-    node1,
-    node2,
-    node_costs_invalid_in_queue,
-    SRABE_SYM = None,
-    **kwargs
-):
-    """
-    Swaps COLUMNS . So all edges FROM node1 go to node2 and vice-versa.
-
-    row ops affect BETA.
-    """
-    #print("SEQ 1: ", node1, seq[node1])
-    #print("REQ 1: ", node1, req[node1])
-    #print("SEQ 2: ", node2, seq[node2])
-    #print("REQ 2: ", node2, req[node2])
-
-    if SRABE_SYM is not None:
-        pivotCOL_OP(
-            SRABE = SRABE_SYM,
-            node1 = node1,
-            node2 = node2,
-            node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-        )
-
-    seq, req, req_alpha, seq_beta, edge_map, = SRABE
-
-    check_graph_at_node(SRABE, node1)
-    check_graph_at_node(SRABE, node2)
-
-    edge_map_2 = dict()
-    #gets all edges from node1/2
-    for snode in seq[node1]:
-        edge = edge_map.pop((node1, snode))
-        edge_map_2[node2, snode] = edge
-        #if snode != node2:
-        req[snode].remove(node1)
-        req[snode].add(node2)
-        node_costs_invalid_in_queue.add(snode)
-
-    for snode in seq_beta[node1]:
-        edge = edge_map.pop((node1, snode))
-        edge_map_2[node2, snode] = edge
-
-    for snode in seq[node2]:
-        edge = edge_map.pop((node2, snode))
-        edge_map_2[node1, snode] = edge
-        #since this one follows the other, we must be careful about uniqueness of removes
-        if snode not in seq[node1]:
-            req[snode].remove(node2)
-        req[snode].add(node1)
-        node_costs_invalid_in_queue.add(snode)
-
-    for snode in seq_beta[node2]:
-        edge = edge_map.pop((node2, snode))
-        edge_map_2[node1, snode] = edge
-
-    sn1 = seq[node1]
-    snB1 = seq_beta[node1]
-
-    seq[node1] = seq[node2]
-    seq_beta[node1] = seq_beta[node2]
-
-    seq[node2] = sn1
-    seq_beta[node2] = snB1
-
-    check_graph_at_node(SRABE, node1)
-    check_graph_at_node(SRABE, node2)
-
-    #print("SEQ 1: ", node1, seq[node1])
-    #print("REQ 1: ", node1, req[node1])
-    #print("SEQ 2: ", node2, seq[node2])
-    #print("REQ 2: ", node2, req[node2])
-
-    edge_map.update(edge_map_2)
     return
 
 
