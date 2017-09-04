@@ -32,6 +32,7 @@ def reduceLUQ_row(
     node,
     node_costs_invalid_in_queue,
     vprint = lambda *x: None,
+    QR_comparison = None,
     **kwargs
 ):
     seq, req, seq_beta, req_alpha, edge_map, = SRABE
@@ -117,6 +118,20 @@ def reduceLUQ_row(
             assert(node not in nfrom)
         else:
             nfrom.remove(node)
+        #last ditch effort to avoid QR by using the orthogonal tests
+        if QR_comparison is None:
+            ret = reduceLUQ_col(
+                SRABE = SRABE,
+                node  = node,
+                node_costs_invalid_in_queue = node_costs_invalid_in_queue,
+                QR_comparison = len(nfrom),
+                **kwargs
+            )
+            if ret != "improvement":
+                #then it performed the operation
+                return
+        elif QR_comparison <= len(nfrom):
+            return "improvement"
         householderREFL_ROW_OP(
             SRABE = SRABE,
             node_into = node,
@@ -149,7 +164,7 @@ def reduceLUQ_row(
             node_costs_invalid_in_queue.add(node)
             node_costs_invalid_in_queue.add(node_pivot)
             #continue
-    reduceLU(
+    return reduceLU(
         SRABE = SRABE,
         node = node,
         node_costs_invalid_in_queue = node_costs_invalid_in_queue,
@@ -885,6 +900,7 @@ def reduceLUQ_col(
     node,
     node_costs_invalid_in_queue,
     vprint = lambda *x: None,
+    QR_comparison = None,
     **kwargs
 ):
     seq, req, seq_beta, req_alpha, edge_map, = SRABE
@@ -959,6 +975,20 @@ def reduceLUQ_col(
             nfrom.remove(node_pivot)
         else:
             nfrom.remove(node)
+        #last ditch effort to avoid QR by using the orthogonal tests
+        if QR_comparison is None:
+            ret = reduceLUQ_row(
+                SRABE = SRABE,
+                node  = node,
+                node_costs_invalid_in_queue = node_costs_invalid_in_queue,
+                QR_comparison = len(nfrom),
+                **kwargs
+            )
+            if ret != "improvement":
+                #then it performed the operation
+                return
+        elif QR_comparison <= len(nfrom):
+            return "improvement"
         householderREFL_COL_OP(
             SRABE = SRABE,
             node_into = node,
@@ -984,13 +1014,12 @@ def reduceLUQ_col(
             node_costs_invalid_in_queue.add(node)
             node_costs_invalid_in_queue.add(node_pivot)
             #continue
-    reduceLU(
+    return reduceLU(
         SRABE = SRABE,
         node = node,
         node_costs_invalid_in_queue = node_costs_invalid_in_queue,
         **kwargs
     )
-    return
 
 
 def householderREFL_COL_OP(
