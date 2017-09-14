@@ -114,10 +114,11 @@ def _roots(a):
         TODO: How many digits are necessary for float equivalence?  Does it
         vary with order?
         """
-        p, err = mp.polyroots(a, maxsteps=1000, error=True)
-        if err > 1e-32:
-            raise ValueError("Legendre filter cannot be accurately computed "
-                             "for order %s" % N)
+        p = mp.polyroots(a, maxsteps=1000, error=False)
+        #p, err = mp.polyroots(a, maxsteps=1000, error=True)
+        #if err > 1e-32:
+        #    raise ValueError("Legendre filter cannot be accurately computed "
+        #"for order %s" % N)
         p = asarray(p).astype(complex)
     else:
         p = np.roots(a)

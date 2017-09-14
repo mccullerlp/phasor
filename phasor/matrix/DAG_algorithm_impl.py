@@ -8,7 +8,7 @@ from phasor.utilities.print import pprint
 #from ..math.dispatched import abs_sq
 
 N_limit_rel = 100
-N_limit_rel = 1.
+#N_limit_rel = 1.
 
 
 def abssq(arr):
@@ -119,19 +119,22 @@ def reduceLUQ_row(
         else:
             nfrom.remove(node)
         #last ditch effort to avoid QR by using the orthogonal tests
-        if QR_comparison is None:
-            ret = reduceLUQ_col(
-                SRABE = SRABE,
-                node  = node,
-                node_costs_invalid_in_queue = node_costs_invalid_in_queue,
-                QR_comparison = len(nfrom),
-                **kwargs
-            )
-            if ret != "improvement":
-                #then it performed the operation
-                return
-        elif QR_comparison <= len(nfrom):
-            return "improvement"
+        if True:
+            if QR_comparison is None:
+                print("USING COL ALT")
+                ret = reduceLUQ_col(
+                    SRABE = SRABE,
+                    node  = node,
+                    node_costs_invalid_in_queue = node_costs_invalid_in_queue,
+                    QR_comparison = len(nfrom),
+                    **kwargs
+                )
+                if ret != "improvement":
+                    print("IMPROVED")
+                    #then it performed the operation
+                    return
+            elif QR_comparison <= len(nfrom):
+                return "improvement"
         householderREFL_ROW_OP(
             SRABE = SRABE,
             node_into = node,
@@ -599,7 +602,7 @@ def reduceLU(
             node                        = node,
         )
     seq, req, req_alpha, seq_beta, edge_map, = SRABE
-    print("NODE:", node)
+    #print("NODE:", node)
 
     self_edge = edge_map[node, node]
 

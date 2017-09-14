@@ -174,7 +174,7 @@ def gen_rand_unitary(
             if new_group in groups:
                 continue
             else:
-                print("GROUP: ", new_group)
+                #print("GROUP: ", new_group)
                 edge_map.update(edge_map_temp)
                 groups.add(new_group)
                 idx += 1

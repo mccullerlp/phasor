@@ -67,10 +67,16 @@ def mgraph_simplify_inplace(
     SRABE = (seq, req, req_alpha, seq_beta, edge_map)
 
     if order is not None:
-        vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
-        mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
-        vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
-        mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
+        #vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
+        #mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
+        #vprint("TRIVIAL STAGE, REMAINING {0}".format(len(req)))
+        #mgraph_simplify_trivial(SRABE = SRABE, **kwargs)
+        print("USING METIS")
+        mgraph_simplify_ordered(
+            SRABE = SRABE,
+            order = order,
+            **kwargs
+        )
 
         import tempfile
         if len(seq) > 3:
