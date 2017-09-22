@@ -3,7 +3,7 @@
 """
 from __future__ import division, print_function, unicode_literals
 
-import declarative as decl
+import declarative
 
 from . import elements
 
@@ -42,7 +42,7 @@ class SMatrix2PortBase(elements.Mechanical2PortBase):
     def S22_by_freq(self, F):
         return 0
 
-    @decl.mproperty
+    @declarative.mproperty
     def ports_mechanical(self):
         return [
             self.pm_A,
