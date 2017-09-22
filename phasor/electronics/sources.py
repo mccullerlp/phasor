@@ -102,7 +102,7 @@ class CurrentSource(smatrix.SMatrix1PortBase):
             matrix_algorithm.coherent_sources_insert(
                 self.pe_A.o,
                 self.fkey,
-                self.I_DC * self.Z_termination
+                self.I_DC * self.Ze_termination
             )
 
         for kfrom in matrix_algorithm.port_set_get(self.ps_In.i):
@@ -111,7 +111,7 @@ class CurrentSource(smatrix.SMatrix1PortBase):
                 kfrom,
                 self.pe_A.o,
                 kfrom,
-                self.Z_termination,
+                self.Ze_termination,
             )
         return
 
@@ -196,13 +196,13 @@ class VoltageSourceBalanced(smatrix.SMatrix2PortBase):
             matrix_algorithm.coherent_sources_insert(
                 self.pe_A.o,
                 self.fkey,
-                self.Z_termination * self.I_DC / _2,
+                self.Ze_termination * self.I_DC / _2,
             )
 
             matrix_algorithm.coherent_sources_insert(
                 self.pe_B.o,
                 self.fkey,
-                self.Z_termination * self.I_DC / _2,
+                self.Ze_termination * self.I_DC / _2,
             )
 
         for kfrom in matrix_algorithm.port_set_get(self.V.i):
@@ -226,14 +226,14 @@ class VoltageSourceBalanced(smatrix.SMatrix2PortBase):
                 kfrom,
                 self.pe_A.o,
                 kfrom,
-                self.Z_termination / _2,
+                self.Ze_termination / _2,
             )
             matrix_algorithm.port_coupling_insert(
                 self.ps_In.i,
                 kfrom,
                 self.pe_B.o,
                 kfrom,
-                self.Z_termination / _2,
+                self.Ze_termination / _2,
             )
 
 
@@ -285,13 +285,13 @@ class CurrentSourceBalanced(smatrix.SMatrix2PortBase):
         matrix_algorithm.coherent_sources_insert(
             self.pe_A.o,
             self.fkey,
-            self.Z_termination * self.I_DC,
+            self.Ze_termination * self.I_DC,
         )
 
         matrix_algorithm.coherent_sources_insert(
             self.pe_B.o,
             self.fkey,
-            self.Z_termination * self.I_DC,
+            self.Ze_termination * self.I_DC,
         )
 
         for kfrom in matrix_algorithm.port_set_get(self.ps_In.i):
@@ -300,14 +300,14 @@ class CurrentSourceBalanced(smatrix.SMatrix2PortBase):
                 kfrom,
                 self.pe_A.o,
                 kfrom,
-                self.Z_termination,
+                self.Ze_termination,
             )
             matrix_algorithm.port_coupling_insert(
                 self.ps_In.i,
                 kfrom,
                 self.pe_B.o,
                 kfrom,
-                self.Z_termination,
+                self.Ze_termination,
             )
 
 

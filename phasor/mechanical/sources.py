@@ -103,7 +103,7 @@ class ForceSource(smatrix.SMatrix1PortBase):
             matrix_algorithm.coherent_sources_insert(
                 self.pm_A.o,
                 self.fkey,
-                self.F_DC * self.zM_termination
+                self.F_DC * self.Zm_termination
             )
 
         for kfrom in matrix_algorithm.port_set_get(self.F.i):
@@ -112,7 +112,7 @@ class ForceSource(smatrix.SMatrix1PortBase):
                 kfrom,
                 self.pm_A.o,
                 kfrom,
-                self.zM_termination,
+                self.Zm_termination,
             )
         return
 
@@ -197,13 +197,13 @@ class DisplacementSourceBalanced(smatrix.SMatrix2PortBase):
             matrix_algorithm.coherent_sources_insert(
                 self.pm_A.o,
                 self.fkey,
-                self.zM_termination * self.F_DC / _2,
+                self.Zm_termination * self.F_DC / _2,
             )
 
             matrix_algorithm.coherent_sources_insert(
                 self.pm_B.o,
                 self.fkey,
-                self.zM_termination * self.F_DC / _2,
+                self.Zm_termination * self.F_DC / _2,
             )
 
         for kfrom in matrix_algorithm.port_set_get(self.d.i):
@@ -227,14 +227,14 @@ class DisplacementSourceBalanced(smatrix.SMatrix2PortBase):
                 kfrom,
                 self.pm_A.o,
                 kfrom,
-                self.zM_termination / _2,
+                self.Zm_termination / _2,
             )
             matrix_algorithm.port_coupling_insert(
                 self.F.i,
                 kfrom,
                 self.pm_B.o,
                 kfrom,
-                self.zM_termination / _2,
+                self.Zm_termination / _2,
             )
 
 
@@ -286,13 +286,13 @@ class ForceSourceBalanced(smatrix.SMatrix2PortBase):
         matrix_algorithm.coherent_sources_insert(
             self.pm_A.o,
             self.fkey,
-            self.zM_termination * self.F_DC,
+            self.Zm_termination * self.F_DC,
         )
 
         matrix_algorithm.coherent_sources_insert(
             self.pm_B.o,
             self.fkey,
-            self.zM_termination * self.F_DC,
+            self.Zm_termination * self.F_DC,
         )
 
         for kfrom in matrix_algorithm.port_set_get(self.F.i):
@@ -301,14 +301,14 @@ class ForceSourceBalanced(smatrix.SMatrix2PortBase):
                 kfrom,
                 self.pm_A.o,
                 kfrom,
-                self.zM_termination,
+                self.Zm_termination,
             )
             matrix_algorithm.port_coupling_insert(
                 self.F.i,
                 kfrom,
                 self.pm_B.o,
                 kfrom,
-                self.zM_termination,
+                self.Zm_termination,
             )
 
 

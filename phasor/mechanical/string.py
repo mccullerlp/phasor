@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-The zM_termination uses mechanical mobility in its calculations, folling the electrical/mechanical impedance analogy. ps_In this case using mobility/admittance rather than impedance to preserve the mechanical topology.
+The Zm_termination uses mechanical mobility in its calculations, folling the electrical/mechanical impedance analogy. ps_In this case using mobility/admittance rather than impedance to preserve the mechanical topology.
 
 https://en.wikipedia.org/wiki/Impedance_analogy
 https://en.wikipedia.org/wiki/Mobility_analogy
@@ -101,22 +101,22 @@ class ZConverter(smatrix.SMatrix2PortBase):
         return val
 
     def S11_by_freq(self, F):
-        Y1 = self.symbols.i2pi * F * 1/self.zM_termination + 1e-18
+        Y1 = self.symbols.i2pi * F * 1/self.Zm_termination + 1e-18
         Y2 = self.symbols.i2pi * F * self.mobility_Ns_m + 1e-18
         return (Y1 - Y2) / (Y1 + Y2)
 
     def S12_by_freq(self, F):
-        Y1 = self.symbols.i2pi * F * 1/self.zM_termination + 1e-18
+        Y1 = self.symbols.i2pi * F * 1/self.Zm_termination + 1e-18
         Y2 = self.symbols.i2pi * F * self.mobility_Ns_m + 1e-18
         return 2 * Y1/(Y1 + Y2)
 
     def S21_by_freq(self, F):
-        Y1 = self.symbols.i2pi * F * 1/self.zM_termination + 1e-18
+        Y1 = self.symbols.i2pi * F * 1/self.Zm_termination + 1e-18
         Y2 = self.symbols.i2pi * F * self.mobility_Ns_m + 1e-18
         return 2 * Y2/(Y1 + Y2)
 
     def S22_by_freq(self, F):
-        Y1 = self.symbols.i2pi * F * 1/self.zM_termination + 1e-18
+        Y1 = self.symbols.i2pi * F * 1/self.Zm_termination + 1e-18
         Y2 = self.symbols.i2pi * F * self.mobility_Ns_m + 1e-18
         return (Y2 - Y1) / (Y1 + Y2)
 

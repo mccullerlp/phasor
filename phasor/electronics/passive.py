@@ -69,7 +69,7 @@ class TerminatorImpedance(smatrix.SMatrix1PortBase):
 
     def S11_by_freq(self, F):
         Z = self.impedance_by_freq(F)
-        return ((Z - self.Z_termination) / (Z + self.Z_termination))
+        return ((Z - self.Ze_termination) / (Z + self.Ze_termination))
 
 
 class TerminatorAdmittance(smatrix.SMatrix1PortBase):
@@ -78,7 +78,7 @@ class TerminatorAdmittance(smatrix.SMatrix1PortBase):
 
     def S11_by_freq(self, F):
         Y = self.admittance_by_freq(F)
-        return ((1 - Y * self.Z_termination) / (1 + Y * self.Z_termination))
+        return ((1 - Y * self.Ze_termination) / (1 + Y * self.Ze_termination))
 
 
 class TerminatorResistor(ResistorBase, TerminatorImpedance):
@@ -99,19 +99,19 @@ class SeriesImpedance(smatrix.SMatrix2PortBase):
 
     def S11_by_freq(self, F):
         Z = self.impedance_by_freq(F)
-        return (Z / (Z + self.Z_termination * 2))
+        return (Z / (Z + self.Ze_termination * 2))
 
     def S12_by_freq(self, F):
         Z = self.impedance_by_freq(F)
-        return ((2 * self.Z_termination) / (Z + self.Z_termination * 2))
+        return ((2 * self.Ze_termination) / (Z + self.Ze_termination * 2))
 
     def S21_by_freq(self, F):
         Z = self.impedance_by_freq(F)
-        return ((2 * self.Z_termination) / (Z + self.Z_termination * 2))
+        return ((2 * self.Ze_termination) / (Z + self.Ze_termination * 2))
 
     def S22_by_freq(self, F):
         Z = self.impedance_by_freq(F)
-        return (Z / (Z + self.Z_termination * 2))
+        return (Z / (Z + self.Ze_termination * 2))
 
 
 class SeriesAdmittance(smatrix.SMatrix2PortBase):
@@ -120,19 +120,19 @@ class SeriesAdmittance(smatrix.SMatrix2PortBase):
 
     def S11_by_freq(self, F):
         Y = self.admittance_by_freq(F)
-        return (1 / (1 + Y * self.Z_termination * 2))
+        return (1 / (1 + Y * self.Ze_termination * 2))
 
     def S12_by_freq(self, F):
         Y = self.admittance_by_freq(F)
-        return ((2 * Y * self.Z_termination) / (1 + Y * self.Z_termination * 2))
+        return ((2 * Y * self.Ze_termination) / (1 + Y * self.Ze_termination * 2))
 
     def S21_by_freq(self, F):
         Y = self.admittance_by_freq(F)
-        return ((2 * Y * self.Z_termination) / (1 + Y * self.Z_termination * 2))
+        return ((2 * Y * self.Ze_termination) / (1 + Y * self.Ze_termination * 2))
 
     def S22_by_freq(self, F):
         Y = self.admittance_by_freq(F)
-        return (1 / (1 + Y * self.Z_termination * 2))
+        return (1 / (1 + Y * self.Ze_termination * 2))
 
 
 class SeriesResistor(ResistorBase, SeriesImpedance):
@@ -182,7 +182,7 @@ class Z2x2To4Port(elements.Electrical4PortBase):
     def system_setup_coupling(self, matrix_algorithm):
         #assumes that all ports have the same setup/keys
         for kfrom in matrix_algorithm.port_set_get(self.pe_A.i):
-            Y = 1/self.Z_termination
+            Y = 1/self.Ze_termination
             freq = self.system.classical_frequency_extract(kfrom)
             Z11 = self.Z11_by_freq(freq)
             Z22 = self.Z22_by_freq(freq)

@@ -160,6 +160,6 @@ class ForceFluctuation(elements.MechanicalNoiseBase, elements.MechanicalElementB
     def noise_2pt_expectation(self, pm_1, k1, pm_2, k2):
         freq = k1[ports.ClassicalFreqKey].frequency()
         Fsq_Hz = self.Fsq_Hz_by_freq(freq) / self.conversion
-        return (self.zM_termination)**2 * Fsq_Hz
+        return (self.Zm_termination)**2 * Fsq_Hz
 
 

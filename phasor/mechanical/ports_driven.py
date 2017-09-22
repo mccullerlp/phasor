@@ -59,7 +59,7 @@ class ForceToDisplacementBase(elements.MechanicalElementBase):
             matrix_algorithm.coherent_sources_insert(
                 self._port.o,
                 self.fkey,
-                self.F_DC * self.zM_termination
+                self.F_DC * self.Zm_termination
             )
 
         for kfrom in matrix_algorithm.port_set_get(self.F.i):
@@ -68,7 +68,7 @@ class ForceToDisplacementBase(elements.MechanicalElementBase):
                 kfrom,
                 self._port.o,
                 kfrom,
-                self.zM_termination,
+                self.Zm_termination,
             )
 
         #now do displacement

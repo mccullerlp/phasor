@@ -50,7 +50,7 @@ class DisplacementReadout(readouts.DCReadout, elements.MechanicalElementBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         pcplgs = {
-            self.system.ports_pre_get(self.terminal.i) :  1,
+            self.system.ports_pre_get(self.terminal.i)  : 1,
             self.system.ports_post_get(self.terminal.o) : 1,
         }
         if self.terminal_N is not None:
@@ -100,8 +100,8 @@ class ForceReadout(readouts.DCReadout, elements.MechanicalElementBase):
     def system_setup_coupling(self, matrix_algorithm):
         #TODO, not sure about the 1/2 everywhere
         pcplgs = {
-            self.terminal.i :  1 / self.zM_termination,
-            self.terminal.o : -1 / self.zM_termination,
+            self.terminal.i :  1 / self.Zm_termination,
+            self.terminal.o : -1 / self.Zm_termination,
         }
         direction_cplg = {'in' : 1, 'out' : -1}[self.direction]
         for port, pcplg in pcplgs.items():

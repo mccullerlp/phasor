@@ -15,7 +15,7 @@ from . import ports
 
 
 class ElectricalElementBase(CouplerBase, SystemElementBase):
-    Z_termination = 50
+    Ze_termination = 50
 
     @decl.mproperty
     def symbols(self):

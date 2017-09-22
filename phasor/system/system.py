@@ -58,7 +58,6 @@ class SystemSymbols(Element):
         PTREE_ASSIGN(self).i2pi                  = np.pi * 2j
         PTREE_ASSIGN(self).math                  = np
         PTREE_ASSIGN(self).temp_K                = 299
-        PTREE_ASSIGN(self).Z_termination         = 50
         super(SystemSymbols, self).__build__()
 
     def number(self, num):

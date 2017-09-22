@@ -98,8 +98,8 @@ class CurrentReadout(readouts.DCReadout, elements.ElectricalElementBase):
         #TODO, not sure about the 1/2 everywhere
         _2 = self.symbols.number(2)
         pcplgs = {
-            self.terminal.i :  1 / self.Z_termination,
-            self.terminal.o : -1 / self.Z_termination,
+            self.terminal.i :  1 / self.Ze_termination,
+            self.terminal.o : -1 / self.Ze_termination,
         }
         direction_cplg = {'in' : 1, 'out' : -1}[self.direction]
         for port, pcplg in pcplgs.items():

@@ -119,7 +119,7 @@ def reduceLUQ_row(
         else:
             nfrom.remove(node)
         #last ditch effort to avoid QR by using the orthogonal tests
-        if True:
+        if False:
             if QR_comparison is None:
                 print("USING COL ALT")
                 ret = reduceLUQ_col(

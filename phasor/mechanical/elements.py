@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-The zM_termination uses mechanical mobility in its calculations, folling the electrical/mechanical impedance analogy. ps_In this case using mobility/admittance rather than impedance to preserve the mechanical topology.
+The Zm_termination uses mechanical mobility in its calculations, folling the electrical/mechanical impedance analogy. ps_In this case using mobility/admittance rather than impedance to preserve the mechanical topology.
 
 https://en.wikipedia.org/wiki/Impedance_analogy
 https://en.wikipedia.org/wiki/Mobility_analogy
@@ -34,7 +34,7 @@ from . import ports
 
 
 class MechanicalElementBase(CouplerBase, SystemElementBase):
-    zM_termination = 1
+    Zm_termination = 1
 
     @decl.mproperty
     def symbols(self):

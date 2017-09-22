@@ -155,7 +155,7 @@ class VAmp(elements.ElectricalElementBase):
             (self.in_n, self.in_n),
         ):
             for kfrom in matrix_algorithm.port_set_get(port1.i):
-                pgain = ((1 - self.Y_input * self.Z_termination) / (1 + self.Y_input * self.Z_termination))
+                pgain = ((1 - self.Y_input * self.Ze_termination) / (1 + self.Y_input * self.Ze_termination))
                 matrix_algorithm.port_coupling_insert(
                     port1.i,
                     kfrom,
@@ -168,7 +168,7 @@ class VAmp(elements.ElectricalElementBase):
         for port1, port2 in (
             (self.out, self.out),
         ):
-            pgain = ((self.Z_output - self.Z_termination) / (self.Z_output + self.Z_termination))
+            pgain = ((self.Z_output - self.Ze_termination) / (self.Z_output + self.Ze_termination))
             for kfrom in matrix_algorithm.port_set_get(port1.i):
                 matrix_algorithm.port_coupling_insert(
                     port1.i,
