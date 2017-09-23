@@ -7,10 +7,10 @@ from __future__ import division, print_function, unicode_literals
 
 import declarative as declarative
 
-from ..mechanical import ports as m_ports
-from ..electrical import ports as e_ports
-from ..mechanical import elements as m_elements
-from ..electrical import elements as e_elements
+from ..mechanical  import ports as m_ports
+from ..electronics import ports as e_ports
+from ..mechanical  import elements as m_elements
+from ..electronics import elements as e_elements
 
 
 class PZTMountedGrounded(
@@ -50,8 +50,8 @@ class PZTMountedGrounded(
     def system_setup_ports(self, ports_algorithm):
         #TODO could reduce these with more information about used S-matrix elements
         ports = [
-            self.pm_A,
-            self.pm_B,
+            self.pe_A,
+            self.pm_Z,
         ]
         for port1 in ports:
             for port2 in ports:
@@ -67,23 +67,38 @@ class PZTMountedGrounded(
         d   = self.d_eff_m_V
         Z_e = self.Ze_termination
         Z_m = self.Zm_termination
-
-        #computed in sympy
         def See_by_freq(F_Hz):
             s = self.symbols.i2pi * F_Hz
-            return ((C*Z_e*Z_m*k*s + C*Z_e*s - Z_e*d**2*k*s - Z_m*k - 1)/(-C*Z_e*Z_m*k*s - C*Z_e*s + Z_e*d**2*k*s - Z_m*k - 1))
+            return ((C*Z_e*Z_m*s + C*Z_e*k*s - Z_e*Z_m*d**2*k*s - Z_m - k)/(-C*Z_e*Z_m*s - C*Z_e*k*s + Z_e*Z_m*d**2*k*s - Z_m - k))
 
         def Smm_by_freq(F_Hz):
             s = self.symbols.i2pi * F_Hz
-            return (-(Z_e*d**2*k*s + (Z_m*k - 1)*(C*Z_e*s + 1))/(C*Z_e*s - Z_e*d**2*k*s + Z_m*k*(C*Z_e*s + 1) + 1))
+            return ((Z_e*Z_m*d**2*k*s - (Z_m - k)*(C*Z_e*s + 1))/(-Z_e*Z_m*d**2*k*s + Z_m*(C*Z_e*s + 1) + k*(C*Z_e*s + 1)))
 
         def Sem_by_freq(F_Hz):
             s = self.symbols.i2pi * F_Hz
-            return (2*Z_m*d*k/(C*Z_e*s - Z_e*d**2*k*s + Z_m*k*(C*Z_e*s + 1) + 1))
+            return (2*Z_m*d*k/(-C*Z_e*Z_m*s - C*Z_e*k*s + Z_e*Z_m*d**2*k*s - Z_m - k))
 
         def Sme_by_freq(F_Hz):
             s = self.symbols.i2pi * F_Hz
-            return (2*Z_e*d*k*s/(-C*Z_e*Z_m*k*s - C*Z_e*s + Z_e*d**2*k*s - Z_m*k - 1))
+            return (2*Z_e*d*k*s/(-C*Z_e*Z_m*s - C*Z_e*k*s + Z_e*Z_m*d**2*k*s - Z_m - k))
+
+        #computed in sympy
+        #def See_by_freq(F_Hz):
+        #    s = self.symbols.i2pi * F_Hz
+        #    return ((C*Z_e*Z_m*k*s + C*Z_e*s - Z_e*d**2*k*s - Z_m*k - 1)/(-C*Z_e*Z_m*k*s - C*Z_e*s + Z_e*d**2*k*s - Z_m*k - 1))
+
+        #def Smm_by_freq(F_Hz):
+        #    s = self.symbols.i2pi * F_Hz
+        #    return (-(Z_e*d**2*k*s + (Z_m*k - 1)*(C*Z_e*s + 1))/(C*Z_e*s - Z_e*d**2*k*s + Z_m*k*(C*Z_e*s + 1) + 1))
+
+        #def Sem_by_freq(F_Hz):
+        #    s = self.symbols.i2pi * F_Hz
+        #    return (2*Z_m*d*k/(C*Z_e*s - Z_e*d**2*k*s + Z_m*k*(C*Z_e*s + 1) + 1))
+
+        #def Sme_by_freq(F_Hz):
+        #    s = self.symbols.i2pi * F_Hz
+        #    return (2*Z_e*d*k*s/(-C*Z_e*Z_m*k*s - C*Z_e*s + Z_e*d**2*k*s - Z_m*k - 1))
 
         for port1, port2, func in [
             (self.pe_A, self.pe_A, See_by_freq),

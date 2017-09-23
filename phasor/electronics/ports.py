@@ -55,6 +55,9 @@ class ElectricalPort(ElectricalPortRaw, bases.SystemElementBase):
     def _bond_partners_building(self):
         return []
 
+    def bond_sequence(self, *others):
+        return self.system.bond_sequence(self, *others)
+
     def bond(self, other):
         self.bond_inform(other.bond_key)
         other.bond_inform(self)

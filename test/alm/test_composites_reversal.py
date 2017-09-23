@@ -14,39 +14,31 @@ from IPython.lib.pretty import pprint as print
 
 import os.path as path
 
-import phasor.alm.beam as alm_beam
-import phasor.alm.system as alm_system
-import phasor.alm.measurements as alm_measurements
-import phasor.alm.mplot as alm_mplot
-import phasor.alm.composites as alm_composites
-
-mplot = alm_mplot.MPlotter()
+from phasor import alm
 asavefig.org_subfolder = path.join(path.dirname(__file__), 'tests')
-
-#mpl.rc('font', family='DejaVu Sans')
 
 
 def test_composites(plot):
     def gensys(reversed):
-        sys = alm_measurements.RootSystem()
-        sys.own.sub1 = alm_system.System(
+        sys = alm.RootSystem()
+        sys.own.sub1 = alm.System(
             loc_m = 0,
             reversed = reversed,
         )
-        sys.sub1.own.q1 = alm_beam.BeamTarget(
+        sys.sub1.own.q1 = alm.BeamTarget(
             loc_m = 0,
-            q_raw = alm_beam.ComplexBeamParam.from_Z_ZR(0, .5),
+            q_raw = alm.ComplexBeamParam.from_Z_ZR(0, .5),
         )
-        #sys.sub1.own.m1 = alm_beam.ThinLens(
+        #sys.sub1.own.m1 = alm.ThinLens(
         #    f_m = .5,
         #    loc_m = .5,
         #)
-        sys.sub1.own.m1 = alm_composites.PLCX(
+        sys.sub1.own.m1 = alm.PLCX(
             R_m = .24,
             loc_m = .5,
             L_m = .02,
         )
-        sys.sub1.own.c_return = alm_beam.NoP(
+        sys.sub1.own.c_return = alm.NoP(
             loc_m = 1,
         )
         return sys
@@ -56,14 +48,14 @@ def test_composites(plot):
     q_end = sys.measurements.q_target_z(1.0)
     #print(("INVAL: ", sys.measurements._registry_invalidate))
     #sys = gensys(False)
-    sys.sub1.own.q2 = alm_beam.BeamTarget(
+    sys.sub1.own.q2 = alm.BeamTarget(
         loc_m = 1.00001,
         q_raw = q_end,
     )
     #sys.invalidate()
     #print("pm_B")
     #q_end2 = sys.measurements.q_target_z(1.0)
-    sysR.sub1.own.q2 = alm_beam.BeamTarget(
+    sysR.sub1.own.q2 = alm.BeamTarget(
         loc_m = 1.00001,
         q_raw = q_end,
     )
@@ -79,8 +71,8 @@ def test_composites(plot):
     assert(abs(sysR.measurements.overlap('sub1.q1', 'sub1.q2')) > .99999)
 
     if plot:
-        mplot.plot('test_composites', sys = sys.measurements)
-        mplot.plot('test_compositesR', sys = sysR.measurements)
+        sys.plot('test_composites')
+        sys.plot('test_compositesR')
         #print(("INVAL: ", sys.measurements._registry_invalidate))
     #assert(False)
     return sys

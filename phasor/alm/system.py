@@ -21,16 +21,13 @@ from .utils import (
     matrix_space,
 )
 
-from .beam import (
-    Space,
-    MatrixAtsCompositeBase,
-    MatrixAtsBase,
-)
+from . import bases
+from . import space
 
 from . import standard_attrs as attrs
 
 class System(
-    MatrixAtsCompositeBase,
+    bases.MatrixAtsCompositeBase,
 ):
     @declarative.mproperty
     def _internal(self):
@@ -78,7 +75,7 @@ class System(
         self.root._complete()
         loc_ch_list = []
         for name, ch in list(self._registry_children.items()):
-            if isinstance(ch, MatrixAtsBase):
+            if isinstance(ch, bases.MatrixAtsBase):
                 if ch.loc_m.ref is not None:
                     loc_ch_list.append((ch.loc_m.ref, ch))
         loc_ch_list.sort()
@@ -153,7 +150,7 @@ class System(
                         name = 'auto_space{0}'.format(idx)
                         components_filled.append(
                             self._internal.insert(
-                                obj = Space(
+                                obj = space.Space(
                                     L_m = loc_m - loc_m_prev,
                                     loc_m = loc_m,
                                     #ctree = self.ctree['internal'][name],
@@ -175,7 +172,7 @@ class System(
                         name = 'auto_space{0}'.format(idx)
                         components_filled.append(
                             self._internal.insert(
-                                obj = Space(
+                                obj = space.Space(
                                     L_m = loc_m - loc_m_prev,
                                     loc_m = loc_m,
                                     #ctree = self.ctree['internal'][name],
@@ -209,7 +206,7 @@ class System(
                 name = 'auto_space{0}'.format(idx + 1)
                 components_filled.append(
                     self._internal.insert(
-                        obj = Space(
+                        obj = space.Space(
                             L_m = loc_m - loc_m_prev,
                             loc_m = loc_m,
                             #ctree = self.ctree['internal'][name],

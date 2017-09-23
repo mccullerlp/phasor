@@ -9,47 +9,38 @@ from phasor.utilities.mpl.autoniceplot import (
     #mplfigB,
     asavefig,
 )
-import matplotlib as mpl
 
 import os.path as path
 
-#from YALL.alm.beam import *
-from phasor.alm.measurements import RootSystem
-import phasor.alm.beam as CB
-#from phasor.alm.beam_param import ComplexBeamParam
-#import phasor.alm.system as CS
-from phasor.alm.mplot import MPlotter
-mplot = MPlotter()
+from phasor import alm
 asavefig.org_subfolder = path.join(path.dirname(__file__), 'tests')
-
-#mpl.rc('font', family='DejaVu Sans')
 
 from IPython.lib.pretty import pprint as print
 
 
 def test_layout(plot):
-    sys = RootSystem(
+    sys = alm.RootSystem(
         env_principle_target = 'q1',
     )
 
-    sys.own.q1 = CB.BeamTarget(
+    sys.own.q1 = alm.BeamTarget(
         loc_m = 0,
-        q_raw = CB.ComplexBeamParam.from_Z_ZR(0, .04),
+        q_raw = alm.ComplexBeamParam.from_Z_ZR(0, .04),
     )
-    sys.own.lens1 = CB.ThinLens(
+    sys.own.lens1 = alm.ThinLens(
         f_m = .1,
         loc_in = 7,
     )
-    sys.own.q2 = CB.BeamTarget(
+    sys.own.q2 = alm.BeamTarget(
         loc_m = .4,
-        q_raw = CB.ComplexBeamParam.from_Z_ZR(0, .04),
+        q_raw = alm.ComplexBeamParam.from_Z_ZR(0, .04),
     )
 
     sys.components
     print(sys.measurements.target_idx('q1'))
 
     if plot:
-        mplot.plot('test_layout', sys = sys.measurements)
+        sys.plot('test_layout')
     return sys
 
 
@@ -67,7 +58,7 @@ def test_regenerate(plot):
     assert(set(sys._registry_children.keys()) == set(sys2._registry_children.keys()))
     #TODO make the plot optional
     if plot:
-        mplot.plot('test_regen', sys = sys2.measurements)
+        sys.plot('test_regen')
     print(sys2._registry_children)
     print(sys2._registry_inserted)
     return
@@ -83,7 +74,7 @@ def test_regenerate_auto(plot):
     assert(set(sys._registry_inserted.keys()) == set(sys2._registry_inserted.keys()))
     assert(set(sys._registry_children.keys()) == set(sys2._registry_children.keys()))
     if plot:
-        mplot.plot('test_regen_auto', sys = sys2.measurements)
+        sys.plot('test_regen_auto')
     print(sys2._registry_children)
     print(sys2._registry_inserted)
     return

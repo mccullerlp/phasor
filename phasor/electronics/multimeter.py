@@ -73,24 +73,28 @@ class CurrentReadout(readouts.DCReadout, elements.ElectricalElementBase):
 
     @decl.dproperty
     def terminal(self, port):
+        self.system.own_port_virtual(self, port.i)
+        self.system.own_port_virtual(self, port.o)
         return port
 
     @decl.dproperty
-    def ps_In(self):
-        return ports.SignalOutPort(sname = 'ps_In')
+    def I(self):
+        return ports.SignalOutPort()
 
     @decl.dproperty
     def port(self):
-        return self.ps_In.o
+        return self.I.o
 
     def system_setup_ports(self, ports_algorithm):
         #TODO hackish, need better system support for binding
         #this linear port into the readout ports
         ports = [self.terminal.i, self.terminal.o]
         for port1 in ports:
-            #for kfrom in ports_algorithm.port_update_get(port1):
-            #    ports_algorithm.port_coupling_needed(self.ps_In.o, kfrom)
-            for kto in ports_algorithm.port_update_get(self.ps_In.o):
+            for kfrom in ports_algorithm.port_update_get(port1):
+                ports_algorithm.port_coupling_needed(self.I.o, kfrom)
+                #for p2 in ports:
+                #    ports_algorithm.port_coupling_needed(p2, kfrom)
+            for kto in ports_algorithm.port_update_get(self.I.o):
                 ports_algorithm.port_coupling_needed(port1, kto)
         return
 
@@ -107,7 +111,7 @@ class CurrentReadout(readouts.DCReadout, elements.ElectricalElementBase):
                 matrix_algorithm.port_coupling_insert(
                     port,
                     kfrom,
-                    self.ps_In.o,
+                    self.I.o,
                     kfrom,
                     direction_cplg * pcplg,
                 )

@@ -5,46 +5,34 @@ from __future__ import division, print_function, unicode_literals
 import pytest
 
 from phasor.utilities.mpl.autoniceplot import (
-    #AutoPlotSaver,
-    #mplfigB,
     asavefig,
 )
-import matplotlib as mpl
 
 import os.path as path
 
-#from YALL.alm.beam import *
-from phasor.alm.measurements import RootSystem
-import phasor.alm.beam as CB
-import phasor.alm.system as CS
-#from phasor.alm.beam_param import ComplexBeamParam
-#import phasor.alm.system as CS
-from phasor.alm.mplot import MPlotter
-mplot = MPlotter()
+from phasor import alm
 asavefig.org_subfolder = path.join(path.dirname(__file__), 'tests')
-
-#mpl.rc('font', family='DejaVu Sans')
 
 from IPython.lib.pretty import pprint as print
 
 
 def test_cavity(plot):
-    print(RootSystem.loc_m)
-    sys = RootSystem()
-    sys.own.q1 = CB.BeamTarget(
+    print(alm.RootSystem.loc_m)
+    sys = alm.RootSystem()
+    sys.own.q1 = alm.BeamTarget(
         loc_m = 0,
-        q_system = CS.System(loc_m = 0),
-        #q_raw = CB.ComplexBeamParam.from_Z_ZR(0, .04),
+        q_system = alm.System(loc_m = 0),
+        #q_raw = alm.ComplexBeamParam.from_Z_ZR(0, .04),
     )
-    sys.q1.q_system.own.m1 = CB.Mirror(
+    sys.q1.q_system.own.m1 = alm.Mirror(
         R_m = .2,
         loc_m = 0,
     )
-    sys.q1.q_system.own.m2 = CB.Mirror(
+    sys.q1.q_system.own.m2 = alm.Mirror(
         R_m = .2,
         loc_m = .1,
     )
-    sys.q1.q_system.own.c_return = CB.NoP(
+    sys.q1.q_system.own.c_return = alm.NoP(
         loc_m = .2,
     )
     sys.own.cav = sys.q1.q_system.replica_generate(loc_m = .0001)
@@ -68,7 +56,7 @@ def test_cavity(plot):
 
     #assert(False)
     if plot:
-        mplot.plot('test_cavity', sys = sys.measurements)
+        sys.plot('test_cavity')
     return sys
 
 

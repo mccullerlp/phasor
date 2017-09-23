@@ -8,13 +8,19 @@ from .beam_param import (
     ComplexBeamParam,
 )
 
-from .beam import (
+from .space import (
     Space,
-    ThinLens,
+)
+
+from .target import (
     BeamTarget,
-    Mirror,
+)
+
+from .bases import (
     NoP,
+    ThinLens,
     ABCDGeneric,
+    Mirror,
 )
 
 from .composites import (

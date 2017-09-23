@@ -5,12 +5,6 @@ from __future__ import division, print_function, unicode_literals
 import numpy as np
 import declarative
 
-from . import standard_attrs as attrs
-
-from .beam import (
-    MatrixAtsBase,
-    NoP,
-)
 
 from .utils import (
     TargetIdx,
@@ -18,12 +12,15 @@ from .utils import (
     TargetRight,
 )
 
-from .substrates import (
-    substrate_environment,
-)
+from . import substrates
+from . import standard_attrs as attrs
+from . import bases
 
 
-class MountBase(MatrixAtsBase, declarative.OverridableObject):
+class MountBase(
+        bases.MatrixAtsBase,
+        declarative.OverridableObject
+):
     _target_type = None
 
     @declarative.mproperty
@@ -179,7 +176,7 @@ class MountBase(MatrixAtsBase, declarative.OverridableObject):
 
 class LensMount(MountBase):
     _target_type = 'lens_mount'
-    substrate = substrate_environment
+    substrate = substrates.substrate_environment
 
     detune_m = attrs.generate_detune_m()
 
@@ -212,8 +209,8 @@ class LensMount(MountBase):
 
 class MirrorMount(MountBase):
     _target_type = 'mirror_mount'
-    subsystem    = NoP()
-    substrate = substrate_environment
+    subsystem    = bases.NoP()
+    substrate = substrates.substrate_environment
 
     detune_m = attrs.generate_detune_m()
 
@@ -249,13 +246,13 @@ class TargetMount(MountBase):
 
     @declarative.dproperty
     def subsystem(self):
-        return NoP()
+        return bases.NoP()
 
 
 class ConjMirrorMount(MountBase):
     _target_type = 'mirror_mount'
-    subsystem    = NoP()
-    substrate = substrate_environment
+    subsystem    = bases.NoP()
+    substrate = substrates.substrate_environment
 
     detune_m = attrs.generate_detune_m()
 

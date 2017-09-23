@@ -7,8 +7,9 @@ import numpy as np
 import sys
 
 #from pprint import pprint
-
 import declarative
+from declarative.bunch import DeepBunchSingleAssign
+
 
 from .utils import (
     TargetLeft,
@@ -18,9 +19,6 @@ from .utils import (
     unit_str,
 )
 
-from .beam import (
-    MatrixAtsBase
-)
 
 from ..base import (
     RootElement,
@@ -31,22 +29,19 @@ from ..base.autograft import (
     invalidate_auto,
 )
 
-from .substrates import substrate_nitrogen
-from .system import System
+from . import bases
+from . import substrates
+from . import system
+from . import mplot
 
-from declarative.bunch import DeepBunchSingleAssign
-
-from .mplot import MPlotter
-
-default_plotter = MPlotter()
+default_plotter = mplot.MPlotter()
 
 
-
-class RootSystem(RootElement, System):
+class RootSystem(RootElement, system.System):
     _defer_build = False
 
     env_principle_target = None
-    env_substrate        = substrate_nitrogen
+    env_substrate        = substrates.substrate_nitrogen
     env_wavelength_nm    = 1064
 
     _loc_default = ('loc_m', 0)
@@ -83,20 +78,19 @@ class RootSystem(RootElement, System):
         return
 
     def environment_query_local(self, query):
-        if query == (MatrixAtsBase, "root"):
+        if query == (bases.MatrixAtsBase, "root"):
             return self
-        elif query == (MatrixAtsBase, "principle_target"):
+        elif query == (bases.MatrixAtsBase, "principle_target"):
             return self.env_principle_target
-        elif query == (MatrixAtsBase, "substrate"):
+        elif query == (bases.MatrixAtsBase, "substrate"):
             return self.env_substrate
-        elif query == (MatrixAtsBase, "wavelength_nm"):
+        elif query == (bases.MatrixAtsBase, "wavelength_nm"):
             return self.env_wavelength_nm
         return super(RootSystem, self).environment_query_local(query)
 
     def _target_to_child(self, sub):
         subidx = self.filled_list.index(sub)
         return TargetIdx((subidx, ))
-
 
 
 class Measurements(Element):
@@ -529,7 +523,7 @@ class Measurements(Element):
             beam_target = self.target_idx(self.beam_targets.tname[-1])
             target_obj = self.layout.target_obj(beam_target)
             q_in = target_obj.beam_q
-        tmat_sense = q_in.sensitivity_matrix
+        #tmat_sense = q_in.sensitivity_matrix
         bigmat = []
         for target in targets:
             tname = target.as_target()
@@ -584,10 +578,8 @@ class Measurements(Element):
                     table,
                     headers = headers,
                     tablefmt='pipe',
-            )))
+                )))
         return max_excursion
-
-
 
     def target_excursions_displacement(
             self,
@@ -605,7 +597,7 @@ class Measurements(Element):
             beam_target = self.target_idx(self.beam_targets.tname[-1])
             target_obj = self.layout.target_obj(beam_target)
             q_in = target_obj.beam_q
-        tmat_sense = q_in.sensitivity_matrix
+        #tmat_sense = q_in.sensitivity_matrix
         bigmat = []
         for target in targets:
             tname = target.as_target()
@@ -652,7 +644,7 @@ class Measurements(Element):
                     table,
                     headers = headers,
                     tablefmt='pipe',
-            )))
+                )))
         return max_excursion
 
 
