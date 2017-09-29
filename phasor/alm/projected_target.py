@@ -2,37 +2,35 @@
 """
 """
 from __future__ import division, print_function, unicode_literals
-import numpy as np
-import scipy.optimize
 import declarative
 
 from .beam_param import (
     ComplexBeamParam
 )
 
-from phasor.utilities.mpl.autoniceplot import (
-    #AutoPlotSaver,
-    mplfigB,
-    #asavefig,
-)
-
-from .beam import BeamTargetBase
 from . import standard_attrs as attrs
+from . import target
+from . import bases
 
-class BeamTargetProjected(BeamTargetBase):
+class BeamTargetProjected(target.BeamTargetBase):
     @declarative.dproperty
-    def qfit(self, val):
+    def target_original(self, val):
+        #reference to other target, should be live and placed
         return val
 
-    @declarative.dproperty
+    #should use mproperty as this uses intermediate knowledge
+    @declarative.mproperty(simple_delete = True)
+    @bases.invalidate_auto
     def beam_q(self):
-        if self.ref_m.val is None:
-            q_value = self.qfit.q_fit
-        else:
-            q_value = self.qfit.q_fit.propagate_distance(self.loc_m.val - self.ref_m.val)
-        if self.env_reversed:
-            q_value = q_value.reversed()
-        return q_value
+        if self.inst_preincarnation is not None:
+            return self.inst_preincarnation.beam_q
+
+        q_pre = self.target_original.beam_q
+        mat = self.root.matrix_between(
+            self.target_original.as_target(),
+            self.as_target()
+        )
+        return q_pre.propagate_matrix(mat)
 
     _ref_default = ('ref_m', None)
     ref_m = attrs.generate_reference_m()

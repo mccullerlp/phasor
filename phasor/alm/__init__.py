@@ -16,6 +16,10 @@ from .target import (
     BeamTarget,
 )
 
+from .projected_target import (
+    BeamTargetProjected,
+)
+
 from .bases import (
     NoP,
     ThinLens,

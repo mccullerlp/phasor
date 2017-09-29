@@ -21,6 +21,11 @@ from . import bases
 
 
 class BeamTargetBase(bases.NoP):
+    @declarative.dproperty
+    def hidden(self, val = False):
+        #TODO CTREE
+        return val
+
     def target_description(self, z):
         beam_q = self.beam_q
         return declarative.Bunch(
@@ -33,9 +38,11 @@ class BeamTargetBase(bases.NoP):
     def system_data_targets(self, typename):
         dmap = {}
         if typename == 'target_description':
-            dmap[TargetIdx()] = self.target_description
+            if not self.hidden:
+                dmap[TargetIdx()] = self.target_description
         if typename == 'q_target':
-            dmap[TargetIdx(('q_target',))] = self.name
+            if not self.hidden:
+                dmap[TargetIdx(('q_target',))] = self.name
         return dmap
 
     def target_obj(self, tidx1):
@@ -43,9 +50,6 @@ class BeamTargetBase(bases.NoP):
 
     def target_pos(self, tidx1):
         return 0
-
-    def draw_lines_mpl(self, ax, offset):
-        ax.axvline(offset, color = 'orange', ls ='--')
 
     def matrix_between(self, tidx1, tidx2):
         if tidx1 == TargetLeft:

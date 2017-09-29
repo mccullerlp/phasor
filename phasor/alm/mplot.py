@@ -95,6 +95,8 @@ class MPlotter(declarative.OverridableObject):
             if padding_m is None:
                 padding_m = sys.layout.width_m * padding_rel
             z = np.linspace(-padding_m, float(sys.layout.width_m) + padding_m, self.N_points)
+            idx_pad_L = np.searchsorted(z, 0)
+            idx_pad_R = np.searchsorted(z, float(sys.layout.width_m))
 
         #fB = mplfigB(Nrows = 3)
         fB = generate_stacked_plot_ax(
@@ -170,6 +172,34 @@ class MPlotter(declarative.OverridableObject):
                 z0 = z0,
                 **kwargs
             )
+
+        xmin = z_unit * (0 - z0)
+        xmax = z_unit * (float(sys.layout.width_m) - z0)
+        def limits_between(ax, xmin, xmax):
+            lmax = -float('infinity')
+            lmin = float('infinity')
+            all_y = []
+            for line in ax.get_lines():
+                xd = line.get_xdata()
+                yd = line.get_ydata()
+                idx_pad_L = np.searchsorted(xd, xmin)
+                idx_pad_R = np.searchsorted(xd, xmax)
+                #only include if the line was in data coordinates
+                if line.get_transform().contains_branch(ax.transData) and (idx_pad_R > idx_pad_L):
+                    all_y.append(yd[idx_pad_L : idx_pad_R])
+                    lmax = max(lmax, np.max(yd[idx_pad_L : idx_pad_R]))
+                    lmin = min(lmin, np.min(yd[idx_pad_L : idx_pad_R]))
+            ysorted = np.sort(np.concatenate(all_y))
+            lmin = ysorted[int(len(ysorted) * .01)]
+            lmax = ysorted[int(len(ysorted) * .99)]
+            return lmin, lmax
+
+        fB.width.set_ylim(0, 1.1*limits_between(fB.width, xmin, xmax)[1])
+        low, high = limits_between(fB.iROC, xmin, xmax)
+        fB.iROC.set_ylim(low * 1.1, high * 1.1)
+        low, high = limits_between(fB.Gouy, xmin, xmax)
+        fB.Gouy.set_ylim(low * 1.1, high * 1.1)
+
         fB.finalize()
         fB.ax_bottom.minorticks_on()
         fB.ax_top_2.minorticks_on()
@@ -431,7 +461,6 @@ class MPlotter(declarative.OverridableObject):
                 F.width.axvline(z_unit * float(z), **lkw)
                 F.iROC.axvline(z_unit * float(z), **lkw)
                 F.Gouy.axvline(z_unit * float(z), **lkw)
-        F.width.set_ylim(0, None)
         return
 
 
