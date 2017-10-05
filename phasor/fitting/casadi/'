@@ -100,8 +100,6 @@ class FitterRoot(RootElement, FitterBase):
             ctree.hints.symbolic = 'casadi'
             ctree.hints.symbolic_fiducials = self.symbol_fiducials
             ctree.hints.symbolic_fiducial_substitute = self.symbol_fiducial_substitute
-
-            #TODO this maybe should be in a hints section (up to subsystems)
             ctree.symbols.math = dmath
 
         injectors = self.targets_recurse(VISIT.ctree_inject)

@@ -66,7 +66,7 @@ class FitterExpression(FitterBase):
                 sbunches_w_trans.append(sbunch)
                 tlengths.append(len(sbunch.transforms))
 
-        total_n = reduce(operator.mul, tlengths, 1)
+        #total_n = reduce(operator.mul, tlengths, 1)
         total_sum = reduce(operator.add, tlengths, 1)
 
         total_pairs = 0

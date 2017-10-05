@@ -40,6 +40,7 @@ from IPython.display import (
     clear_output,
     Audio,
     Javascript,
+    Markdown,
 )
 
 #for more options in mpl
