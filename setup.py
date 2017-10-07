@@ -50,7 +50,8 @@ setup(
     ],
     extras_require = {
         "fitting" : ["casadi"],
-        "test" : ["pytest"],
+        "test" :    ["pytest"],
+        "matrix":   ['scikit-umfpack'],
     },
     zip_safe=False,
     keywords = 'Controls Linear Physics',
