@@ -5,11 +5,13 @@ from __future__ import division, print_function, unicode_literals
 
 import warnings
 import os
+import contextlib
 from os import path
 
 import declarative
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 import numpy as np
 
 from .colors import color_array
@@ -20,21 +22,33 @@ except NameError:
     org_mode = False
 
 
+def save_figure_MP(fig, fname, *args, **kwargs):
+    """
+    After pickling to a subprocess, the canvas is destroyed due to matplotlib bullshit, so make a new one as it apparently doesn't
+    do this for you
+    """
+    if fig.canvas is None:
+        canvas = FigureCanvas(fig)
+        fig.set_canvas(canvas)
+    return fig.savefig(fname, *args, **kwargs)
+
+
 class SaveToken(declarative.OverridableObject):
     aps = None
     fbasename = None
+    kwargs = {}
 
     def __lshift__(self, other):
-        self.aps(self.fbasename, fig_or_fbunch = other)
+        self.aps(self.fbasename, fig_or_fbunch = other, **self.kwargs)
         return other
     def __rlshift__(self, other):
-        self.aps(self.fbasename, fig_or_fbunch = other)
+        self.aps(self.fbasename, fig_or_fbunch = other, **self.kwargs)
         return other
     def __rshift__(self, other):
-        self.aps(self.fbasename, fig_or_fbunch = other)
+        self.aps(self.fbasename, fig_or_fbunch = other, **self.kwargs)
         return other
     def __rrshift__(self, other):
-        self.aps(self.fbasename, fig_or_fbunch = other)
+        self.aps(self.fbasename, fig_or_fbunch = other, **self.kwargs)
         return other
 
 def mpl_autorasterize(fig):
@@ -91,17 +105,69 @@ class AutoPlotSaver(declarative.OverridableObject):
     formats.png.use = False
 
     embed = False
+    save_show  = True
+    fixname = True
+    _pool = None
+    _last_async_result = None
 
-    def __call__(self, fbasename, fig_or_fbunch = None):
+    @contextlib.contextmanager
+    def pool(self, workers = 4):
+        """
+        runs the plot save in a contextmanager and waits for the plotting to be done simultaneously
+        """
+        import multiprocessing
+        wasnone = False
+        if self._pool is None:
+            if workers > 1:
+                asavefig._pool = multiprocessing.Pool(workers)
+                asavefig._last_async_result = []
+            wasnone = True
+        yield
+        if asavefig._last_async_result is not None:
+            for result in asavefig._last_async_result:
+                result.get()
+            asavefig._last_async_result = []
+        if wasnone:
+            asavefig._pool.close()
+            asavefig._pool.join()
+            asavefig._pool = None
+            asavefig._last_async_result = None
+
+    def __call__(
+            self,
+            fbasename,
+            fig_or_fbunch = None,
+            fixname = None,
+    ):
+
         if fig_or_fbunch is None:
             return SaveToken(
                 aps = self,
                 fbasename = fbasename,
+                kwargs = dict(
+                    fixname = fixname,
+                ),
             )
+
+        fixname = fixname if fixname is not None else self.fixname
+        assert(not fixname)
+
         try:
             fig = fig_or_fbunch.fig
+
+            formats = fig_or_fbunch.formats
+            if not formats:
+                formats = self.formats
+
+            save_show    = fig_or_fbunch.save_show
+            #and needed since show may be empty DeepBunch
+            if not save_show and save_show is not False:
+                save_show = self.save_show
+
         except AttributeError:
             fig = fig_or_fbunch
+            save_show = self.save_show
+            formats = self.formats
         w, h = fig.get_size_inches()
         if self.max_width_in is not None and w > self.max_width_in:
             new_w = self.max_width_in
@@ -115,7 +181,7 @@ class AutoPlotSaver(declarative.OverridableObject):
         if self.org_subfolder:
             subfolder = self.org_subfolder
 
-        if '_' in fbasename:
+        if '_' in fbasename and fixname:
             warnings.warn("Image name contains '_' which will be changed to '-' to fix nbsphinx export")
             fbasename = fbasename.replace('_', '-')
         fbasename = path.join(subfolder, fbasename)
@@ -124,11 +190,15 @@ class AutoPlotSaver(declarative.OverridableObject):
             os.makedirs(dirname)
 
         global org_mode
-        for fmt, fB in self.formats.items():
+        used_png = False
+        for fmt, fB in formats.items():
             if fmt == 'png' and (org_mode or self.org_subfolder):
+                #to avoide the elif
                 pass
             elif not fB.use:
                 continue
+            if fmt == 'png':
+                used_png = True
             if fB.dpi:
                 dpi = fB.dpi
             else:
@@ -136,55 +206,81 @@ class AutoPlotSaver(declarative.OverridableObject):
             kwargs = dict()
             if fB.facecolorize:
                 kwargs['facecolor'] = fig.get_facecolor()
-            fig.savefig(
-                fbasename + '.' + fmt,
-                dpi = dpi,
-                bbox_inches = 'tight',
-                #tight_layout=True,
-                pad_inches = 0.05,
-                transparent=True,
-                quality = 50,
-                **kwargs
-            )
+            if self._pool is None:
+                fig.savefig(
+                    fbasename + '.' + fmt,
+                    dpi = dpi,
+                    bbox_inches = 'tight',
+                    #tight_layout=True,
+                    pad_inches = 0.05,
+                    transparent=True,
+                    quality = 50,
+                    **kwargs
+                )
+            else:
+                mydir = os.getcwd()
+                self._last_async_result.append(
+                    self._pool.apply_async(
+                        save_figure_MP,
+                        args          = (
+                            fig,
+                            os.path.join(mydir, fbasename + '.' + fmt),
+                        ),
+                        kwds = dict(
+                            dpi           = dpi,
+                            bbox_inches   = 'tight',
+                            pad_inches    = 0.05,
+                            transparent   = True,
+                            quality       = 50,
+                            #tight_layout =True,
+                            **kwargs
+                        ),
+                    )
+                )
 
-        if org_mode or self.org_subfolder:
+        if used_png:
             fname = fbasename + '.png'
             if org_mode:
                 print("figure: {0}".format(fname))
                 print("[[file:{0}]]".format(fname))
             if not self.embed:
-                try:
-                    import IPython.display
-                    import time
-                    #IPython.display.display(IPython.display.Image(filename=fname, embed=False))
-                    #html_bit = '<img src="{1}/../{0}?{1}">'.format(fname, int(time.time()))
-                    #IPython.display.display(IPython.display.HTML(html_bit))
-                    ftype_md = []
-                    for fmt, fB in self.formats.items():
-                        if fB.use or fmt == 'png':
-                            md = "[{ftype}]({fbasename}.{ftype})".format(
-                                ftype = fmt,
-                                fbasename = fbasename
-                            )
-                            ftype_md.append(md)
-                    markdown_bit = '![{fbasename}]({0}?{1} "{fbasename}")'.format(
-                        fname,
-                        int(time.time()),
-                        fbasename = fbasename,
-                    )
-                    IPython.display.display(IPython.display.Markdown(markdown_bit + "\n" + ",  ".join(ftype_md)))
+                if save_show:
+                    try:
+                        import IPython.display
+                        import time
+                        #IPython.display.display(IPython.display.Image(filename=fname, embed=False))
+                        #html_bit = '<img src="{1}/../{0}?{1}">'.format(fname, int(time.time()))
+                        #IPython.display.display(IPython.display.HTML(html_bit))
+                        ftype_md = []
+                        for fmt, fB in formats.items():
+                            if fB.use or fmt == 'png':
+                                md = "[{ftype}]({fbasename}.{ftype})".format(
+                                    ftype = fmt,
+                                    fbasename = fbasename
+                                )
+                                ftype_md.append(md)
+                        markdown_bit = '![{fbasename}]({0}?{1} "{fbasename}")'.format(
+                            fname,
+                            int(time.time()),
+                            fbasename = fbasename,
+                        )
+                        IPython.display.display(IPython.display.Markdown(markdown_bit + "\n" + ",  ".join(ftype_md)))
+                        plt.close(fig)
+                    except ImportError:
+                        pass
+                else:
                     plt.close(fig)
-                except ImportError:
-                    pass
             else:
-                try:
-                    import IPython.display
-                    import time
-                    IPython.display.display(IPython.display.Image("{0}".format(fname)))
+                if save_show:
+                    try:
+                        import IPython.display
+                        import time
+                        IPython.display.display(IPython.display.Image("{0}".format(fname)))
+                        plt.close(fig)
+                    except ImportError:
+                        pass
+                else:
                     plt.close(fig)
-                except ImportError:
-                    pass
-
         fig.set_dpi(144)
         return
 
@@ -254,7 +350,7 @@ def mplfigB(
             ax.set_prop_cycle(
                 color = color_array
             )
-            patch_axes(ax)
+            #patch_axes(ax)
             ax_list.append(ax)
             ax.grid(b=True)
             axB.ax_grid_colrow[idx_col].append(ax)

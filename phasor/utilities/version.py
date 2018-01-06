@@ -44,9 +44,7 @@ except ImportError:
         return output
 
 
-
-
-def foundations_version():
+def phasor_git_version():
     return check_output(['git', 'show', '-s', '--format=%ci (%H)'], cwd = path.join(path.dirname(__file__), '../..')).strip()
 
 

@@ -99,7 +99,7 @@ def generate_stacked_plot_ax(
         ax_list = []
         for idx, name in enumerate(view_names):
             ax_local  = fig.add_subplot(gs_DC[idx, col_idx], sharex = ax_top)
-            patch_axes(ax_local)
+            #patch_axes(ax_local)
             ax_local.grid(b=True)
             axB['ax{0}_{1}'.format(idx, col_idx)] = ax_local
             if col_idx == 0:

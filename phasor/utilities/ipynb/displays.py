@@ -34,6 +34,7 @@ from IPython.display import (
     display_latex,
     display_svg,
     display_javascript,
+    display_markdown,
     FileLink,
     Image,
     SVG,

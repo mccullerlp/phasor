@@ -11,6 +11,7 @@ from .autoniceplot import (
 
 from .stacked_plots import (
     generate_stacked_plot_ax,
+    generate_ax,
 )
 
 
