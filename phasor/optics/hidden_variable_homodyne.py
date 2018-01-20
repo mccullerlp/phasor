@@ -5,7 +5,7 @@ from __future__ import division, print_function, unicode_literals
 import numpy as np
 
 from .. import readouts
-from ..system.matrix_injections import TripletNormCoupling
+from ..system.matrix_injections import TripletNormCoupling, TripletNormsCoupling
 
 from . import ports
 from . import bases
@@ -42,14 +42,6 @@ class HiddenVariableHomodynePD(
         self.own.rtWpdQ   = ports.SignalOutPort()
         self.own.rtWpdCmn = ports.SignalOutPort()
 
-        if self.include_quanta:
-            self.own.rtQuantumI   = ports.SignalOutPort()
-            self.own.rtQuantumQ   = ports.SignalOutPort()
-
-        if self.include_relative:
-            self.own.RinI   = ports.SignalOutPort()
-            self.own.RadQ   = ports.SignalOutPort()
-
         if source_port is None:
             self.source_port = self.po_Fr.i
         else:
@@ -60,6 +52,17 @@ class HiddenVariableHomodynePD(
             port           = self.source_port,
             #include_quanta = self.include_quanta,
         )
+
+        if self.include_quanta:
+            self.own.rtQuantumI   = ports.SignalOutPort()
+            self.own.rtQuantumQ   = ports.SignalOutPort()
+
+        if self.include_relative:
+            self.own.RinI   = ports.SignalOutPort()
+            self.own.RadQ   = ports.SignalOutPort()
+            self.own.PWR_in = TotalDCPowerPD(
+                port         = self.po_Fr.i,
+            )
 
         bases.PTREE_ASSIGN(self).include_readouts = include_readouts
         if self.include_readouts:
@@ -191,9 +194,9 @@ class HiddenVariableHomodynePD(
             def insert_coupling(
                     out_port_classical,
                     Stdcplg, StdcplgC,
-                    norm_port,
+                    norm_ports,
                     as_quanta,
-                    norm_func = lambda v : v**.5,
+                    norms_func = lambda v : (abs(v) + 1e-20)**.5,
             ):
                 lktos = matrix_algorithm.port_set_get(out_port_classical.o)
                 lkto_completed = set()
@@ -241,46 +244,46 @@ class HiddenVariableHomodynePD(
                     if kfrom.contains(ports.LOWER):
                         #TODO Check factor of 2 overcounting here between raising and lowering
                         if ktoOptP is not None:
-                            inj = TripletNormCoupling(
+                            inj = TripletNormsCoupling(
                                 pkfrom1     = (self.po_Fr.i,            ktoOptP),
                                 pkfrom2     = optCplgC,
                                 pkto        = (out_port_classical.o, lkto),
-                                pknorm      = norm_port,
                                 cplg        = Stdcplg / 2 * cplg_adjust,
-                                pknorm_func = norm_func,
+                                pknorms      = norm_ports,
+                                pknorms_func = norms_func,
                             )
                             matrix_algorithm.injection_insert(inj)
                         if lktoN != lkto and ktoOptN is not None:
-                            inj = TripletNormCoupling(
+                            inj = TripletNormsCoupling(
                                 pkfrom1     = (self.po_Fr.i, ktoOptN),
                                 pkfrom2     = optCplgC,
                                 pkto        = (out_port_classical.o, lktoN),
-                                pknorm      = norm_port,
                                 cplg        = Stdcplg / 2 * cplg_adjust,
-                                pknorm_func = norm_func,
+                                pknorms      = norm_ports,
+                                pknorms_func = norms_func,
                             )
                             matrix_algorithm.injection_insert(inj)
                     elif kfrom.contains(ports.RAISE):
                         #TODO Check factor of 2 overcounting here between raising and lowering
                         # because of conjugation issues, the frequencies are reversed in the lktos for the optical ports.RAISE operators
                         if ktoOptP is not None:
-                            inj = TripletNormCoupling(
+                            inj = TripletNormsCoupling(
                                 pkfrom1      = (self.po_Fr.i, ktoOptP),
                                 pkfrom2     = optCplgC,
                                 pkto        = (out_port_classical.o, lktoN),
-                                pknorm      = norm_port,
                                 cplg        = StdcplgC / 2 * cplg_adjust,
-                                pknorm_func = norm_func,
+                                pknorms      = norm_ports,
+                                pknorms_func = norms_func,
                             )
                             matrix_algorithm.injection_insert(inj)
                         if lktoN != lkto and ktoOptN is not None:
-                            inj = TripletNormCoupling(
+                            inj = TripletNormsCoupling(
                                 pkfrom1     = (self.po_Fr.i, ktoOptN),
                                 pkfrom2     = optCplgC,
                                 pkto        = (out_port_classical.o, lkto),
-                                pknorm      = norm_port,
                                 cplg        = StdcplgC / 2 * cplg_adjust,
-                                pknorm_func = norm_func,
+                                pknorms      = norm_ports,
+                                pknorms_func = norms_func,
                             )
                             matrix_algorithm.injection_insert(inj)
                     else:
@@ -290,14 +293,14 @@ class HiddenVariableHomodynePD(
                 self.rtWpdI,
                 Stdcplg,
                 StdcplgC,
-                norm_port = self.PWR_tot.pk_WpdDC,
+                norm_ports = [self.PWR_tot.pk_WpdDC],
                 as_quanta = False,
             )
             insert_coupling(
                 self.rtWpdQ,
                 self.symbols.i * Stdcplg,
                 -self.symbols.i * StdcplgC,
-                norm_port = self.PWR_tot.pk_WpdDC,
+                norm_ports = [self.PWR_tot.pk_WpdDC],
                 as_quanta = False,
             )
             if self.include_quanta:
@@ -305,14 +308,14 @@ class HiddenVariableHomodynePD(
                     self.rtQuantumI,
                     Stdcplg,
                     StdcplgC,
-                    norm_port = self.PWR_tot.pk_WpdDC,
+                    norm_ports = [self.PWR_tot.pk_WpdDC],
                     as_quanta = True,
                 )
                 insert_coupling(
                     self.rtQuantumQ,
                     self.symbols.i * Stdcplg,
                     -self.symbols.i * StdcplgC,
-                    norm_port = self.PWR_tot.pk_WpdDC,
+                    norm_ports = [self.PWR_tot.pk_WpdDC],
                     as_quanta = True,
                 )
             if self.include_relative:
@@ -320,17 +323,17 @@ class HiddenVariableHomodynePD(
                     self.RinI,
                     Stdcplg,
                     StdcplgC,
-                    norm_port = self.PWR_tot.pk_WpdDC,
+                    norm_ports = [self.PWR_tot.pk_WpdDC, self.PWR_in.pk_WpdDC],
                     as_quanta = False,
-                    norm_func = lambda v : v,
+                    norms_func = lambda u, v : (abs(v * u) + 1e-20)**.5,
                 )
                 insert_coupling(
                     self.RadQ,
                     self.symbols.i * Stdcplg,
                     -self.symbols.i * StdcplgC,
-                    norm_port = self.PWR_tot.pk_WpdDC,
+                    norm_ports = [self.PWR_tot.pk_WpdDC, self.PWR_in.pk_WpdDC],
                     as_quanta = False,
-                    norm_func = lambda v : v,
+                    norms_func = lambda u, v : (abs(v * u) + 1e-20)**.5,
                 )
 
         for kfrom in matrix_algorithm.port_set_get(self.po_Bk.i):
@@ -409,7 +412,6 @@ class TotalDCPowerPD(
 
         if self.include_quanta:
             self.own.QuantaDC       = ports.SignalOutPort(sname = 'QuantaDC')
-            self.fdkey          = ports.DictKey({ports.ClassicalFreqKey: ports.FrequencyKey({})})
             self.pk_QuantaDC       = (self.QuantaDC.o, self.fdkey)
         return
 

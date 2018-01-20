@@ -75,7 +75,7 @@ class PortUpdatesAlgorithm(object):
         assert(self._current_element is not None)
         element = self._current_element
         self._current_element = None
-        for port in self.system.owners_ports[element]:
+        for port in self.system.owners_ports.get(element, []):
             update = self.port_cplgs_update[element, port]
             updateX = self.port_cplgs_updateX[port]
             self.port_cplgs[port].update(update)

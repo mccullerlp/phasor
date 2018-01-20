@@ -23,6 +23,10 @@ module_by_type = {
     np.int16      : npmath,
     np.int32      : npmath,
     np.int64      : npmath,
+    np.uint8      : npmath,
+    np.uint16     : npmath,
+    np.uint32     : npmath,
+    np.uint64     : npmath,
     np.complex    : npmath,
     np.complex64  : npmath,
     np.complex128 : npmath,
@@ -142,7 +146,7 @@ check_symbolic_type_run = generate_dispatched('check_symbolic_type')
 def check_symbolic_type(arg):
     if isinstance(arg, (int, float, complex)):
         return False
-    elif isinstance(arg, np.ndarray):
+    elif isinstance(arg, (np.ndarray, np.generic)):
         if np.issubdtype(arg.dtype, np.number):
             return False
         else:

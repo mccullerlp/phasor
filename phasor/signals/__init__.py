@@ -50,3 +50,8 @@ from .ZPSOS import (
 from .noise import (
     WhiteNoise
 )
+
+
+from .state_space import (
+    TransferFunctionSS,
+)

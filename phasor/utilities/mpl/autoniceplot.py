@@ -128,9 +128,10 @@ class AutoPlotSaver(declarative.OverridableObject):
                 result.get()
             asavefig._last_async_result = []
         if wasnone:
-            asavefig._pool.close()
-            asavefig._pool.join()
-            asavefig._pool = None
+            if asavefig._pool is not None:
+                asavefig._pool.close()
+                asavefig._pool.join()
+                asavefig._pool = None
             asavefig._last_async_result = None
 
     def __call__(
@@ -150,16 +151,15 @@ class AutoPlotSaver(declarative.OverridableObject):
             )
 
         fixname = fixname if fixname is not None else self.fixname
-        assert(not fixname)
 
         try:
             fig = fig_or_fbunch.fig
 
-            formats = fig_or_fbunch.formats
+            formats = fig_or_fbunch.get("formats", None)
             if not formats:
                 formats = self.formats
 
-            save_show    = fig_or_fbunch.save_show
+            save_show    = fig_or_fbunch.get("save_show", None)
             #and needed since show may be empty DeepBunch
             if not save_show and save_show is not False:
                 save_show = self.save_show
