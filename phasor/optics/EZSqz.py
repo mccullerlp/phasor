@@ -57,8 +57,11 @@ class EZSqz(
             assert all(x is None for x in (check_all - set([normalized_nonlinear_field_gain, loss])))
             use_parameter = 'normalized_nonlinear_field_gain'
         elif rel_variance_1 is not None:
-            assert all(x is None for x in (check_all - set([rel_variance_1, rel_variance_2])))
+            assert all(x is None for x in (check_all - set([rel_variance_1, loss, rel_variance_2])))
             use_parameter = 'rel_variance'
+            bases.PTREE_ASSIGN(self).loss                            = loss
+            bases.PTREE_ASSIGN(self).rel_variance_1                  = rel_variance_1
+            bases.PTREE_ASSIGN(self).rel_variance_2                  = rel_variance_2
         elif sqzDB is not None:
             assert all(x is None for x in (check_all - set([sqzDB, antisqzDB])))
             use_parameter = 'sqzDB'
@@ -67,7 +70,6 @@ class EZSqz(
 
         #TODO, actually respect this variable
         bases.PTREE_ASSIGN(self).phi_sqz_deg = phi_sqz_deg
-
         bases.PTREE_ASSIGN(self).use_parameter = use_parameter
 
         if self.use_parameter == 'nonlinear_power_gain':
@@ -101,19 +103,17 @@ class EZSqz(
             nonlinear_field_gain_2 = np.sqrt(nonlinear_power_gain - 1)
         elif self.use_parameter == 'rel_variance':
             subtype = 'variance'
-            if rel_variance_2 is None:
+            if self.rel_variance_2 is None:
                 if loss is None:
-                    rel_variance_2 = 1/rel_variance_1
+                    self.rel_variance_2 = 1/self.rel_variance_1
                     loss = 0
                 else:
-                    raise NotImplementedError("Need to implement this parameter set")
-                    rel_variance_2 = 1/rel_variance_1
-                    loss = 0
+                    self.rel_variance_2 = 1/(self.rel_variance_1 - self.loss)
             else:
-                loss = (1 - rel_variance_1 * rel_variance_2) / (2 - rel_variance_1 - rel_variance_2)
+                loss = (1 - self.rel_variance_1 * self.rel_variance_2) / (2 - self.rel_variance_1 - self.rel_variance_2)
 
-            sqzDB     = -10 * np.log(rel_variance_1) / np.log(10)
-            antisqzDB = +10 * np.log(rel_variance_2) / np.log(10)
+            sqzDB     = -10 * np.log(self.rel_variance_1) / np.log(10)
+            antisqzDB = +10 * np.log(self.rel_variance_2) / np.log(10)
         elif self.use_parameter == 'sqzDB':
             subtype = 'variance'
             bases.PTREE_ASSIGN(self).sqzDB = sqzDB
@@ -126,9 +126,8 @@ class EZSqz(
             raise RuntimeError("Must specify some squeezing parameter")
 
         if subtype == 'gain':
-            print("ASDASD", self.loss)
-            rel_variance_1 = (1 - self.loss) * (nonlinear_field_gain_1 - nonlinear_field_gain_2)**2 + self.loss
-            rel_variance_2 = (1 - self.loss) * (nonlinear_field_gain_1 + nonlinear_field_gain_2)**2 + self.loss
+            rel_variance_1 = (1 - self.loss) * (self.nonlinear_field_gain_1 - self.nonlinear_field_gain_2)**2 + self.loss
+            rel_variance_2 = (1 - self.loss) * (self.nonlinear_field_gain_1 + self.nonlinear_field_gain_2)**2 + self.loss
             sqzDB     = -10 * np.log(rel_variance_1) / np.log(10)
             antisqzDB = +10 * np.log(rel_variance_2) / np.log(10)
             #Xloss = (1 - rel_variance_1 * rel_variance_2) / (2 - rel_variance_1 - rel_variance_2)
@@ -137,12 +136,15 @@ class EZSqz(
             #Xnonlinear_power_gain = (2 + np.sqrt(4 + V_d**2))/4
             #print('Power Check', self.nonlinear_power_gain, Xnonlinear_power_gain)
         elif subtype == 'variance':
-            V_d = (rel_variance_1 - 1) / (rel_variance_2 - 1) - (rel_variance_2 - 1) / (rel_variance_1 - 1)
+            if self.rel_variance_1 == 1:
+                V_d = 0
+            else:
+                V_d = (self.rel_variance_1 - 1) / (self.rel_variance_2 - 1) - (self.rel_variance_2 - 1) / (self.rel_variance_1 - 1)
             nonlinear_power_gain = (2 + np.sqrt(4 + V_d**2))/4
             nonlinear_field_gain_1 = np.sqrt(nonlinear_power_gain)
             nonlinear_field_gain_2 = np.sqrt(nonlinear_power_gain - 1)
             normalized_nonlinear_field_gain = 1 - 1/nonlinear_field_gain_1
-            loss = (1 - rel_variance_1 * rel_variance_2) / (2 - rel_variance_1 - rel_variance_2)
+            loss = (1 - self.rel_variance_1 * self.rel_variance_2) / (2 - self.rel_variance_1 - self.rel_variance_2)
             #Xrel_variance_1 = (1 - loss) * (nonlinear_field_gain_1 - nonlinear_field_gain_2)**2 + loss
             #Xrel_variance_2 = (1 - loss) * (nonlinear_field_gain_1 + nonlinear_field_gain_2)**2 + loss
             #print(rel_variance_1 , Xrel_variance_1)
@@ -174,10 +176,10 @@ class EZSqz(
             })
         self.Fkey_QC_center = Fkey_QC_center
 
-        self.po_Fr = ports.OpticalPort(sname = 'po_Fr' )
-        self.po_Bk = ports.OpticalPort(sname = 'po_Bk' )
-        self._LFr  = ports.OpticalPort(sname = 'LFr')
-        self._LBk  = ports.OpticalPort(sname = 'LBk')
+        self.own.po_Fr = ports.OpticalPort()
+        self.own.po_Bk = ports.OpticalPort()
+        self.own._LFr  = ports.OpticalPort()
+        self.own._LBk  = ports.OpticalPort()
         return
 
     @decl.mproperty
