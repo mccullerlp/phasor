@@ -3,14 +3,16 @@
 """
 from __future__ import division, print_function, unicode_literals
 import sys
-from ..utilities.future_from_2 import repr_compat
 
 from collections import namedtuple
-from .dispatched import sin, cos, atan
-from . import dispatched
 from declarative.utilities.representations import ReprMixin
 from math import pi
 import numpy as np
+
+from ..utilities.future_from_2 import repr_compat, super
+
+from .dispatched import sin, cos, atan
+from . import dispatched
 
 ComplexTuple = namedtuple('ComplexTuple', ['real', 'imag'])
 
@@ -18,9 +20,9 @@ ComplexTuple = namedtuple('ComplexTuple', ['real', 'imag'])
 #class Complex(ComplexTuple):
 #    def __new__(cls, real, imag=None):
 #        if imag is None:
-#            inst = super(Complex, cls).__new__(cls, real.real, real.imag)
+#            inst = super().__new__(cls, real.real, real.imag)
 #        else:
-#            inst = super(Complex, cls).__new__(cls, real, imag)
+#            inst = super().__new__(cls, real, imag)
 #        return inst
 
 class Complex(ReprMixin):

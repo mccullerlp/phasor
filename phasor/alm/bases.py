@@ -2,7 +2,6 @@
 """
 """
 from __future__ import division, print_function, unicode_literals
-from ..utilities.future_from_2 import str
 import numpy as np
 import declarative
 
@@ -10,6 +9,7 @@ import declarative
 #import sympy
 
 
+from ..utilities.future_from_2 import super
 from ..base.autograft import invalidate_auto
 from ..base.bases import Element
 
@@ -134,7 +134,7 @@ class MatrixAtsBase(Element):
     def environment_query_local(self, query):
         if query == (MatrixAtsBase, "reversed"):
             return self.env_reversed
-        return super(MatrixAtsBase, self).environment_query_local(query)
+        return super().environment_query_local(query)
 
     @declarative.dproperty
     def root(self):

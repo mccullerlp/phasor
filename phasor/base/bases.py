@@ -8,6 +8,7 @@ import declarative
 from declarative.utilities import SuperBase
 from declarative import bunch
 
+from ..utilities.future_from_2 import super
 from . import autograft
 from . import visitors as VISIT
 import warnings
@@ -15,7 +16,7 @@ import warnings
 
 class Element(autograft.Element):
     def __mid_init__(self):
-        super(Element, self).__mid_init__()
+        super().__mid_init__()
         with self.building:
             self.__build__()
 
@@ -45,7 +46,7 @@ class Element(autograft.Element):
 
     #def insert(self, obj, name = None, invalidate = True):
     #    print("INSERT", obj, name, invalidate)
-    #    super(Element, self).insert(obj, name = name, invalidate = invalidate)
+    #    super().insert(obj, name = name, invalidate = invalidate)
     #    print("REG: ", self._registry_children)
 
 
@@ -62,7 +63,7 @@ class SystemElementBase(Element, SuperBase):
         #TODO, eventually remove this
         self.owned_ports = dict()
         self.owned_port_keys = dict()
-        super(SystemElementBase, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     @repr_compat
     def __repr__(self):
@@ -135,7 +136,7 @@ class OOABridge(object):
 
     def __setattr__(self, key, item):
         if key in self.__slots__:
-            return super(OOABridge, self).__setattr__(key, item)
+            return super().__setattr__(key, item)
         return self.__setitem__(key, item)
 
 

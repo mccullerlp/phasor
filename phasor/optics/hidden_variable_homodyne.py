@@ -4,6 +4,7 @@
 from __future__ import division, print_function, unicode_literals
 import numpy as np
 
+from ..utilities.future_from_2 import super
 from .. import readouts
 from ..system.matrix_injections import TripletNormCoupling, TripletNormsCoupling
 
@@ -27,7 +28,7 @@ class HiddenVariableHomodynePD(
         **kwargs
     ):
         #TODO make optional, requires adjusting the ports.OpticalNonOriented1PortMixin base to be adjustable
-        super(HiddenVariableHomodynePD, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.include_quanta = include_quanta
         self.include_relative = include_relative
 
@@ -400,7 +401,7 @@ class TotalDCPowerPD(
             **kwargs
     ):
         #TODO make magic optional
-        super(TotalDCPowerPD, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.include_quanta = include_quanta
         self.port           = port
 

@@ -7,6 +7,7 @@ from unittest import TestCase, main
 
 #import numpy as np
 
+from phasor.utilities.future_from_2 import super
 from phasor import system
 from phasor import optics
 from phasor import readouts
@@ -23,7 +24,7 @@ class FaradayTestSled(
             PSL_pol = 'S',
             **kwargs
     ):
-        super(FaradayTestSled, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         self.PSL = optics.Laser(
             F = self.system.F_carrier_1064,

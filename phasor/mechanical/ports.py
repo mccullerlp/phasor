@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import division, print_function, unicode_literals
-from ..utilities.future_from_2 import str
+
 import declarative
 
 #from ..math.key_matrix import DictKey
 
+from ..utilities.future_from_2 import str, super
 from ..base.ports import (
     DictKey,
     FrequencyKey,
@@ -34,7 +35,7 @@ class MechanicalPort(MechanicalPortRaw, bases.SystemElementBase):
     typename = 'Mechanical'
 
     def _complete(self):
-        if not super(MechanicalPort, self)._complete():
+        if not super()._complete():
             prein = self.inst_preincarnation
             if prein is not None:
                 for built, bpartner in zip(prein._bond_partners_building, prein._bond_partners):
@@ -120,7 +121,7 @@ class MechanicalPort(MechanicalPortRaw, bases.SystemElementBase):
             if len(self._bond_partners) < self.require_N_autoterminate:
                 return self.auto_terminate()
         else:
-            return super(MechanicalPort, self).targets_list(typename)
+            return super().targets_list(typename)
 
     pchain = None
 
@@ -161,7 +162,7 @@ class MechanicalXYZPort(bases.SystemElementBase):
         return val
 
     def _complete(self):
-        if not super(MechanicalXYZPort, self)._complete():
+        if not super()._complete():
             prein = self.inst_preincarnation
             if prein is not None:
                 for built, bpartner in zip(prein._bond_partners_building, prein._bond_partners):
@@ -211,7 +212,7 @@ class MechanicalXYZPort(bases.SystemElementBase):
         if typename == VISIT.bond_delegate:
             return self, self.bond_delegate
         else:
-            return super(MechanicalXYZPort, self).targets_list(typename)
+            return super().targets_list(typename)
 
     pchain = None
 

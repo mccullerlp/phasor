@@ -2,12 +2,12 @@
 """
 """
 from __future__ import division, print_function, unicode_literals
-#from builtins import range
-#from builtins import object
 import declarative
 
 import warnings
 import numpy as np
+
+from ..utilities.future_from_2 import super
 
 
 class KVSpace(object):
@@ -158,7 +158,7 @@ class KeyVectorBase(KeyLinearBase):
         vspace,
         _premap = None,
     ):
-        super(KeyVectorBase, self).__init__(dtype = vspace.dtype)
+        super().__init__(dtype = vspace.dtype)
         self.vspace = vspace
         if _premap is None:
             self._data_map = {}
@@ -217,7 +217,7 @@ class KeyMatrixBase(KeyLinearBase):
         vspace_to,
         _premap = None,
     ):
-        super(KeyMatrixBase, self).__init__(dtype = np.result_type(vspace_to.dtype, vspace_from.dtype))
+        super().__init__(dtype = np.result_type(vspace_to.dtype, vspace_from.dtype))
         self.vspace_from = vspace_from
         self.vspace_to = vspace_to
         if _premap is None:
@@ -296,7 +296,7 @@ class KeyMatrixBase(KeyLinearBase):
 class KeyVector(KeyVectorBase):
 
     def __init__(self, vspace, **kwargs):
-        super(KeyVector, self).__init__(vspace, **kwargs)
+        super().__init__(vspace, **kwargs)
         self._memoize_array_count = 0
         self._memoize_array = None
 
@@ -347,7 +347,7 @@ class KeyMatrix(KeyMatrixBase):
         vspace_to,
         **kwargs
     ):
-        super(KeyMatrix, self).__init__(vspace_from, vspace_to, **kwargs)
+        super().__init__(vspace_from, vspace_to, **kwargs)
         self._memoize_array_count = 0
         self._memoize_array = None
 

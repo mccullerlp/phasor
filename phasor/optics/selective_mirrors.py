@@ -38,7 +38,7 @@ class MirrorSelectionStack(
             return set(['po_FrA', 'po_FrB', 'po_BkA', 'po_BkB'])
 
     def __build__(self):
-        super(MirrorSelectionStack, self).__build__()
+        super().__build__()
 
         for sname, sub_element in self.sub_element_map.items():
             self.Z.bond(sub_element.Z)

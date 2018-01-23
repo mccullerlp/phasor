@@ -6,6 +6,7 @@ from __future__ import division, print_function, unicode_literals
 import declarative
 from collections import defaultdict
 
+from ..utilities.future_from_2 import super
 from ..base import (
     CouplerBase,
 )
@@ -25,7 +26,7 @@ class TransferFunctionMIMO(CouplerBase, SystemElementBase):
             max_freq = None,
             **kwargs
     ):
-        super(TransferFunctionMIMO, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.ps_In  = declarative.Bunch()
         self.O  = declarative.Bunch()
 

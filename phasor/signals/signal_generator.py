@@ -10,10 +10,11 @@ import numpy as np
 #from numbers import Number
 #import warnings
 
+from ..utilities.future_from_2 import super
+from ..optics import standard_attrs as standard_attrs_opt
+
 from . import ports
 from . import bases
-
-from ..optics import standard_attrs as standard_attrs_opt
 
 #from ..utilities.print import pprint
 
@@ -60,7 +61,7 @@ class SignalGenerator(bases.SignalElementBase):
         return ports.FrequencyKey(self.f_dict)
 
     def __build__(self):
-        super(SignalGenerator, self).__build__()
+        super().__build__()
         self.own.ps_Out = ports.SignalOutPort(sname = 'ps_Out')
 
         for Hidx, gain in list(self.harmonic_gains.items()):

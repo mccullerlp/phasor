@@ -2,11 +2,13 @@
 """
 """
 from __future__ import division, print_function, unicode_literals
+
 #import pytest
 import declarative
 #import numpy as np
 import numpy.testing as test
 
+from phasor.utilities.future_from_2 import super
 import phasor.signals as signals
 import phasor.readouts as readouts
 import phasor.system as system
@@ -75,7 +77,7 @@ class VCOTest(signals.SignalElementBase):
         return val
 
     def __build__(self):
-        super(VCOTest, self).__build__()
+        super().__build__()
         self.generate.ps_Out.bond(
             self.modulate.ps_In,
         )

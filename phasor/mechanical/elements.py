@@ -22,6 +22,7 @@ and their inverses for reactance
 """
 from __future__ import division, print_function, unicode_literals
 
+from ..utilities.future_from_2 import super
 from ..base.bases import (
     SystemElementBase,
     NoiseBase,
@@ -131,7 +132,7 @@ class Connection(MechanicalElementBase):
         return val
 
     def __build__(self):
-        super(Connection, self).__build__()
+        super().__build__()
 
         total_ports = self.N_ports + len(self.connect)
         ports_mechanical = []

@@ -2,9 +2,11 @@
 """
 """
 from __future__ import division, print_function, unicode_literals
+
 import declarative
 import numpy as np
 
+from phasor.utilities.future_from_2 import super
 from phasor import optics
 from phasor import signals
 from phasor import readouts
@@ -175,7 +177,7 @@ class QuadSusp(optics.OpticalCouplerBase):
 
     def __build__(self):
         try:
-            super(QuadSusp, self).__build__()
+            super().__build__()
 
             self.Platform.pm_A.bond(self.ActuatorF.pm_A)
 
@@ -210,7 +212,7 @@ class QuadSusp(optics.OpticalCouplerBase):
 
 class LIGODetector(base.SystemElementBase):
     def __init__(self, **kwargs):
-        super(LIGODetector, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         base.PTREE_ASSIGN(self).lossless = False
 
@@ -463,7 +465,7 @@ class LIGODetector(base.SystemElementBase):
 
 class LIGOInputBasic(base.SystemElementBase):
     def __init__(self, **kwargs):
-        super(LIGOInputBasic, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.own.F9 = base.Frequency(
             F_Hz  = 9099471,
             order = 0,
@@ -505,7 +507,7 @@ class LIGOInputBasic(base.SystemElementBase):
 
 class LIGOOutputBasic(base.SystemElementBase):
     def __init__(self, LIGO_obj, **kwargs):
-        super(LIGOOutputBasic, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.own.ASPD = optics.PD()
 
         self.own.ASPD_DC = readouts.DCReadout(
@@ -526,7 +528,7 @@ class LIGOOutputHomodyne(base.SystemElementBase):
             LIGO_obj,
             **kwargs
     ):
-        super(LIGOOutputHomodyne, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         self.own.ASPD = optics.MagicPD(
             #facing_cardinal = 'N',
@@ -621,7 +623,7 @@ class LIGOOutputHomodyne(base.SystemElementBase):
 
 class LIGOBasicOperation(base.SystemElementBase):
     def __init__(self, **kwargs):
-        super(LIGOBasicOperation, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.own.LIGO = LIGODetector()
         self.own.input  = LIGOInputBasic()
         #self.output = LIGOOutputBasic(LIGO_obj = self.LIGO)

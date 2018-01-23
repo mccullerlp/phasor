@@ -48,10 +48,11 @@ from .ZPSOS import (
 )
 
 from .noise import (
-    WhiteNoise
+    WhiteNoise,
+    PSDFunctionNoise,
 )
 
 
 from .state_space import (
-    TransferFunctionSS,
+    StateSpaceModel,
 )

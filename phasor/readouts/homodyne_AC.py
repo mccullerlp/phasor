@@ -7,6 +7,7 @@ from __future__ import division, print_function, unicode_literals
 import numpy as np
 import declarative
 
+from ..utilities.future_from_2 import super
 from .. import base
 
 from . import noise
@@ -331,7 +332,7 @@ class HomodyneNoiseReadout(noise.NoiseReadout):
         self.portNI = portNI
         self.portNQ = portNQ
 
-        super(HomodyneNoiseReadout, self).__init__(
+        super().__init__(
             port_map = dict(
                 ps_In = self.portNI,
                 Q = self.portNQ,
@@ -370,7 +371,7 @@ class HomodyneACReadout(HomodyneACReadoutBase, base.SystemElementBase):
         return val
 
     def __build__(self):
-        super(HomodyneACReadout, self).__build__()
+        super().__build__()
         #TODO: make this adjustable
         self.F_sep = self.system.F_AC
 

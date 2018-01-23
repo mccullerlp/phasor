@@ -7,6 +7,7 @@ from __future__ import division, print_function, unicode_literals
 
 import declarative as decl
 
+from ..utilities.future_from_2 import super
 from ..base import (
     FrequencyBase,
     PTREE_ASSIGN,
@@ -28,6 +29,6 @@ class OpticalFrequency(FrequencyBase):
             order       = None,
             **kwargs
     ):
-        super(OpticalFrequency, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         PTREE_ASSIGN(self).order = order
         return

@@ -9,6 +9,8 @@ from ..utilities.print import pprint
 
 import declarative
 
+from ..utilities.future_from_2 import super
+
 from . import ports
 from . import bases
 from . import standard_attrs
@@ -60,7 +62,7 @@ class NonlinearCrystal(
         return val
 
     def __build__(self):
-        super(NonlinearCrystal, self).__build__()
+        super().__build__()
         self.own.po_Fr   = ports.OpticalPort(sname = 'po_Fr', pchain = lambda : self.po_Bk)
         self.own.po_Bk   = ports.OpticalPort(sname = 'po_Bk', pchain = lambda : self.po_Fr)
         return

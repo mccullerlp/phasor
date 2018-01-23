@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import division, print_function, unicode_literals
-from ..utilities.future_from_2 import str
 import declarative
 
 #from ..math.key_matrix import DictKey
 
+from ..utilities.future_from_2 import str, super
 from ..base.ports import (
     DictKey,
     FrequencyKey,
@@ -32,7 +32,7 @@ class ElectricalPort(ElectricalPortRaw, bases.SystemElementBase):
     typename = 'Electrical'
 
     def _complete(self):
-        if not super(ElectricalPort, self)._complete():
+        if not super()._complete():
             prein = self.inst_preincarnation
             if prein is not None:
                 for built, bpartner in zip(prein._bond_partners_building, prein._bond_partners):
@@ -117,7 +117,7 @@ class ElectricalPort(ElectricalPortRaw, bases.SystemElementBase):
             if not self._bond_partners:
                 return self.auto_terminate()
         else:
-            return super(ElectricalPort, self).targets_list(typename)
+            return super().targets_list(typename)
 
     pchain = None
 

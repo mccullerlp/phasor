@@ -4,6 +4,7 @@ from ..utilities.future_from_2 import str
 #from phasor.utilities.print import print
 import declarative
 
+from ..utilities.future_from_2 import super
 from ..base.ports import (
     PortInRaw,
     PortOutRaw,
@@ -66,11 +67,11 @@ class SignalCommonPortBase(bases.SystemElementBase):
             self.bond_completion()
             return self
         else:
-            return super(SignalCommonPortBase, self).targets_list(typename)
+            return super().targets_list(typename)
 
 class SignalInPortBase(bases.SystemElementBase):
     def _complete(self):
-        if not super(SignalInPortBase, self)._complete():
+        if not super()._complete():
             prein = self.inst_preincarnation
             if prein is not None:
                 for built, bpartner in zip(prein._bond_partners_in_building, prein._bond_partners_in):
@@ -113,7 +114,7 @@ class SignalInPort(
 
 class SignalOutPortBase(bases.SystemElementBase):
     def _complete(self):
-        if not super(SignalOutPortBase, self)._complete():
+        if not super()._complete():
             prein = self.inst_preincarnation
             if prein is not None:
                 for built, bpartner in zip(prein._bond_partners_out_building, prein._bond_partners_out):

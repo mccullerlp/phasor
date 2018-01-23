@@ -2,9 +2,11 @@
 """
 """
 from __future__ import division, print_function, unicode_literals
+
 import numpy as np
 import declarative
 
+from ...utilities.future_from_2 import super
 from ... import optics
 from ... import base
 from ... import signals
@@ -18,7 +20,7 @@ from .. import elements
 
 class HTTS_Flag(mechanical.XYZMomentDriver):
     def __build__(self):
-        super(HTTS_Flag, self).__build__()
+        super().__build__()
         self.own.FZ = mechanical.ForceSource()
         self.own.FZ.pm_A.bond(self.pm_A.Z)
 
@@ -69,7 +71,7 @@ class HTTS(elements.MechanicalElementBase):
         return val
 
     def __build__(self):
-        super(HTTS, self).__build__()
+        super().__build__()
         #tip-tilt displacement test
         self.own.M_com = mechanical.XYZMass(
             mass_kg = self.COM_kg,

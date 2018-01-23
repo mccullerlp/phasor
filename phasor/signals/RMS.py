@@ -10,6 +10,7 @@ import declarative
 #from numbers import Number
 #import warnings
 
+from ..utilities.future_from_2 import super
 from . import bases
 from . import ports
 
@@ -78,7 +79,7 @@ class SquareRootFunction(bases.CouplerBase, bases.SystemElementBase):
             self,
             **kwargs
     ):
-        super(SquareRootFunction, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.ps_In      = ports.SignalPortHolderIn()
         self.sqroot = ports.SignalOutPort()
         return
@@ -128,7 +129,7 @@ class RMSMixer(bases.CouplerBase, bases.SystemElementBase):
             self,
             **kwargs
     ):
-        super(RMSMixer, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.ps_In   = ports.SignalPortHolderIn(self,  x = 'ps_In')
         self.RMS = SignalOutPort(sname = 'RMS')
         self.system.virtual_link

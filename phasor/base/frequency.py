@@ -6,10 +6,10 @@ import numpy as np
 
 import declarative
 
+from ..utilities.future_from_2 import super
+
 from . import bases
-
 from . import multi_unit_args as mua
-
 from .import units
 
 
@@ -48,7 +48,7 @@ class Frequency(
             order       = None,
             **kwargs
     ):
-        super(Frequency, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         bases.PTREE_ASSIGN(self).F_width_Hz  = F_width_Hz
         bases.PTREE_ASSIGN(self).order = order

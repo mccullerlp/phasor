@@ -4,13 +4,15 @@
 
 from __future__ import division, print_function, unicode_literals
 #from builtins import zip, range, object
-from .optical_system import OpticalSystem
 import sympy
 import numpy as np
+import declarative
 
-from declarative.bunch import Bunch
-import phasor.utilities.numerics.dispatched as dmath
-import phasor.utilities.numerics.dispatch_sympy
+from ..utilities.future_from_2 import super
+from ..utilities.numerics import dispatched as dmath
+from ..utilities.numerics import dispatch_sympy
+
+from .optical_system import OpticalSystem
 
 from .optical_elements import (
     BeamSplitter,
@@ -20,17 +22,17 @@ from .optical_elements import (
     Space,
 )
 
-from IPython.display import (
-    display,
-    display_pretty,
-    display_html,
-    display_jpeg,
-    display_png,
-    display_json,
-    display_latex,
-    display_svg,
-    clear_output,
-)
+#from IPython.display import (
+#    display,
+#    display_pretty,
+#    display_html,
+#    display_jpeg,
+#    display_png,
+#    display_json,
+#    display_latex,
+#    display_svg,
+#    clear_output,
+#)
 
 
 var = sympy.var
@@ -122,7 +124,7 @@ class SympyPDMixer(SympyViewReduction, PDMixer):
 
 class SympySpace(Space):
     def phase_advance(self, system, F):
-        return super(SympySpace, self).phase_advance(system, F).simplify()
+        return super().phase_advance(system, F).simplify()
 
 
 def prefactor_cplx_split(expr):

@@ -2,7 +2,6 @@
 """
 """
 from __future__ import division, print_function, unicode_literals
-from ..utilities.future_from_2 import str
 import numpy as np
 import sys
 
@@ -10,16 +9,7 @@ import sys
 import declarative
 from declarative.bunch import DeepBunchSingleAssign
 
-
-from .utils import (
-    TargetLeft,
-    TargetRight,
-    TargetIdx,
-    np_check_sorted,
-    unit_str,
-)
-
-
+from ..utilities.future_from_2 import super, str
 from ..base import (
     RootElement,
     Element,
@@ -27,6 +17,14 @@ from ..base import (
 
 from ..base.autograft import (
     invalidate_auto,
+)
+
+from .utils import (
+    TargetLeft,
+    TargetRight,
+    TargetIdx,
+    np_check_sorted,
+    unit_str,
 )
 
 from . import bases
@@ -86,7 +84,7 @@ class RootSystem(RootElement, system.System):
             return self.env_substrate
         elif query == (bases.MatrixAtsBase, "wavelength_nm"):
             return self.env_wavelength_nm
-        return super(RootSystem, self).environment_query_local(query)
+        return super().environment_query_local(query)
 
     def _target_to_child(self, sub):
         subidx = self.filled_list.index(sub)

@@ -3,6 +3,8 @@
 """
 from __future__ import division, print_function, unicode_literals
 import numpy as np
+
+from ...utilities.future_from_2 import str, super
 from ... import optics
 from ... import base
 from ... import signals
@@ -13,7 +15,7 @@ from ...utilities.mpl.autoniceplot import mplfigB
 
 class KTPTestStand(optics.OpticalCouplerBase):
     def __build__(self):
-        super(KTPTestStand, self).__build__()
+        super().__build__()
         self.own.PSLG = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = 0.,
@@ -148,7 +150,7 @@ class KTPTestStand(optics.OpticalCouplerBase):
 
 class SHGTestStandResonant(optics.OpticalCouplerBase):
     def __build__(self):
-        super(SHGTestStandResonant, self).__build__()
+        super().__build__()
         self.own.PSLR = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = 1,
@@ -302,7 +304,7 @@ class SHGTestStandResonant(optics.OpticalCouplerBase):
 
 class OPOTestStandResonant(optics.OpticalCouplerBase):
     def __build__(self):
-        super(OPOTestStandResonant, self).__build__()
+        super().__build__()
         self.own.PSLG = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = .02,

@@ -8,6 +8,7 @@ from ..base.bases import (
     NoiseBase,
     CouplerBase,
 )
+from ..utilities.future_from_2 import super
 
 import declarative as decl
 
@@ -112,7 +113,7 @@ class Connection(ElectricalElementBase):
         return val
 
     def __build__(self):
-        super(Connection, self).__build__()
+        super().__build__()
 
         total_ports = self.N_ports + len(self.connect)
         ports_electrical = []

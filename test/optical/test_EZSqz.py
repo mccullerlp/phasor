@@ -3,6 +3,8 @@
 """
 from __future__ import division, print_function, unicode_literals
 
+import declarative
+
 from phasor import system
 from phasor import optics
 
@@ -20,72 +22,60 @@ def gensys(
 ):
     sys = system.BGSystem()
     sled = sys
-    sled.sqz = optics.EZSqz(
+    sled.own.sqz = optics.EZSqz(
         rel_variance_1 = .1,
         rel_variance_2 = 12,
     )
-    sled.sqz = optics.EZSqz(
-        nonlinear_power_gain = 10,
-        loss = .1,
-    )
+    #sled.own.sqz = optics.EZSqz(
+    #    nonlinear_power_gain = 10,
+    #    loss = .1,
+    #)
 
-    sled.laser = optics.Laser(
+    sled.own.PSL = optics.Laser(
         F = sys.F_carrier_1064,
         power_W = 1.,
-        name = "PSL",
     )
 
-    sled.mX = optics.Mirror(
+    sled.own.mX = optics.Mirror(
         T_hr = 0,
         L_hr = loss_EM,
-        name = 'mX',
-        facing_cardinal = 'W',
     )
-    sled.mY = optics.Mirror(
+    sled.own.mY = optics.Mirror(
         T_hr = 0,
         L_hr = loss_EM,
-        name = 'mY',
-        facing_cardinal = 'S',
     )
     #T_hr = sys.optical_harmonic_value(.3),
-    sled.mBS = optics.Mirror(
+    sled.own.mBS = optics.Mirror(
         T_hr = .5,
         L_hr = loss_BS,
         AOI_deg = 45,
-        facing_cardinal = 'NW',
     )
 
-    sled.sX = optics.Space(
+    sled.own.sX = optics.Space(
         1,
         L_detune_m = 1064e-9 / 8,
-        name = 'sX',
     )
-    sled.sY = optics.Space(
+    sled.own.sY = optics.Space(
         1,
         L_detune_m = 0,
-        name = 'sY',
     )
 
-    sled.symPD = optics.MagicPD(
-        name = 'symPD',
-        facing_cardinal = 'E',
-    )
-    sled.asymPD = optics.PD(
-        name = 'asymPD',
-    )
+    sled.own.symPD = optics.MagicPD()
+    sled.own.asymPD = optics.PD()
 
-    #sys.link(laser.po_Fr, symPD.po_Bk)
-    #sys.link(symPD.po_Fr, mBS.po_FrA)
-    #sys.link(mBS.po_FrB, sY.po_Fr)
-    #sys.link(sY.po_Bk, mY.po_Fr)
-    #sys.link(mBS.po_BkA, sX.po_Fr)
-    #sys.link(sX.po_Bk, mX.po_Fr)
-    #sys.link(mBS.po_BkB, asymPD.po_Fr)
-    sys.optical_link_sequence_WtoE(
-        sled.laser, sled.symPD, sled.mBS, sled.sX, sled.mX,
+    sys.bond_sequence(
+        sys.PSL.po_Fr,
+        sys.symPD.po_Bk,
+        sys.mBS.po_FrA,
+        sys.sX.po_Fr,
+        sys.mX.po_Fr,
     )
-    sys.optical_link_sequence_StoN(
-        sled.asymPD, sled.mBS, sled.sY, sled.mY,
+    sys.bond_sequence(
+        sys.asymPD.po_Fr,
+        sys.ASPDHD.po_Bk,
+        sys.mBS.po_BkB,
+        sys.sY.po_Fr,
+        sys.mY.po_Fr,
     )
 
     #vterm = VacuumTerminator(name = 'vterm')

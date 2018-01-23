@@ -6,6 +6,8 @@ from collections import defaultdict
 
 import declarative
 
+from ..utilities.future_from_2 import super
+
 from . import bases
 from . import ports
 
@@ -147,7 +149,7 @@ class OpticalSelectionStack(
         return val
 
     def __build__(self):
-        super(OpticalSelectionStack, self).__build__()
+        super().__build__()
 
         if self.port_set is None:
             optical_ports = defaultdict(lambda : 0)

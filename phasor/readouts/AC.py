@@ -8,6 +8,7 @@ from __future__ import division, print_function, unicode_literals
 
 import declarative as decl
 
+from ..utilities.future_from_2 import super
 from .. import base
 
 from .noise import NoiseReadout
@@ -28,7 +29,7 @@ class ACReadout(base.SystemElementBase):
         include_noise = True,
         **kwargs
     ):
-        super(ACReadout, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         if portDrv is None:
             portDrv = portD
 
@@ -164,7 +165,7 @@ class ACReadoutCLG(base.SystemElementBase):
         include_noise = True,
         **kwargs
     ):
-        super(ACReadoutCLG, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.portD = portD
         self.portN = portN
 
@@ -253,7 +254,7 @@ class ACReadoutLG(base.SystemElementBase):
         include_noise = True,
         **kwargs
     ):
-        super(ACReadoutLG, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.portAct   = portAct
         self.portSense = portSense
         if portDrv is not None:

@@ -14,6 +14,7 @@ from ..math.key_matrix import (
     KVSpace,
 )
 
+from ..utilities.future_from_2 import super
 from .. import base
 from .base import ReadoutViewBase
 from .noise import NoiseMatrixView
@@ -41,7 +42,7 @@ class MultiACReadout(base.SystemElementBase):
         port_set = 'AC',
         **kwargs
     ):
-        super(MultiACReadout, self).__init__(system = system, **kwargs)
+        super().__init__(system = system, **kwargs)
         if portDrv is None:
             portDrv = portD
 
@@ -91,7 +92,7 @@ class MultiACReadoutView(ReadoutViewBase):
             phase_deg,
             **kwargs
     ):
-        super(MultiACReadoutView, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.noise     = noise_view
         self.phase_deg = phase_deg
 
@@ -254,7 +255,7 @@ class MultiNoiseReadout(base.SystemElementBase):
             AC_sidebands_use = True,
             **kwargs
     ):
-        super(MultiNoiseReadout, self).__init__(
+        super().__init__(
             system = system,
             **kwargs
         )

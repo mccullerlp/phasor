@@ -5,6 +5,8 @@ from __future__ import division, print_function, unicode_literals
 from collections import defaultdict
 import declarative
 
+from ..utilities.future_from_2 import super
+
 from . import bases
 from . import ports
 
@@ -15,7 +17,7 @@ class DistributionAmplifier(bases.CouplerBase, bases.SystemElementBase):
             port_gains,
             **kwargs
     ):
-        super(DistributionAmplifier, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         bases.PTREE_ASSIGN(self).port_gains = port_gains
 
         self.own.ps_In  = ports.SignalInPort()
@@ -49,7 +51,7 @@ class SummingAmplifier(bases.CouplerBase, bases.SystemElementBase):
             port_gains,
             **kwargs
     ):
-        super(SummingAmplifier, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         bases.PTREE_ASSIGN(self).port_gains = port_gains
 
         self.own.ps_Out  = ports.SignalOutPort()
@@ -86,7 +88,7 @@ class MatrixAmplifier(bases.CouplerBase, bases.SystemElementBase):
             port_pair_gains,
             **kwargs
     ):
-        super(MatrixAmplifier, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         bases.PTREE_ASSIGN(self).port_pair_gains = port_pair_gains
 
         self.ps_In  = declarative.Bunch()

@@ -11,6 +11,7 @@ from .bases import (
     SystemElementBase,
 )
 
+from ..utilities.future_from_2 import super
 from . import ports
 from . import nonlinear_utilities
 
@@ -30,7 +31,7 @@ class PPKTP(ports.OpticalSymmetric2PortMixin, OpticalCouplerBase, SystemElementB
         wedge_angle_rad = 0,
         **kwargs
     ):
-        super(PPKTP, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         self.Lc_m = 1e-2,
         poling_spacing = wavelen_r_m / (2 * (self.n_g - self.n_r))

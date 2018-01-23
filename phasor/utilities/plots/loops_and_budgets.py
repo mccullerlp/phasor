@@ -175,12 +175,14 @@ class ACReadoutPlots(declarative.OverridableObject):
         readout,
         ax,
         limit = 2e-8,
+        label_total = 'total',
+        label_prefix = '',
     ):
         ax.loglog(
             self.X.val,
             abs(readout.AC_ASD),
             color = 'black',
-            label = 'total'
+            label = label_total,
         )
 
         sgroups = []
@@ -204,7 +206,7 @@ class ACReadoutPlots(declarative.OverridableObject):
             ax.loglog(
                 self.X.val,
                 abs(psd)**.5,
-                label = (source.name_noise),
+                label = label_prefix + str(source.name_noise),
                 **kw,
             )
             prev_mpsd = mpsd

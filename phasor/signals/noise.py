@@ -23,7 +23,7 @@ sided_conversions = {
     "double" :       1,
 }
 
-class WhiteNoise(bases.SignalElementBase, bases.NoiseBase):
+class SimpleNoiseBase(bases.SignalElementBase, bases.NoiseBase):
     @declarative.dproperty
     def port(self, val):
         #self.system.own_port_virtual(self, val.i)
@@ -38,10 +38,6 @@ class WhiteNoise(bases.SignalElementBase, bases.NoiseBase):
     def conversion(self):
         return sided_conversions[self.sided]
 
-    @declarative.dproperty
-    def magnitude_ASD(self, val = 1):
-        return val
-
     def system_setup_noise(self, matrix_algorithm):
         #print("SETUP NOISE: ", self.name_noise)
         #print("NOISE PORT: ", self.port.i)
@@ -55,7 +51,25 @@ class WhiteNoise(bases.SignalElementBase, bases.NoiseBase):
             )
         return
 
+
+class WhiteNoise(SimpleNoiseBase):
+    @declarative.dproperty
+    def magnitude_ASD(self, val = 1):
+        return val
+
     def noise_2pt_expectation(self, pe_1, k1, pe_2, k2):
         #print("APPLY NOISE: ", self.name_noise)
         Fsq_Hz = self.magnitude_ASD**2 / self.conversion
+        return Fsq_Hz
+
+
+class PSDFunctionNoise(SimpleNoiseBase):
+    @declarative.dproperty
+    def PSD_function(self, func):
+        return func
+
+    def noise_2pt_expectation(self, pe_1, k1, pe_2, k2):
+        #print("APPLY NOISE: ", self.name_noise)
+        freq = self.system.classical_frequency_extract(k1)
+        Fsq_Hz = self.PSD_function(freq) / self.conversion
         return Fsq_Hz

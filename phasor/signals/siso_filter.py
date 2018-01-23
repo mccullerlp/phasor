@@ -10,6 +10,7 @@ import numpy as np
 #from numbers import Number
 #import warnings
 
+from ..utilities.future_from_2 import super
 from . import ports
 
 from .bases import (
@@ -101,7 +102,7 @@ class TransferFunctionSISO(TransferFunctionSISOBase):
             filter_func,
             **kwargs
     ):
-        super(TransferFunctionSISO, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         PTREE_ASSIGN(self).filter = filter
         return
 
@@ -139,7 +140,7 @@ class TransferFunctionSISOMechSingleResonance(TransferFunctionSISOBase):
             FWHM_Hz     = None,
             **kwargs
     ):
-        super(TransferFunctionSISOMechSingleResonance, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         PTREE_ASSIGN(self).mass_kg   = mass_kg
         PTREE_ASSIGN(self).center_Hz = center_Hz
 

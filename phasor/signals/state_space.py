@@ -9,7 +9,7 @@ from . import ports
 from . import bases
 
 
-class TransferFunctionSS(
+class StateSpaceModel(
     bases.SignalElementBase,
     bases.CouplerBase,
 ):

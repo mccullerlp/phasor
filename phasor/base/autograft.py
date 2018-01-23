@@ -2,7 +2,6 @@
 """
 """
 from __future__ import division, print_function, unicode_literals
-from ..utilities.future_from_2 import str, repr_compat
 #from builtins import object
 from functools import wraps
 
@@ -30,6 +29,8 @@ from declarative.bunch import (
 from declarative.utilities.future_from_2 import (
     raise_from_with_traceback,
 )
+
+from ..utilities.future_from_2 import str, repr_compat, super
 
 if __debug__:
     mproperty_check = dproperty
@@ -133,7 +134,7 @@ class ElementConstructorInternal(object):
 
     def __getattr__(self, aname):
         try:
-            return super(ElementConstructorInternal, self).__getattr__(aname)
+            return super().__getattr__(aname)
         except AttributeError as e:
             raise AttributeError(
                 "Instance of {0} not fully constructed, but be immediately bound into appropriate object"
@@ -163,14 +164,14 @@ class ElementBase(object):
             #TODO make this a class returned that gives sane error messages
             #for users not realizing the dispatch must happen
             constr = ElementConstructorInternal(
-                new = super(ElementBase, cls).__new__,
+                new = super().__new__,
                 cls = cls,
                 args = args,
                 kwargs = kwargs,
             )
             return constr
         else:
-            inst = super(ElementBase, cls).__new__(
+            inst = super().__new__(
                 cls,
                 *args,
                 **kwargs
@@ -182,7 +183,7 @@ class ElementBase(object):
             self,
             **kwargs
     ):
-        super(ElementBase, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     @repr_compat
     def __repr__(self):
@@ -195,7 +196,7 @@ class ElementBase(object):
             if isinstance(item, PropertyTransforming):
                 if not hasattr(self.__class__, name):
                     raise RuntimeError("Cannot directly assign sub-elements, use ...{cname}.own.{name} = ... instead".format(cname = self.name_child, name = name))
-            return super(ElementBase, self).__setattr__(name, item)
+            return super().__setattr__(name, item)
 
 
 def invalidate_auto(func):
@@ -385,7 +386,7 @@ class Element(
 
     def __getattr__(self, name):
         try:
-            return super(Element, self).__getattr__(name)
+            return super().__getattr__(name)
         except AttributeError as E:
             try:
                 if name in self._registry_children or name in self._registry_inserted_pre:
@@ -406,7 +407,7 @@ class Element(
         return
 
     def __dir__(self):
-        directory = super(Element, self).__dir__()
+        directory = super().__dir__()
         directory.extend(list(self._registry_children.keys()))
         return directory
 
@@ -479,7 +480,7 @@ class RootElement(Element):
 
     def __init__(self, *args, **kwargs):
         with self.building:
-            super(RootElement, self).__init__(*args, **kwargs)
+            super().__init__(*args, **kwargs)
 
     @mproperty_check
     def building(self):
@@ -570,7 +571,7 @@ class SubElementBridge(object):
 
     def __setattr__(self, name, item):
         if name in self.__slots__:
-            return super(SubElementBridge, self).__setattr__(name, item)
+            return super().__setattr__(name, item)
         return self._parent.insert(obj = item, name = name)
 
     def __getitem__(self, name):
@@ -578,7 +579,7 @@ class SubElementBridge(object):
 
     def __getattr__(self, name):
         try:
-            return super(SubElementBridge, self).__getattr__(name)
+            return super().__getattr__(name)
         except AttributeError:
             pass
         try:
@@ -587,7 +588,7 @@ class SubElementBridge(object):
             raise AttributeError(str(E))
 
     def __dir__(self):
-        directory = super(SubElementBridge, self).__dir__()
+        directory = super().__dir__()
         directory.extend(list(self._parent._registry_children.keys()))
         return directory
 

@@ -5,7 +5,7 @@ from __future__ import division, print_function, unicode_literals
 import casadi
 import declarative
 
-from . import visitors as VISIT
+from ...utilities.future_from_2 import super
 from ...base.multi_unit_args import (
     arbunit_refval_attribute,
 )
@@ -16,6 +16,7 @@ from .base import (
 
 from ...math.complex import Complex
 
+from . import visitors as VISIT
 #from ...base import units
 
 
@@ -66,7 +67,7 @@ class FitterSym(FitterBase):
         elif typename == VISIT.constraints:
             return self.constraints
         else:
-            return super(FitterSym, self).targets_list(typename)
+            return super().targets_list(typename)
 
     def ctree_inject(self, meta_ooa):
         for datum, symbol in list(self._parameter_symbols.items()):

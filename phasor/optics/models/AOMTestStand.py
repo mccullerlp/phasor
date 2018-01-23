@@ -5,6 +5,7 @@ from __future__ import division, print_function, unicode_literals
 import numpy as np
 import declarative
 
+from ...utilities.future_from_2 import super
 from ... import optics
 from ... import base
 from ... import signals
@@ -29,7 +30,7 @@ class VCO(optics.OpticalCouplerBase):
         return val
 
     def __build__(self):
-        super(VCO, self).__build__()
+        super().__build__()
         self.generate.ps_Out.bond(
             self.modulate.ps_In,
         )
@@ -40,7 +41,7 @@ class AOM2VCO(optics.OpticalCouplerBase):
     VCO2_use = False
 
     def __build__(self):
-        super(AOM2VCO, self).__build__()
+        super().__build__()
         self.AOM1.Drv.bond(
             self.VCO_AOM1.ps_Out,
         )
@@ -98,7 +99,7 @@ class AOM2VCOBasic(optics.OpticalCouplerBase):
     VCO2_use = False
 
     def __build__(self):
-        super(AOM2VCOBasic, self).__build__()
+        super().__build__()
         self.AOM1.Drv.bond(
             self.VCO_AOM1.ps_Out,
         )
@@ -254,7 +255,7 @@ class AOM2VCOTestStand(optics.OpticalCouplerBase):
         return val
 
     def __build__(self):
-        super(AOM2VCOTestStand, self).__build__()
+        super().__build__()
 
         self.PSLR.po_Fr.bond_sequence(
             self.aoms.po_Fr,
@@ -276,7 +277,7 @@ class AOM2VCOTestStand(optics.OpticalCouplerBase):
 
 class AOMTestStand(optics.OpticalCouplerBase):
     def __build__(self):
-        super(AOMTestStand, self).__build__()
+        super().__build__()
         self.own.PSL = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = 1,
@@ -316,7 +317,7 @@ class AOMTestStand(optics.OpticalCouplerBase):
 
 class AOMTestStandBasic(optics.OpticalCouplerBase):
     def __build__(self):
-        super(AOMTestStandBasic, self).__build__()
+        super().__build__()
         self.own.PSL = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = 1,

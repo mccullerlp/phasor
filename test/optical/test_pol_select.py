@@ -2,6 +2,7 @@
 """
 """
 from __future__ import division, print_function, unicode_literals
+
 from unittest import TestCase, main
 
 import declarative as decl
@@ -11,6 +12,7 @@ from declarative.bunch import (
 
 #import numpy as np
 
+from phasor.utilities.future_from_2 import super
 from phasor import system
 from phasor import readouts
 from phasor import optics
@@ -22,7 +24,7 @@ class PolTester(
     optics.OpticalCouplerBase, optics.SystemElementBase
 ):
     def __init__(self, **kwargs):
-        super(PolTester, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.own.PSL = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = 1.,
@@ -68,7 +70,7 @@ class WavePlateTester(
         return val
 
     def __init__(self, **kwargs):
-        super(WavePlateTester, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.own.PSL = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = 1.,
@@ -129,7 +131,7 @@ class WavePlateTesterRetro(
         return val
 
     def __init__(self, **kwargs):
-        super(WavePlateTesterRetro, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.own.PSL = optics.Laser(
             F = self.system.F_carrier_1064,
             power_W = 1.,

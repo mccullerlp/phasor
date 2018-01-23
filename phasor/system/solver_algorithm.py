@@ -2,12 +2,12 @@
 """
 """
 from __future__ import division, print_function, unicode_literals
-from ..utilities.future_from_2 import str, object, repr_compat
 
 import numpy as np
 from collections import defaultdict
 import declarative
 
+from ..utilities.future_from_2 import str, object, repr_compat, super
 from ..utilities.print import pprint
 
 from ..base import (
@@ -45,7 +45,7 @@ class SystemSolver(object):
         max_epsilon = 1e-4,
         **kwargs
     ):
-        super(SystemSolver, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.system = system
         self.ports_algorithm   = ports_algorithm
         self.matrix_algorithm  = matrix_algorithm

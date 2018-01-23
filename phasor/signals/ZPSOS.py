@@ -2,24 +2,25 @@
 """
 """
 from __future__ import division, print_function, unicode_literals
-#from phasor.utilities.print import print
+#import numpy as np
 import declarative
 import collections
 
-import numpy as np
 
 #from numbers import Number
 #import warnings
+from ..utilities.future_from_2 import super
+#from phasor.utilities.print import print
+
 from ..base import units
-
-from . import ports
-
-from . import siso_filter
-
 from ..base.multi_unit_args import (
     unitless_refval_attribute,
     generate_refval_attribute,
 )
+
+#from . import ports
+from . import siso_filter
+
 
 def ctree_root_grab(ctree, root_key, defaults):
         #only used if the ooa params are completely missing
@@ -235,10 +236,10 @@ class SRationalFilter(SZPCascade):
         pre = self.gain.val
         if self.delay_s.val is not None:
             pre = pre * self.symbols.math.exp(-self.symbols.i2pi * freq * self.delay_s.val)
-        xfer = super(SRationalFilter, self).filter_func(freq) * pre
+        xfer = super().filter_func(freq) * pre
 
         if self.gain_F_Hz != 0:
-            xfer = xfer / abs(super(SRationalFilter, self).filter_func(self.gain_F_Hz))
+            xfer = xfer / abs(super().filter_func(self.gain_F_Hz))
 
         return xfer
 

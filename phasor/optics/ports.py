@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import division, print_function, unicode_literals
-from ..utilities.future_from_2 import str
 #from builtins import object
 
 import declarative as declarative
 
+from ..utilities.future_from_2 import str, super
 from ..base import visitors as VISIT
 
 from ..base.ports import(
@@ -61,7 +61,7 @@ class OpticalPort(OpticalPortRaw, bases.SystemElementBase):
     typename = 'optical'
 
     def _complete(self):
-        if not super(OpticalPort, self)._complete():
+        if not super()._complete():
             prein = self.inst_preincarnation
             if prein is not None:
                 if prein._bond_partner is not None and not prein._building_bonded:
@@ -119,7 +119,7 @@ class OpticalPort(OpticalPortRaw, bases.SystemElementBase):
             if self._bond_partner is None:
                 return self.auto_terminate()
         else:
-            return super(OpticalPort, self).targets_list(typename)
+            return super().targets_list(typename)
 
     pchain = None
 

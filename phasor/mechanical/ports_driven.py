@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import division, print_function, unicode_literals
+
 import declarative
 
+from ..utilities.future_from_2 import super
 from . import elements
 from . import ports
 
@@ -37,7 +39,7 @@ class ForceToDisplacementBase(elements.MechanicalElementBase):
         return
 
     def system_setup_ports(self, ports_algorithm):
-        super(ForceToDisplacementBase, self).system_setup_ports(ports_algorithm)
+        super().system_setup_ports(ports_algorithm)
         for kfrom in ports_algorithm.port_update_get(self.F.i):
             ports_algorithm.port_coupling_needed(self._port.o, kfrom)
         for kto in ports_algorithm.port_update_get(self._port.o):
@@ -53,7 +55,7 @@ class ForceToDisplacementBase(elements.MechanicalElementBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         #TODO setup DC
-        super(ForceToDisplacementBase, self).system_setup_coupling(matrix_algorithm)
+        super().system_setup_coupling(matrix_algorithm)
 
         if self.F_DC != 0:
             matrix_algorithm.coherent_sources_insert(

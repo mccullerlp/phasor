@@ -3,6 +3,7 @@
 """
 from __future__ import division, print_function, unicode_literals
 #from phasor.utilities.print import print
+from ..utilities.future_from_2 import super
 
 from declarative.bunch import (
     DeepBunch,
@@ -17,7 +18,7 @@ class ReadoutViewBase(object):
             solver,
             **kwargs
     ):
-        super(ReadoutViewBase, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.readout = readout
         self.system = system
         self.solver = solver

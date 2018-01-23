@@ -17,6 +17,7 @@ import warnings
 
 import declarative as declarative
 
+from ..utilities.future_from_2 import super
 from ..base import (
     DictKey,
     Frequency,
@@ -58,7 +59,7 @@ class SystemSymbols(Element):
         PTREE_ASSIGN(self).i2pi                  = np.pi * 2j
         PTREE_ASSIGN(self).math                  = np
         PTREE_ASSIGN(self).temp_K                = 299
-        super(SystemSymbols, self).__build__()
+        super().__build__()
 
     def number(self, num):
         return num

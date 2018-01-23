@@ -2,6 +2,7 @@
 """
 """
 from __future__ import division, print_function, unicode_literals
+from phasor.utilities.future_from_2 import super
 import numpy as np
 
 import declarative as decl
@@ -22,7 +23,7 @@ class EZSqz(
     """
     def __init__(
             self,
-            Fkey_QC_center,
+            Fkey_QC_center                  = None,
             loss                            = None,
             nonlinear_power_gain            = None,
             nonlinear_field_gain            = None,
@@ -34,7 +35,7 @@ class EZSqz(
             phi_sqz_deg                     = 0,
             **kwargs
     ):
-        super(EZSqz, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         check_all = set([
             nonlinear_power_gain           ,
@@ -44,6 +45,7 @@ class EZSqz(
             rel_variance_2                 ,
             sqzDB                          ,
             antisqzDB                      ,
+            loss                           ,
         ])
         if nonlinear_power_gain is not None:
             assert all(x is None for x in (check_all - set([nonlinear_power_gain, loss])))
@@ -100,8 +102,13 @@ class EZSqz(
         elif self.use_parameter == 'rel_variance':
             subtype = 'variance'
             if rel_variance_2 is None:
-                rel_variance_2 = 1/rel_variance_1
-                loss = 0
+                if loss is None:
+                    rel_variance_2 = 1/rel_variance_1
+                    loss = 0
+                else:
+                    raise NotImplementedError("Need to implement this parameter set")
+                    rel_variance_2 = 1/rel_variance_1
+                    loss = 0
             else:
                 loss = (1 - rel_variance_1 * rel_variance_2) / (2 - rel_variance_1 - rel_variance_2)
 
@@ -160,12 +167,17 @@ class EZSqz(
         self.used_sqzDB                           = sqzDB
         self.used_antisqzDB                       = antisqzDB
 
+        if Fkey_QC_center is None:
+            Fkey_QC_center = ports.DictKey({
+                ports.OpticalFreqKey : self.system.FD_carrier_1064,
+                ports.ClassicalFreqKey : ports.FrequencyKey({}),
+            })
         self.Fkey_QC_center = Fkey_QC_center
 
-        self.po_Fr   = ports.OpticalPort(sname = 'po_Fr' )
-        self.po_Bk   = ports.OpticalPort(sname = 'po_Bk' )
-        self._LFr = ports.OpticalPort(sname = 'LFr')
-        self._LBk = ports.OpticalPort(sname = 'LBk')
+        self.po_Fr = ports.OpticalPort(sname = 'po_Fr' )
+        self.po_Bk = ports.OpticalPort(sname = 'po_Bk' )
+        self._LFr  = ports.OpticalPort(sname = 'LFr')
+        self._LBk  = ports.OpticalPort(sname = 'LBk')
         return
 
     @decl.mproperty

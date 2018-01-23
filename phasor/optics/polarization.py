@@ -4,6 +4,8 @@
 from __future__ import division, print_function, unicode_literals
 import declarative as decl
 
+from ..utilities.future_from_2 import super
+
 from . import bases
 from . import ports
 
@@ -314,7 +316,7 @@ class WavePlate(
             **kwargs
     ):
         #TODO Make these generic properties
-        super(WavePlate, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         bases.PTREE_ASSIGN(self).cplgP  = cplgP
         if cplgPC is None:
@@ -387,7 +389,7 @@ class WavePlate(
 
 class UnmountedQuarterWavePlate(WavePlate):
     def __init__(self, **kwargs):
-        super(UnmountedQuarterWavePlate, self).__init__(
+        super().__init__(
             cplgS  = 1,
             cplgP  = 1j,  # #TODO, use global/system ps_In
             **kwargs
@@ -396,7 +398,7 @@ class UnmountedQuarterWavePlate(WavePlate):
 
 class UnmountedHalfWavePlate(WavePlate):
     def __init__(self, **kwargs):
-        super(UnmountedHalfWavePlate, self).__init__(
+        super().__init__(
             cplgS  = 1,
             cplgP  = -1,
             **kwargs
@@ -417,7 +419,7 @@ class WavePlateMount(
         self,
         **kwargs
     ):
-        super(WavePlateMount, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         self.own.coord_Fr = PolarizationRotator(rotate =  self.rotate)
         self.own.coord_Bk = PolarizationRotator(rotate = -self.rotate)
@@ -434,7 +436,7 @@ class HalfWavePlate(WavePlateMount):
         self,
         **kwargs
     ):
-        super(HalfWavePlate, self).__init__(
+        super().__init__(
             plate = UnmountedHalfWavePlate(),
             **kwargs
         )
@@ -445,7 +447,7 @@ class QuarterWavePlate(WavePlateMount):
         self,
         **kwargs
     ):
-        super(QuarterWavePlate, self).__init__(
+        super().__init__(
             plate = UnmountedQuarterWavePlate(),
             **kwargs
         )
@@ -483,14 +485,14 @@ class PolarizingBeamsplitter(PolarizingMirror):
         )
 
         if self.pass_polarization.upper() == 'P':
-            super(PolarizingBeamsplitter, self).__init__(
+            super().__init__(
                 mirror_P = select_mirror,
                 mirror_S = reject_mirror,
                 AOI_deg  = AOI_deg,
                 **kwargs
             )
         elif self.pass_polarization.upper() == 'S':
-            super(PolarizingBeamsplitter, self).__init__(
+            super().__init__(
                 mirror_S = select_mirror,
                 mirror_P = reject_mirror,
                 AOI_deg  = AOI_deg,

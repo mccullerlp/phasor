@@ -9,6 +9,7 @@ from collections import defaultdict
 
 import declarative
 
+from ..utilities.future_from_2 import super
 from .. import base
 
 
@@ -21,9 +22,7 @@ class NoiseReadout(base.SystemElementBase):
             port_map = None,
             **kwargs
     ):
-        super(NoiseReadout, self).__init__(
-            **kwargs
-        )
+        super().__init__(**kwargs)
 
         self.portN = portN
 

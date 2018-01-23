@@ -5,6 +5,8 @@ from __future__ import division, print_function, unicode_literals
 
 import declarative as decl
 
+from ..utilities.future_from_2 import super
+
 from . import ports
 from . import smatrix
 
@@ -33,7 +35,7 @@ class VoltageSource(smatrix.SMatrix1PortBase):
         return
 
     def system_setup_ports(self, ports_algorithm):
-        super(VoltageSource, self).system_setup_ports(ports_algorithm)
+        super().system_setup_ports(ports_algorithm)
         for kfrom in ports_algorithm.port_update_get(self.V.i):
             ports_algorithm.port_coupling_needed(self.pe_A.o, kfrom)
         for kto in ports_algorithm.port_update_get(self.pe_A.o):
@@ -42,7 +44,7 @@ class VoltageSource(smatrix.SMatrix1PortBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         #TODO setup DC
-        super(VoltageSource, self).system_setup_coupling(matrix_algorithm)
+        super().system_setup_coupling(matrix_algorithm)
 
         if self.V_DC != 0:
             matrix_algorithm.coherent_sources_insert(
@@ -87,7 +89,7 @@ class CurrentSource(smatrix.SMatrix1PortBase):
         return
 
     def system_setup_ports(self, ports_algorithm):
-        super(CurrentSource, self).system_setup_ports(ports_algorithm)
+        super().system_setup_ports(ports_algorithm)
         for kfrom in ports_algorithm.port_update_get(self.ps_In.i):
             ports_algorithm.port_coupling_needed(self.pe_A.o, kfrom)
         for kto in ports_algorithm.port_update_get(self.pe_A.o):
@@ -96,7 +98,7 @@ class CurrentSource(smatrix.SMatrix1PortBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         #TODO setup DC
-        super(CurrentSource, self).system_setup_coupling(matrix_algorithm)
+        super().system_setup_coupling(matrix_algorithm)
 
         if self.I_DC != 0:
             matrix_algorithm.coherent_sources_insert(
@@ -161,7 +163,7 @@ class VoltageSourceBalanced(smatrix.SMatrix2PortBase):
         return
 
     def system_setup_ports(self, ports_algorithm):
-        super(VoltageSourceBalanced, self).system_setup_ports(ports_algorithm)
+        super().system_setup_ports(ports_algorithm)
         for port2 in [self.pe_A, self.pe_B]:
             for kfrom in ports_algorithm.port_update_get(self.V.i):
                 ports_algorithm.port_coupling_needed(port2.o, kfrom)
@@ -175,7 +177,7 @@ class VoltageSourceBalanced(smatrix.SMatrix2PortBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         #TODO setup DC
-        super(VoltageSourceBalanced, self).system_setup_coupling(matrix_algorithm)
+        super().system_setup_coupling(matrix_algorithm)
         #TODO, not sure about the 1/2 everywhere
         _2 = self.symbols.number(2)
 
@@ -270,7 +272,7 @@ class CurrentSourceBalanced(smatrix.SMatrix2PortBase):
         return
 
     def system_setup_ports(self, ports_algorithm):
-        super(CurrentSourceBalanced, self).system_setup_ports(ports_algorithm)
+        super().system_setup_ports(ports_algorithm)
         for port2 in [self.pe_A, self.pe_B]:
             for kfrom in ports_algorithm.port_update_get(self.ps_In.i):
                 ports_algorithm.port_coupling_needed(port2.o, kfrom)
@@ -280,7 +282,7 @@ class CurrentSourceBalanced(smatrix.SMatrix2PortBase):
 
     def system_setup_coupling(self, matrix_algorithm):
         #TODO setup DC
-        super(CurrentSourceBalanced, self).system_setup_coupling(matrix_algorithm)
+        super().system_setup_coupling(matrix_algorithm)
 
         matrix_algorithm.coherent_sources_insert(
             self.pe_A.o,
