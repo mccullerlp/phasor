@@ -7,7 +7,7 @@ import declarative
 import warnings
 import numpy as np
 
-from ..utilities.future_from_2 import super
+from ...utilities.future_from_2 import super
 
 
 class KVSpace(object):
