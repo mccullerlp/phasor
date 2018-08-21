@@ -232,6 +232,64 @@ class Z2x2To4Port(elements.Electrical4PortBase):
                 )
 
 
+class TransformerSeries(smatrix.SMatrix2PortBase):
+
+    @decl.dproperty
+    def L1_inductance_Henries(self, val):
+        return val
+
+    @decl.dproperty
+    def L2_inductance_Henries(self, val):
+        return val
+
+    def transformer_k_by_freq(self, F_Hz):
+        return 1
+
+    @decl.dproperty
+    def L1_resistance_Ohms(self, val = 0):
+        return val
+
+    @decl.dproperty
+    def L1_johnson_noise(self):
+        if self.system.include_johnson_noise and self.L1_resistance_Ohms != 0:
+            return noise.VoltageFluctuation(
+                port = self.pe_A,
+                Vsq_Hz_by_freq = lambda F : 4 * self.L1_resistance_Ohms * self.symbols.temp_K * self.symbols.kB_J_K,
+                sided = 'one-sided',
+            )
+        return None
+
+    @decl.dproperty
+    def L2_resistance_Ohms(self, val = 0):
+        return val
+
+    @decl.dproperty
+    def L2_johnson_noise(self):
+        if self.system.include_johnson_noise and self.L2_resistance_Ohms != 0:
+            return noise.VoltageFluctuation(
+                port = self.pe_C,
+                Vsq_Hz_by_freq = lambda F : 4 * self.L2_resistance_Ohms * self.symbols.temp_K * self.symbols.kB_J_K,
+                sided = 'one-sided',
+            )
+        return None
+
+    def Z11_by_freq(self, F):
+        return (self.L1_resistance_Ohms + self.symbols.i2pi * F * self.L1_inductance_Henries)
+
+    def Z12_by_freq(self, F):
+        M = self.transformer_k_by_freq(F) * (self.L1_inductance_Henries * self.L2_inductance_Henries)**.5
+        return (self.symbols.i2pi * F * M)
+
+    def Z21_by_freq(self, F):
+        return self.Z12_by_freq(F)
+
+    def Z22_by_freq(self, F):
+        return (self.L2_resistance_Ohms + self.symbols.i2pi * F * self.L2_inductance_Henries)
+
+
+
+
+
 class Transformer(Z2x2To4Port):
 
     @decl.dproperty

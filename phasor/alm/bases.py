@@ -37,6 +37,12 @@ class MatrixAtsBase(Element):
     #TODO report in ctree
 
     @declarative.dproperty
+    def plotname(self, arg = declarative.NOARG):
+        if arg is declarative.NOARG:
+            arg = self.name
+        return arg
+
+    @declarative.dproperty
     def reversed(self, arg = declarative.NOARG):
         elname = "reversed"
         if arg is declarative.NOARG:
@@ -218,6 +224,7 @@ class ThinLens(ThinBase):
             f_m = self.f_m.val,
             z = z,
             type = 'lens',
+            name = self.plotname,
             str = 'thin lens f_m = {f_m}'.format(f_m = str_m(self.f_m.val)),
         )
 
@@ -327,14 +334,16 @@ class Mirror(ThinBase):
                 R_m = self.R_m.val,
                 f_m = f_m,
                 z = z,
+                name = self.plotname,
                 type = 'mirror',
-                str = 'Mirror, R_m = {R_m}, f_m = {R_m}'.format(R_m = str_m(self.R_m.val), f_m = str_m(f_m)),
+                str = 'Mirror, R_m = {R_m}, f_m = {f_m}'.format(R_m = str_m(self.R_m.val), f_m = str_m(f_m)),
             )
         else:
             return declarative.Bunch(
                 R_m = self.R_m.val,
                 z = z,
                 type = 'mirror',
+                name = self.plotname,
                 str = 'Mirror, flat',
             )
 

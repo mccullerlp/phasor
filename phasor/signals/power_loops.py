@@ -334,3 +334,56 @@ def controller_fast_2p5x1e1(UGF, out = 'zpk'):
     )
 
 
+def cheby_plateau(
+    shift = 5.,
+    main_freq = 7,
+):
+    N = 8
+    peak = .1
+    shift = 1.02
+    print(shift ** (-N))
+
+    zpk_cheby = scipy.signal.cheby1(N, peak, 1 * main_freq, analog = True, output = 'zpk')
+    zpk_butter = scipy.signal.cheby1(N, peak, shift * main_freq, analog = True, output='zpk')
+    zpk_butter = scipy.signal.butter(N-0, shift * main_freq, analog = True, output='zpk')
+
+    return zpk_div(zpk_cheby, zpk_butter)
+
+def cheby_plateau_inner(
+    shift = 5.,
+    F_center = 3.3,
+    F_width = 3,
+):
+    """
+    The parameters are optimized for sus resonances between .5Hz and 4Hz. They aren't particularly stable after that.
+    """
+    F_center = float(F_center)
+    N = 7
+    peak = .1
+    shift = 1.00
+    F_start = F_center - F_width
+    F_stop = F_center + F_width
+
+    zpk_cheby = scipy.signal.cheby1(N, peak, [F_start, F_stop], btype = 'bandpass', analog = True, output = 'zpk')
+    zpk_butter = scipy.signal.cheby1(N, peak, [F_start, F_stop], btype = 'bandpass', analog = True, output='zpk')
+    zpk_butter = scipy.signal.butter(N-0, [F_start, F_stop], btype = 'bandpass', analog = True, output='zpk')
+
+    return zpk_div(zpk_cheby, zpk_butter)
+
+
+
+def shift_to(ZPK, to_freq):
+    Z, P, K = ZPK
+
+    newZ = np.asarray([(z + to_freq * 1j) for z in Z])
+    newZ = np.concatenate([newZ, newZ.conjugate(), [-to_freq / 2]])
+    newP = np.asarray([(p + to_freq * 1j) for p in P])
+    newP = np.concatenate([newP, newP.conjugate(), [-to_freq * .8]])
+
+    return newZ, newP, K**2
+
+
+
+
+
+

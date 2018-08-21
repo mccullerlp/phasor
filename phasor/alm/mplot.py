@@ -33,8 +33,11 @@ class MPlotter(declarative.OverridableObject):
     padding_m = None
     padding_rel = .05
 
-    bbox_args = dict(boxstyle="round", fc="0.8")
-    bbox_args = dict()
+    bbox_args = dict(
+        alpha=0,
+        ec = None,
+        fc = None,
+    )
     arrow_args = dict(
         arrowstyle="->",
         connectionstyle="angle,angleB=90,angleA=180,rad=3",
@@ -239,6 +242,7 @@ class MPlotter(declarative.OverridableObject):
                 wdesc.z - z0,
                 None,
                 wdesc.str,
+                None,
                 dict(
                     color = 'green',
                     ls = '--',
@@ -256,6 +260,7 @@ class MPlotter(declarative.OverridableObject):
                     wdesc.z - z0,
                     wdesc.get('width_m', None),
                     wdesc.str,
+                    wdesc.get('name', None),
                     dict(
                         color = 'red',
                         ls = '--',
@@ -276,6 +281,7 @@ class MPlotter(declarative.OverridableObject):
                 wdesc.z - z0,
                 wdesc.get('width_m', None),
                 str_tag + wdesc.str,
+                wdesc.get('name', None),
                 dict(
                     color = 'blue',
                     ls = '--',
@@ -292,6 +298,7 @@ class MPlotter(declarative.OverridableObject):
                 wdesc.z - z0,
                 wdesc.get('width_m', None),
                 wdesc.str,
+                wdesc.get('name', None),
                 dict(
                     color = 'red',
                     ls = '--',
@@ -308,6 +315,7 @@ class MPlotter(declarative.OverridableObject):
                 wdesc.z - z0,
                 -float('inf'),
                 wdesc.str,
+                None,
                 dict(
                     color = 'orange',
                     #ls = '--',
@@ -323,6 +331,7 @@ class MPlotter(declarative.OverridableObject):
                 wdesc.z - z0,
                 wdesc.get('width_m', None),
                 wdesc.str,
+                None,
                 dict(
                     color = wdesc.get('color', ),
                     #ls = '--',
@@ -345,6 +354,7 @@ class MPlotter(declarative.OverridableObject):
                     wdesc.z - z0,
                     wdesc.get('width_m', None),
                     label,
+                    None,
                     dict(
                         color = wdesc.get('color', 'cyan'),
                         ls = '--',
@@ -369,15 +379,27 @@ class MPlotter(declarative.OverridableObject):
         fsize_sep = 15
 
         if use_in:
-            def desc_format(z, desc):
-                desc = u"{0:.2f}in: {desc}".format(z * 100 / 2.54, desc = desc)
-                return desc
+            def desc_loc_format(z):
+                return u"{0:.2f}in".format(z * 100 / 2.54)
         else:
-            def desc_format(z, desc):
-                desc = u"{0}: {desc}".format(str_m(z, 3), desc = desc)
-                return desc
-        for idx, (z, width, desc, lkw, akw) in enumerate(reversed(left_list)):
-            desc = desc_format(z, desc)
+            def desc_loc_format(z):
+                return u"{0}".format(str_m(z, 3))
+        def desc_format(z, name, desc, left):
+            locstr = desc_loc_format(z)
+            if left:
+                if name is not None:
+                    desc = u"{0}:{name}: {desc}".format(locstr, desc = desc, name = name)
+                else:
+                    desc = u"{0}: {desc}".format(locstr, desc = desc)
+            else:
+                if name is not None:
+                    desc = u"{desc}: {name}:{0}".format(locstr, desc = desc, name = name)
+                else:
+                    desc = u"{0}: {desc}".format(locstr, desc = desc)
+            return desc
+
+        for idx, (z, width, desc, name, lkw, akw) in enumerate(reversed(left_list)):
+            desc = desc_format(z, name, desc, False)
             #top elements
             arrowkw = dict(self.arrow_args)
             arrowkw.update(akw)
@@ -419,8 +441,8 @@ class MPlotter(declarative.OverridableObject):
                 F.iROC.axvline(z_unit * float(z), **lkw)
                 F.Gouy.axvline(z_unit * float(z), **lkw)
 
-        for idx, (z, width, desc, lkw, akw) in enumerate(right_list):
-            desc = desc_format(z, desc)
+        for idx, (z, width, desc, name, lkw, akw) in enumerate(right_list):
+            desc = desc_format(z, name, desc, True)
             #bottom elements
             arrowkw = dict(self.arrow_args)
             arrowkw.update(akw)

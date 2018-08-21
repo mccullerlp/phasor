@@ -12,7 +12,6 @@ from phasor.utilities.mpl import (
 )
 
 
-
 def plot_loop(F, h, inv = True, full = True):
     if inv:
         h = -h
@@ -93,9 +92,6 @@ def plot_loop(F, h, inv = True, full = True):
 
         CLG_ud_ls = (0, (2, 2))
 
-        axF2.CLG.set_yscale('log_zoom')
-        #ax2F.CLG_zoom.set_yscale('log_zoom')
-        #axF2.CLG_zoom.set_ylim(.5, 2)
 
         axF2.CLG.plot(F, abs(clg), color = CLG_color)
         axF2.CLG_zoom.plot(F, abs(clg), color = CLG_color)
@@ -128,6 +124,9 @@ def plot_loop(F, h, inv = True, full = True):
         axF2.CLG.set_ylabel("Gain")
         axF2.CLG_zoom.set_ylabel("Gain")
         #axF2.CLG_phase.set_ylabel("Phase [deg]")
+        axF2.CLG.set_yscale('log_zoom')
+        #ax2F.CLG_zoom.set_yscale('log_zoom')
+        #axF2.CLG_zoom.set_ylim(.5, 2)
 
     axF.OLG.set_title("OLTF Gain")
     axF.OLG_zoom.set_title("OLTF Gain (zoomed)")
@@ -153,4 +152,79 @@ def plot_loop(F, h, inv = True, full = True):
         if full:
             for ax in axF2.ax_list:
                 ax.axvline(UGF, ls = ':', color = 'blue')
+    return axF
+
+
+def plot_xfer(
+        F,
+        h,
+        phase_crossings = [-60, -30, 30, 60],
+        inv = False,
+        xscale = 'log_zoom',
+):
+    if inv:
+        h = -h
+    fig = pyplot.figure()
+    fig.set_size_inches(10, 4)
+    gs = gridspec.GridSpec(
+        1, 2,
+        wspace = .2
+    )
+    axF = generate_stacked_plot_ax(
+        fig = fig,
+        gs_base = gs[0],
+        name_use_list = [
+            ('OLG', True),
+            ('OLG_zoom', True),
+            ('OLG_phase', True),
+        ],
+        height_ratios = {
+            'OLG': 1,
+            'OLG_zoom': .5,
+            'OLG_phase': 1,
+        },
+        xscales = 'log_zoom',
+        hspace = .4
+    )
+
+    crossings = []
+    #abs_OLG = abs(h)
+    phase_OLG = np.angle(h, deg = True)
+    cross_blocks = (phase_OLG > phase_crossings[0])
+    for phase in phase_crossings[1:]:
+        cross_blocks = cross_blocks ^ (phase_OLG > phase)
+    cross_blocks = (cross_blocks[1:] ^ cross_blocks[:-1])
+    ugf_idx = None
+
+    for idx in np.argwhere(cross_blocks):
+        ugf_idx = idx
+        F_ugf = F[ugf_idx]
+        crossings.append(F_ugf)
+
+    OLG_color = 'blue'
+
+    axF.OLG.plot(F, abs(h), color = OLG_color)
+    axF.OLG.set_yscale('log_zoom')
+    axF.OLG_zoom.plot(F, abs(h), color = OLG_color)
+    axF.OLG_zoom.set_yscale('log_zoom')
+    axF.OLG_zoom.set_ylim(.5, 2)
+    axF.OLG_phase.plot(F, np.angle(h, deg = True), color = OLG_color)
+
+    axF.OLG.set_title("OLTF Gain")
+    axF.OLG_zoom.set_title("OLTF Gain (zoomed)")
+    axF.OLG_phase.set_title("OLTF Phase")
+
+    axF.OLG.set_ylabel("Gain")
+    axF.OLG_zoom.set_ylabel("Gain")
+    axF.OLG_phase.set_ylabel("Phase [deg]")
+
+    axF.ax_bottom.set_xlabel('Frequency [Hz]')
+    axF.finalize()
+
+    axF.ax_bottom.set_xscale(xscale)
+    for cross_F in crossings:
+        for ax in axF.ax_list:
+            ax.axvline(cross_F, ls = ':', color = 'blue')
+    for phase in phase_crossings:
+        axF.OLG_phase.axhline(phase)
     return axF

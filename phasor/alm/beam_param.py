@@ -53,6 +53,30 @@ class ComplexBeamParam(object):
         )
 
     @classmethod
+    def from_W_R(
+            cls,
+            W,
+            R,
+            wavelen = None,
+            gouy_phasor = None,
+    ):
+        if wavelen is None:
+            wavelen = cls.nominal_wavelen
+        if R != 0:
+            iq = 1/R - 1j * wavelen / (np.pi * W**2)
+            return cls(
+                1/iq,
+                wavelen = wavelen,
+                gouy_phasor = gouy_phasor,
+            )
+        else:
+            return cls(
+                1j * (np.pi * W**2) / wavelen,
+                wavelen = wavelen,
+                gouy_phasor = gouy_phasor,
+            )
+
+    @classmethod
     def from_Z_ZR(
             cls,
             Z,

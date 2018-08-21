@@ -68,6 +68,7 @@ class PLCX(system.SystemStack):
             width_m = self.width_m * (-1 if from_target == TargetRight else 1),
             z       = z,
             type    = 'lens',
+            name = self.plotname,
             obj     = self,
             str     = 'PLCX R_m={R_m} f_m={f_m}'.format(R_m = str_m(self.R_m.val), f_m = str_m(f_m)),
         )
@@ -216,13 +217,14 @@ class PLCXMirror(system.SystemStack):
             self.interface2,
         ]
 
-    def lens_description(self, z, from_target):
+    def mirror_description(self, z, from_target):
         f_m = -1/self.matrix[1, 0]
         return declarative.Bunch(
             f_m     = f_m,
             width_m = self.width_m * (-1 if from_target == TargetRight else 1),
             z       = z,
             type    = 'mirror',
+            name = self.plotname,
             obj     = self,
             str     = 'PLCXMirror R_m={R_m} f_m={f_m}'.format(R_m = str_m(self.R_m.val), f_m = str_m(f_m)),
         )
@@ -239,7 +241,7 @@ class PLCXMirror(system.SystemStack):
 
     def system_data_targets(self, typename):
         dmap = {}
-        if typename == 'lens_description':
+        if typename == 'mirror_description':
             dmap[TargetIdx()] = self.lens_description
         elif typename == 'detune_description':
             dmap[TargetIdx()] = self.detune_description

@@ -16,6 +16,10 @@ class Mixer(bases.SignalElementBase):
 
     @declarative.dproperty
     def LO(self):
+        return self.ps_LO
+
+    @declarative.dproperty
+    def ps_LO(self):
         return ports.SignalInPort()
 
     @declarative.dproperty

@@ -97,17 +97,19 @@ class AutoPlotSaver(declarative.OverridableObject):
     org_subfolder = None
 
     rasterize_auto = True
-    formats = declarative.DeepBunch()
-    formats.pdf.use = True
-    formats.jpg.use = False
-    formats.jpg.dpi = 200
-    formats.jpg.facecolorize = True
-    formats.png.use = False
 
-    embed = False
-    save_show  = True
-    fixname = True
-    _pool = None
+    formats = declarative.DeepBunch()
+    formats.pdf.use          = True
+    formats.jpg.use          = False
+    formats.jpg.dpi          = 200
+    formats.jpg.facecolorize = True
+    formats.png.use          = False
+
+    embed     = False
+    save_show = True
+    fixname   = True
+    _pool     = None
+
     _last_async_result = None
 
     @contextlib.contextmanager
@@ -156,6 +158,8 @@ class AutoPlotSaver(declarative.OverridableObject):
             fig = fig_or_fbunch.fig
 
             formats = fig_or_fbunch.get("formats", None)
+            #the "get" method unwraps the deepbunch
+            formats = declarative.DeepBunch(formats)
             if not formats:
                 formats = self.formats
 
@@ -173,6 +177,20 @@ class AutoPlotSaver(declarative.OverridableObject):
             new_w = self.max_width_in
             new_h = float(h)/float(w) * new_w
             fig.set_size_inches(new_w, new_h)
+
+        #this silly bit reduces the formats to only the one specified
+        fbase, fext = path.splitext(fbasename)
+        if fext:
+            fbasename = fbase
+            #cut off the dot
+            fext = fext[1:]
+            single_formats = declarative.DeepBunch()
+            #apply any settings stored in this object or the plot itself
+            single_formats[fext].update_recursive(self.formats[fext])
+            single_formats[fext].update_recursive(formats[fext])
+            #force usage of this single format!
+            single_formats[fext].use = True
+            formats = single_formats
 
         if self.rasterize_auto:
             mpl_autorasterize(fig)
@@ -317,6 +335,12 @@ def mplfigB(
         size_in_dW_dH = (3, 1),
         x_by_col      = False,
 ):
+    if isinstance(Nrows, (list, tuple)):
+        rownames = Nrows
+        Nrows = len(rownames)
+    else:
+        rownames = None
+
     if size_in:
         width_in = size_in[0]
         height_in = size_in[1]
@@ -356,6 +380,10 @@ def mplfigB(
             axB.ax_grid_colrow[idx_col].append(ax)
             axB["ax{0}_{1}".format(idx_row, idx_col)] = ax
             axB["ax{0}".format(N)] = ax
+
+            if rownames is not None:
+                axB[rownames[N]] = ax
+
             N += 1
             if idx_col == 0:
                 if idx_row == 0:

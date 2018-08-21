@@ -44,6 +44,7 @@ from .passive import (
     SeriesCapacitor,
     SeriesInductor,
     Transformer,
+    TransformerSeries,
 )
 
 from .noise import (
