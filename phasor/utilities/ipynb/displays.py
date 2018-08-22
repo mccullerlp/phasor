@@ -12,6 +12,10 @@ if _ip is not None:
 
     #if this is run from the console then inline can't be found. This hack seems to get around it
     try:
+        import ipykernel.pylab.backend_inline
+        backend = ipykernel.pylab.backend_inline.InlineBackend.instance()
+        backend.rc.clear()
+
         _ip.magic("matplotlib inline")
         _ip.magic("pylab inline")
     except Exception:
@@ -21,6 +25,7 @@ if _ip is not None:
 
 import numpy as np
 import matplotlib as mpl
+import matplotlib
 from matplotlib import gridspec
 import matplotlib.pyplot as plt
 
@@ -44,6 +49,11 @@ from IPython.display import (
     Markdown,
 )
 
+from phasor.utilities.np import (
+    logspaced,
+    first_non_NaN
+)
+
 #for more options in mpl
 import phasor.utilities.mpl
 
@@ -51,37 +61,21 @@ from phasor.utilities.mpl.utils import (
     indexed_cmap,
 )
 
-from phasor.utilities.np import (
-    logspaced,
-    first_non_NaN
-)
-
-from phasor.utilities.mpl.autoniceplot import (
+from phasor.utilities.mpl import (
     AutoPlotSaver,
     mplfigB,
-    asavefig
-)
-
-from phasor.utilities.mpl.stacked_plots import (
+    asavefig,
     generate_stacked_plot_ax,
+    style_6p5in,
+    style_3p0in,
+    setup_log_xticks,
 )
 
-import matplotlib
 
 try:
     import tabulate
 except ImportError:
     pass
-
-#TODO remove from here
-mpl.rcParams['savefig.dpi'] = 144
-mpl.rcParams['lines.linewidth'] = 1.0
-mpl.rcParams['axes.facecolor'] = 'FFFFFF'
-mpl.rcParams['figure.facecolor'] = 'FFFFFF'
-mpl.rcParams['figure.dpi'] = 130
-mpl.rcParams['savefig.dpi'] = 92
-mpl.rcParams['figure.figsize'] = [7.0, 3.0]
-mpl.rcParams['font.family'] = 'DejaVu Sans'
 
 
 def setup_auto_savefig(ipynb_name, check_warn = False):

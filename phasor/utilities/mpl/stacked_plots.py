@@ -2,6 +2,7 @@
 """
 """
 from __future__ import division, print_function, unicode_literals
+import matplotlib as mpl
 from matplotlib import gridspec
 import matplotlib.pyplot as plt
 import declarative
@@ -40,7 +41,7 @@ def generate_stacked_plot_ax(
     xscales = 'linear',
     xlim = None,
     wspacing = .04,
-    width_phys_in = 6,
+    width_phys_in = None,
     fig = None,
     ax_group = None,
     hspace = 0.2,
@@ -72,6 +73,9 @@ def generate_stacked_plot_ax(
 
     if not isinstance(xscales, (list, tuple)):
         xscales = [xscales] * len(width_ratios)
+
+    if width_phys_in is None:
+        width_phys_in = mpl.rcParams['figure.figsize'][0]
 
     if fig is None:
         fig = plt.figure()

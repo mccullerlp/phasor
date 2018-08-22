@@ -199,9 +199,12 @@ class AutoPlotSaver(declarative.OverridableObject):
         if self.org_subfolder:
             subfolder = self.org_subfolder
 
-        if '_' in fbasename and fixname:
+        fbasepath, fbasefname = path.split(fbasename)
+        if '_' in fbasefname and fixname:
             warnings.warn("Image name contains '_' which will be changed to '-' to fix nbsphinx export")
-            fbasename = fbasename.replace('_', '-')
+            fbasefname = fbasefname.replace('_', '-')
+            fbasename = path.join(fbasepath, fbasename)
+
         fbasename = path.join(subfolder, fbasename)
         dirname = path.dirname(fbasename)
         if dirname and not os.path.exists(dirname):
@@ -299,7 +302,7 @@ class AutoPlotSaver(declarative.OverridableObject):
                         pass
                 else:
                     plt.close(fig)
-        fig.set_dpi(144)
+        fig.set_dpi(mpl.rcParams['figure.dpi'])
         return
 
 asavefig = AutoPlotSaver()
@@ -330,10 +333,11 @@ def patch_axes(ax):
 def mplfigB(
         Nrows         = 1,
         Ncols         = 1,
-        size_in       = None,
-        size_in_base  = (6, 2),
+        size_in       = (None, None),
+        size_in_base  = (None, None),
         size_in_dW_dH = (3, 1),
         x_by_col      = False,
+        prop_cycle    = color_array,
 ):
     if isinstance(Nrows, (list, tuple)):
         rownames = Nrows
@@ -341,12 +345,20 @@ def mplfigB(
     else:
         rownames = None
 
-    if size_in:
-        width_in = size_in[0]
-        height_in = size_in[1]
-    else:
-        width_in = size_in_base[0] + Ncols * size_in_dW_dH[0]
-        height_in = size_in_base[1] + Nrows * size_in_dW_dH[1]
+    width_in, height_in = size_in
+    size_in_base_W, size_in_base_H = size_in_base
+
+    if size_in_base_W is None:
+        size_in_base_W = mpl.rcParams['figure.figsize'][0]
+
+    if size_in_base_H is None:
+        size_in_base_H = mpl.rcParams['figure.figsize'][1]
+
+    if width_in is None:
+        width_in = size_in_base_W + Ncols * size_in_dW_dH[0]
+
+    if height_in is None:
+        height_in = size_in_base_H + Nrows * size_in_dW_dH[1]
 
     axB = declarative.Bunch()
     axB.fig = plt.figure()
@@ -371,9 +383,10 @@ def mplfigB(
             else:
                 sharex = None
             ax = axB.fig.add_subplot(Nrows, Ncols, idx_row + idx_col*Nrows + 1, sharex = sharex)
-            ax.set_prop_cycle(
-                color = color_array
-            )
+            if prop_cycle is not None:
+                ax.set_prop_cycle(
+                    color = prop_cycle
+                )
             #patch_axes(ax)
             ax_list.append(ax)
             ax.grid(b=True)

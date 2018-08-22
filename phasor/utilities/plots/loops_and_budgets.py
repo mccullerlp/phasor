@@ -69,6 +69,7 @@ class ACReadoutPlots(declarative.OverridableObject):
             unwrap        = False,
             ugf_line      = True,
             preferred_UGF = None,
+            legend_kwargs = dict(),
     ):
         if ugf_line and np.asarray(readout.OLG).shape:
             abs_OLG = abs(readout.OLG)
@@ -140,7 +141,7 @@ class ACReadoutPlots(declarative.OverridableObject):
             label = 'OLG'
         )
 
-        ax_phase.legend(loc = 'upper right', fontsize = 6)
+        ax_phase.legend(**legend_kwargs)
         if preferred_UGF is not None and np.asarray(readout.OLG).shape:
             print(
                 "UGF at {0}Hz needs {1} more gain".format(
@@ -177,6 +178,8 @@ class ACReadoutPlots(declarative.OverridableObject):
         limit = 2e-8,
         label_total = 'total',
         label_prefix = '',
+        legend_kwargs = dict(),
+        **kw
     ):
         ax.loglog(
             self.X.val,
@@ -213,5 +216,5 @@ class ACReadoutPlots(declarative.OverridableObject):
             prev_psd  = psd
 
         ax.set_ylim(np.min(readout.AC_ASD) * 1e-3, np.max(readout.AC_ASD) * 3)
-        ax.legend(fontsize = 6)
+        ax.legend(**legend_kwargs)
         return
