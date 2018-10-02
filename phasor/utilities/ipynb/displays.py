@@ -67,7 +67,9 @@ from phasor.utilities.mpl import (
     asavefig,
     generate_stacked_plot_ax,
     style_6p5in,
-    style_3p0in,
+    style_3p5in,
+    style_tex_serif,
+    style_serif,
     setup_log_xticks,
 )
 
