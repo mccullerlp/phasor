@@ -30,7 +30,10 @@ class QFitBeamTarget(target.BeamTargetBase):
         if self.ref_m.val is None:
             q_value = self.qfit.q_fit
         else:
-            q_value = self.qfit.q_fit.propagate_distance(self.loc_m.val - self.ref_m.val)
+            if self.reversed:
+                q_value = self.qfit.q_fit.propagate_distance(-self.loc_m.val + self.ref_m.val)
+            else:
+                q_value = self.qfit.q_fit.propagate_distance(self.loc_m.val - self.ref_m.val)
         if self.env_reversed:
             q_value = q_value.reversed()
         return q_value

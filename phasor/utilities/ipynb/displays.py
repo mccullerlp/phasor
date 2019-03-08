@@ -7,7 +7,7 @@ import IPython
 _ip = IPython.get_ipython()
 
 if _ip is not None:
-    _ip.magic("load_ext phasor.utilities.ipynb.autoreload")
+    _ip.magic("load_ext autoreload")
     _ip.magic("autoreload 2")
 
     #if this is run from the console then inline can't be found. This hack seems to get around it

@@ -1,17 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import division, print_function, unicode_literals
-import os
 import sys
-from distutils.sysconfig import get_python_lib
+import setup_helper
 
 from setuptools import find_packages, setup
 
-
 version = '1.0.0.dev3'
+cmdclass = setup_helper.version_checker(version, 'phasor')
 
 extra_install_requires = []
-if sys.version_info < (3,0):
+if sys.version_info < (3, 0):
     extra_install_requires.append('future')
 
 setup(
@@ -53,7 +52,8 @@ setup(
         "test" :    ["pytest"],
         "matrix":   ['scikit-umfpack'],
     },
-    zip_safe=False,
+    cmdclass = cmdclass,
+    zip_safe = False,
     keywords = 'Controls Linear Physics',
     classifiers=[
         'Development Status :: 3 - Alpha ',

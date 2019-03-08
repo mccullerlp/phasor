@@ -390,6 +390,7 @@ def mplfigB(
             #patch_axes(ax)
             ax_list.append(ax)
             ax.grid(b=True)
+            ax.grid(b=True, which = 'minor', color = (.9, .9, .9), lw = .5)
             axB.ax_grid_colrow[idx_col].append(ax)
             axB["ax{0}_{1}".format(idx_row, idx_col)] = ax
             axB["ax{0}".format(N)] = ax

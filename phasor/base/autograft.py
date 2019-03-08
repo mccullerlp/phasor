@@ -27,10 +27,10 @@ from declarative.bunch import (
 )
 
 from declarative.utilities.future_from_2 import (
-    raise_from_with_traceback,
+    raise_from_with_traceback, unicode
 )
 
-from ..utilities.future_from_2 import str, repr_compat, super
+from ..utilities.future_from_2 import repr_compat
 
 if __debug__:
     mproperty_check = dproperty
@@ -134,7 +134,7 @@ class ElementConstructorInternal(object):
 
     def __getattr__(self, aname):
         try:
-            return super().__getattr__(aname)
+            return super(ElementConstructorInternal, self).__getattr__(aname)
         except AttributeError as e:
             raise AttributeError(
                 "Instance of {0} not fully constructed, but be immediately bound into appropriate object"
@@ -164,26 +164,20 @@ class ElementBase(object):
             #TODO make this a class returned that gives sane error messages
             #for users not realizing the dispatch must happen
             constr = ElementConstructorInternal(
-                new = super().__new__,
+                new = super(ElementBase, cls).__new__,
                 cls = cls,
                 args = args,
                 kwargs = kwargs,
             )
             return constr
         else:
-            inst = super().__new__(
+            inst = super(ElementBase, cls).__new__(
                 cls,
                 *args,
                 **kwargs
             )
             #the __init__ function must not be explicitely called because python does this for us
             return inst
-
-    def __init__(
-            self,
-            **kwargs
-    ):
-        super().__init__(**kwargs)
 
     @repr_compat
     def __repr__(self):
@@ -193,10 +187,13 @@ class ElementBase(object):
 
     if __debug__:
         def __setattr__(self, name, item):
+            if not (isinstance(name, (str, unicode))):
+                print("BADNAME", name, item)
+                print(type(name))
             if isinstance(item, PropertyTransforming):
                 if not hasattr(self.__class__, name):
                     raise RuntimeError("Cannot directly assign sub-elements, use ...{cname}.own.{name} = ... instead".format(cname = self.name_child, name = name))
-            return super().__setattr__(name, item)
+            return super(ElementBase, self).__setattr__(name, item)
 
 
 def invalidate_auto(func):
@@ -386,7 +383,7 @@ class Element(
 
     def __getattr__(self, name):
         try:
-            return super().__getattr__(name)
+            return super(Element, self).__getattr__(name)
         except AttributeError as E:
             try:
                 if name in self._registry_children or name in self._registry_inserted_pre:
@@ -407,8 +404,9 @@ class Element(
         return
 
     def __dir__(self):
-        directory = super().__dir__()
-        directory.extend(list(self._registry_children.keys()))
+        directory = super(Element, self).__dir__()
+        directory.extend(k for k in self._registry_children.keys() if isinstance(k, (str, unicode)))
+        directory.sort()
         return directory
 
     def child_register(self, name, child):
@@ -480,7 +478,7 @@ class RootElement(Element):
 
     def __init__(self, *args, **kwargs):
         with self.building:
-            super().__init__(*args, **kwargs)
+            super(RootElement, self).__init__(*args, **kwargs)
 
     @mproperty_check
     def building(self):
@@ -570,8 +568,11 @@ class SubElementBridge(object):
             raise TypeError("Can't insert {0} into {1} at name {2}".format(item, self._dict, name))
 
     def __setattr__(self, name, item):
+        if not (isinstance(name, (str, unicode))):
+            print("BADNAME", name, item)
+            print(type(name))
         if name in self.__slots__:
-            return super().__setattr__(name, item)
+            return super(SubElementBridge, self).__setattr__(name, item)
         return self._parent.insert(obj = item, name = name)
 
     def __getitem__(self, name):
@@ -579,7 +580,7 @@ class SubElementBridge(object):
 
     def __getattr__(self, name):
         try:
-            return super().__getattr__(name)
+            return super(SubElementBridge, self).__getattr__(name)
         except AttributeError:
             pass
         try:
@@ -588,8 +589,9 @@ class SubElementBridge(object):
             raise AttributeError(str(E))
 
     def __dir__(self):
-        directory = super().__dir__()
-        directory.extend(list(self._parent._registry_children.keys()))
+        directory = super(SubElementBridge, self).__dir__()
+        directory.extend(k for k in self._parent._registry_children.keys() if isinstance(k, (str, unicode)))
+        directory.sort()
         return directory
 
 
